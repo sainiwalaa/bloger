@@ -10,7 +10,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, get, push, onValue, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -29,6 +29,7 @@
         const UPLOAD_PRESET = "social_preset";
 
         let currentUserData = null;
+        let selectedProduct = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -46,107 +47,120 @@
             }
         });
 
-        window.handleAuth = (mode) => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if(mode === 'login') signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            else createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+        // --- SHOP LOGIC (Private vs Public) ---
+        window.loadMyShop = () => {
+            const shopRef = ref(db, 'products');
+            onValue(shopRef, (snap) => {
+                const data = snap.val();
+                let h = "";
+                if(data) {
+                    Object.keys(data).reverse().forEach(k => {
+                        const p = data[k];
+                        // Sirf wahi product dikhao jo is user ka hai
+                        if(p.uid === auth.currentUser.uid) {
+                            h += renderProductHTML(k, p, true);
+                        }
+                    });
+                }
+                document.getElementById('bazaar-grid').innerHTML = h || "<p class='col-span-2 text-center py-10 opacity-50 text-xs'>Aapne abhi koi saaman nahi joda hai sa.</p>";
+            });
         };
 
-        window.registerUser = async () => {
-            const name = document.getElementById('reg-name').value;
-            await set(ref(db, 'users/' + auth.currentUser.uid), { name, bio: "SainiWalaa Member", uid: auth.currentUser.uid });
-            location.reload();
-        };
-
-        function showApp() {
-            document.getElementById('auth-screen').classList.add('hide');
-            document.getElementById('reg-screen').classList.add('hide');
-            document.getElementById('app').classList.remove('hide');
-            document.querySelectorAll('.u-name-display').forEach(el => el.innerText = currentUserData.name);
-            onValue(ref(db, 'posts'), snap => renderFeed(snap.val()));
-            onValue(ref(db, 'products'), snap => renderShop(snap.val()));
+        function renderProductHTML(id, p, isOwner) {
+            return `
+            <div class="bg-white rounded-2xl shadow-md border overflow-hidden relative">
+                ${isOwner ? `<i class="fa-solid fa-trash absolute top-2 right-2 text-red-500 bg-white p-2 rounded-full text-[10px]" onclick="del('products','${id}')"></i>` : ''}
+                <img src="${p.url}" class="w-full h-40 object-cover">
+                <div class="p-3">
+                    <h3 class="font-black text-red-900 text-[11px] uppercase truncate">${p.name}</h3>
+                    <div class="text-orange-600 font-bold text-sm mb-2">₹${p.price}</div>
+                    <button onclick="openOrderForm('${id}', '${p.uid}', '${p.name}')" class="w-full bg-red-800 text-white py-2 rounded-lg text-[10px] font-bold">ORDER NOW</button>
+                </div>
+            </div>`;
         }
 
-        window.publish = async (mode) => {
-            const file = document.getElementById(mode + '-file').files[0];
-            const btn = document.getElementById('btn-' + mode);
-            if(!file) return alert("Pehle file chuniye sa!");
+        // --- ORDER SYSTEM ---
+        window.openOrderForm = (prodId, sellerId, prodName) => {
+            selectedProduct = { prodId, sellerId, prodName };
+            document.getElementById('order-prod-title').innerText = prodName;
+            openM('order-modal');
+        };
 
-            btn.disabled = true; btn.innerText = "🚩 Taiyari ho rahi hai...";
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', UPLOAD_PRESET);
-            const type = file.type.includes('video') ? 'video' : 'image';
-            
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {method:"POST", body:formData});
-            const cData = await res.json();
+        window.submitOrder = async () => {
+            const customerName = document.getElementById('cust-name').value;
+            const customerPhone = document.getElementById('cust-phone').value;
+            const customerAddr = document.getElementById('cust-addr').value;
 
-            const item = {
-                uid: auth.currentUser.uid,
-                uName: currentUserData.name,
-                url: cData.secure_url,
-                type: type,
+            if(!customerName || !customerPhone || !customerAddr) return alert("Hukum, puri jankari bhariye!");
+
+            const orderData = {
+                ...selectedProduct,
+                customerName,
+                customerPhone,
+                customerAddr,
+                status: 'New',
                 time: Date.now(),
-                caption: document.getElementById(mode + '-desc').value
+                buyerUid: auth.currentUser.uid
             };
 
-            if(mode === 'prod') {
-                item.name = document.getElementById('prod-name').value;
-                item.price = document.getElementById('prod-price').value;
-                item.link = document.getElementById('prod-link').value;
-                await push(ref(db, 'products'), item);
-            } else {
-                await push(ref(db, 'posts'), item);
-            }
-            alert("Mubarak ho! Post live hai.");
-            closeM(mode + '-modal');
-            btn.disabled = false; btn.innerText = "PUBLISH";
+            await push(ref(db, 'orders'), orderData);
+            alert("🚩 Hukum, aapka Order Creator ke paas bhej diya gaya hai!");
+            closeM('order-modal');
         };
+
+        // --- SHOW ORDERS (FOR CREATOR) ---
+        window.loadMyOrders = () => {
+            onValue(ref(db, 'orders'), (snap) => {
+                const data = snap.val();
+                let h = "";
+                if(data) {
+                    Object.keys(data).reverse().forEach(k => {
+                        const o = data[k];
+                        if(o.sellerId === auth.currentUser.uid) {
+                            h += `<div class="bg-orange-50 p-4 rounded-xl border-l-4 border-red-800 mb-3 text-[11px]">
+                                <b>Item:</b> ${o.prodName} <br>
+                                <b>Customer:</b> ${o.customerName} (${o.customerPhone}) <br>
+                                <b>Address:</b> ${o.customerAddr}
+                            </div>`;
+                        }
+                    });
+                }
+                document.getElementById('order-list').innerHTML = h || "Abhi koi order nahi hai.";
+            });
+        };
+
+        // Standard App Logic
+        function showApp() {
+            document.getElementById('app').classList.remove('hide');
+            document.getElementById('u-name-top').innerText = currentUserData.name;
+            onValue(ref(db, 'posts'), snap => renderFeed(snap.val()));
+            loadMyShop();
+            loadMyOrders();
+        }
 
         function renderFeed(data) {
             let h = "";
             if(data) {
                 Object.keys(data).reverse().forEach(k => {
                     const p = data[k];
-                    const media = p.type === 'video' ? `<video src="${p.url}" controls class="w-full object-contain bg-black max-h-[70vh]"></video>` : `<img src="${p.url}" class="w-full object-contain max-h-[70vh]">`;
+                    const media = p.type === 'video' ? `<video src="${p.url}" controls class="w-full max-h-[70vh] bg-black"></video>` : `<img src="${p.url}" class="w-full max-h-[70vh]">`;
                     h += `<div class="bg-white mb-4 border-b">
                         <div class="p-3 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-800 border-2 border-orange-500 uppercase">${p.uName[0]}</div>
-                            <div class="text-sm font-black text-gray-800 uppercase italic tracking-tighter">${p.uName}</div>
-                            ${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-trash ml-auto text-gray-300" onclick="del('posts','${k}')"></i>` : ''}
+                            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center font-bold text-red-800 uppercase text-xs">${p.uName[0]}</div>
+                            <b class="text-xs uppercase">${p.uName}</b>
                         </div>
-                        <div class="bg-gray-50 flex items-center justify-center">${media}</div>
-                        <div class="p-4"><p class="text-sm"><b>${p.uName}</b> ${p.caption || ''}</p></div>
+                        ${media}
+                        <div class="p-4 text-sm"><p><b>${p.uName}</b> ${p.caption || ''}</p></div>
                     </div>`;
                 });
             }
             document.getElementById('v-feed').innerHTML = h;
         }
 
-        function renderShop(data) {
-            let h = "";
-            if(data) {
-                Object.keys(data).reverse().forEach(k => {
-                    const p = data[k];
-                    h += `<div class="bg-white rounded-2xl shadow-md border overflow-hidden">
-                        <img src="${p.url}" class="w-full h-48 object-cover">
-                        <div class="p-3">
-                            <h3 class="font-black text-red-900 text-sm uppercase">${p.name}</h3>
-                            <p class="text-[10px] text-gray-500 my-1 line-clamp-2">${p.caption || ''}</p>
-                            <div class="text-orange-600 font-bold text-lg">₹${p.price}</div>
-                            <button onclick="window.open('${p.link}')" class="w-full bg-red-800 text-white py-2 rounded-lg text-xs font-bold mt-2">ORDER NOW</button>
-                        </div>
-                    </div>`;
-                });
-            }
-            document.getElementById('bazaar-grid').innerHTML = h;
-        }
-
-        window.del = (p,k) => confirm("Hukum, hatana hai?") && remove(ref(db, `${p}/${k}`));
-        window.logout = () => signOut(auth).then(()=>location.reload());
+        // Global Utility
+        window.del = (p,k) => confirm("Hatana hai?") && remove(ref(db, `${p}/${k}`));
         window.showPage = (p) => {
-            ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
+            ['feed','shop','profile','orders'].forEach(v => document.getElementById('v-'+v)?.classList.add('hide'));
             document.getElementById('v-'+p).classList.remove('hide');
         };
         window.openM = (id) => document.getElementById(id).classList.remove('hide');
@@ -155,42 +169,39 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fdfaf6; }
+        body { font-family: 'Montserrat', sans-serif; background: #fff; }
         .hide { display: none !important; }
-        .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #7c1212, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(2px 2px 0px #fff); }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; margin-bottom: 10px; width: 100%; outline: none; }
-        .nav-icon { font-size: 1.4rem; color: #d1d5db; transition: 0.3s; cursor: pointer; }
-        .nav-icon.active { color: #ea580c; }
+        .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #7c1212, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; width: 100%; }
+        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; margin-bottom: 10px; width: 100%; }
+        .nav-icon { font-size: 1.2rem; color: #d1d5db; cursor: pointer; }
     </style>
 </head>
 <body class="flex justify-center">
 
-    <div id="auth-screen" class="w-full max-w-[450px] min-h-screen bg-white p-10 flex flex-col justify-center hide">
-        <h1 class="text-5xl font-black text-center raj-title mb-2">SAINIWALAA</h1>
-        <p class="text-center text-xs font-bold text-orange-700 tracking-[5px] mb-12 uppercase">Royal Studio</p>
+    <div id="auth-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide">
+        <h1 class="text-4xl font-black raj-title text-center mb-10">SAINIWALAA</h1>
         <input type="email" id="auth-email" placeholder="Email">
         <input type="password" id="auth-pass" placeholder="Password">
-        <div class="flex gap-2">
-            <button onclick="handleAuth('login')" class="btn-royal">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="btn-royal bg-black">SIGNUP</button>
-        </div>
+        <button onclick="handleAuth('login')" class="btn-royal mb-2">LOGIN</button>
+        <button onclick="handleAuth('signup')" class="btn-royal bg-black">SIGNUP</button>
     </div>
 
-    <div id="reg-screen" class="w-full max-w-[450px] min-h-screen bg-white p-10 flex flex-col justify-center hide text-center">
-        <h2 class="text-2xl font-black raj-title mb-6">AAPKO SHUBH NAAM?</h2>
-        <input type="text" id="reg-name" placeholder="Yahan naam likhein...">
+    <div id="reg-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide text-center">
+        <h2 class="text-xl font-black raj-title mb-6">AAPKO SHUBH NAAM?</h2>
+        <input type="text" id="reg-name" placeholder="Naam likhein...">
         <button onclick="registerUser()" class="btn-royal">CHALO STUDIO MEIN 🚩</button>
     </div>
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20 hide">
+    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-20 hide shadow-xl">
         <header class="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-50">
             <div>
-                <h1 class="text-2xl font-black raj-title tracking-tighter leading-none">SAINIWALAA</h1>
-                <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest u-name-display">Hukum</p>
+                <h1 class="text-xl font-black raj-title">SAINIWALAA</h1>
+                <p id="u-name-top" class="text-[9px] font-black text-orange-600 uppercase tracking-widest"></p>
             </div>
             <div class="flex gap-4">
-                <i class="fa-solid fa-plus-square nav-icon" onclick="openM('post-modal')"></i>
+                <i class="fa-solid fa-list-check nav-icon" onclick="showPage('orders')" title="Orders"></i>
+                <i class="fa-solid fa-plus-square nav-icon text-red-800" onclick="openM('post-modal')"></i>
                 <i class="fa-solid fa-store nav-icon" onclick="openM('prod-modal')"></i>
             </div>
         </header>
@@ -198,14 +209,18 @@
         <main id="v-feed"></main>
 
         <main id="v-shop" class="p-4 hide">
-            <h2 class="text-xl font-black raj-title mb-4 uppercase tracking-tighter border-b pb-2">Bazaar Exclusive 🚩</h2>
+            <h2 class="text-sm font-black raj-title mb-4 border-b pb-2">MERI PERSONAL SHOP 🚩</h2>
             <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
         </main>
 
+        <main id="v-orders" class="p-4 hide">
+            <h2 class="text-sm font-black raj-title mb-4 border-b pb-2">MERE ORDERS (KAMAEE) 💰</h2>
+            <div id="order-list"></div>
+        </main>
+
         <main id="v-profile" class="p-10 hide text-center">
-            <div class="w-24 h-24 rounded-full bg-orange-100 mx-auto mb-4 border-4 border-white shadow-lg flex items-center justify-center text-3xl font-black text-orange-800 uppercase u-name-display-initial">S</div>
-            <h2 class="text-2xl font-black u-name-display uppercase"></h2>
-            <button onclick="logout()" class="mt-10 text-red-600 font-bold uppercase text-xs tracking-widest border-2 border-red-600 px-6 py-2 rounded-full">Logout Studio</button>
+            <div class="w-20 h-20 rounded-full bg-orange-100 mx-auto mb-4 border-2 border-orange-500 flex items-center justify-center text-2xl font-black text-orange-800">S</div>
+            <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase tracking-tighter">Logout</button>
         </main>
 
         <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around z-50">
@@ -214,22 +229,33 @@
             <i onclick="showPage('profile')" class="fa-solid fa-user-circle nav-icon"></i>
         </nav>
 
-        <div id="post-modal" class="fixed inset-0 bg-white z-[100] hide p-8 overflow-y-auto">
-            <div class="flex justify-between mb-8"><b class="raj-title text-2xl uppercase">Naya Dhamaka</b><i class="fa-solid fa-times text-2xl" onclick="closeM('post-modal')"></i></div>
-            <input type="file" id="post-file" accept="image/*,video/*">
-            <textarea id="post-desc" placeholder="Post ki jankari (Description)..." class="h-32"></textarea>
-            <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH NOW</button>
+        <div id="order-modal" class="fixed inset-0 bg-white z-[200] hide p-10 flex flex-col justify-center">
+            <h2 class="text-xl font-black raj-title mb-2 uppercase">Order Parchi 🚩</h2>
+            <p id="order-prod-title" class="text-xs font-bold text-gray-400 mb-8"></p>
+            <input type="text" id="cust-name" placeholder="Aapka Naam">
+            <input type="number" id="cust-phone" placeholder="Mobile Number">
+            <textarea id="cust-addr" placeholder="Pura Pata (Address) jahan delivery chahiye..." class="h-32"></textarea>
+            <button onclick="submitOrder()" class="btn-royal">CONFIRM ORDER</button>
+            <button onclick="closeM('order-modal')" class="mt-4 text-xs font-bold text-gray-400">CANCEL</button>
         </div>
 
-        <div id="prod-modal" class="fixed inset-0 bg-white z-[100] hide p-8 overflow-y-auto">
-            <div class="flex justify-between mb-8"><b class="raj-title text-2xl uppercase">Bazaar Item</b><i class="fa-solid fa-times text-2xl" onclick="closeM('prod-modal')"></i></div>
-            <input type="file" id="prod-file" accept="image/*">
-            <input type="text" id="prod-name" placeholder="Product ka Shubh Naam">
-            <textarea id="prod-desc" placeholder="Product ki Full Jankari (Description)..." class="h-24"></textarea>
-            <input type="number" id="prod-price" placeholder="Keemat (₹)">
-            <input type="text" id="prod-link" placeholder="Buy Link (URL)">
-            <button onclick="publish('prod')" id="btn-prod" class="btn-royal">LIST IN SHOP</button>
+        <div id="post-modal" class="fixed inset-0 bg-white z-[100] hide p-10 overflow-y-auto">
+            <div class="flex justify-between mb-8"><b>NEW POST</b><i class="fa-solid fa-times" onclick="closeM('post-modal')"></i></div>
+            <input type="file" id="post-file" accept="image/*,video/*">
+            <textarea id="post-desc" placeholder="Caption..."></textarea>
+            <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH</button>
         </div>
+
+        <div id="prod-modal" class="fixed inset-0 bg-white z-[100] hide p-10 overflow-y-auto">
+            <div class="flex justify-between mb-8"><b>ADD TO MY SHOP</b><i class="fa-solid fa-times" onclick="closeM('prod-modal')"></i></div>
+            <input type="file" id="prod-file" accept="image/*">
+            <input type="text" id="prod-name" placeholder="Product Name">
+            <input type="number" id="prod-price" placeholder="Price">
+            <textarea id="prod-desc" placeholder="Description..."></textarea>
+            <input type="text" id="prod-link" placeholder="Purchase Link">
+            <button onclick="publish('prod')" id="btn-prod" class="btn-royal">ADD PRODUCT</button>
+        </div>
+
     </div>
 </body>
 </html>
