@@ -1,39 +1,161 @@
-async function load() {
-    const res = await fetch(`${API}?action=getAppData&uid=${UID}`);
-    const d = await res.json();
-    
-    // Mapping according to your screenshot columns
-    document.getElementById('u-name').innerText = d.user.name;
-    document.getElementById('u-logo').src = d.user.logo || "https://via.placeholder.com/100";
-    document.getElementById('u-banner').src = d.user.banner || "https://via.placeholder.com/600x200";
-    document.getElementById('u-bio').innerText = d.user.bio;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sainiwalaa Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .hide { display: none !important; }
+        .active-tab { border-bottom: 3px solid #000; color: #000; font-weight: 800; }
+        .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .post-grid img, .post-grid video { aspect-ratio: 1/1; object-fit: cover; width: 100%; border-radius: 4px; }
+    </style>
+</head>
+<body class="flex justify-center">
 
-    // Load Posts Grid (from 'Posts' tab)
-    let feedH = "";
-    d.posts.filter(p => p[1] == UID).forEach(p => {
-        feedH += `<div class="relative group">
-            <img src="${p[0]}" class="w-full aspect-square object-cover">
-            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button onclick="deletePost('${p[3]}')" class="text-white bg-red-600 p-2 rounded-lg text-xs">Delete</button>
+    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20">
+        
+        <div id="v-login" class="p-10 pt-32 text-center">
+            <h1 class="text-4xl font-black italic mb-2">SAINIWALAA</h1>
+            <p class="text-gray-400 mb-10 text-sm">Enter number to access your studio</p>
+            <input type="number" id="user-id" placeholder="8829934849" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none font-bold text-center">
+            <button onclick="login()" class="w-full bg-black text-white p-4 rounded-2xl font-bold shadow-lg">ENTER STUDIO</button>
+        </div>
+
+        <div id="v-main" class="hide">
+            <div class="relative h-44 bg-gray-200">
+                <img id="u-banner" class="w-full h-full object-cover">
+                <img id="u-logo" class="absolute -bottom-8 left-6 w-24 h-24 rounded-3xl border-4 border-white shadow-md bg-white">
             </div>
-        </div>`;
-    });
-    document.getElementById('sec-feed').innerHTML = feedH || "<p class='col-span-3 text-center py-10 text-gray-400'>No Posts Yet</p>";
 
-    // Load Shop (from 'Shop' tab)
-    let shopH = "";
-    d.shop.forEach(s => {
-        // Column I (Index 8) is 'show' logic
-        if(s[8] === "show") {
-            shopH += `<div class="bg-white border p-3 rounded-2xl shadow-sm">
-                <img src="${s[1]}" class="w-full h-32 object-cover rounded-xl mb-2">
-                <h4 class="font-bold text-xs truncate">${s[0]}</h4>
-                <div class="flex justify-between items-center mt-2">
-                    <span class="text-blue-600 font-black text-sm">₹${s[3]}</span>
-                    <button class="bg-black text-white px-3 py-1 rounded-lg text-[10px]">BUY</button>
+            <div class="px-6 pt-12 flex justify-between items-start">
+                <div>
+                    <h2 id="u-name" class="text-2xl font-black">Creator</h2>
+                    <p id="u-bio" class="text-sm text-gray-400 mt-1">No bio added yet.</p>
                 </div>
-            </div>`;
+                <button onclick="openM('m-edit')" class="p-2 text-gray-400"><i class="fa-solid fa-gear text-xl"></i></button>
+            </div>
+
+            <div class="flex px-6 mt-8 border-b text-xs font-bold text-gray-400">
+                <button onclick="tab('posts')" id="t-posts" class="flex-1 py-3 active-tab">POSTS</button>
+                <button onclick="tab('shop')" id="t-shop" class="flex-1 py-3">SHOP</button>
+                <button onclick="tab('orders')" id="t-orders" class="flex-1 py-3">SALES</button>
+            </div>
+
+            <div id="s-posts" class="post-grid p-1"></div>
+            <div id="s-shop" class="p-4 grid grid-cols-2 gap-4 hide"></div>
+            <div id="s-orders" class="p-4 space-y-3 hide"></div>
+        </div>
+
+        <nav id="nav" class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-4 hide">
+            <i class="fa-solid fa-house text-xl"></i>
+            <button onclick="openM('m-add')" class="text-4xl text-blue-600 -mt-8 bg-white rounded-full p-1"><i class="fa-solid fa-circle-plus"></i></button>
+            <i onclick="location.reload()" class="fa-solid fa-user text-xl"></i>
+        </nav>
+    </div>
+
+    <div id="m-edit" class="fixed inset-0 bg-white z-[200] hidden p-8">
+        <div class="flex justify-between mb-8"><h2 class="text-2xl font-bold">Edit Profile</h2><button onclick="closeM('m-edit')" class="text-2xl">&times;</button></div>
+        <input type="text" id="ed-name" placeholder="Full Name" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+        <textarea id="ed-bio" placeholder="Bio" class="w-full p-4 bg-gray-100 rounded-xl mb-4"></textarea>
+        <button onclick="saveProfile()" id="btn-save" class="w-full bg-black text-white p-4 rounded-xl font-bold">UPDATE</button>
+    </div>
+
+    <div id="m-add" class="fixed inset-0 bg-white z-[200] hidden p-8 overflow-y-auto">
+        <div class="flex justify-between mb-8"><h2 class="text-2xl font-bold">New Upload</h2><button onclick="closeM('m-add')" class="text-2xl">&times;</button></div>
+        <select id="add-type" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+            <option value="post">Post to Feed</option>
+            <option value="shop">Add to Shop</option>
+        </select>
+        <input type="file" id="add-file" class="mb-4">
+        <input type="text" id="add-title" placeholder="Title/Caption" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+        <input type="number" id="add-price" placeholder="Price (₹)" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+        <button onclick="handleUpload()" id="btn-up" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold">PUBLISH</button>
+    </div>
+
+    <script>
+        const API = "https://script.google.com/macros/s/AKfycbzIt34Ff5aqRECSgFJK2YkZGzARuD8s6S0rEnTMwDP5SU5ak1w8M4MY9iFxGB31fedjMA/exec";
+        const CLOUD = "https://api.cloudinary.com/v1_1/dprl2lyih/upload";
+        const PRESET = "social_preset";
+        let UID = localStorage.getItem('s_uid');
+
+        function openM(id){ document.getElementById(id).classList.remove('hide'); document.getElementById(id).style.display='block'; }
+        function closeM(id){ document.getElementById(id).classList.add('hide'); document.getElementById(id).style.display='none'; }
+        
+        function tab(t){
+            ['posts','shop','orders'].forEach(x => {
+                document.getElementById('s-'+x).classList.add('hide');
+                document.getElementById('t-'+x).classList.remove('active-tab');
+            });
+            document.getElementById('s-'+t).classList.remove('hide');
+            document.getElementById('t-'+t).classList.add('active-tab');
         }
-    });
-    document.getElementById('sec-shop').innerHTML = shopH;
-}
+
+        function login(){
+            const val = document.getElementById('user-id').value;
+            if(val) { localStorage.setItem('s_uid', val); location.reload(); }
+        }
+
+        async function upload(f){
+            if(!f) return "";
+            const fd = new FormData(); fd.append("file", f); fd.append("upload_preset", PRESET);
+            const res = await fetch(CLOUD, {method:"POST", body:fd});
+            const d = await res.json(); return d.secure_url;
+        }
+
+        async function load(){
+            if(!UID) return;
+            document.getElementById('v-login').classList.add('hide');
+            document.getElementById('v-main').classList.remove('hide');
+            document.getElementById('nav').classList.remove('hide');
+
+            const res = await fetch(`${API}?action=getAppData&uid=${UID}`);
+            const d = await res.json();
+
+            // Profile Map
+            document.getElementById('u-name').innerText = d.user.name;
+            document.getElementById('u-bio').innerText = d.user.bio;
+            document.getElementById('u-logo').src = d.user.logo || "https://via.placeholder.com/100";
+            document.getElementById('u-banner').src = d.user.banner || "https://via.placeholder.com/600x200";
+
+            // Posts Map
+            let ph = "";
+            d.posts.filter(p => p[1] == UID).forEach(p => {
+                ph += `<img src="${p[0]}">`;
+            });
+            document.getElementById('s-posts').innerHTML = ph || "<p class='col-span-3 text-center py-20 text-gray-300'>No Posts</p>";
+
+            // Shop Map
+            let sh = "";
+            d.shop.filter(s => s[2] == UID && s[8] == "show").forEach(s => {
+                sh += `<div class='bg-gray-50 border p-2 rounded-xl'><img src='${s[1]}' class='w-full h-24 object-cover rounded-lg'><b class='text-[10px] block mt-1'>${s[0]}</b><b class='text-blue-600 text-xs'>₹${s[3]}</b></div>`;
+            });
+            document.getElementById('s-shop').innerHTML = sh;
+        }
+
+        async function handleUpload(){
+            const b = document.getElementById('btn-up'); b.innerText="Uploading..."; b.disabled=true;
+            const url = await upload(document.getElementById('add-file').files[0]);
+            const payload = {
+                action: document.getElementById('add-type').value === 'shop' ? 'addShop' : 'addPost',
+                uid: UID, name: document.getElementById('add-title').value,
+                price: document.getElementById('add-price').value, img: url, file: url, text: document.getElementById('add-title').value
+            };
+            await fetch(API, {method:"POST", mode:"no-cors", body:JSON.stringify(payload)});
+            location.reload();
+        }
+
+        async function saveProfile(){
+            const b = document.getElementById('btn-save'); b.innerText="Saving...";
+            const payload = { action:"updateProfile", uid:UID, name:document.getElementById('ed-name').value, bio:document.getElementById('ed-bio').value };
+            await fetch(API, {method:"POST", mode:"no-cors", body:JSON.stringify(payload)});
+            location.reload();
+        }
+
+        if(UID) load();
+    </script>
+</body>
+</html>
