@@ -7,184 +7,191 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --royal-pink: #E91E63; --saffron: #FF9933; --gold: #D4AF37; }
-        body { background: #fafafa; font-family: -apple-system, sans-serif; }
+        :root { --p: #ef828a; --s: #FF9933; }
+        body { background: #fafafa; font-family: -apple-system, sans-serif; overflow-x: hidden; }
         .hide { display: none !important; }
-        .active-nav { color: var(--saffron) !important; }
-        .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .active-nav { color: var(--s) !important; }
         .insta-border { border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #f093fb, #f5576c) border-box; }
-        .header-logo { font-family: 'Dancing Script', cursive; font-size: 24px; font-weight: 900; color: #D84315; }
+        .post-img { aspect-ratio: 1/1; object-fit: cover; width: 100%; border-radius: 4px; }
+        /* Like Heart Animation */
+        .heart-pop { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: white; font-size: 80px; transition: 0.3s; pointer-events: none; }
+        .heart-pop.animate { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
     </style>
 </head>
 <body class="flex justify-center">
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20">
-        
-        <header class="sticky top-0 bg-white/95 backdrop-blur-md z-50 border-b p-4 flex justify-between items-center">
-            <h1 class="header-logo italic">SainiWalaa</h1>
-            <div class="flex gap-5 text-xl text-orange-800">
-                <i class="fa-solid fa-square-plus" onclick="openModal('add-modal')"></i>
-                <i class="fa-solid fa-heart"></i>
-                <i class="fa-solid fa-right-from-bracket text-red-500" onclick="logout()"></i>
-            </div>
-        </header>
+<div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20">
+    
+    <header class="sticky top-0 bg-white/95 backdrop-blur-md z-[100] border-b p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-black italic text-orange-700">SainiWalaa</h1>
+        <div class="flex gap-5 text-xl text-orange-800">
+            <i class="fa-solid fa-square-plus" onclick="openM('add-modal')"></i>
+            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-right-from-bracket text-red-500" onclick="logout()"></i>
+        </div>
+    </header>
 
-        <main id="v-feed" class="space-y-4"></main>
+    <main id="v-feed" class="space-y-4 pt-2"></main>
 
-        <main id="v-shop" class="p-4 hide">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-black text-orange-900">ROYAL BAZAAR</h2>
-                <span class="text-[10px] bg-orange-100 px-2 py-1 rounded-full text-orange-700">Live Studio</span>
-            </div>
-            <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
-        </main>
+    <main id="v-shop" class="p-4 hide">
+        <h2 class="font-black text-orange-900 mb-4 tracking-tighter uppercase">🚩 Royal Bazaar</h2>
+        <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
+    </main>
 
-        <main id="v-profile" class="hide">
-            <div class="p-6">
-                <div class="flex items-center gap-8 mb-6">
-                    <div class="w-20 h-20 rounded-full insta-border p-1">
-                        <img src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
-                    </div>
-                    <div class="flex gap-4 text-center text-xs">
-                        <div><b id="count-posts">0</b><p class="text-gray-400">Posts</p></div>
-                        <div><b>1,248</b><p class="text-gray-400">Followers</p></div>
-                        <div><b>452</b><p class="text-gray-400">Following</p></div>
-                    </div>
+    <main id="v-profile" class="hide">
+        <div class="p-6">
+            <div class="flex items-center gap-8 mb-4">
+                <div class="w-20 h-20 rounded-full insta-border p-1">
+                    <img src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
                 </div>
-                <h2 class="font-bold text-sm">SainiWalaa Studio 🚩</h2>
-                <p class="text-xs text-gray-600 mt-1">Jaipur Heritage & Modern Art. <br>Order Royal Collection below.</p>
-                <div class="flex gap-2 mt-4">
-                    <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Edit Profile</button>
-                    <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Share Store</button>
+                <div class="flex gap-4 text-center text-xs">
+                    <div><b id="c-posts">0</b><p class="text-gray-400">Posts</p></div>
+                    <div><b>12.5k</b><p class="text-gray-400">Fans</p></div>
+                    <div><b>840</b><p class="text-gray-400">Orders</p></div>
                 </div>
             </div>
-            <div class="flex border-t text-[10px] font-bold text-gray-400">
-                <button class="flex-1 py-3 border-b-2 border-black text-black"><i class="fa-solid fa-table-cells mr-1"></i>POSTS</button>
-                <button class="flex-1 py-3" onclick="showPage('shop')"><i class="fa-solid fa-shop mr-1"></i>MY SHOP</button>
+            <h2 class="font-bold text-sm">SainiWalaa Studio</h2>
+            <p class="text-[11px] text-gray-500">Artist & Creator | Jaipur Heritage 🌸</p>
+            <div class="flex gap-2 mt-4">
+                <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Edit Studio</button>
+                <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Analytics</button>
             </div>
-            <div id="profile-grid" class="post-grid"></div>
-        </main>
-
-        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-3 z-50 shadow-2xl">
-            <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl active-nav"></i>
-            <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300"></i>
-            <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300"></i>
-            <i class="fa-solid fa-clapperboard text-2xl text-gray-300"></i>
-            <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300"></i>
-        </nav>
-    </div>
-
-    <div id="add-modal" class="fixed inset-0 bg-white z-[1000] hide p-8">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold">New Upload</h2>
-            <i class="fa-solid fa-xmark text-2xl" onclick="closeModal('add-modal')"></i>
         </div>
-        <div class="space-y-4">
-            <select id="up-type" class="w-full p-4 bg-gray-50 rounded-xl outline-none font-bold text-orange-800">
-                <option value="post">Feed Post (Social)</option>
-                <option value="shop">Shop Item (Bazaar)</option>
-            </select>
-            <input type="text" id="up-url" placeholder="Paste Cloudinary URL (Image/Video)" class="w-full p-4 border rounded-xl outline-none">
-            <input type="text" id="up-title" placeholder="Title / Caption" class="w-full p-4 border rounded-xl outline-none">
-            <input type="number" id="up-price" placeholder="Price (for Shop)" class="w-full p-4 border rounded-xl outline-none">
-            
-            <button onclick="publishData()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black shadow-lg">KHAMA GHANI (POST)</button>
+        <div class="flex border-t text-[10px] font-bold text-gray-400">
+            <button class="flex-1 py-3 border-b-2 border-black text-black uppercase">My Posts</button>
+            <button class="flex-1 py-3 uppercase" onclick="showPage('shop')">Inventory</button>
         </div>
+        <div id="profile-grid" class="grid grid-cols-3 gap-1"></div>
+    </main>
+
+    <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-3 z-[100] shadow-2xl">
+        <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl active-nav"></i>
+        <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300"></i>
+        <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300"></i>
+        <i class="fa-solid fa-clapperboard text-2xl text-gray-300"></i>
+        <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300"></i>
+    </nav>
+
+</div>
+
+<div id="add-modal" class="fixed inset-0 bg-white z-[2000] hide p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-xl font-bold">Create New</h2>
+        <i class="fa-solid fa-xmark text-2xl" onclick="closeM('add-modal')"></i>
     </div>
+    <div class="space-y-4">
+        <select id="up-type" class="w-full p-4 bg-orange-50 rounded-xl outline-none font-bold text-orange-800">
+            <option value="post">Social Post</option>
+            <option value="shop">List in Bazaar (Shop)</option>
+        </select>
+        <input type="text" id="up-url" placeholder="Cloudinary Link / Image URL" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
+        <input type="text" id="up-title" placeholder="Caption or Product Name" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
+        <input type="number" id="up-price" placeholder="Price (₹) for Shop" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
+        <button onclick="publishData()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black shadow-lg">KHAMA GHANI (POST)</button>
+    </div>
+</div>
 
-    <script>
-        // --- DATABASE SYSTEM (Sheet & Firebase Ready) ---
-        let DB = JSON.parse(localStorage.getItem('SAINI_MASTER_DB')) || { posts: [] };
+<script>
+    // System Database
+    let DB = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { items: [] };
 
-        function saveDB() { localStorage.setItem('SAINI_MASTER_DB', JSON.stringify(DB)); }
+    function save() { localStorage.setItem('SAINI_LIVE_DB', JSON.stringify(DB)); }
 
-        function showPage(p) {
-            ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
-            ['feed','shop','profile'].forEach(n => document.getElementById('n-'+n).classList.remove('active-nav'));
-            document.getElementById('v-'+p).classList.remove('hide');
-            document.getElementById('n-'+p).classList.add('active-nav');
-            if(p === 'shop') renderShop();
-            if(p === 'profile') renderProfile();
-        }
+    function showPage(p) {
+        ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
+        ['feed','shop','profile'].forEach(n => document.getElementById('n-'+n).classList.remove('active-nav'));
+        document.getElementById('v-'+p).classList.remove('hide');
+        document.getElementById('n-'+p).classList.add('active-nav');
+        if(p === 'shop') renderShop();
+        if(p === 'profile') renderProfile();
+    }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hide'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hide'); }
+    function openM(id) { document.getElementById(id).classList.remove('hide'); }
+    function closeM(id) { document.getElementById(id).classList.add('hide'); }
 
-        // --- CORE LOGIC: PUBLISH ---
-        function publishData() {
-            const newItem = {
-                id: Date.now(),
-                type: document.getElementById('up-type').value,
-                url: document.getElementById('up-url').value,
-                title: document.getElementById('up-title').value,
-                price: document.getElementById('up-price').value || 0,
-                status: 'show', // Default Status is Show
-                likes: 0
-            };
-            DB.posts.unshift(newItem);
-            saveDB();
-            closeModal('add-modal');
-            renderFeed();
-        }
+    // Core Logic
+    function publishData() {
+        const item = {
+            id: Date.now(),
+            type: document.getElementById('up-type').value,
+            url: document.getElementById('up-url').value,
+            title: document.getElementById('up-title').value,
+            price: document.getElementById('up-price').value || 0,
+            status: 'show', // Show/Hide Logic
+            likes: 0
+        };
+        DB.items.unshift(item);
+        save();
+        closeM('add-modal');
+        renderFeed();
+    }
 
-        // --- SHOW/HIDE SYSTEM ---
-        function toggleProductStatus(pid) {
-            const item = DB.posts.find(p => p.id === pid);
-            item.status = (item.status === 'show') ? 'hide' : 'show';
-            saveDB();
-            renderShop();
-        }
+    function toggleStatus(id) {
+        const i = DB.items.find(x => x.id === id);
+        i.status = (i.status === 'show') ? 'hide' : 'show';
+        save();
+        renderShop();
+    }
 
-        function renderFeed() {
-            let h = "";
-            DB.posts.forEach(p => {
-                const isVid = p.url.match(/\.(mp4|webm|mov)$/i);
-                h += `
-                <div class="border-b bg-white">
-                    <div class="p-3 flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-orange-200"></div><b class="text-xs">SainiWalaa</b></div>
-                    ${isVid ? `<video src="${p.url}" autoplay muted loop class="w-full"></video>` : `<img src="${p.url}" class="w-full h-[400px] object-cover">`}
-                    <div class="p-4">
-                        <div class="flex gap-4 text-2xl mb-2 text-orange-800">
-                            <i class="fa-regular fa-heart"></i>
-                            <i class="fa-regular fa-comment"></i>
-                            ${p.type === 'shop' ? `<i class="fa-solid fa-bag-shopping" onclick="showPage('shop')"></i>` : ''}
-                        </div>
-                        <p class="text-sm"><b>SainiWalaa</b> ${p.title}</p>
+    function renderFeed() {
+        let h = "";
+        DB.items.forEach(p => {
+            h += `
+            <div class="border-b bg-white relative">
+                <div class="p-3 flex items-center gap-2"><div class="w-7 h-7 bg-orange-500 rounded-full"></div><b class="text-xs">SainiWalaa</b></div>
+                <div class="relative overflow-hidden" ondblclick="animateLike(this)">
+                    <img src="${p.url}" class="w-full h-[400px] object-cover">
+                    <i class="fa-solid fa-heart heart-pop"></i>
+                </div>
+                <div class="p-4">
+                    <div class="flex gap-4 text-2xl mb-2 text-orange-800">
+                        <i class="fa-regular fa-heart"></i>
+                        <i class="fa-regular fa-comment"></i>
+                        ${p.type==='shop' ? `<i class="fa-solid fa-bag-shopping text-pink-600"></i>` : ''}
                     </div>
-                </div>`;
-            });
-            document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-300'>No posts yet sa!</p>";
-        }
+                    <p class="text-sm font-medium"><b>SainiWalaa</b> ${p.title}</p>
+                </div>
+            </div>`;
+        });
+        document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-300'>Nothing here sa!</p>";
+    }
 
-        function renderShop() {
-            let h = "";
-            DB.posts.filter(p => p.type === 'shop').forEach(p => {
-                h += `
-                <div class="relative bg-white border rounded-2xl overflow-hidden shadow-sm ${p.status === 'hide' ? 'opacity-40 grayscale' : ''}">
-                    <img src="${p.url}" class="w-full h-40 object-cover">
-                    <div class="p-3 text-center">
-                        <b class="text-[10px] block truncate">${p.title}</b>
-                        <b class="text-orange-700 text-sm">₹${p.price}</b>
-                        <button class="w-full bg-orange-600 text-white text-[10px] mt-2 py-2 rounded-lg font-bold">BUY NOW</button>
-                        
-                        <button onclick="toggleProductStatus(${p.id})" class="absolute top-2 right-2 bg-white/80 p-2 rounded-full text-xs">
-                            <i class="fa-solid ${p.status === 'show' ? 'fa-eye text-green-600' : 'fa-eye-slash text-red-600'}"></i>
-                        </button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('bazaar-grid').innerHTML = h;
-        }
+    function renderShop() {
+        let h = "";
+        DB.items.filter(i => i.type === 'shop').forEach(p => {
+            h += `
+            <div class="relative bg-white border rounded-3xl overflow-hidden shadow-sm ${p.status==='hide' ? 'opacity-30 grayscale' : ''}">
+                <img src="${p.url}" class="w-full h-40 object-cover">
+                <div class="p-3 text-center">
+                    <b class="text-[10px] block truncate">${p.title}</b>
+                    <b class="text-orange-700 text-sm">₹${p.price}</b>
+                    <button class="w-full bg-black text-white text-[10px] mt-2 py-2 rounded-xl">ORDER NOW</button>
+                    <button onclick="toggleStatus(${p.id})" class="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-xs shadow-md">
+                        <i class="fa-solid ${p.status==='show' ? 'fa-eye text-green-500' : 'fa-eye-slash text-red-500'}"></i>
+                    </button>
+                </div>
+            </div>`;
+        });
+        document.getElementById('bazaar-grid').innerHTML = h;
+    }
 
-        function renderProfile() {
-            let h = "";
-            const myPosts = DB.posts;
-            document.getElementById('count-posts').innerText = myPosts.length;
-            myPosts.forEach(p => h += `<img src="${p.url}" class="w-full h-full object-cover aspect-square">`);
-            document.getElementById('profile-grid').innerHTML = h;
-        }
+    function renderProfile() {
+        let h = "";
+        const myItems = DB.items;
+        document.getElementById('c-posts').innerText = myItems.length;
+        myItems.forEach(p => h += `<img src="${p.url}" class="aspect-square object-cover">`);
+        document.getElementById('profile-grid').innerHTML = h;
+    }
 
-        window.onload = renderFeed;
-    </script>
+    function animateLike(el) {
+        const heart = el.querySelector('.heart-pop');
+        heart.classList.add('animate');
+        setTimeout(() => heart.classList.remove('animate'), 800);
+    }
+
+    function logout() { localStorage.clear(); location.reload(); }
+
+    window.onload = renderFeed;
+</script>
 </body>
 </html>
