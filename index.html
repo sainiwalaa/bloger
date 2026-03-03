@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SainiWalaa - Official Studio</title>
+    <title>SainiWalaa - Social Bazaar Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -27,121 +27,123 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let myData = null;
+        let userCache = null;
 
-        // --- CLOUDINARY UPLOAD CONFIG ---
-        const cloudName = "dvp58lgh3"; // Aapki ID se nikala hua
-        const uploadPreset = "ml_default"; 
-
-        window.openUploadWidget = (type) => {
+        // --- CLOUDINARY UPLOAD (Photo/Video) ---
+        window.openUpload = (target) => {
             cloudinary.openUploadWidget({
-                cloudName: cloudName,
-                uploadPreset: uploadPreset,
-                sources: ['local', 'camera'],
-                multiple: false,
-                clientAllowedFormats: type === 'video' ? ['mp4', 'mov'] : ['png', 'jpg', 'jpeg'],
-            }, (error, result) => {
-                if (!error && result && result.event === "success") {
-                    const url = result.info.secure_url;
-                    if(type === 'post' || type === 'video') savePost(url, type);
-                    if(type === 'product') saveProduct(url);
+                cloudName: "dvp58lgh3", uploadPreset: "ml_default", sources: ['local', 'camera']
+            }, (err, res) => {
+                if (!err && res.event === "success") {
+                    if(target === 'post') saveToFirebase('posts', { url: res.info.secure_url, type: res.info.resource_type });
+                    if(target === 'shop') saveToFirebase('products', { url: res.info.secure_url });
                 }
             });
         };
 
-        // --- AUTH TRACKER ---
+        async function saveToFirebase(path, data) {
+            const extra = prompt(path === 'posts' ? "Caption?" : "Product Name & Price (e.g. Kurta-999):");
+            const payload = {
+                ...data, uid: auth.currentUser.uid, uHandle: userCache.username,
+                uPhoto: userCache.photo, time: serverTimestamp()
+            };
+            if(path === 'posts') payload.caption = extra;
+            else { const s = extra.split('-'); payload.name = s[0]; payload.price = s[1]; }
+            
+            await push(ref(db, path), payload);
+            alert("Hukum, Data Save ho gayo!");
+        }
+
+        // --- AUTH & REFRESH LOGIC ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await get(ref(db, `users/${user.uid}`));
-                myData = snap.val();
-                document.getElementById('auth-screen').classList.add('hide');
-                document.getElementById('app').classList.remove('hide');
-                loadFeed();
-                showTab(localStorage.getItem('tab') || 'feed');
+                userCache = snap.val();
+                document.getElementById('auth-box').classList.add('hide');
+                document.getElementById('app-box').classList.remove('hide');
+                loadGlobalFeed();
+                goTab(localStorage.getItem('curr_tab') || 'home');
             } else {
-                document.getElementById('auth-screen').classList.remove('hide');
-                document.getElementById('app').classList.add('hide');
+                document.getElementById('auth-box').classList.remove('hide');
+                document.getElementById('app-box').classList.add('hide');
             }
         });
 
-        // --- SAVE LOGIC ---
-        async function savePost(url, type) {
-            const cap = prompt("Hukum, Caption likho:");
-            await push(ref(db, 'posts'), {
-                uid: auth.currentUser.uid, uName: myData.name, uHandle: myData.username,
-                uPhoto: myData.photo, url: url, type: type, caption: cap || "", likes: 0, time: serverTimestamp()
-            });
-            alert("Ghani Khamma! Post ho gayi.");
-        }
+        // --- UNIQUE ID REGISTRATION ---
+        window.doRegister = async () => {
+            const uid = document.getElementById('reg-id').value.toLowerCase().trim();
+            const em = document.getElementById('reg-email').value;
+            const ps = document.getElementById('reg-pass').value;
 
-        async function saveProduct(url) {
-            const name = prompt("Product Name:");
-            const price = prompt("Price (₹):");
-            await push(ref(db, 'products'), {
-                ownerUid: auth.currentUser.uid, name, price, url, time: serverTimestamp()
-            });
-            alert("Bazaar mein chiz jud gayi!");
-        }
+            const check = await get(query(ref(db, 'users'), orderByChild('username'), equalTo(uid)));
+            if(check.exists()) return alert("Maafi! Ye Unique ID pehle se book hai.");
 
-        // --- FEED & INTERFACE ---
-        function loadFeed() {
+            try {
+                const res = await createUserWithEmailAndPassword(auth, em, ps);
+                await set(ref(db, `users/${res.user.uid}`), {
+                    uid: res.user.uid, username: uid, name: uid.toUpperCase(),
+                    photo: 'https://i.pravatar.cc/150?u='+uid, bio: 'Royal SainiWalaa Member 🚩'
+                });
+                alert("Ghani Khamma! Studio taiyaar hai.");
+            } catch(e) { alert(e.message); }
+        };
+
+        // --- FEED & SHOP LOGIC ---
+        function loadGlobalFeed() {
             onValue(ref(db, 'posts'), s => {
-                const container = document.getElementById('feed-list');
-                container.innerHTML = "";
-                if(s.exists()) {
-                    Object.entries(s.val()).reverse().forEach(([id, p]) => {
-                        container.innerHTML += `
-                        <div class="bg-white mb-4 border-b">
-                            <div class="p-3 flex items-center gap-3" onclick="visitStudio('${p.uid}')">
-                                <img src="${p.uPhoto}" class="w-10 h-10 rounded-full border-2 border-orange-600">
-                                <b class="text-sm raj-title">@${p.uHandle}</b>
-                            </div>
-                            ${p.type === 'video' ? `<video src="${p.url}" class="w-full h-[400px] object-cover" controls></video>` : `<img src="${p.url}" class="w-full object-cover">`}
-                            <div class="p-4 flex gap-6 text-2xl">
-                                <i class="fa-regular fa-heart" onclick="alert('Like ho gayo!')"></i>
-                                <i class="fa-regular fa-comment"></i>
-                                <i class="fa-regular fa-paper-plane"></i>
-                            </div>
-                            <p class="px-4 pb-4 text-xs"><b>${p.uHandle}</b> ${p.caption}</p>
-                        </div>`;
-                    });
-                }
+                const f = document.getElementById('feed-items'); f.innerHTML = "";
+                if(s.exists()) Object.entries(s.val()).reverse().forEach(([id, p]) => {
+                    f.innerHTML += `
+                    <div class="bg-white mb-4 border-b">
+                        <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="visitUser('${p.uid}')">
+                            <img src="${p.uPhoto}" class="w-10 h-10 rounded-full border-2 border-orange-600">
+                            <b class="text-sm raj-title">@${p.uHandle}</b>
+                        </div>
+                        ${p.type === 'video' ? `<video src="${p.url}" class="w-full" controls></video>` : `<img src="${p.url}" class="w-full">`}
+                        <div class="p-4 flex gap-6 text-2xl">
+                            <i class="fa-regular fa-heart" onclick="alert('Liked!')"></i>
+                            <i class="fa-regular fa-comment"></i>
+                            <i class="fa-solid fa-cart-shopping text-orange-600" onclick="visitUser('${p.uid}')"></i>
+                        </div>
+                        <p class="px-4 pb-4 text-xs"><b>${p.uHandle}</b> ${p.caption}</p>
+                    </div>`;
+                });
             });
         }
 
-        window.visitStudio = async (uid) => {
-            showTab('profile');
+        window.visitUser = async (uid) => {
+            goTab('profile');
             const snap = await get(ref(db, `users/${uid}`));
             const d = snap.val();
             document.getElementById('p-name').innerText = d.name;
-            document.getElementById('p-handle').innerText = "@" + d.username;
+            document.getElementById('p-id').innerText = "@" + d.username;
             document.getElementById('p-img').src = d.photo;
             
-            // Load Shop
-            const shopBox = document.getElementById('p-shop'); shopBox.innerHTML = "";
-            const pSnap = await get(ref(db, 'products'));
-            if(pSnap.exists()) Object.values(pSnap.val()).forEach(p => {
-                if(p.ownerUid === uid) shopBox.innerHTML += `
-                <div class="bg-gray-50 p-2 border">
-                    <img src="${p.url}" class="w-full h-32 object-cover">
-                    <b class="text-[10px] block mt-1">${p.name}</b>
+            // Show Shop Items
+            const shop = document.getElementById('p-shop-items'); shop.innerHTML = "";
+            const sSnap = await get(ref(db, 'products'));
+            if(sSnap.exists()) Object.values(sSnap.val()).forEach(p => {
+                if(p.uid === uid) shop.innerHTML += `
+                <div class="bg-white border p-2 shadow-sm">
+                    <img src="${p.url}" class="w-full h-32 object-cover mb-2">
+                    <b class="text-[10px] block truncate">${p.name}</b>
                     <p class="text-orange-600 font-bold text-xs">₹${p.price}</p>
-                    <button onclick="orderProduct('${p.name}', '${uid}')" class="w-full bg-black text-white text-[9px] py-2 mt-1">ORDER NOW</button>
+                    <button onclick="openOrderForm('${p.name}', '${uid}')" class="w-full bg-black text-white text-[9px] py-2 mt-2 font-bold uppercase">Buy Now</button>
                 </div>`;
             });
         };
 
-        window.orderProduct = (name, uid) => {
-            const detail = prompt("Apno Naam aur Address:");
-            if(detail) {
-                push(ref(db, `orders/${uid}`), { item: name, customer: detail, time: serverTimestamp() });
-                alert("Order bhej diyo Hukum!");
-                window.open(`https://wa.me/91XXXXXXXXXX?text=New Order: ${name}\nCustomer: ${detail}`);
+        window.openOrderForm = (pName, ownerUid) => {
+            const cust = prompt("Apno Naam aur Address Likho:");
+            if(cust) {
+                push(ref(db, `orders/${ownerUid}`), { product: pName, customer: cust, time: serverTimestamp() });
+                alert("Order bhej diyo! WhatsApp khul ryo hai.");
+                window.open(`https://wa.me/91XXXXXXXXXX?text=Order: ${pName}\nCustomer: ${cust}`);
             }
         };
 
-        window.showTab = (t) => {
-            localStorage.setItem('tab', t);
+        window.goTab = (t) => {
+            localStorage.setItem('curr_tab', t);
             document.querySelectorAll('main').forEach(m => m.classList.add('hide'));
             document.getElementById(`v-${t}`).classList.remove('hide');
         };
@@ -153,76 +155,60 @@
         body { font-family: 'Montserrat', sans-serif; background: #fafafa; }
         .hide { display: none !important; }
         .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
-        .btn-royal { background: #000; color: #fff; padding: 14px; font-weight: 900; width: 100%; text-transform: uppercase; border-radius: 4px; cursor: pointer; }
         .nav-fixed { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 15px; z-index: 100; }
-        input { border: 1px solid #ddd; padding: 12px; width: 100%; margin-bottom: 10px; border-radius: 4px; outline: none; }
+        .action-btn { background: #000; color: #fff; padding: 12px; font-weight: 900; border-radius: 6px; width: 100%; cursor: pointer; text-transform: uppercase; }
+        input { border: 1.5px solid #eee; padding: 12px; width: 100%; margin-bottom: 12px; border-radius: 8px; outline: none; }
     </style>
 </head>
 <body class="flex justify-center">
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20 hide">
+    <div id="app-box" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20 hide">
         <header class="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-50">
             <h1 class="text-xl font-black raj-title italic">SAINIWALAA</h1>
             <div class="flex gap-4">
-                <i class="fa-solid fa-camera text-orange-600 text-xl" onclick="openUploadWidget('post')"></i>
-                <i class="fa-solid fa-video text-orange-600 text-xl" onclick="openUploadWidget('video')"></i>
-                <i class="fa-solid fa-plus-circle text-black text-xl" onclick="openUploadWidget('product')"></i>
+                <i class="fa-solid fa-camera text-orange-600 text-xl" onclick="openUpload('post')"></i>
+                <i class="fa-solid fa-store text-black text-xl" onclick="openUpload('shop')"></i>
             </div>
         </header>
 
-        <main id="v-feed"><div id="feed-list"></div></main>
+        <main id="v-home"><div id="feed-items"></div></main>
 
         <main id="v-profile" class="hide">
             <div class="p-8 text-center border-b">
-                <img id="p-img" class="w-24 h-24 mx-auto rounded-full border-4 border-orange-600 shadow-xl mb-4">
+                <img id="p-img" class="w-24 h-24 mx-auto rounded-full border-4 border-orange-600 shadow-xl mb-4 bg-gray-100">
                 <h2 id="p-name" class="text-2xl font-black raj-title"></h2>
-                <p id="p-handle" class="text-xs font-bold text-gray-400 uppercase tracking-widest"></p>
+                <p id="p-id" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"></p>
                 <div class="flex gap-4 mt-6">
-                    <button class="flex-1 bg-black text-white py-2 text-[10px] font-bold uppercase">Follow 🚩</button>
-                    <button onclick="signOut(getAuth())" class="flex-1 bg-red-50 text-red-600 py-2 text-[10px] font-bold border border-red-100 uppercase">Logout</button>
+                    <button class="flex-1 bg-black text-white py-2 text-[10px] font-bold rounded uppercase">Follow 🚩</button>
+                    <button onclick="signOut(getAuth())" class="flex-1 bg-red-50 text-red-600 py-2 text-[10px] font-bold border border-red-100 rounded uppercase">Logout</button>
                 </div>
             </div>
             <div class="p-4">
-                <h3 class="font-black text-xs mb-4 uppercase tracking-tighter">Royal Bazaar</h3>
-                <div id="p-shop" class="grid grid-cols-2 gap-3"></div>
+                <h3 class="font-black text-[10px] mb-4 uppercase tracking-tighter text-gray-400">Royal Bazaar</h3>
+                <div id="p-shop-items" class="grid grid-cols-2 gap-4"></div>
             </div>
         </main>
 
         <nav class="nav-fixed">
-            <i class="fa-solid fa-house" onclick="showTab('feed')"></i>
+            <i class="fa-solid fa-house" onclick="goTab('home')"></i>
             <i class="fa-solid fa-magnifying-glass"></i>
-            <i class="fa-solid fa-crown text-orange-600" onclick="showTab('profile')"></i>
+            <i class="fa-solid fa-crown text-orange-600" onclick="goTab('profile')"></i>
         </nav>
     </div>
 
-    <div id="auth-screen" class="w-full max-w-[450px] min-h-screen p-10 flex flex-col justify-center text-center hide">
-        <h1 class="text-5xl font-black raj-title mb-10 italic">SAINIWALAA</h1>
-        <div id="l-box">
-            <input type="email" id="l-email" placeholder="Email"><input type="password" id="l-pass" placeholder="Password">
-            <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('l-email').value, document.getElementById('l-pass').value)" class="btn-royal">LOGIN 🚩</button>
-            <p class="mt-6 text-xs text-gray-400" onclick="document.getElementById('l-box').classList.add('hide'); document.getElementById('r-box').classList.remove('hide')">Naya ho? <b>Register Karo</b></p>
+    <div id="auth-box" class="w-full max-w-[450px] min-h-screen p-10 flex flex-col justify-center text-center hide">
+        <h1 class="text-5xl font-black raj-title mb-12 italic">SAINIWALAA</h1>
+        <div id="login-form">
+            <input type="email" id="log-email" placeholder="Email"><input type="password" id="log-pass" placeholder="Password">
+            <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('log-email').value, document.getElementById('log-pass').value)" class="action-btn">Kholo Studio 🚩</button>
+            <p class="mt-8 text-xs text-gray-400 cursor-pointer" onclick="document.getElementById('login-form').classList.add('hide'); document.getElementById('reg-form').classList.remove('hide')">Naya ho? <b>Register Karo</b></p>
         </div>
-        <div id="r-box" class="hide">
-            <input type="text" id="r-uid" placeholder="Unique Studio ID">
-            <input type="email" id="r-email" placeholder="Email"><input type="password" id="r-pass" placeholder="Password">
-            <button onclick="registerUser()" class="btn-royal">JOIN NOW 🚩</button>
+        <div id="reg-form" class="hide">
+            <input type="text" id="reg-id" placeholder="Unique Studio ID (e.g. saini01)">
+            <input type="email" id="reg-email" placeholder="Email"><input type="password" id="reg-pass" placeholder="Password">
+            <button onclick="doRegister()" class="action-btn">Register 🚩</button>
         </div>
     </div>
 
-    <script>
-        window.registerUser = async () => {
-            const id = document.getElementById('r-uid').value.toLowerCase().trim();
-            const em = document.getElementById('r-email').value;
-            const ps = document.getElementById('r-pass').value;
-            try {
-                const res = await firebase.auth().createUserWithEmailAndPassword(em, ps);
-                await firebase.database().ref('users/' + res.user.uid).set({
-                    uid: res.user.uid, username: id, name: id.toUpperCase(),
-                    photo: "https://i.pravatar.cc/150?u=" + id
-                });
-                alert("Registration ho gayo!");
-            } catch(e) { alert(e.message); }
-        }
-    </script>
 </body>
 </html>
