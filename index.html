@@ -12,7 +12,6 @@
         import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Firebase Configuration (Aapki Config)
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
             authDomain: "social-blog-93d38.firebaseapp.com",
@@ -32,13 +31,16 @@
         let currentUserData = null;
         let activePostId = null;
 
-        // --- AUTH & SETUP ---
+        // --- AUTH LOGIC ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userSnap = await get(ref(db, 'users/' + user.uid));
                 if (userSnap.exists()) {
                     currentUserData = userSnap.val();
-                    showApp();
+                    document.getElementById('auth-screen').classList.add('hide');
+                    document.getElementById('reg-screen').classList.add('hide');
+                    document.getElementById('app').classList.remove('hide');
+                    initApp();
                 } else {
                     document.getElementById('reg-screen').classList.remove('hide');
                     document.getElementById('auth-screen').classList.add('hide');
@@ -49,7 +51,13 @@
             }
         });
 
-        // --- FAST REGISTRATION ---
+        window.handleAuth = (mode) => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(mode === 'login') signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+            else createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
+        };
+
         window.registerUser = async () => {
             const name = document.getElementById('reg-name').value.trim();
             const username = document.getElementById('reg-username').value.toLowerCase().trim().replace(/\s+/g, '_');
@@ -57,7 +65,7 @@
             
             const unameRef = ref(db, 'usernames/' + username);
             const snap = await get(unameRef);
-            if(snap.exists()) return alert("Username already taken!");
+            if(snap.exists()) return alert("Username pehle se maujood hai!");
 
             const userData = { name, username, bio: "SainiWalaa Royal Member 🚩", uid: auth.currentUser.uid, photo: "", banner: "" };
             await set(ref(db, 'users/' + auth.currentUser.uid), userData);
@@ -65,13 +73,60 @@
             location.reload();
         };
 
-        // --- SOCIAL CORE (LIKE & COMMENT) ---
+        // --- FEED & SOCIAL ---
+        function initApp() {
+            onValue(ref(db, 'posts'), (snapshot) => {
+                const posts = snapshot.val();
+                let html = "";
+                if(posts) {
+                    Object.keys(posts).reverse().forEach(postId => {
+                        const p = posts[postId];
+                        html += `
+                        <div class="bg-white mb-6 border-b post-card shadow-sm">
+                            <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="visitProfile('${p.uid}')">
+                                <img src="${p.uPhoto || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded-full object-cover border-2 border-orange-100">
+                                <div class="leading-tight">
+                                    <b class="text-sm raj-title italic">${p.uName}</b><br>
+                                    <span class="text-[9px] text-gray-400 font-bold uppercase">@${p.uHandle}</span>
+                                </div>
+                            </div>
+                            <div class="bg-black flex items-center justify-center min-h-[300px]">
+                                ${p.type==='video' ? `<video src="${p.url}" controls class="w-full max-h-[550px]"></video>` : `<img src="${p.url}" class="w-full max-h-[550px] object-contain">`}
+                            </div>
+                            <div class="p-4">
+                                <div class="flex gap-6 mb-3 text-2xl">
+                                    <i class="fa-regular fa-heart cursor-pointer hover:text-red-500" onclick="toggleLike('${postId}')" id="like-icon-${postId}"></i>
+                                    <i class="fa-regular fa-comment cursor-pointer hover:text-orange-600" onclick="openComments('${postId}')"></i>
+                                </div>
+                                <p class="text-sm"><b class="text-xs">@${p.uHandle}</b> ${p.caption || ''}</p>
+                            </div>
+                        </div>`;
+                        updateLikeStatus(postId);
+                    });
+                }
+                document.getElementById('v-feed').innerHTML = html || "<p class='text-center py-20 opacity-30'>No Posts Yet</p>";
+            });
+            // Profile Update
+            document.getElementById('u-prof-img').src = currentUserData.photo || 'https://via.placeholder.com/100';
+            document.querySelectorAll('.u-name-display').forEach(el => el.innerText = currentUserData.name);
+        }
+
         window.toggleLike = async (postId) => {
             const likeRef = ref(db, `likes/${postId}/${auth.currentUser.uid}`);
             const snap = await get(likeRef);
             if(snap.exists()) await remove(likeRef);
             else await set(likeRef, true);
         };
+
+        function updateLikeStatus(postId) {
+            onValue(ref(db, `likes/${postId}/${auth.currentUser.uid}`), (snap) => {
+                const icon = document.getElementById(`like-icon-${postId}`);
+                if(icon) {
+                    if(snap.exists()) { icon.className = "fa-solid fa-heart text-red-500"; }
+                    else { icon.className = "fa-regular fa-heart"; }
+                }
+            });
+        }
 
         window.openComments = (postId) => {
             activePostId = postId;
@@ -81,14 +136,16 @@
                 const data = snap.val();
                 if(data) {
                     Object.keys(data).forEach(k => {
-                        h += `<div class="mb-3 text-xs"><b class="text-orange-600">@${data[k].uHandle}:</b> <span class="text-gray-700">${data[k].text}</span></div>`;
+                        h += `<div class="mb-3 p-2 bg-gray-50 rounded-lg text-xs">
+                            <b class="text-orange-600">@${data[k].uHandle}</b>: <span>${data[k].text}</span>
+                        </div>`;
                     });
                 }
-                document.getElementById('comment-list').innerHTML = h || "<p class='text-center text-gray-400 py-10'>Pehla comment aap karein...</p>";
+                document.getElementById('comment-list').innerHTML = h || "<p class='text-center py-10 opacity-40'>Be the first to comment!</p>";
             });
         };
 
-        window.postComment = async () => {
+        window.sendComment = async () => {
             const input = document.getElementById('comm-input');
             if(!input.value.trim()) return;
             await push(ref(db, `comments/${activePostId}`), {
@@ -99,158 +156,116 @@
             input.value = "";
         };
 
-        // --- UI RENDERING ---
-        function renderFeed(posts) {
-            let h = "";
-            if(!posts) return;
-            Object.keys(posts).reverse().forEach(k => {
-                const p = posts[k];
-                // Like count logic
-                onValue(ref(db, `likes/${k}`), (lSnap) => {
-                    const likesCount = lSnap.exists() ? Object.keys(lSnap.val()).length : 0;
-                    const isLiked = lSnap.exists() && lSnap.val()[auth.currentUser.uid];
-                    
-                    const postHTML = `
-                    <div class="post-card bg-white mb-6 border-b pb-4">
-                        <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="visitProfile('${p.uid}')">
-                            <img src="${p.uPhoto || 'https://via.placeholder.com/100'}" class="w-10 h-10 rounded-full border-2 border-orange-100 object-cover shadow-sm">
-                            <div class="leading-none"><b class="text-sm raj-title tracking-tight italic">${p.uName}</b><br><span class="text-[10px] text-gray-400 font-bold tracking-widest">@${p.uHandle || 'user'}</span></div>
-                        </div>
-                        
-                        <div class="relative bg-black flex items-center justify-center min-h-[300px] max-h-[550px] overflow-hidden">
-                            ${p.type==='video' ? `<video src="${p.url}" controls class="w-full max-h-[550px]"></video>` : `<img src="${p.url}" class="w-full max-h-[550px] object-contain">`}
-                        </div>
-
-                        <div class="p-4">
-                            <div class="flex gap-6 mb-2">
-                                <button onclick="toggleLike('${k}')" class="social-btn flex items-center gap-1">
-                                    <i class="${isLiked ? 'fa-solid fa-heart text-red-500 animate-pulse' : 'fa-regular fa-heart'} text-2xl"></i>
-                                    <span class="text-xs font-black">${likesCount}</span>
-                                </button>
-                                <button onclick="openComments('${k}')" class="social-btn flex items-center gap-1">
-                                    <i class="fa-regular fa-comment text-2xl"></i>
-                                </button>
-                                <i class="fa-regular fa-paper-plane text-2xl ml-auto"></i>
-                            </div>
-                            <div class="text-sm">
-                                <p><b class="text-xs">@${p.uHandle}</b> <span class="text-gray-600">${p.caption || ''}</span></p>
-                            </div>
-                        </div>
-                    </div>`;
-                    // Manual dynamic update for likes without refreshing whole feed
-                    const existingPost = document.getElementById(`post-${k}`);
-                    if(existingPost) {
-                        existingPost.outerHTML = `<div id="post-${k}">${postHTML}</div>`;
-                    } else {
-                        h += `<div id="post-${k}">${postHTML}</div>`;
-                    }
-                });
-            });
-            document.getElementById('v-feed').innerHTML = h;
-        }
-
-        // --- Core Functions for Modals & Pages ---
-        window.showApp = () => {
-            document.getElementById('app').classList.remove('hide');
-            onValue(ref(db, 'posts'), s => renderFeed(s.val()));
-            // Setup personal info
-            document.getElementById('u-prof-img').src = currentUserData.photo || 'https://via.placeholder.com/100';
-            document.querySelectorAll('.u-name-display').forEach(el => el.innerText = currentUserData.name);
+        window.publish = async (mode) => {
+            const file = document.getElementById(mode + '-file').files[0];
+            const btn = document.getElementById('btn-' + mode);
+            if(!file) return alert("Hukum, file chunye!");
+            btn.disabled = true; btn.innerText = "⏳ Uploading...";
+            
+            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', UPLOAD_PRESET);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:"POST", body:fd});
+            const d = await res.json();
+            
+            const item = {
+                uid: auth.currentUser.uid,
+                uName: currentUserData.name,
+                uHandle: currentUserData.username,
+                uPhoto: currentUserData.photo,
+                url: d.secure_url,
+                type: file.type.includes('video') ? 'video' : 'image',
+                time: Date.now(),
+                caption: document.getElementById(mode + '-desc').value
+            };
+            await push(ref(db, 'posts'), item);
+            closeM(mode + '-modal');
+            btn.disabled = false; btn.innerText = "PUBLISH POST";
         };
-        
+
+        window.showPage = (p) => {
+            ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
+            document.getElementById('v-'+p).classList.remove('hide');
+        };
         window.openM = (id) => document.getElementById(id).classList.remove('hide');
         window.closeM = (id) => document.getElementById(id).classList.add('hide');
-        window.showPage = (p) => { ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide')); document.getElementById('v-'+p).classList.remove('hide'); };
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@300;400;700;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fdfdfd; color: #1a1a1a; }
+        @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;700;900&display=swap');
+        body { font-family: 'Montserrat', sans-serif; background: #fff; }
         .hide { display: none !important; }
         .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 15px; padding: 14px; width: 100%; transition: 0.3s; }
-        .btn-royal:active { transform: scale(0.95); opacity: 0.8; }
-        input, textarea { background: #f8f8f8 !important; border: 1px solid #eee !important; padding: 12px; border-radius: 12px; margin-bottom: 10px; width: 100%; outline: none; }
-        .nav-icon { font-size: 1.4rem; color: #ccc; cursor: pointer; transition: 0.3s; }
-        .nav-icon:active { color: #ea580c; transform: translateY(-3px); }
-        .post-card { box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-        .social-btn:active { transform: scale(1.2); transition: 0.1s; }
+        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 14px; width: 100%; }
+        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; margin-bottom: 8px; width: 100%; outline: none; font-size: 13px; background: #fcfcfc; }
+        .nav-icon { font-size: 1.4rem; color: #d1d5db; cursor: pointer; }
     </style>
 </head>
-<body class="flex justify-center">
+<body class="flex justify-center bg-gray-50">
 
-    <div id="auth-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide">
-        <h1 class="text-6xl font-black raj-title text-center mb-2 italic tracking-tighter">SainiWalaa</h1>
-        <p class="text-[10px] text-center font-bold tracking-[8px] text-orange-600 mb-16 uppercase opacity-50">Royal Digital Studio</p>
+    <div id="auth-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide bg-white">
+        <h1 class="text-5xl font-black raj-title text-center italic tracking-tighter mb-12">SainiWalaa</h1>
         <input type="email" id="auth-email" placeholder="Email Address">
         <input type="password" id="auth-pass" placeholder="Password (Min 6)">
-        <button onclick="handleAuth('login')" class="btn-royal mb-4 shadow-lg shadow-orange-100">ENTER STUDIO</button>
-        <button onclick="handleAuth('signup')" class="text-xs font-bold text-gray-400 tracking-widest">CREATE NEW ACCOUNT</button>
+        <button onclick="handleAuth('login')" class="btn-royal mb-4 shadow-xl">STUDIO LOGIN</button>
+        <button onclick="handleAuth('signup')" class="text-xs font-bold text-gray-400 text-center uppercase tracking-widest">Register New Account</button>
     </div>
 
-    <div id="reg-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide text-center">
+    <div id="reg-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide text-center bg-white">
         <h2 class="text-2xl font-black raj-title mb-8 uppercase italic">Swaagat Hai Sa!</h2>
-        <input type="text" id="reg-name" placeholder="Full Name">
-        <div class="relative"><span class="absolute left-4 top-3.5 text-orange-600 font-bold text-sm">@</span><input type="text" id="reg-username" placeholder="unique_id" class="!pl-10"></div>
-        <button id="btn-reg" onclick="registerUser()" class="btn-royal mt-6">CLAIM YOUR ROYAL ID 🚩</button>
+        <input type="text" id="reg-name" placeholder="Aapka Naam">
+        <div class="relative"><span class="absolute left-4 top-3.5 text-orange-600 font-bold">@</span><input type="text" id="reg-username" placeholder="unique_id" class="!pl-10"></div>
+        <button id="btn-reg" onclick="registerUser()" class="btn-royal mt-4 shadow-xl">START ROYAL JOURNEY 🚩</button>
     </div>
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-24 hide">
-        <header class="sticky top-0 bg-white/80 backdrop-blur-xl border-b p-4 flex justify-between items-center z-[100]">
+    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-20 hide bg-white shadow-2xl">
+        <header class="sticky top-0 bg-white/90 backdrop-blur-lg border-b p-4 flex justify-between items-center z-50">
             <h1 class="text-2xl font-black raj-title italic tracking-tighter">SAINIWALAA</h1>
             <div class="flex gap-5">
-                <i class="fa-solid fa-square-plus nav-icon text-orange-600" onclick="openM('post-modal')"></i>
-                <i class="fa-solid fa-bag-shopping nav-icon" onclick="showPage('shop')"></i>
+                <i class="fa-solid fa-square-plus text-orange-600 text-2xl" onclick="openM('post-modal')"></i>
             </div>
         </header>
 
-        <main id="v-feed" class="animate-fade-in"></main>
+        <main id="v-feed" class="pb-10"></main>
 
-        <main id="v-profile" class="hide">
-            <div id="u-banner-img" class="h-40 bg-gray-100 bg-cover bg-center relative">
-                <img id="u-prof-img" src="" class="w-24 h-24 rounded-full absolute -bottom-10 left-6 border-4 border-white object-cover bg-white shadow-2xl">
-            </div>
-            <div class="mt-14 p-6">
-                <h2 class="text-3xl font-black u-name-display uppercase raj-title tracking-tighter italic leading-none"></h2>
-                <p id="u-handle-display" class="text-orange-600 font-black text-xs mt-1 tracking-widest uppercase"></p>
-                <div class="flex gap-3 mt-6">
-                    <button onclick="openM('edit-profile-modal')" class="bg-black text-white px-8 py-2.5 rounded-full text-[10px] font-black tracking-widest uppercase">Edit Profile</button>
-                    <button onclick="signOut(auth).then(()=>location.reload())" class="bg-red-50 text-red-600 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest">Logout</button>
-                </div>
-            </div>
-            <div id="profile-grid" class="grid grid-cols-3 gap-1 mt-4 p-1"></div>
+        <main id="v-shop" class="hide p-4">
+            <p class="text-center py-20 opacity-40">Bazaar is coming soon...</p>
         </main>
 
-        <div id="comment-modal" class="fixed inset-0 bg-black/60 z-[1000] hide backdrop-blur-sm flex items-end">
-            <div class="bg-white w-full max-w-[450px] h-[70vh] rounded-t-[30px] p-6 flex flex-col shadow-2xl">
+        <main id="v-profile" class="hide">
+            <div class="h-32 bg-gray-200 bg-cover bg-center relative" id="u-banner-img">
+                <img id="u-prof-img" src="" class="w-20 h-20 rounded-full absolute -bottom-10 left-6 border-4 border-white object-cover shadow-xl">
+            </div>
+            <div class="mt-12 p-6">
+                <h2 class="text-2xl font-black u-name-display uppercase raj-title italic leading-none"></h2>
+                <button onclick="signOut(auth).then(()=>location.reload())" class="mt-4 bg-red-50 text-red-600 px-6 py-2 rounded-full text-[10px] font-black uppercase">Logout</button>
+            </div>
+            <div id="profile-grid" class="grid grid-cols-3 gap-0.5 mt-4"></div>
+        </main>
+
+        <div id="comment-modal" class="fixed inset-0 bg-black/50 z-[1000] hide flex items-end">
+            <div class="bg-white w-full max-w-[450px] h-[60vh] rounded-t-[30px] p-6 flex flex-col">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" onclick="closeM('comment-modal')"></div>
-                <h3 class="text-center font-black text-xs uppercase tracking-[5px] mb-6 text-gray-400">Royal Comments</h3>
+                <h3 class="text-center font-black text-gray-400 text-[10px] uppercase tracking-widest mb-4">Royal Comments</h3>
                 <div id="comment-list" class="flex-1 overflow-y-auto px-2"></div>
                 <div class="mt-4 flex gap-2 border-t pt-4">
                     <input type="text" id="comm-input" placeholder="Yahan likhein sa..." class="!mb-0 !rounded-full text-xs">
-                    <button onclick="postComment()" class="bg-orange-600 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
+                    <button onclick="sendComment()" class="bg-orange-600 text-white w-12 h-12 rounded-full flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
 
-        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white/90 backdrop-blur-lg border-t p-5 flex justify-around z-[100]">
+        <div id="post-modal" class="fixed inset-0 bg-white z-[600] hide p-8 flex flex-col justify-center">
+            <h2 class="text-3xl font-black raj-title mb-8 text-center italic">NEW POST</h2>
+            <input type="file" id="post-file" accept="image/*,video/*">
+            <textarea id="post-desc" placeholder="Caption likhein..." class="h-32"></textarea>
+            <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH 🚩</button>
+            <button onclick="closeM('post-modal')" class="mt-4 text-xs font-bold text-gray-400">Peeche Jayein</button>
+        </div>
+
+        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around z-50">
             <i onclick="showPage('feed')" class="fa-solid fa-house nav-icon"></i>
             <i onclick="showPage('shop')" class="fa-solid fa-shop nav-icon"></i>
-            <i onclick="showPage('profile')" class="fa-solid fa-user-ninja nav-icon"></i>
+            <i onclick="showPage('profile')" class="fa-solid fa-circle-user nav-icon"></i>
         </nav>
-
-        <div id="post-modal" class="fixed inset-0 bg-white z-[500] hide p-8 pt-16">
-            <h2 class="text-3xl font-black raj-title mb-10 text-center italic tracking-tighter">NEW CREATION</h2>
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Media File</label>
-                    <input type="file" id="post-file" accept="video/*,image/*">
-                </div>
-                <textarea id="post-desc" placeholder="Write caption or description... (Royal Look)" class="h-32"></textarea>
-                <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH TO FEED 🚩</button>
-                <button onclick="closeM('post-modal')" class="w-full text-xs font-bold text-gray-300 uppercase tracking-widest mt-4">Peeche Jayein</button>
-            </div>
-        </div>
     </div>
 </body>
 </html>
