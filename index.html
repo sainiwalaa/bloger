@@ -3,97 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SainiWalaa - Royal Multi-User Studio</title>
+    <title>SainiWalaa - Royal Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --s: #FF9933; }
-        body { background: #fafafa; font-family: -apple-system, sans-serif; }
+        :root { --royal: #991b1b; --gold: #FF9933; --bg: #fffcf5; }
+        body { background: var(--bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .hide { display: none !important; }
-        .active-nav { color: var(--s) !important; border-bottom: 2px solid var(--s); }
+        .active-nav { color: var(--gold) !important; transform: scale(1.2); }
+        .royal-card { border: 1px solid #eee; background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .insta-border { border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #f093fb, #f5576c) border-box; }
-        input, textarea { border: 1px solid #ddd !important; padding: 12px; border-radius: 12px; width: 100%; outline: none; margin-bottom: 10px; }
+        .btn-royal { background: linear-gradient(45deg, #991b1b, #FF9933); color: white; font-weight: 800; border-radius: 12px; padding: 12px; }
+        input, textarea { border: 1.5px solid #ffe4cc !important; padding: 12px; border-radius: 15px; width: 100%; outline: none; margin-bottom: 12px; background: #fffaf5; }
+        header h1 { letter-spacing: -1px; text-shadow: 1px 1px 0px #fff; }
     </style>
 </head>
 <body class="flex justify-center">
 
-<div id="login-screen" class="w-full max-w-[450px] min-h-screen bg-white flex flex-col items-center justify-center p-8 hide">
-    <h1 class="text-4xl font-black italic text-orange-700 mb-8">SainiWalaa</h1>
-    <input type="number" id="login-phone" placeholder="Mobile Number">
-    <input type="text" id="login-name" placeholder="Aapko Naam">
-    <button onclick="userLogin()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold shadow-lg">PADAARO (JOIN)</button>
+<div id="login-screen" class="w-full max-w-[450px] min-h-screen flex flex-col items-center justify-center p-8 hide">
+    <div class="text-center mb-10">
+        <h1 class="text-5xl font-black italic text-red-800">SainiWalaa</h1>
+        <p class="text-orange-600 font-bold mt-2">🚩 KHAMA GHANI HUKUM 🚩</p>
+    </div>
+    <div class="w-full royal-card p-6">
+        <input type="number" id="login-phone" placeholder="Aapko Mobile Number">
+        <input type="text" id="login-name" placeholder="Aapko Shubh Naam">
+        <button onclick="userLogin()" class="w-full btn-royal shadow-xl mt-4 uppercase">Studio Mein Padharo</button>
+    </div>
 </div>
 
-<div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20 hide">
+<div id="app" class="w-full max-w-[450px] min-h-screen shadow-2xl relative pb-24 hide bg-white">
     
-    <header class="sticky top-0 bg-white/95 backdrop-blur-md z-[100] border-b p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-black italic text-orange-700">SainiWalaa</h1>
-        <div class="flex gap-5 text-xl text-orange-800">
-            <i class="fa-solid fa-camera cursor-pointer" title="New Post" onclick="openM('post-modal')"></i>
-            <i class="fa-solid fa-cart-plus cursor-pointer" title="List Product" onclick="openM('prod-modal')"></i>
-            <i class="fa-solid fa-right-from-bracket text-red-500" onclick="logout()"></i>
+    <header class="sticky top-0 bg-white/90 backdrop-blur-md z-[100] border-b p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-black italic text-red-800">SainiWalaa</h1>
+        <div class="flex gap-5 text-xl text-orange-700">
+            <i class="fa-solid fa-camera cursor-pointer hover:scale-110 transition" onclick="openM('post-modal')"></i>
+            <i class="fa-solid fa-cart-plus cursor-pointer hover:scale-110 transition" onclick="openM('prod-modal')"></i>
+            <i class="fa-solid fa-power-off text-red-500 cursor-pointer" onclick="logout()"></i>
         </div>
     </header>
 
-    <main id="v-feed" class="space-y-4 pt-2"></main>
+    <main id="v-feed" class="space-y-6 pt-2 pb-10"></main>
 
-    <main id="v-shop" class="p-4 hide">
-        <h2 class="font-black text-orange-900 mb-4 uppercase italic">🚩 Royal Bazaar</h2>
+    <main id="v-shop" class="p-4 hide pb-10">
+        <h2 class="font-black text-red-900 mb-4 uppercase italic flex items-center gap-2">🚩 Royal Bazaar</h2>
         <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
     </main>
 
-    <main id="v-profile" class="hide">
-        <div class="p-6">
-            <div class="flex items-center gap-8 mb-4">
-                <div class="w-20 h-20 rounded-full insta-border p-1">
-                    <img id="u-avatar" src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
+    <main id="v-profile" class="hide pb-10">
+        <div class="p-6 bg-orange-50/50">
+            <div class="flex items-center gap-6 mb-4">
+                <div class="w-24 h-24 rounded-full insta-border p-1 shadow-lg">
+                    <img id="u-avatar" src="" class="rounded-full w-full h-full object-cover">
                 </div>
-                <div class="flex gap-4 text-center text-xs">
-                    <div><b id="c-posts">0</b><p class="text-gray-400">Posts</p></div>
-                    <div><b id="c-prods">0</b><p class="text-gray-400">Items</p></div>
+                <div class="flex gap-6 text-center">
+                    <div><b id="c-posts" class="text-lg">0</b><p class="text-[10px] text-gray-500 uppercase font-bold">Posts</p></div>
+                    <div><b id="c-prods" class="text-lg">0</b><p class="text-[10px] text-gray-500 uppercase font-bold">Maal</p></div>
                 </div>
             </div>
-            <h2 id="u-display-name" class="font-bold text-sm">User Name</h2>
-            <p id="u-display-bio" class="text-[11px] text-gray-500">Artist & Creator 🌸</p>
-            <button onclick="openM('edit-profile-modal')" class="w-full mt-4 bg-gray-100 py-2 rounded-lg font-bold text-xs border">Edit Profile</button>
+            <h2 id="u-display-name" class="font-black text-red-900 text-lg"></h2>
+            <p id="u-display-bio" class="text-xs text-orange-800 font-medium"></p>
+            <button onclick="openM('edit-profile-modal')" class="w-full mt-4 bg-white py-2 rounded-xl font-bold text-xs border-2 border-orange-100 text-orange-900">Edit Royal Profile</button>
         </div>
-        <div id="profile-grid" class="grid grid-cols-3 gap-1 px-1 border-t pt-2"></div>
+        <div id="profile-grid" class="grid grid-cols-3 gap-1 px-1 border-t-2 border-orange-50 pt-2"></div>
     </main>
 
-    <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-3 z-[100] shadow-2xl">
-        <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl active-nav cursor-pointer"></i>
-        <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300 cursor-pointer"></i>
-        <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300 cursor-pointer"></i>
+    <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around z-[100] shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl active-nav cursor-pointer transition"></i>
+        <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300 cursor-pointer transition"></i>
+        <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300 cursor-pointer transition"></i>
     </nav>
 </div>
 
 <div id="post-modal" class="fixed inset-0 bg-white z-[2000] hide p-8">
-    <h2 class="text-xl font-bold mb-4">Create Post 📸</h2>
+    <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black text-red-800 italic">Naya Post</h2><i class="fa-solid fa-xmark" onclick="closeM('post-modal')"></i></div>
     <input type="file" id="post-file" accept="image/*">
-    <textarea id="post-cap" placeholder="Write something royal..." class="h-24"></textarea>
-    <button onclick="publish('post')" id="btn-post" class="w-full bg-orange-600 text-white p-4 rounded-xl font-bold">POST NOW</button>
-    <button onclick="closeM('post-modal')" class="w-full text-gray-400 mt-4 text-sm">Back</button>
+    <textarea id="post-cap" placeholder="Aapki post ka caption..." class="h-32"></textarea>
+    <button onclick="publish('post')" id="btn-post" class="w-full btn-royal shadow-lg">PUBLISH POST</button>
 </div>
 
 <div id="prod-modal" class="fixed inset-0 bg-white z-[2000] hide p-8 overflow-y-auto">
-    <h2 class="text-xl font-bold mb-4">List Product 🛍️</h2>
+    <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black text-red-800 italic">Add Product</h2><i class="fa-solid fa-xmark" onclick="closeM('prod-modal')"></i></div>
     <input type="file" id="prod-file" accept="image/*">
     <input type="text" id="prod-name" placeholder="Product Name">
     <input type="number" id="prod-price" placeholder="Price (₹)">
-    <input type="text" id="prod-link" placeholder="External Web Link (URL)">
-    <textarea id="prod-desc" placeholder="Product Description..." class="h-20"></textarea>
-    <button onclick="publish('prod')" id="btn-prod" class="w-full bg-black text-white p-4 rounded-xl font-bold">LIST IN BAZAAR</button>
-    <button onclick="closeM('prod-modal')" class="w-full text-gray-400 mt-4 text-sm">Back</button>
+    <input type="text" id="prod-link" placeholder="Buy Link (Web URL)">
+    <textarea id="prod-desc" placeholder="Product details..." class="h-24"></textarea>
+    <button onclick="publish('prod')" id="btn-prod" class="w-full btn-royal shadow-lg">LIST IN BAZAAR</button>
 </div>
 
 <div id="edit-profile-modal" class="fixed inset-0 bg-white z-[2000] hide p-8">
-    <h2 class="text-xl font-bold mb-4">Edit Studio Profile</h2>
-    <p class="text-[10px] text-gray-400 mb-2">Profile Image (Paste URL):</p>
-    <input type="text" id="edit-pic" placeholder="Image URL (Cloudinary link)">
-    <input type="text" id="edit-name" placeholder="Full Name">
-    <textarea id="edit-bio" placeholder="Your Bio..." class="h-20"></textarea>
-    <button onclick="saveProfile()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold">SAVE PROFILE</button>
-    <button onclick="closeM('edit-profile-modal')" class="w-full text-gray-400 mt-4 text-sm">Cancel</button>
+    <h2 class="text-2xl font-black text-red-800 mb-6 italic">Edit Studio</h2>
+    <input type="text" id="edit-pic" placeholder="Profile Image URL">
+    <input type="text" id="edit-name" placeholder="Studio Name">
+    <textarea id="edit-bio" placeholder="Bio..." class="h-24"></textarea>
+    <button onclick="saveProfile()" class="w-full btn-royal">SAVE CHANGES</button>
+    <button onclick="closeM('edit-profile-modal')" class="w-full mt-4 text-gray-400">Cancel</button>
 </div>
 
 <script>
@@ -101,14 +106,13 @@
     const CLOUD_NAME = "dprl2lyih"; 
     const UPLOAD_PRESET = "sainiwalaa_preset"; 
 
-    // SESSION
     function userLogin() {
         const ph = document.getElementById('login-phone').value;
         const nm = document.getElementById('login-name').value;
         if(ph.length < 10 || !nm) return alert("Pura data bhariye hukum!");
         localStorage.setItem('s_uid', ph);
         localStorage.setItem('s_name', nm);
-        localStorage.setItem('s_bio', "SainiWalaa Artist 🚩");
+        localStorage.setItem('s_bio', "Royal Artist 🚩");
         localStorage.setItem('s_pic', "https://via.placeholder.com/150");
         location.reload();
     }
@@ -118,7 +122,6 @@
         else { document.getElementById('app').classList.remove('hide'); init(); }
     }
 
-    // PROFILE LOAD
     function init() {
         document.getElementById('u-display-name').innerText = localStorage.getItem('s_name');
         document.getElementById('u-display-bio').innerText = localStorage.getItem('s_bio');
@@ -136,59 +139,69 @@
         init(); closeM('edit-profile-modal');
     }
 
-    // SYNC DATA
     async function syncData() {
         try {
             const res = await fetch(API + "?action=getData");
             const data = await res.json();
             window.SAINI_DATA = data;
             renderAll();
-        } catch(e) { console.log("Sync..."); }
+        } catch(e) { console.log("Syncing..."); }
     }
 
     function renderAll() {
         const uid = localStorage.getItem('s_uid');
         
-        // FEED
+        // FEED (RAJSTHANI CARDS)
         let feedH = "";
         window.SAINI_DATA.posts.slice().reverse().forEach(p => {
-            feedH += `<div class="border-b bg-white"><div class="p-3 flex items-center gap-2 font-bold text-xs"><div class="w-6 h-6 bg-orange-100 rounded-full"></div>${p[1]}</div><img src="${p[2]}" class="w-full h-[380px] object-cover"><div class="p-4 text-sm"><b>${p[1]}</b> ${p[4]}</div></div>`;
+            feedH += `
+            <div class="bg-white border-b-8 border-orange-50">
+                <div class="p-4 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-tr from-orange-400 to-red-600 rounded-full"></div>
+                    <b class="text-sm text-red-900">${p[1] == uid ? 'Me (You)' : 'Creator '+p[1]}</b>
+                </div>
+                <img src="${p[2]}" class="w-full max-h-[450px] object-cover border-y border-orange-50">
+                <div class="p-4">
+                    <div class="flex gap-4 mb-2 text-xl text-orange-700"><i class="fa-regular fa-heart"></i><i class="fa-regular fa-comment"></i></div>
+                    <p class="text-sm"><b>${p[1]}</b> ${p[4]}</p>
+                </div>
+            </div>`;
         });
-        document.getElementById('v-feed').innerHTML = feedH || "<p class='text-center py-20'>No posts</p>";
+        document.getElementById('v-feed').innerHTML = feedH || "<p class='text-center py-20 text-gray-400'>No posts yet hukum!</p>";
 
-        // SHOP (Full Data)
+        // SHOP (FIXED DATA)
         let shopH = "";
         window.SAINI_DATA.products.slice().reverse().forEach(p => {
-            shopH += `<div class="bg-white border rounded-2xl overflow-hidden shadow-sm">
-                <img src="${p[6]}" class="w-full h-32 object-cover">
-                <div class="p-2 text-center">
-                    <div class="text-[11px] font-bold truncate">${p[2]}</div>
-                    <div class="text-orange-600 font-black text-sm">₹${p[3]}</div>
-                    <button onclick="window.open('${p[5]}','_blank')" class="w-full bg-black text-white text-[9px] mt-1 py-1.5 rounded-lg">BUY NOW</button>
+            shopH += `
+            <div class="royal-card overflow-hidden">
+                <img src="${p[6]}" class="w-full h-36 object-cover">
+                <div class="p-3">
+                    <div class="text-[11px] font-black text-red-900 truncate uppercase">${p[2]}</div>
+                    <div class="text-orange-600 font-black text-sm mb-2">₹${p[3]}</div>
+                    <button onclick="window.open('${p[5]}','_blank')" class="w-full bg-red-800 text-white text-[10px] py-2 rounded-lg font-bold">BUY NOW</button>
                 </div>
             </div>`;
         });
         document.getElementById('bazaar-grid').innerHTML = shopH || "<p class='col-span-2 text-center py-10'>Bazaar Khali Hai</p>";
 
-        // MY PROFILE
+        // PROFILE
         let myPosts = window.SAINI_DATA.posts.filter(p => p[1] == uid);
         let myProds = window.SAINI_DATA.products.filter(p => p[1] == uid);
         document.getElementById('c-posts').innerText = myPosts.length;
         document.getElementById('c-prods').innerText = myProds.length;
-
         let profH = "";
-        myPosts.forEach(p => profH += `<img src="${p[2]}" class="aspect-square object-cover">`);
+        myPosts.forEach(p => profH += `<img src="${p[2]}" class="aspect-square object-cover border border-white">`);
         document.getElementById('profile-grid').innerHTML = profH;
     }
 
-    // PUBLISH (With all Fields)
     async function publish(mode) {
         const uid = localStorage.getItem('s_uid');
-        const file = document.getElementById(mode === 'post' ? 'post-file' : 'prod-file').files[0];
+        const fileInput = document.getElementById(mode === 'post' ? 'post-file' : 'prod-file');
+        const file = fileInput.files[0];
         const btn = document.getElementById(mode === 'post' ? 'btn-post' : 'btn-prod');
 
-        if(!file) return alert("Hukum! Photo chunna zaroori hai.");
-        btn.disabled = true; btn.innerText = "Processing... ⏳";
+        if(!file) return alert("Photo bhariye hukum!");
+        btn.disabled = true; btn.innerText = "Sourcing... ⏳";
 
         try {
             const formData = new FormData();
@@ -203,24 +216,23 @@
                 name: document.getElementById('prod-name')?.value || "",
                 price: document.getElementById('prod-price')?.value || 0,
                 desc: document.getElementById('prod-desc')?.value || "",
-                weblink: document.getElementById('prod-link')?.value || "",
+                weblink: document.getElementById('prod-link')?.value || "#",
                 img: cData.secure_url,
                 url: cData.secure_url,
                 cap: document.getElementById('post-cap')?.value || ""
             };
 
             fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-            alert("Mubarak ho! Publish ho gaya.");
+            alert("Mubarak! Data Sheet mein chala gaya.");
             location.reload();
         } catch(e) { alert("Error!"); btn.disabled = false; }
     }
 
-    // HELPERS
     function showPage(p) {
         ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
-        ['n-feed','n-shop','n-profile'].forEach(n => document.getElementById(n).classList.remove('active-nav'));
+        ['n-feed','n-shop','n-profile'].forEach(n => document.getElementById(n).classList.replace('active-nav', 'text-gray-300'));
         document.getElementById('v-'+p).classList.remove('hide');
-        document.getElementById('n-'+p).classList.add('active-nav');
+        document.getElementById('n-'+p).classList.replace('text-gray-300', 'active-nav');
     }
     function openM(id) { document.getElementById(id).classList.remove('hide'); }
     function closeM(id) { document.getElementById(id).classList.add('hide'); }
