@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>SainiWalaa - Royal Social Bazaar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, get, push, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, update, get, push, onValue, query, orderByChild, equalTo, serverTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -27,219 +27,240 @@
         const db = getDatabase(app);
 
         let myData = null;
-        let activeViewUid = null;
+        let activeProfileUid = null;
 
-        // --- AUTH & REFRESH LOGIC ---
+        // --- AUTH & STATUS SYSTEM ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const snap = await get(ref(db, `users/${user.uid}`));
+                const userRef = ref(db, `users/${user.uid}`);
+                const snap = await get(userRef);
                 myData = snap.val();
+                
+                // Online Status Logic
+                const statusRef = ref(db, `status/${user.uid}`);
+                set(statusRef, { state: 'online', last_changed: serverTimestamp() });
+                onDisconnect(statusRef).set({ state: 'offline', last_changed: serverTimestamp() });
+
                 document.getElementById('auth-screen').classList.add('hide');
                 document.getElementById('main-app').classList.remove('hide');
-                initFeed();
-                goTab(localStorage.getItem('active_tab') || 'feed');
+                loadFeed();
+                goTab(localStorage.getItem('last_tab') || 'feed');
             } else {
                 document.getElementById('auth-screen').classList.remove('hide');
                 document.getElementById('main-app').classList.add('hide');
             }
         });
 
-        // --- REGISTER WITH UNIQUE ID ---
-        window.register = async () => {
-            const name = document.getElementById('r-name').value;
-            const uid = document.getElementById('r-id').value.toLowerCase().trim();
-            const email = document.getElementById('r-email').value;
-            const pass = document.getElementById('r-pass').value;
+        // --- REGISTRATION (Unique ID Check) ---
+        window.registerUser = async () => {
+            const uid = document.getElementById('reg-id').value.toLowerCase().trim();
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
 
-            if(!uid || !email) return alert("Hukum, poori jankari bharo!");
             const q = query(ref(db, 'users'), orderByChild('username'), equalTo(uid));
             const snap = await get(q);
-            if(snap.exists()) return alert("Maafi! Ye ID pehle se hai.");
+            if(snap.exists()) return alert("Hukum, ye ID pehle se book hai!");
 
             try {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
                 await set(ref(db, `users/${res.user.uid}`), {
-                    uid: res.user.uid, name: name, username: uid, bio: "SainiWalaa Royal Member 🚩",
-                    photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-                    banner: "https://images.unsplash.com/photo-1579546123315-b06dd26749c0"
+                    uid: res.user.uid, username: uid, name: uid.toUpperCase(),
+                    photo: 'https://i.pravatar.cc/150?u='+uid, banner: 'https://source.unsplash.com/random/900x600?rajasthan',
+                    bio: 'Kshatriya Pride 🚩 SainiWalaa Member', followers: 0, following: 0
                 });
-                alert("Ghani Khamma! Tharo swagat hai.");
+                alert("Ghani Khamma! Tharo Swagat hai.");
             } catch(e) { alert(e.message); }
         };
 
-        // --- CORE FUNCTIONS ---
-        function initFeed() {
+        // --- FEED SYSTEM (Image + Video) ---
+        function loadFeed() {
             onValue(ref(db, 'posts'), s => {
-                const box = document.getElementById('feed-list'); box.innerHTML = "";
+                const feed = document.getElementById('feed-container'); feed.innerHTML = "";
                 if(s.exists()) Object.entries(s.val()).reverse().forEach(([pid, p]) => {
-                    box.innerHTML += `
-                        <div class="bg-white mb-4 border-b pb-3">
-                            <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="openStudio('${p.uid}')">
-                                <img src="${p.uPhoto}" class="w-9 h-9 border border-orange-600 chokor">
-                                <div><b class="text-xs raj-title">${p.uName}</b><p class="text-[9px] text-gray-400 font-bold">@${p.uHandle}</p></div>
+                    const isVideo = p.url.includes('.mp4') || p.type === 'video';
+                    feed.innerHTML += `
+                        <div class="bg-white mb-6 border-b pb-4">
+                            <div class="p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-3 cursor-pointer" onclick="visitProfile('${p.uid}')">
+                                    <div class="relative">
+                                        <img src="${p.uPhoto}" class="w-10 h-10 rounded-full border-2 border-orange-500">
+                                        <span id="dot-${p.uid}" class="absolute bottom-0 right-0 w-3 h-3 bg-gray-400 border-2 border-white rounded-full"></span>
+                                    </div>
+                                    <b class="text-sm raj-title">@${p.uHandle}</b>
+                                </div>
+                                <i class="fa-solid fa-ellipsis-vertical text-gray-400"></i>
                             </div>
-                            <img src="${p.url}" class="w-full bg-gray-50" loading="lazy">
-                            <div class="p-4 flex gap-6 text-xl">
-                                <i class="fa-regular fa-heart" onclick="alert('Like ho gayo!')"></i>
-                                <i class="fa-regular fa-comment" onclick="alert('Comment box jaldi aave!')"></i>
-                                <i class="fa-solid fa-share-nodes" onclick="alert('Link copy ho gayo!')"></i>
+                            <div class="relative min-h-[300px] bg-black flex items-center">
+                                ${isVideo ? `<video src="${p.url}" class="w-full" loop muted onclick="this.paused?this.play():this.pause()"></video>` : `<img src="${p.url}" class="w-full">`}
                             </div>
-                            <p class="px-4 text-xs"><b>${p.uHandle}</b> ${p.caption}</p>
+                            <div class="p-4 flex gap-5 text-2xl">
+                                <i class="fa-regular fa-heart cursor-pointer hover:text-red-500" onclick="likePost('${pid}')"></i>
+                                <i class="fa-regular fa-comment cursor-pointer" onclick="openComments('${pid}')"></i>
+                                <i class="fa-regular fa-paper-plane cursor-pointer"></i>
+                            </div>
+                            <div class="px-4 text-xs">
+                                <p class="font-bold mb-1">${p.likes || 0} Likes</p>
+                                <p><b>${p.uHandle}</b> ${p.caption}</p>
+                                <p class="text-gray-400 mt-2 text-[10px]">View all comments...</p>
+                            </div>
                         </div>`;
+                    updateOnlineStatus(p.uid);
                 });
             });
         }
 
-        window.openStudio = async (uid) => {
-            activeViewUid = uid;
+        // --- PROFILE & SHOP LOGIC ---
+        window.visitProfile = async (uid) => {
+            activeProfileUid = uid;
             goTab('profile');
             const snap = await get(ref(db, `users/${uid}`));
             const d = snap.val();
             
-            document.getElementById('prof-name').innerText = d.name;
-            document.getElementById('prof-id').innerText = "@" + d.username;
-            document.getElementById('prof-bio').innerText = d.bio;
-            document.getElementById('prof-img').src = d.photo;
-            document.getElementById('prof-banner').src = d.banner;
-
+            document.getElementById('p-name').innerText = d.name;
+            document.getElementById('p-handle').innerText = "@" + d.username;
+            document.getElementById('p-bio').innerText = d.bio;
+            document.getElementById('p-img').src = d.photo;
+            document.getElementById('p-banner').style.backgroundImage = `url('${d.banner}')`;
+            
             const isMe = uid === auth.currentUser.uid;
-            document.getElementById('self-btns').style.display = isMe ? 'flex' : 'none';
-            document.getElementById('visit-btns').style.display = isMe ? 'none' : 'flex';
+            document.getElementById('p-edit-btn').style.display = isMe ? 'block' : 'none';
+            document.getElementById('p-follow-btn').style.display = isMe ? 'none' : 'block';
 
-            loadUserItems(uid);
+            loadProfileContent(uid);
         };
 
-        function loadUserItems(uid) {
-            const pGrid = document.getElementById('grid-posts'); pGrid.innerHTML = "";
-            const sGrid = document.getElementById('grid-shop'); sGrid.innerHTML = "";
+        function loadProfileContent(uid) {
+            const grid = document.getElementById('profile-grid'); grid.innerHTML = "";
+            const shop = document.getElementById('shop-grid'); shop.innerHTML = "";
 
-            get(ref(db, 'posts')).then(s => {
+            onValue(ref(db, 'products'), s => {
                 if(s.exists()) Object.values(s.val()).forEach(p => {
-                    if(p.uid === uid) pGrid.innerHTML += `<img src="${p.url}" class="w-full aspect-square object-cover border">`;
-                });
-            });
-
-            get(ref(db, 'products')).then(s => {
-                if(s.exists()) Object.values(s.val()).forEach(p => {
-                    if(p.ownerUid === uid) sGrid.innerHTML += `
-                        <div class="bg-white border p-2 chokor shadow-sm">
-                            <img src="${p.url}" class="w-full h-28 object-cover mb-2">
-                            <b class="text-[10px] block truncate">${p.name}</b>
-                            <p class="text-orange-600 font-bold text-xs">₹${p.price}</p>
-                            <button onclick="orderForm('${p.name}', '${uid}')" class="w-full bg-black text-white text-[9px] py-2 mt-2 font-bold">BUY NOW</button>
+                    if(p.ownerUid === uid) shop.innerHTML += `
+                        <div class="bg-white p-2 border shadow-sm rounded-lg overflow-hidden">
+                            <img src="${p.url}" class="w-full h-32 object-cover">
+                            <div class="p-2">
+                                <b class="text-[10px] block truncate">${p.name}</b>
+                                <span class="text-orange-600 font-bold text-sm">₹${p.price}</span>
+                                <button onclick="buyProduct('${p.name}', '${p.price}', '${uid}')" class="w-full bg-black text-white text-[9px] py-2 mt-2 font-bold rounded">BUY NOW</button>
+                            </div>
                         </div>`;
                 });
             });
         }
 
-        window.orderForm = (pName, ownerUid) => {
-            const name = prompt("Hukum, aapno naam?");
-            const addr = prompt("Pooro Pato (Address)?");
-            if(name && addr) {
-                const msg = `New Order: ${pName}\nCustomer: ${name}\nAddress: ${addr}`;
-                push(ref(db, `orders/${ownerUid}`), { product: pName, customer: name, address: addr, date: new Date().toLocaleString() });
-                alert("Hukum, Tharo order bhej diyo!");
-                window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`);
+        window.buyProduct = (name, price, ownerUid) => {
+            const cust = prompt("Hukum, Apna Naam aur Pura Pata (Address) likho:");
+            if(cust) {
+                const orderData = { item: name, price: price, customer: cust, date: serverTimestamp() };
+                push(ref(db, `orders/${ownerUid}`), orderData);
+                alert("Hukum, Order bhej diyo! WhatsApp khul raha hai.");
+                window.open(`https://wa.me/91XXXXXXXXXX?text=New Order: ${name} (₹${price})\nDetails: ${cust}`);
             }
         };
 
-        window.addAnything = async (type) => {
-            const url = prompt("Image URL Daalo Hukum:");
-            const title = prompt(type === 'post' ? "Caption Likho:" : "Product Name & Price (e.g. Kurta - 999):");
-            if(!url || !title) return;
-
-            if(type === 'post') {
-                await push(ref(db, 'posts'), { uid: auth.currentUser.uid, uName: myData.name, uHandle: myData.username, uPhoto: myData.photo, url: url, caption: title });
-            } else {
-                const [n, p] = title.split('-');
-                await push(ref(db, 'products'), { ownerUid: auth.currentUser.uid, name: n, price: p || '0', url: url });
-            }
-            alert("Hukum, kaam ho gayo!");
-            location.reload();
-        };
+        // --- HELPERS ---
+        function updateOnlineStatus(uid) {
+            onValue(ref(db, `status/${uid}`), s => {
+                const el = document.getElementById(`dot-${uid}`);
+                if(el && s.exists()) el.className = `absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${s.val().state === 'online' ? 'bg-green-500' : 'bg-gray-400'}`;
+            });
+        }
 
         window.goTab = (id) => {
-            localStorage.setItem('active_tab', id);
+            localStorage.setItem('last_tab', id);
             document.querySelectorAll('main').forEach(m => m.classList.add('hide'));
-            document.getElementById(`tab-${id}`).classList.remove('hide');
-            if(id === 'profile' && !activeViewUid) openStudio(auth.currentUser.uid);
+            document.getElementById(`v-${id}`).classList.remove('hide');
+            if(id === 'profile' && !activeProfileUid) visitProfile(auth.currentUser.uid);
         };
 
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;700;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fff; }
+        body { font-family: 'Montserrat', sans-serif; background: #fafafa; }
         .hide { display: none !important; }
         .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
-        .chokor { border-radius: 0px !important; }
-        input { border: 1px solid #eee; padding: 12px; margin-bottom: 10px; width: 100%; border-radius: 4px; outline: none; }
-        .btn-royal { background: #000; color: #fff; padding: 14px; font-weight: 900; width: 100%; text-transform: uppercase; cursor: pointer; }
-        .nav-fixed { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 15px; z-index: 100; }
-        .tab-btn { flex: 1; text-align: center; padding: 12px; font-size: 10px; font-weight: 900; border-bottom: 2px solid transparent; cursor: pointer; }
-        .active-tab-btn { border-bottom-color: #ea580c; color: #ea580c; }
+        .royal-btn { background: #000; color: #fff; padding: 12px; font-weight: 900; border-radius: 6px; width: 100%; transition: 0.3s; }
+        .royal-btn:active { transform: scale(0.95); }
+        input { border: 1.5px solid #eee; padding: 12px; margin-bottom: 12px; width: 100%; border-radius: 8px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #ea580c; }
+        .nav-icon { font-size: 1.5rem; color: #333; cursor: pointer; }
     </style>
 </head>
 <body class="flex justify-center">
 
     <div id="main-app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20 hide">
         <header class="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-50">
-            <h1 class="text-xl font-black raj-title italic" onclick="location.reload()">SAINIWALAA</h1>
-            <div class="flex gap-4 text-orange-600">
-                <i class="fa-solid fa-square-plus text-2xl" onclick="addAnything('post')"></i>
-                <i class="fa-solid fa-bag-shopping text-xl" onclick="addAnything('prod')"></i>
+            <h1 class="text-2xl font-black raj-title italic tracking-tighter" onclick="location.reload()">SAINIWALAA</h1>
+            <div class="flex gap-5">
+                <i class="fa-regular fa-square-plus nav-icon text-orange-600" onclick="alert('Post tool aave hai...')"></i>
+                <i class="fa-regular fa-heart nav-icon"></i>
             </div>
         </header>
 
-        <main id="tab-feed"><div id="feed-list"></div></main>
-
-        <main id="tab-profile" class="hide">
-            <div class="h-40 bg-gray-100 relative">
-                <img id="prof-banner" class="w-full h-full object-cover">
-                <img id="prof-img" class="w-24 h-24 absolute -bottom-8 left-4 border-2 border-white chokor bg-white object-cover shadow-lg">
-            </div>
-            <div class="mt-10 p-5">
-                <div class="flex justify-between items-start">
-                    <div><h2 id="prof-name" class="text-xl font-black raj-title"></h2><p id="prof-id" class="text-[10px] text-gray-400 font-bold uppercase"></p></div>
-                    <div id="self-btns" class="flex gap-2">
-                        <button class="bg-gray-100 text-[10px] px-3 py-1 font-black">EDIT</button>
-                        <button onclick="signOut(getAuth())" class="bg-red-50 text-red-600 text-[10px] px-3 py-1 font-black">LOGOUT</button>
-                    </div>
-                    <div id="visit-btns" class="hide flex gap-2">
-                        <button class="bg-black text-white text-[10px] px-5 py-1 font-black">FOLLOW 🚩</button>
-                    </div>
-                </div>
-                <p id="prof-bio" class="text-[11px] mt-4 text-gray-500 italic leading-relaxed"></p>
-                <div class="mt-6 border-2 border-black p-3 text-center text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-black hover:text-white transition">Visit Website</div>
-            </div>
-
-            <div class="flex border-y bg-gray-50">
-                <div class="tab-btn active-tab-btn" id="btn-p" onclick="document.getElementById('grid-posts').classList.remove('hide'); document.getElementById('grid-shop').classList.add('hide'); this.classList.add('active-tab-btn'); document.getElementById('btn-s').classList.remove('active-tab-btn')">SOCIAL POSTS</div>
-                <div class="tab-btn" id="btn-s" onclick="document.getElementById('grid-posts').classList.add('hide'); document.getElementById('grid-shop').classList.remove('hide'); this.classList.add('active-tab-btn'); document.getElementById('btn-p').classList.remove('active-tab-btn')">ROYAL BAZAAR</div>
-            </div>
-            <div id="grid-posts" class="grid grid-cols-3 gap-0.5"></div>
-            <div id="grid-shop" class="grid grid-cols-2 gap-3 p-4 hide"></div>
+        <main id="v-feed">
+            <div id="feed-container"></div>
         </main>
 
-        <nav class="nav-fixed">
-            <i class="fa-solid fa-house text-gray-300" onclick="goTab('feed')"></i>
-            <i class="fa-solid fa-magnifying-glass text-gray-300" onclick="alert('Search jaldi aave...')"></i>
-            <i class="fa-solid fa-crown text-gray-300" onclick="goTab('profile')"></i>
+        <main id="v-profile" class="hide">
+            <div id="p-banner" class="h-44 bg-cover bg-center relative bg-gray-200">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <img id="p-img" class="w-24 h-24 absolute -bottom-10 left-6 rounded-full border-4 border-white shadow-xl bg-white object-cover">
+            </div>
+            <div class="mt-14 p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="p-name" class="text-2xl font-black raj-title leading-tight"></h2>
+                        <p id="p-handle" class="text-xs font-bold text-gray-400"></p>
+                    </div>
+                    <button id="p-edit-btn" class="bg-gray-100 px-6 py-2 rounded-lg font-bold text-[10px] uppercase">Edit Studio</button>
+                    <button id="p-follow-btn" class="bg-black text-white px-8 py-2 rounded-lg font-bold text-[10px] uppercase shadow-lg hide">Follow 🚩</button>
+                </div>
+                <p id="p-bio" class="text-xs mt-4 text-gray-600 leading-relaxed italic"></p>
+                <div class="flex gap-8 mt-6 border-y py-4 justify-center">
+                    <div class="text-center"><b class="block text-lg">12</b><span class="text-[9px] text-gray-400 font-bold uppercase">Posts</span></div>
+                    <div class="text-center"><b class="block text-lg">2.4k</b><span class="text-[9px] text-gray-400 font-bold uppercase">Followers</span></div>
+                    <div class="text-center"><b class="block text-lg">150</b><span class="text-[9px] text-gray-400 font-bold uppercase">Products</span></div>
+                </div>
+            </div>
+
+            <div class="flex border-b bg-gray-50/50">
+                <div class="flex-1 p-3 text-center border-b-2 border-orange-600 text-orange-600" onclick="document.getElementById('profile-grid').classList.remove('hide'); document.getElementById('shop-grid').classList.add('hide')">
+                    <i class="fa-solid fa-table-cells"></i>
+                </div>
+                <div class="flex-1 p-3 text-center" onclick="document.getElementById('profile-grid').classList.add('hide'); document.getElementById('shop-grid').classList.remove('hide')">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+            </div>
+            <div id="profile-grid" class="grid grid-cols-3 gap-0.5 p-0.5"></div>
+            <div id="shop-grid" class="grid grid-cols-2 gap-3 p-4 hide"></div>
+        </main>
+
+        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around py-4 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+            <i class="fa-solid fa-house nav-icon" onclick="goTab('feed')"></i>
+            <i class="fa-solid fa-magnifying-glass nav-icon"></i>
+            <i class="fa-solid fa-play nav-icon"></i>
+            <i class="fa-solid fa-crown nav-icon text-orange-600" onclick="goTab('profile')"></i>
         </nav>
     </div>
 
-    <div id="auth-screen" class="w-full max-w-[450px] min-h-screen p-10 flex flex-col justify-center hide text-center">
-        <h1 class="text-5xl font-black raj-title mb-10 italic">SAINIWALAA</h1>
+    <div id="auth-screen" class="w-full max-w-[450px] min-h-screen p-10 flex flex-col justify-center text-center hide">
+        <h1 class="text-5xl font-black raj-title mb-2 italic">SAINIWALAA</h1>
+        <p class="text-[9px] font-bold text-gray-400 tracking-[5px] uppercase mb-12">Royal Studio & Bazaar</p>
+        
         <div id="login-box">
-            <input type="email" id="l-email" placeholder="Email"><input type="password" id="l-pass" placeholder="Password">
-            <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('l-email').value, document.getElementById('l-pass').value)" class="btn-royal">LOGIN 🚩</button>
-            <p class="mt-6 text-xs text-gray-400" onclick="document.getElementById('login-box').classList.add('hide'); document.getElementById('reg-box').classList.remove('hide')">Naya ho? Registration Karo</p>
+            <input type="email" id="log-email" placeholder="Email">
+            <input type="password" id="log-pass" placeholder="Password">
+            <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('log-email').value, document.getElementById('log-pass').value)" class="royal-btn">Enter Studio 🚩</button>
+            <p class="mt-8 text-xs text-gray-400 cursor-pointer" onclick="document.getElementById('login-box').classList.add('hide'); document.getElementById('reg-box').classList.remove('hide')">New here? <b>Register</b></p>
         </div>
+
         <div id="reg-box" class="hide">
-            <input type="text" id="r-name" placeholder="Full Name"><input type="text" id="r-id" placeholder="Unique Studio ID">
-            <input type="email" id="r-email" placeholder="Email"><input type="password" id="r-pass" placeholder="Password">
-            <button onclick="register()" class="btn-royal">JOIN NOW 🚩</button>
-            <p class="mt-6 text-xs text-gray-400" onclick="document.getElementById('reg-box').classList.add('hide'); document.getElementById('login-box').classList.remove('hide')">Pehle se ho? Login Karo</p>
+            <input type="text" id="reg-id" placeholder="Unique Studio ID">
+            <input type="email" id="reg-email" placeholder="Email">
+            <input type="password" id="reg-pass" placeholder="Password">
+            <button onclick="registerUser()" class="royal-btn">Join Kingdom 🚩</button>
+            <p class="mt-8 text-xs text-gray-400 cursor-pointer" onclick="document.getElementById('reg-box').classList.add('hide'); document.getElementById('login-box').classList.remove('hide')">Back to <b>Login</b></p>
         </div>
     </div>
 
