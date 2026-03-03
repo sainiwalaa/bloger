@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sainiwalaa Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f2f2f7; font-family: -apple-system, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .tab-active { color: #007AFF; border-bottom: 2px solid #007AFF; }
+        video { border-radius: 15px; width: 100%; max-height: 400px; background: #000; }
+    </style>
+</head>
+<body>
+
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative overflow-hidden">
+        
+        <div class="relative h-56">
+            <img id="u-banner" src="https://via.placeholder.com/600x200" class="w-full h-44 object-cover">
+            <img id="u-logo" src="https://via.placeholder.com/100" class="absolute bottom-0 left-5 w-24 h-24 rounded-3xl border-4 border-white shadow-lg object-cover bg-white">
+            <button onclick="location.reload()" class="absolute top-4 right-4 bg-black/30 text-white p-2 rounded-full blur-xs"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+
+        <div class="px-5 pt-8">
+            <div class="flex justify-between items-center">
+                <h1 id="u-name" class="text-2xl font-black italic text-gray-800">Sainiwalaa</h1>
+                <button onclick="openM('m-edit')" class="bg-gray-100 px-4 py-2 rounded-xl text-sm font-bold">Edit Profile</button>
+            </div>
+            
+            <div class="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <p id="u-bio" class="text-sm text-gray-600 leading-relaxed font-medium">Loading details...</p>
+                <a id="u-web" target="_blank" class="text-blue-600 text-xs font-bold mt-2 block">Visit Website</a>
+            </div>
+        </div>
+
+        <div class="flex border-b mt-5 px-5 space-x-8">
+            <button onclick="switchTab('store')" id="tab-store" class="pb-2 font-bold tab-active">Store</button>
+            <button onclick="switchTab('posts')" id="tab-posts" class="pb-2 font-bold text-gray-400">Posts & Reels</button>
+        </div>
+
+        <div id="content-store" class="p-5 grid grid-cols-2 gap-4">
+            </div>
+
+        <div id="content-posts" class="p-5 hidden space-y-4">
+            </div>
+
+        <button onclick="openM('m-add')" class="fixed bottom-24 right-5 bg-black text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl z-50">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+    </div>
+
+    <div id="m-add" class="fixed inset-0 bg-white z-[100] hidden p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-6">Create New Post</h2>
+        <input type="file" id="p-file" class="w-full mb-4 p-3 bg-gray-100 rounded-xl" accept="image/*,video/*">
+        <input type="text" id="p-name" placeholder="Title/Product Name" class="w-full mb-4 p-4 bg-gray-100 rounded-xl outline-none">
+        <input type="text" id="p-price" placeholder="Price (Optional)" class="w-full mb-4 p-4 bg-gray-100 rounded-xl outline-none">
+        <select id="p-type" class="w-full mb-4 p-4 bg-gray-100 rounded-xl">
+            <option value="store">Add to Store</option>
+            <option value="post">Add to Posts/Videos</option>
+        </select>
+        <button id="p-btn" onclick="saveItem()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold shadow-lg">Upload Now</button>
+        <p onclick="closeM('m-add')" class="text-center mt-5 text-gray-400 font-bold cursor-pointer">Cancel</p>
+    </div>
+
+    <div id="m-edit" class="fixed inset-0 bg-white z-[100] hidden p-8">
+        <h2 class="text-2xl font-bold mb-6">Update Profile</h2>
+        <label class="text-xs font-bold text-gray-400 ml-2">Logo</label><input type="file" id="e-logo" class="w-full mb-4 p-2 bg-gray-100 rounded-xl">
+        <label class="text-xs font-bold text-gray-400 ml-2">Banner</label><input type="file" id="e-banner" class="w-full mb-4 p-2 bg-gray-100 rounded-xl">
+        <textarea id="e-bio" class="w-full mb-4 p-4 bg-gray-100 rounded-xl outline-none" rows="3" placeholder="Bio"></textarea>
+        <input id="e-web" class="w-full mb-4 p-4 bg-gray-100 rounded-xl outline-none" placeholder="Website Link">
+        <button id="e-btn" onclick="saveProf()" class="w-full bg-black text-white p-4 rounded-xl font-bold shadow-lg">Update Profile</button>
+        <p onclick="closeM('m-edit')" class="text-center mt-5 text-gray-400 font-bold cursor-pointer">Close</p>
+    </div>
+
+    <script>
+        const API = "https://script.google.com/macros/s/AKfycbzIt34Ff5aqRECSgFJK2YkZGzARuD8s6S0rEnTMwDP5SU5ak1w8M4MY9iFxGB31fedjMA/exec";
+        const CLOUD = "https://api.cloudinary.com/v1_1/dprl2lyih/upload";
+        const PRESET = "social_preset"; 
+        const UID = "8829934849";
+
+        function openM(id){ document.getElementById(id).style.display='block'; }
+        function closeM(id){ document.getElementById(id).style.display='none'; }
+        function switchTab(t){
+            document.getElementById('content-store').classList.toggle('hidden', t !== 'store');
+            document.getElementById('content-posts').classList.toggle('hidden', t !== 'posts');
+            document.getElementById('tab-store').classList.toggle('tab-active', t === 'store');
+            document.getElementById('tab-posts').classList.toggle('tab-active', t === 'posts');
+        }
+
+        async function upload(f){
+            if(!f) return "";
+            const fd = new FormData(); fd.append("file", f); fd.append("upload_preset", PRESET);
+            const res = await fetch(CLOUD, {method:"POST", body:fd});
+            const d = await res.json(); return d.secure_url;
+        }
+
+        async function load(){
+            const res = await fetch(`${API}?action=getAppData&uid=${UID}`);
+            const d = await res.json();
+            
+            // Profile Sync
+            document.getElementById('u-name').innerText = d.user[2];
+            document.getElementById('u-logo').src = d.user[3];
+            document.getElementById('u-banner').src = d.user[5];
+            document.getElementById('u-bio').innerText = d.user[4];
+            document.getElementById('u-web').href = d.user[6];
+
+            // Store Logic
+            let sh = "";
+            d.shop.forEach(s => {
+                sh += `<div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                    <img src="${s[1]}" class="w-full h-32 object-cover">
+                    <div class="p-3"><b class="text-xs block truncate">${s[0]}</b><span class="text-blue-600 font-black text-sm">₹${s[3]}</span></div>
+                </div>`;
+            });
+            document.getElementById('content-store').innerHTML = sh;
+
+            // Posts Logic (Filtering Images and Videos)
+            // Note: Sheet me 'type' ka column hona chahiye, ya file extension se check karenge
+            let ph = "";
+            d.posts.forEach(p => {
+                const isVideo = p[0].includes(".mp4") || p[0].includes("video");
+                ph += `<div class="bg-white rounded-2xl overflow-hidden shadow-sm border">
+                    ${isVideo ? `<video src="${p[0]}" controls></video>` : `<img src="${p[0]}" class="w-full">`}
+                    <div class="p-4"><p class="text-sm font-bold text-gray-700">${p[2]}</p></div>
+                </div>`;
+            });
+            document.getElementById('content-posts').innerHTML = ph || "No posts yet.";
+        }
+
+        async function saveItem(){
+            const b = document.getElementById('p-btn'); b.disabled = true; b.innerText = "Uploading to Cloud...";
+            const file = document.getElementById('p-file').files[0];
+            const url = await upload(file);
+            const type = document.getElementById('p-type').value;
+
+            const action = type === 'store' ? 'addShop' : 'addPost';
+            const data = { action, name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, img: url, file: url, text: document.getElementById('p-name').value, uid: UID };
+            
+            await fetch(API, {method:"POST", mode:"no-cors", body:JSON.stringify(data)});
+            location.reload();
+        }
+
+        window.onload = load;
+    </script>
+</body>
+</html>
