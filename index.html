@@ -9,7 +9,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, get, push, onValue, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -28,50 +28,93 @@
         const CLOUD_NAME = "dprl2lyih";
         const UPLOAD_PRESET = "social_preset";
 
-        let userCache = JSON.parse(localStorage.getItem('user_data')) || null;
+        let userCache = null;
         let currentPage = localStorage.getItem('last_page') || 'feed';
 
-        // --- ANTI-DUPLICATE USERNAME & REGISTRATION ---
-        window.registerUser = async () => {
-            const btn = document.getElementById('reg-btn');
-            const userBox = document.getElementById('reg-username');
-            const name = document.getElementById('reg-name').value;
-            const username = userBox.value.trim().toLowerCase();
-
-            if(!username || !name) return alert("Pura naam aur ID bhariye sa!");
-
-            btn.disabled = true;
-            btn.innerHTML = "Janch ho rahi hai...";
-
-            const userRef = query(ref(db, 'users'), orderByChild('username'), equalTo(username));
-            const snap = await get(userRef);
-
-            if(snap.exists()){
-                alert("Ye ID pehle se hai, dusri chuniye!");
-                btn.disabled = false;
-                btn.innerHTML = "SHURU KAREIN 🚩";
-                return;
+        // --- AUTH & DATA PERSISTENCE ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await get(ref(db, 'users/' + user.uid));
+                if(snap.exists()) {
+                    userCache = snap.val();
+                    document.getElementById('auth-screen').classList.add('hide');
+                    document.getElementById('app').classList.remove('hide');
+                    showPage(currentPage);
+                    initApp();
+                } else {
+                    document.getElementById('reg-screen').classList.remove('hide');
+                    document.getElementById('auth-screen').classList.add('hide');
+                }
+            } else {
+                document.getElementById('auth-screen').classList.remove('hide');
+                document.getElementById('app').classList.add('hide');
             }
+        });
 
-            const userData = {
-                uid: auth.currentUser.uid,
-                name: name,
-                username: username,
-                bio: "SainiWalaa Royal Member 🚩",
-                photo: "", banner: "", website: ""
-            };
+        // --- SYSTEM INITIALIZATION (DATA FETCH) ---
+        function initApp() {
+            // 1. Fetch Posts with Date & Time
+            onValue(ref(db, 'posts'), (snapshot) => {
+                const list = document.getElementById('v-feed');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                if(data) {
+                    Object.keys(data).reverse().forEach(k => {
+                        const p = data[k];
+                        list.innerHTML += `
+                            <div class="bg-white mb-6 border-b pb-4">
+                                <div class="p-3 flex items-center gap-3">
+                                    <img src="${p.uPhoto || 'https://via.placeholder.com/50'}" class="w-10 h-10 chokor border">
+                                    <div>
+                                        <b class="text-sm raj-title italic">${p.uName}</b><br>
+                                        <span class="text-[9px] text-gray-400 font-bold">${p.date || ''}</span>
+                                    </div>
+                                </div>
+                                <img src="${p.url}" class="w-full max-h-[500px] object-contain bg-black">
+                                <div class="p-4">
+                                    <div class="flex gap-6 text-2xl mb-2">
+                                        <i class="fa-regular fa-heart cursor-pointer" onclick="toggleLike('${k}')"></i>
+                                        <i class="fa-regular fa-comment cursor-pointer"></i>
+                                    </div>
+                                    <p class="text-xs"><b>@${p.uHandle}</b> ${p.caption}</p>
+                                </div>
+                            </div>`;
+                    });
+                }
+            });
 
-            await set(ref(db, 'users/' + auth.currentUser.uid), userData);
-            userCache = userData;
-            localStorage.setItem('user_data', JSON.stringify(userData));
-            location.reload();
-        };
+            // 2. Fetch Shop (Bazaar)
+            onValue(ref(db, 'products'), (snapshot) => {
+                const grid = document.getElementById('shop-grid');
+                grid.innerHTML = "";
+                const pr = snapshot.val();
+                if(pr) {
+                    Object.keys(pr).reverse().forEach(k => {
+                        const p = pr[k];
+                        grid.innerHTML += `
+                            <div class="bg-white border p-2 rounded-xl shadow-sm">
+                                <img src="${p.url}" class="w-full h-32 object-cover chokor mb-2">
+                                <h3 class="text-[10px] font-black uppercase truncate">${p.name}</h3>
+                                <div class="text-orange-600 font-black text-xs">₹${p.price}</div>
+                                <button onclick="handleOrder('${p.name}', '${p.link}')" class="w-full bg-orange-600 text-white py-2 text-[10px] rounded-lg mt-2 font-bold shadow-md">BUY NOW</button>
+                            </div>`;
+                    });
+                }
+            });
 
-        // --- ROYAL PUBLISH (ANTI-DOUBLE CLICK) ---
+            // 3. Profile Setup
+            document.getElementById('u-name-profile').innerText = userCache.name;
+            document.getElementById('u-handle-profile').innerText = "Studio ID: " + userCache.username;
+            document.getElementById('u-prof-img').src = userCache.photo || 'https://via.placeholder.com/100';
+            document.getElementById('u-bio-profile').innerText = userCache.bio || "SainiWalaa Royal Member 🚩";
+            document.getElementById('u-web-btn').href = userCache.website || "#";
+        }
+
+        // --- PREVENT DOUBLE ENTRIES (RAJASTHANI LOOK) ---
         window.publish = async (mode) => {
             const btn = document.getElementById('btn-' + mode);
             const file = document.getElementById(mode + '-file').files[0];
-            if(!file) return alert("File chuniye sa!");
+            if(!file) return alert("Hukum, file to chuniye!");
 
             btn.disabled = true;
             btn.innerHTML = "Thambo Sa... Entry ho rahi hai 🚩";
@@ -83,81 +126,50 @@
                 const d = await res.json();
 
                 const now = new Date();
-                const timeStr = now.toLocaleDateString() + " | " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const timeStr = now.toLocaleDateString() + " | " + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
-                const item = {
+                const entry = {
                     uid: auth.currentUser.uid,
                     uName: userCache.name,
                     uHandle: userCache.username,
+                    uPhoto: userCache.photo || "",
                     url: d.secure_url,
-                    caption: document.getElementById(mode + '-desc').value,
+                    caption: document.getElementById(mode + '-desc').value || "",
                     date: timeStr,
                     timestamp: Date.now()
                 };
 
                 if(mode === 'prod') {
-                    item.name = document.getElementById('prod-name').value;
-                    item.price = document.getElementById('prod-price').value;
-                    item.link = document.getElementById('prod-link').value;
-                    await push(ref(db, 'products'), item);
+                    entry.name = document.getElementById('prod-name').value;
+                    entry.price = document.getElementById('prod-price').value;
+                    entry.link = document.getElementById('prod-link').value;
+                    await push(ref(db, 'products'), entry);
                 } else {
-                    item.type = file.type.includes('video') ? 'video' : 'image';
-                    await push(ref(db, 'posts'), item);
+                    entry.type = file.type.includes('video') ? 'video' : 'image';
+                    await push(ref(db, 'posts'), entry);
                 }
 
                 btn.innerHTML = "Khamma Ghani! Ho gya 🚩";
                 setTimeout(() => { closeM(mode + '-modal'); btn.disabled = false; btn.innerHTML = "PUBLISH"; }, 1500);
-            } catch(e) { 
-                btn.disabled = false; btn.innerHTML = "ERROR - TRY AGAIN";
+            } catch(e) {
+                alert("Error sa!");
+                btn.disabled = false;
+                btn.innerHTML = "Try Again";
             }
         };
 
-        // --- ORDER FORM LOGIC ---
-        window.openOrder = (pName, pLink) => {
-            const name = prompt("Aapka Naam?");
-            const phone = prompt("Aapka Mobile Number?");
-            if(name && phone) {
-                alert("Hukum, Order darj ho gya! Ab aapko website par bhej rahe hain.");
-                window.open(pLink, '_blank');
-            }
+        window.handleOrder = (name, link) => {
+            const confirm = window.confirm(`Order For: ${name}\n\nKya aap abhi order karna chahte hain?`);
+            if(confirm) window.open(link, '_blank');
         };
-
-        // --- SEARCH SYSTEM ---
-        window.searchUser = async () => {
-            const val = document.getElementById('search-input').value.toLowerCase();
-            const btn = document.getElementById('search-btn');
-            btn.innerHTML = "<i class='fa-solid fa-spinner animate-spin'></i>";
-            
-            const userRef = query(ref(db, 'users'), orderByChild('username'), equalTo(val));
-            const snap = await get(userRef);
-            
-            if(snap.exists()) {
-                const uid = Object.keys(snap.val())[0];
-                showUserProfile(uid);
-            } else {
-                alert("Maafi, ye user nahi mila!");
-            }
-            btn.innerHTML = "<i class='fa-solid fa-magnifying-glass'></i>";
-        };
-
-        // --- UI REFRESH (STAY ON PAGE) ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('auth-screen').classList.add('hide');
-                document.getElementById('app').classList.remove('hide');
-                showPage(currentPage);
-                initApp();
-            } else {
-                document.getElementById('auth-screen').classList.remove('hide');
-                document.getElementById('app').classList.add('hide');
-            }
-        });
 
         window.showPage = (p) => {
             currentPage = p;
             localStorage.setItem('last_page', p);
             document.querySelectorAll('main').forEach(m => m.classList.add('hide'));
             document.getElementById('v-' + p).classList.remove('hide');
+            // Update Nav Icons
+            document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('text-orange-600'));
         };
 
         window.openM = (id) => document.getElementById(id).classList.remove('hide');
@@ -167,32 +179,29 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;700;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fafafa; }
+        body { font-family: 'Montserrat', sans-serif; background: #fff; color: #1a1a1a; }
         .hide { display: none !important; }
         .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .chokor { border-radius: 8px; object-fit: cover; }
-        .web-box { border: 2px solid #ea580c; background: #fff7ed; padding: 10px; border-radius: 12px; font-weight: 900; color: #800000; text-align: center; display: block; margin-top: 10px; }
-        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; font-size: 13px; outline: none; }
-        .nav-icon { font-size: 1.4rem; color: #d1d5db; transition: 0.3s; cursor: pointer; }
-        .active-nav { color: #ea580c !important; }
+        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; border: none; width: 100%; cursor: pointer; }
+        .chokor { border-radius: 4px; object-fit: cover; }
+        .web-box { border: 2.5px solid #ea580c; background: #fff; padding: 12px; border-radius: 12px; font-weight: 900; color: #000; text-align: center; display: block; text-decoration: none; box-shadow: 4px 4px 0px #ea580c; }
+        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 10px; width: 100%; margin-bottom: 8px; outline: none; font-size: 13px; }
+        nav { box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .nav-icon { font-size: 1.4rem; color: #d1d5db; transition: 0.3s; }
     </style>
 </head>
-<body class="flex justify-center">
+<body class="flex justify-center bg-gray-50">
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-24 hide bg-white shadow-2xl overflow-x-hidden">
+    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-24 hide bg-white shadow-2xl">
         
-        <header class="sticky top-0 bg-white/90 backdrop-blur-md border-b p-4 z-50">
-            <div class="flex justify-between items-center mb-4">
+        <header class="sticky top-0 bg-white/95 backdrop-blur-md border-b p-4 flex justify-between items-center z-50">
+            <div>
                 <h1 class="text-2xl font-black raj-title italic leading-none">SAINIWALAA</h1>
-                <div class="flex gap-4">
-                    <i class="fa-solid fa-plus-square text-orange-600 text-2xl" onclick="openM('post-modal')"></i>
-                    <i class="fa-solid fa-store text-gray-400 text-2xl" onclick="openM('prod-modal')"></i>
-                </div>
+                <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Royal Studio Culture</p>
             </div>
-            <div class="relative flex gap-2">
-                <input type="text" id="search-input" placeholder="User ki ID khojein..." class="!mb-0 !py-2 !rounded-full bg-gray-50">
-                <button id="search-btn" onclick="searchUser()" class="bg-black text-white px-4 rounded-full"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <div class="flex gap-4">
+                <i class="fa-solid fa-plus-square text-orange-600 text-2xl" onclick="openM('post-modal')"></i>
+                <i class="fa-solid fa-store text-gray-400 text-2xl" onclick="openM('prod-modal')"></i>
             </div>
         </header>
 
@@ -204,50 +213,25 @@
         </main>
 
         <main id="v-profile" class="hide">
-            <div class="h-44 bg-gray-200 relative">
-                <img id="u-banner" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1590050752117-23a9d7fc2173?auto=format&fit=crop&w=500&q=60">
+            <div class="h-40 bg-orange-50 relative">
+                <img id="u-banner" class="w-full h-full object-cover opacity-80" src="https://images.unsplash.com/photo-1590050752117-23a9d7fc2173?auto=format&fit=crop&w=500&q=60">
                 <img id="u-prof-img" class="w-24 h-24 absolute -bottom-10 left-6 border-4 border-white shadow-xl chokor bg-white">
             </div>
             <div class="mt-14 p-6">
-                <h2 id="u-name-profile" class="text-3xl font-black raj-title italic leading-none"></h2>
-                <p id="u-handle-profile" class="text-orange-600 font-bold text-sm mb-2 mt-1"></p>
+                <h2 id="u-name-profile" class="text-3xl font-black raj-title italic"></h2>
+                <p id="u-handle-profile" class="text-orange-600 font-bold text-xs mt-1"></p>
+                <p id="u-bio-profile" class="text-gray-500 text-sm mt-4 italic leading-relaxed"></p>
                 
-                <p id="u-bio-profile" class="text-gray-600 text-sm italic mt-4"></p>
-                
-                <a id="u-web-link" href="#" target="_blank" class="web-box shadow-sm">
-                    <i class="fa-solid fa-link mr-2"></i> VISIT ROYAL WEBSITE
+                <a id="u-web-btn" href="#" target="_blank" class="web-box mt-6">
+                    VISIT OFFICIAL WEBSITE <i class="fa-solid fa-arrow-right ml-1"></i>
                 </a>
 
                 <div class="grid grid-cols-2 gap-3 mt-8">
-                    <button onclick="openM('edit-modal')" class="bg-black text-white py-3 rounded-xl text-[10px] font-black tracking-widest uppercase">Edit Studio</button>
+                    <button onclick="openM('edit-modal')" class="bg-black text-white py-3 rounded-xl text-[10px] font-black uppercase">Edit Profile</button>
                     <button onclick="signOut(auth).then(()=>location.reload())" class="bg-red-50 text-red-600 py-3 rounded-xl text-[10px] font-black uppercase">Log Out</button>
                 </div>
             </div>
-            
-            <div class="border-t mt-4 flex justify-around p-4">
-                <i class="fa-solid fa-table-cells text-orange-600"></i>
-                <i class="fa-solid fa-bag-shopping text-gray-300"></i>
-            </div>
         </main>
-
-        <div id="post-modal" class="fixed inset-0 bg-white z-[600] hide p-8 flex flex-col justify-center">
-            <h2 class="text-3xl font-black raj-title mb-8 text-center">NAYA POST 🚩</h2>
-            <input type="file" id="post-file" accept="image/*,video/*">
-            <textarea id="post-desc" placeholder="Caption likhein hukum..." class="h-32"></textarea>
-            <button onclick="publish('post')" id="btn-post" class="btn-royal shadow-lg">STUDIO MEIN DALIYE</button>
-            <button onclick="closeM('post-modal')" class="mt-4 text-xs font-bold text-gray-300 text-center">Peeche Jayein</button>
-        </div>
-
-        <div id="prod-modal" class="fixed inset-0 bg-white z-[600] hide p-8 flex flex-col justify-center overflow-y-auto">
-            <h2 class="text-3xl font-black raj-title mb-8 text-center">LIST PRODUCT 🚩</h2>
-            <input type="file" id="prod-file" accept="image/*">
-            <input type="text" id="prod-name" placeholder="Item Name">
-            <input type="number" id="prod-price" placeholder="Price (₹)">
-            <input type="text" id="prod-link" placeholder="Website Link">
-            <textarea id="prod-desc" placeholder="Details..."></textarea>
-            <button onclick="publish('prod')" id="btn-prod" class="btn-royal shadow-lg">BAZAAR MEIN LAGAYEIN</button>
-            <button onclick="closeM('prod-modal')" class="mt-4 text-xs font-bold text-gray-300 text-center">Cancel</button>
-        </div>
 
         <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-5 flex justify-around z-50">
             <i onclick="showPage('feed')" class="fa-solid fa-house nav-icon"></i>
@@ -256,12 +240,30 @@
         </nav>
     </div>
 
+    <div id="post-modal" class="fixed inset-0 bg-white z-[600] hide p-8">
+        <h2 class="text-2xl font-black raj-title mb-6">NEW STUDIO POST</h2>
+        <input type="file" id="post-file" accept="image/*,video/*">
+        <textarea id="post-desc" placeholder="Caption..."></textarea>
+        <button id="btn-post" onclick="publish('post')" class="btn-royal">PUBLISH 🚩</button>
+        <button onclick="closeM('post-modal')" class="mt-4 w-full text-xs font-bold text-gray-300">CANCEL</button>
+    </div>
+
+    <div id="prod-modal" class="fixed inset-0 bg-white z-[600] hide p-8">
+        <h2 class="text-2xl font-black raj-title mb-6">LIST IN BAZAAR</h2>
+        <input type="file" id="prod-file" accept="image/*">
+        <input type="text" id="prod-name" placeholder="Product Name">
+        <input type="number" id="prod-price" placeholder="Price (₹)">
+        <input type="text" id="prod-link" placeholder="Order Link">
+        <textarea id="prod-desc" placeholder="Description..."></textarea>
+        <button id="btn-prod" onclick="publish('prod')" class="btn-royal">LIST NOW 🚩</button>
+        <button onclick="closeM('prod-modal')" class="mt-4 w-full text-xs font-bold text-gray-300">CANCEL</button>
+    </div>
+
     <div id="auth-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide bg-white">
-        <h1 class="text-5xl font-black raj-title text-center mb-4 italic">SainiWalaa</h1>
-        <p class="text-center text-[10px] text-gray-400 font-bold mb-10 uppercase tracking-widest">Royal Studio Registration</p>
-        <input type="text" id="reg-name" placeholder="Pura Naam">
-        <input type="text" id="reg-username" placeholder="Chuniye User ID (e.g. saini01)">
-        <button id="reg-btn" onclick="registerUser()" class="btn-royal shadow-xl">SHURU KAREIN 🚩</button>
+        <h1 class="text-5xl font-black raj-title text-center mb-10 italic">SainiWalaa</h1>
+        <input type="email" id="auth-email" placeholder="Email">
+        <input type="password" id="auth-pass" placeholder="Password">
+        <button onclick="signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-pass').value)" class="btn-royal">STUDIO ENTER</button>
     </div>
 
 </body>
