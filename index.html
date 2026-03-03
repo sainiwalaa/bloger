@@ -3,192 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sainiwalaa Premium App</title>
+    <title>Sainiwalaa Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.9); }
-        body { background: #F0F2F5; font-family: 'Inter', sans-serif; }
-        .nav-fixed { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: white; border-top: 1px solid #eee; z-index: 1000; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.3); }
-        .profile-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        body { background: #fafafa; font-family: 'Inter', sans-serif; }
+        .nav-item.active { color: #000; }
+        .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .post-grid img, .post-grid video { aspect-ratio: 1/1; object-fit: cover; width: 100%; }
         .hide { display: none !important; }
-        video { width: 100%; border-radius: 15px; }
+        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="flex justify-center">
 
-    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white pb-24 shadow-2xl relative">
+    <div id="main-app" class="w-full max-w-[450px] min-h-screen bg-white pb-20 shadow-2xl">
         
-        <div id="view-login" class="p-8 pt-20">
-            <h1 class="text-4xl font-black mb-2 text-gray-800">Welcome.</h1>
-            <p class="text-gray-500 mb-10">Please register or login to continue</p>
-            <input type="number" id="login-uid" placeholder="Enter Mobile Number" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none font-bold">
-            <button onclick="handleLogin()" class="w-full bg-black text-white p-4 rounded-2xl font-bold shadow-lg">Login / Register</button>
-        </div>
-
-        <div id="view-home" class="hide">
-            <div class="p-5 flex justify-between items-center sticky top-0 bg-white/80 backdrop-blur z-50">
-                <h1 class="text-2xl font-black italic">SAINIWALAA</h1>
-                <div class="flex items-center gap-2">
-                    <span id="display-user" class="text-xs font-bold bg-blue-100 text-blue-600 px-3 py-1 rounded-full">User</span>
-                </div>
-            </div>
-            <div id="home-feed" class="p-4 space-y-6">
-                </div>
-        </div>
-
-        <div id="view-shop" class="hide p-4">
-            <h2 class="text-2xl font-black mb-5">My Store Inventory</h2>
-            <div id="my-products" class="grid grid-cols-2 gap-4">
+        <div id="view-home" class="p-4 space-y-6">
+            <h1 class="text-2xl font-black italic mb-4">Sainiwalaa Feed</h1>
+            <div id="public-feed" class="space-y-8">
                 </div>
         </div>
 
         <div id="view-profile" class="hide">
-            <div class="relative h-64">
-                <img id="p-banner" src="" class="w-full h-48 object-cover bg-gray-300">
-                <img id="p-logo" src="" class="absolute bottom-4 left-6 w-24 h-24 rounded-3xl border-4 border-white shadow-xl object-cover bg-white">
+            <div class="relative h-44 bg-gray-200">
+                <img id="u-banner" class="w-full h-full object-cover">
+                <img id="u-logo" class="absolute -bottom-6 left-6 w-20 h-20 rounded-2xl border-4 border-white shadow-lg bg-white">
             </div>
-            <div class="px-6 pt-2">
-                <div class="p-5 profile-gradient rounded-3xl text-white shadow-2xl mb-6">
-                    <h2 id="p-name" class="text-2xl font-black">User Name</h2>
-                    <p id="p-bio" class="text-sm opacity-90 mt-2 leading-relaxed">Attractve bio box content...</p>
-                    <a id="p-web" target="_blank" class="inline-block mt-4 bg-white/20 px-4 py-2 rounded-xl text-xs font-bold backdrop-blur">🔗 WEBSITE</a>
+            
+            <div class="px-6 pt-10">
+                <h2 id="u-name" class="text-xl font-black">User Name</h2>
+                <p id="u-bio" class="text-sm text-gray-500 mb-4">Digital Creator</p>
+                
+                <div class="flex border-b mb-4 text-xs font-bold text-gray-400">
+                    <button onclick="switchTab('posts')" id="tab-posts" class="flex-1 py-2 active text-black border-b-2 border-black">POSTS</button>
+                    <button onclick="switchTab('orders')" id="tab-orders" class="flex-1 py-2">MY SALES</button>
                 </div>
 
-                <h3 class="font-black text-gray-800 mb-4">Order History</h3>
-                <div id="order-list" class="space-y-3 mb-10">
+                <div id="profile-posts" class="post-grid"></div>
+
+                <div id="profile-sales" class="hide space-y-3 py-4">
                     </div>
             </div>
         </div>
 
-        <nav id="main-nav" class="nav-fixed flex justify-around p-4 hide">
-            <button onclick="showPage('home')" class="text-gray-400 hover:text-black"><i class="fa-solid fa-house text-xl"></i></button>
-            <button id="nav-shop" onclick="showPage('shop')" class="text-gray-400 hover:text-black hide"><i class="fa-solid fa-bag-shopping text-xl"></i></button>
-            <button onclick="openM('modal-add')" class="text-gray-400 hover:text-black"><i class="fa-solid fa-circle-plus text-xl"></i></button>
-            <button onclick="showPage('profile')" class="text-gray-400 hover:text-black"><i class="fa-solid fa-user text-xl"></i></button>
+        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-3 z-50">
+            <button onclick="showPage('home') text-xl"><i class="fa-solid fa-house"></i></button>
+            <button onclick="openM('modal-add')" class="text-3xl text-blue-600 -mt-6 bg-white rounded-full p-1"><i class="fa-solid fa-circle-plus"></i></button>
+            <button onclick="showPage('profile')" class="text-xl"><i class="fa-solid fa-user"></i></button>
         </nav>
-
     </div>
 
-    <div id="modal-add" class="fixed inset-0 bg-white z-[2000] hidden p-8 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-black">Add New Post/Product</h2>
-            <button onclick="closeM('modal-add')" class="text-2xl">&times;</button>
-        </div>
-        <select id="add-type" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 font-bold outline-none">
-            <option value="post">Add Social Post</option>
-            <option value="shop">Add to My Shop</option>
+    <div id="modal-buy" class="fixed inset-0 glass z-[200] hidden p-8">
+        <h2 class="text-xl font-black mb-4">Confirm Order</h2>
+        <input id="buy-name" placeholder="Full Name" class="w-full p-4 bg-gray-100 rounded-xl mb-3">
+        <input id="buy-address" placeholder="Shipping Address" class="w-full p-4 bg-gray-100 rounded-xl mb-3">
+        <input id="buy-phone" placeholder="Mobile Number" class="w-full p-4 bg-gray-100 rounded-xl mb-6">
+        <button onclick="confirmPurchase()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold">PLACE ORDER</button>
+        <button onclick="closeM('modal-buy')" class="w-full mt-4 text-gray-400">Cancel</button>
+    </div>
+
+    <div id="modal-add" class="fixed inset-0 bg-white z-[100] hidden p-8">
+        <h2 class="text-2xl font-black mb-6">Create</h2>
+        <select id="add-type" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+            <option value="post">Social Post</option>
+            <option value="shop">Product for Sale</option>
         </select>
         <input type="file" id="add-file" class="mb-4">
-        <input type="text" id="add-title" placeholder="Title" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none">
-        <input type="number" id="add-price" placeholder="Price (₹)" class="w-full p-4 bg-gray-100 rounded-2xl mb-6 outline-none">
-        <button onclick="handleUpload()" id="up-btn" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black">UPLOAD TO CLOUD</button>
+        <input id="add-title" placeholder="Caption/Title" class="w-full p-4 bg-gray-100 rounded-xl mb-4">
+        <input id="add-price" placeholder="Price (if product)" class="w-full p-4 bg-gray-100 rounded-xl mb-6">
+        <button onclick="handleUpload()" class="w-full bg-black text-white p-4 rounded-xl font-bold">PUBLISH</button>
+        <button onclick="closeM('modal-add')" class="w-full mt-4 text-gray-400">Back</button>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbzIt34Ff5aqRECSgFJK2YkZGzARuD8s6S0rEnTMwDP5SU5ak1w8M4MY9iFxGB31fedjMA/exec";
-        const CLOUD = "https://api.cloudinary.com/v1_1/dprl2lyih/upload";
-        const PRESET = "social_preset";
-        let CURRENT_USER = localStorage.getItem('saini_uid') || null;
+        const UID = "8829934849"; // Logged in user id
 
         function showPage(p) {
-            ['home', 'shop', 'profile', 'login'].forEach(v => document.getElementById('view-'+v).classList.add('hide'));
+            document.getElementById('view-home').classList.add('hide');
+            document.getElementById('view-profile').classList.add('hide');
             document.getElementById('view-'+p).classList.remove('hide');
         }
 
-        function openM(id) { document.getElementById(id).classList.remove('hide'); }
-        function closeM(id) { document.getElementById(id).classList.add('hide'); }
-
-        async function handleLogin() {
-            const uid = document.getElementById('login-uid').value;
-            if(!uid) return alert("Enter Mobile Number");
-            localStorage.setItem('saini_uid', uid);
-            location.reload();
+        function switchTab(t) {
+            document.getElementById('profile-posts').classList.toggle('hide', t !== 'posts');
+            document.getElementById('profile-sales').classList.toggle('hide', t !== 'orders');
         }
 
         async function loadData() {
-            if(!CURRENT_USER) { showPage('login'); return; }
-            showPage('home');
-            document.getElementById('main-nav').classList.remove('hide');
-            document.getElementById('nav-shop').classList.remove('hide');
+            const res = await fetch(`${API}?action=getAppData&uid=${UID}`);
+            const d = await res.json();
 
-            const res = await fetch(`${API}?action=getAppData&uid=${CURRENT_USER}`);
-            const data = await res.json();
-
-            // Set Profile
-            if(data.user) {
-                document.getElementById('display-user').innerText = data.user[2];
-                document.getElementById('p-name').innerText = data.user[2];
-                document.getElementById('p-logo').src = data.user[3] || "https://via.placeholder.com/100";
-                document.getElementById('p-banner').src = data.user[5] || "https://via.placeholder.com/600x200";
-                document.getElementById('p-bio').innerText = data.user[4] || "No bio set.";
-                document.getElementById('p-web').href = data.user[6] || "#";
-            }
-
-            // Feed Logic (Home)
+            // 1. PUBLIC FEED
             let feedH = "";
-            data.posts.forEach(p => {
-                const isVid = p[0].match(/\.(mp4|mov)$/i);
-                feedH += `<div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
-                    <div class="p-4 flex justify-between items-center">
-                        <b class="text-sm font-bold">@${p[1] || 'creator'}</b>
-                        <button class="bg-black text-white px-4 py-1 rounded-full text-[10px] font-bold">FOLLOW</button>
+            d.posts.forEach(p => {
+                feedH += `
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                    <div class="p-3 font-bold text-sm">@${p[1]}</div>
+                    ${p[0].includes('video') ? `<video src="${p[0]}" controls></video>` : `<img src="${p[0]}">`}
+                    <div class="p-4">
+                        <div class="flex gap-4 mb-2 text-xl">
+                            <i class="fa-regular fa-heart"></i> <i class="fa-regular fa-comment"></i>
+                        </div>
+                        <p class="text-sm"><b>${p[1]}</b> ${p[2]}</p>
                     </div>
-                    ${isVid ? `<video src="${p[0]}" controls></video>` : `<img src="${p[0]}" class="w-full">`}
-                    <div class="p-4 text-sm">${p[2]}</div>
                 </div>`;
             });
-            document.getElementById('home-feed').innerHTML = feedH;
+            document.getElementById('public-feed').innerHTML = feedH;
 
-            // My Shop Logic (Personal Products)
-            let shopH = "";
-            data.shop.forEach(s => {
-                // Column 9 Logic: Show only if Col 9 is "show" AND belongs to current user
-                if(s[8] === "show") { 
-                    shopH += `<div class="bg-white rounded-2xl border p-2 shadow-sm">
-                        <img src="${s[1]}" class="w-full h-32 object-cover rounded-xl">
-                        <h4 class="text-xs font-bold mt-2 truncate">${s[0]}</h4>
-                        <p class="text-blue-600 font-black text-xs">₹${s[3]}</p>
-                    </div>`;
-                }
-            });
-            document.getElementById('my-products').innerHTML = shopH || "No public products.";
-
-            // Orders Logic
-            let orderH = "";
-            data.orders.forEach(o => {
-                orderH += `<div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div><b class="text-sm block">${o[1]}</b><span class="text-[10px] text-gray-400">${new Date().toLocaleDateString()}</span></div>
-                    <span class="text-green-600 font-bold text-xs">₹${o[4] || '0'}</span>
+            // 2. PROFILE GRID (Posts + Products)
+            let gridH = "";
+            d.posts.filter(p => p[1] == UID).forEach(p => {
+                gridH += `<div class="relative group">
+                    <img src="${p[0]}">
+                    <button onclick="deletePost('${p[3]}')" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded text-[10px]"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
             });
-            document.getElementById('order-list').innerHTML = orderH || "No orders yet.";
+            document.getElementById('profile-posts').innerHTML = gridH;
+
+            // 3. SALES / ORDERS (Who bought your items)
+            let salesH = "";
+            d.orders.filter(o => o[5] == UID).forEach(o => { // o[5] is Seller ID in sheet
+                salesH += `<div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <b class="text-sm">${o[1]} bought ${o[2]}</b>
+                    <p class="text-[10px] text-gray-500">${o[3]} | ${o[4]}</p>
+                </div>`;
+            });
+            document.getElementById('profile-sales').innerHTML = salesH || "No sales yet.";
         }
 
-        async function handleUpload() {
-            const btn = document.getElementById('up-btn');
-            const file = document.getElementById('add-file').files[0];
-            if(!file) return alert("Select File");
-            btn.innerText = "UPLOADING..."; btn.disabled = true;
-
-            const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", PRESET);
-            const cloudRes = await fetch(CLOUD, {method:"POST", body:fd});
-            const cloudData = await cloudRes.json();
-            
-            const payload = {
-                action: document.getElementById('add-type').value === 'shop' ? 'addShop' : 'addPost',
-                uid: CURRENT_USER,
-                name: document.getElementById('add-title').value,
-                price: document.getElementById('add-price').value,
-                img: cloudData.secure_url,
-                file: cloudData.secure_url
-            };
-
-            await fetch(API, {method:"POST", mode:"no-cors", body:JSON.stringify(payload)});
-            location.reload();
+        async function deletePost(id) {
+            if(confirm("Delete this post?")) {
+                await fetch(API, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"delete", id:id})});
+                location.reload();
+            }
         }
 
+        // Add more functions for Buy, Form, and Upload...
         window.onload = loadData;
     </script>
 </body>
