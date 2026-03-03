@@ -8,10 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <script type="module">
+        // Firebase Modular SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Aapka Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
             authDomain: "social-blog-93d38.firebaseapp.com",
@@ -27,37 +27,33 @@
         const CLOUD_NAME = "dprl2lyih";
         const UPLOAD_PRESET = "sainiwalaa_preset";
 
-        // --- AUTH CHECK ---
-        const uid = localStorage.getItem('s_uid');
+        // --- AUTH ---
         window.userLogin = () => {
             const ph = document.getElementById('login-phone').value;
             const nm = document.getElementById('login-name').value;
-            if(ph.length < 10 || !nm) return alert("Pura data bhariye hukum!");
+            if(ph.length < 10 || !nm) return alert("Details bhariye sa!");
             localStorage.setItem('s_uid', ph);
             localStorage.setItem('s_name', nm);
             location.reload();
         };
 
+        const uid = localStorage.getItem('s_uid');
         if(!uid) {
             document.getElementById('login-screen').classList.remove('hide');
         } else {
             document.getElementById('app').classList.remove('hide');
-            initApp();
-        }
-
-        function initApp() {
+            // Listen for Posts
+            onValue(ref(db, 'posts'), (snap) => renderFeed(snap.val()), (err) => console.error(err));
+            // Listen for Products
+            onValue(ref(db, 'products'), (snap) => renderShop(snap.val()), (err) => console.error(err));
             document.getElementById('u-display-name').innerText = localStorage.getItem('s_name');
-            // Listen for Real-time Posts
-            onValue(ref(db, 'posts'), (snapshot) => renderFeed(snapshot.val()));
-            // Listen for Real-time Products
-            onValue(ref(db, 'products'), (snapshot) => renderShop(snapshot.val()));
         }
 
-        // --- REAL-TIME PUBLISH ---
+        // --- PUBLISH ---
         window.publish = async (mode) => {
             const file = document.getElementById(mode === 'post' ? 'post-file' : 'prod-file').files[0];
             const btn = document.getElementById(mode === 'post' ? 'btn-post' : 'btn-prod');
-            if(!file) return alert("Photo chunna zaroori hai!");
+            if(!file) return alert("Photo zaroori hai!");
 
             btn.disabled = true; btn.innerText = "Royal Processing... ⏳";
 
@@ -68,113 +64,141 @@
                 const cRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:"POST", body:formData});
                 const cData = await cRes.json();
 
-                const commonData = {
+                const data = {
                     uid: uid,
                     uName: localStorage.getItem('s_name'),
                     img: cData.secure_url,
-                    timestamp: Date.now()
+                    time: Date.now()
                 };
 
                 if(mode === 'post') {
-                    commonData.caption = document.getElementById('post-cap').value;
-                    await push(ref(db, 'posts'), commonData);
+                    data.caption = document.getElementById('post-cap').value;
+                    await push(ref(db, 'posts'), data);
                 } else {
-                    commonData.name = document.getElementById('prod-name').value;
-                    commonData.price = document.getElementById('prod-price').value;
-                    commonData.link = document.getElementById('prod-link').value || "#";
-                    commonData.desc = document.getElementById('prod-desc').value;
-                    await push(ref(db, 'products'), commonData);
+                    data.name = document.getElementById('prod-name').value;
+                    data.price = document.getElementById('prod-price').value;
+                    data.link = document.getElementById('prod-link').value || "#";
+                    await push(ref(db, 'products'), data);
                 }
+                alert("Mubarak! Post ho gaya.");
                 closeM(mode + '-modal');
-            } catch(e) { alert("Error!"); }
+            } catch (e) { alert("Error: " + e.message); }
             btn.disabled = false; btn.innerText = "PUBLISH";
         };
 
-        // --- RENDER UI ---
+        // --- RENDER ---
         function renderFeed(data) {
             let h = "";
+            let myCount = 0;
+            let myProfH = "";
             if(data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const p = data[key];
-                    h += `<div class="bg-white border-b-8 border-orange-50">
-                        <div class="p-4 flex justify-between items-center">
-                            <div class="flex items-center gap-2 font-bold text-red-900 text-sm italic">🚩 ${p.uName}</div>
-                            ${p.uid === uid ? `<i class="fa-solid fa-trash-can text-gray-300" onclick="deleteItem('posts', '${key}')"></i>` : ''}
+                Object.keys(data).reverse().forEach(k => {
+                    const p = data[k];
+                    h += `<div class="bg-white border-b-8 border-orange-50 mb-4">
+                        <div class="p-3 flex justify-between items-center font-bold text-red-900 text-sm italic">
+                            <span>🚩 ${p.uName}</span>
+                            ${p.uid === uid ? `<i class="fa-solid fa-trash text-gray-300" onclick="del('posts','${k}')"></i>` : ''}
                         </div>
-                        <img src="${p.img}" class="w-full h-96 object-cover border-y border-orange-50">
-                        <div class="p-4"><p class="text-sm"><b>${p.uName}</b> ${p.caption || ''}</p></div>
+                        <img src="${p.img}" class="w-full h-80 object-cover">
+                        <div class="p-4 text-sm"><b>${p.uName}</b> ${p.caption || ''}</div>
                     </div>`;
+                    if(p.uid === uid) { myCount++; myProfH += `<img src="${p.img}" class="aspect-square object-cover">`; }
                 });
             }
-            document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-400'>Feed khali hai hukum.</p>";
-            updateCount(data);
+            document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20'>No posts.</p>";
+            document.getElementById('profile-grid').innerHTML = myProfH;
+            document.getElementById('c-posts').innerText = myCount;
         }
 
         function renderShop(data) {
             let h = "";
             if(data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const p = data[key];
-                    h += `<div class="bg-white border-2 border-orange-50 rounded-2xl overflow-hidden relative shadow-sm">
-                        ${p.uid === uid ? `<i class="fa-solid fa-circle-xmark absolute top-2 right-2 text-red-500 bg-white rounded-full" onclick="deleteItem('products', '${key}')"></i>` : ''}
-                        <img src="${p.img}" class="w-full h-36 object-cover">
-                        <div class="p-3 text-center">
-                            <b class="text-[10px] block truncate text-red-900 uppercase font-black">${p.name}</b>
-                            <div class="text-orange-600 font-black text-sm mb-2">₹${p.price}</div>
-                            <button onclick="window.open('${p.link}','_blank')" class="w-full bg-red-800 text-white text-[10px] py-2 rounded-lg font-bold">KHAREEDO (BUY)</button>
+                Object.keys(data).reverse().forEach(k => {
+                    const p = data[k];
+                    h += `<div class="bg-white border rounded-xl overflow-hidden relative shadow-sm">
+                        ${p.uid === uid ? `<i class="fa-solid fa-circle-xmark absolute top-1 right-1 text-red-500" onclick="del('products','${k}')"></i>` : ''}
+                        <img src="${p.img}" class="w-full h-32 object-cover">
+                        <div class="p-2 text-center">
+                            <b class="text-[10px] block truncate">${p.name}</b>
+                            <b class="text-orange-600 text-xs">₹${p.price}</b>
+                            <button onclick="window.open('${p.link}','_blank')" class="w-full bg-red-800 text-white text-[9px] mt-1 py-1 rounded">BUY</button>
                         </div>
                     </div>`;
                 });
             }
-            document.getElementById('bazaar-grid').innerHTML = h || "<p class='col-span-2 text-center py-10'>Bazaar khali hai.</p>";
+            document.getElementById('bazaar-grid').innerHTML = h || "<p class='col-span-2 text-center py-10'>Shop is empty.</p>";
         }
 
-        function updateCount(data) {
-            let count = 0;
-            let profH = "";
-            if(data) {
-                Object.values(data).forEach(p => {
-                    if(p.uid === uid) {
-                        count++;
-                        profH += `<img src="${p.img}" class="aspect-square object-cover border border-white">`;
-                    }
-                });
-            }
-            document.getElementById('c-posts').innerText = count;
-            document.getElementById('profile-grid').innerHTML = profH;
-        }
-
-        window.deleteItem = async (path, key) => {
-            if(confirm("Hukum, ise delete kar dein?")) await remove(ref(db, `${path}/${key}`));
-        };
-
-        window.logout = () => { localStorage.clear(); location.reload(); };
+        window.del = async (p, k) => { if(confirm("Hata dein?")) await remove(ref(db, `${p}/${k}`)); };
         window.showPage = (p) => {
             ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
-            ['n-feed','n-shop','n-profile'].forEach(n => document.getElementById(n).classList.replace('text-orange-600', 'text-gray-400'));
+            ['n-feed','n-shop','n-profile'].forEach(n => document.getElementById(n).classList.replace('text-orange-600', 'text-gray-300'));
             document.getElementById('v-'+p).classList.remove('hide');
-            document.getElementById('n-'+p).classList.replace('text-gray-400', 'text-orange-600');
+            document.getElementById('n-'+p).classList.replace('text-gray-300', 'text-orange-600');
         };
         window.openM = (id) => document.getElementById(id).classList.remove('hide');
         window.closeM = (id) => document.getElementById(id).classList.add('hide');
-
+        window.logout = () => { localStorage.clear(); location.reload(); };
     </script>
     <style>
         .hide { display: none !important; }
-        .btn-royal { background: linear-gradient(45deg, #991b1b, #FF9933); color: white; font-weight: 800; border-radius: 12px; padding: 12px; width: 100%; }
-        input, textarea { border: 1.5px solid #ffe4cc !important; padding: 12px; border-radius: 15px; margin-bottom: 12px; background: #fffaf5; width: 100%; outline: none; }
+        .btn-royal { background: linear-gradient(45deg, #991b1b, #FF9933); color: white; font-weight: bold; border-radius: 10px; padding: 12px; width: 100%; }
+        input, textarea { border: 1px solid #ddd !important; padding: 10px; border-radius: 10px; margin-bottom: 10px; width: 100%; outline: none; }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center">
+<body class="bg-gray-50 flex justify-center">
 
 <div id="login-screen" class="w-full max-w-[450px] min-h-screen bg-white flex flex-col items-center justify-center p-8 hide">
-    <h1 class="text-5xl font-black italic text-red-800 mb-2">SainiWalaa</h1>
-    <p class="text-orange-600 font-bold mb-10">🚩 KHAMA GHANI HUKUM 🚩</p>
+    <h1 class="text-4xl font-black italic text-red-800 mb-6">SainiWalaa</h1>
     <input type="number" id="login-phone" placeholder="Mobile Number">
     <input type="text" id="login-name" placeholder="Aapko Naam">
-    <button onclick="userLogin()" class="btn-royal shadow-xl">PADHARO STUDIO MEIN</button>
+    <button onclick="userLogin()" class="btn-royal">ENTER STUDIO</button>
 </div>
 
-<div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-24 hide">
-    <header class="sticky top-0 bg-white/95 backdrop-blur-md z-[100] border-b p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-
+<div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-xl relative pb-20 hide">
+    <header class="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-[50]">
+        <h1 class="text-xl font-black italic text-red-800">SainiWalaa</h1>
+        <div class="flex gap-4 text-orange-700">
+            <i class="fa-solid fa-camera" onclick="openM('post-modal')"></i>
+            <i class="fa-solid fa-cart-plus" onclick="openM('prod-modal')"></i>
+            <i class="fa-solid fa-power-off text-red-500" onclick="logout()"></i>
+        </div>
+    </header>
+
+    <main id="v-feed"></main>
+    <main id="v-shop" class="p-4 hide"><div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div></main>
+    <main id="v-profile" class="hide">
+        <div class="p-6 bg-orange-50/30 border-b">
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 rounded-full bg-orange-200"></div>
+                <div><b id="c-posts" class="text-xl">0</b><p class="text-[10px] font-bold text-gray-400 uppercase">Posts</p></div>
+            </div>
+            <h2 id="u-display-name" class="font-bold mt-2 text-red-900"></h2>
+        </div>
+        <div id="profile-grid" class="grid grid-cols-3 gap-0.5"></div>
+    </main>
+
+    <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around shadow-inner z-[100]">
+        <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl text-orange-600"></i>
+        <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300"></i>
+        <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300"></i>
+    </nav>
+
+    <div id="post-modal" class="fixed inset-0 bg-white z-[200] hide p-8">
+        <div class="flex justify-between mb-4"><b class="text-xl italic">New Post</b><i class="fa-solid fa-xmark" onclick="closeM('post-modal')"></i></div>
+        <input type="file" id="post-file">
+        <textarea id="post-cap" placeholder="Caption..."></textarea>
+        <button onclick="publish('post')" id="btn-post" class="btn-royal">POST</button>
+    </div>
+    <div id="prod-modal" class="fixed inset-0 bg-white z-[200] hide p-8">
+        <div class="flex justify-between mb-4"><b class="text-xl italic">Add Product</b><i class="fa-solid fa-xmark" onclick="closeM('prod-modal')"></i></div>
+        <input type="file" id="prod-file">
+        <input type="text" id="prod-name" placeholder="Item Name">
+        <input type="number" id="prod-price" placeholder="Price">
+        <input type="text" id="prod-link" placeholder="Buy Link">
+        <button onclick="publish('prod')" id="btn-prod" class="btn-royal">LIST</button>
+    </div>
+</div>
+
+</body>
+</html>
