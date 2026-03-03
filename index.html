@@ -1,30 +1,123 @@
-// --- PRODUCT LIST LOGIC (Database se Data khichne ka tarika) ---
-function loadShopData() {
-    const shopContainer = document.getElementById('p-shop-items');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SainiWalaa - Royal Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     
-    // Firebase ke 'products' folder ko check karo
-    onValue(ref(db, 'products'), (snapshot) => {
-        shopContainer.innerHTML = ""; // Pehle purana kachra saaf karo
-        
-        if (snapshot.exists()) {
-            const allData = snapshot.val();
-            
-            Object.values(allData).forEach(product => {
-                // Sirf wahi product dikhao jo is user ka hai
-                if (product.uid === activeProfileUid) { 
-                    shopContainer.innerHTML += `
-                        <div class="bg-white border p-2 shadow-sm rounded-lg">
-                            <img src="${product.url}" class="w-full h-32 object-cover rounded">
-                            <div class="p-2">
-                                <b class="text-xs block truncate">${product.name}</b>
-                                <p class="text-orange-600 font-bold text-sm">₹${product.price}</p>
-                                <button onclick="orderNow('${product.name}')" class="w-full bg-black text-white text-[10px] py-2 mt-2 font-bold uppercase rounded">Buy Now</button>
-                            </div>
-                        </div>`;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, get, query, orderByChild, equalTo, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
+            authDomain: "social-blog-93d38.firebaseapp.com",
+            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com",
+            projectId: "social-blog-93d38",
+            storageBucket: "social-blog-93d38.firebasestorage.app",
+            messagingSenderId: "730884874913",
+            appId: "1:730884874913:web:e2cb8f6084ee039db006e0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        let myData = null;
+
+        // --- CLOUDINARY UPLOAD ---
+        window.uploadToCloud = (target) => {
+            cloudinary.openUploadWidget({
+                cloudName: "dvp58lgh3", uploadPreset: "ml_default", sources: ['local', 'camera']
+            }, (err, res) => {
+                if (!err && res.event === "success") {
+                    const info = prompt(target === 'post' ? "Caption?" : "Product Name - Price (e.g. Kurta - 500):");
+                    saveData(target, res.info.secure_url, info);
                 }
             });
-        } else {
-            shopContainer.innerHTML = "<p class='text-center text-gray-400 text-xs'>Hukum, Bazaar khali hai!</p>";
+        };
+
+        async function saveData(type, url, info) {
+            const folder = type === 'post' ? 'posts' : 'products';
+            const payload = {
+                url, uid: auth.currentUser.uid, uHandle: myData.username,
+                uPhoto: myData.photo, time: serverTimestamp()
+            };
+            if(type === 'post') payload.caption = info;
+            else { 
+                const s = info.split('-'); 
+                payload.name = s[0].trim(); 
+                payload.price = s[1]?.trim() || "0"; 
+            }
+            await push(ref(db, folder), payload);
+            alert("Hukum, Data Save ho gayo! 🚩");
         }
-    });
-}
+
+        // --- LOAD DATA (SHOP + FEED) ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await get(ref(db, `users/${user.uid}`));
+                myData = snap.val();
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadAllContent();
+            } else {
+                document.getElementById('auth').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+            }
+        });
+
+        function loadAllContent() {
+            // Social Feed
+            onValue(ref(db, 'posts'), s => {
+                const f = document.getElementById('feed'); f.innerHTML = "";
+                if(s.exists()) Object.values(s.val()).reverse().forEach(p => {
+                    f.innerHTML += `<div class="bg-white border-b mb-4 pb-2"><img src="${p.url}" class="w-full"><p class="p-3 text-xs"><b>@${p.uHandle}</b> ${p.caption}</p></div>`;
+                });
+            });
+
+            // Product List
+            onValue(ref(db, 'products'), s => {
+                const shop = document.getElementById('shop'); shop.innerHTML = "";
+                if(s.exists()) Object.values(s.val()).forEach(p => {
+                    shop.innerHTML += `<div class="bg-white p-2 border"><img src="${p.url}" class="w-full h-32 object-cover"><b class="text-[10px] block mt-1">${p.name}</b><p class="text-orange-600 font-bold text-xs">₹${p.price}</p></div>`;
+                });
+            });
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Marcellus&display=swap');
+        .raj { font-family: 'Marcellus', serif; color: #ea580c; }
+        .hide { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 flex justify-center">
+
+    <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-xl relative pb-20" style="display:none">
+        <header class="p-4 border-b flex justify-between bg-white sticky top-0 z-50">
+            <h1 class="text-xl font-bold raj">SAINIWALAA</h1>
+            <div class="flex gap-4">
+                <i class="fa-solid fa-camera" onclick="uploadToCloud('post')"></i>
+                <i class="fa-solid fa-plus-square" onclick="uploadToCloud('prod')"></i>
+            </div>
+        </header>
+        <main id="feed" class="p-2"></main>
+        <div id="shop" class="grid grid-cols-2 gap-2 p-4 border-t"></div>
+        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around">
+            <i class="fa-solid fa-house"></i>
+            <i class="fa-solid fa-crown"></i>
+        </nav>
+    </div>
+
+    <div id="auth" class="w-full max-w-[450px] min-h-screen flex flex-col justify-center p-10 text-center">
+        <h1 class="text-4xl raj mb-10">SAINIWALAA</h1>
+        <input type="email" id="em" placeholder="Email" class="border p-3 mb-2 rounded">
+        <input type="password" id="ps" placeholder="Password" class="border p-3 mb-4 rounded">
+        <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('em').value, document.getElementById('em').value)" class="bg-black text-white p-4 font-bold">LOGIN 🚩</button>
+    </div>
+
+</body>
+</html>
