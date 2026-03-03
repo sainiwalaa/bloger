@@ -25,16 +25,16 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const CLOUD_NAME = "dprl2lyih";
-        const UPLOAD_PRESET = "social_preset";
 
         let userCache = null;
         let activePostId = null;
+        let viewedUid = null; // To track whose profile we are looking at
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await get(ref(db, 'users/' + user.uid));
                 userCache = snap.val();
+                viewedUid = user.uid; // Default to own profile
                 document.getElementById('auth-screen').classList.add('hide');
                 document.getElementById('app').classList.remove('hide');
                 initApp();
@@ -45,17 +45,16 @@
         });
 
         function initApp() {
-            // 1. Feed & Profile Posts
+            // 1. Feed Rendering with Profile Click
             onValue(ref(db, 'posts'), s => {
                 const feed = document.getElementById('v-feed');
-                const myPosts = document.getElementById('my-posts-grid');
-                feed.innerHTML = ""; myPosts.innerHTML = "";
+                feed.innerHTML = ""; 
                 const data = s.val();
                 if(data) Object.keys(data).reverse().forEach(k => {
                     const p = data[k];
                     feed.innerHTML += `
                         <div class="bg-white mb-4 border-b pb-4">
-                            <div class="p-3 flex items-center gap-2">
+                            <div class="p-3 flex items-center gap-2 cursor-pointer" onclick="viewUserProfile('${p.uid}')">
                                 <img src="${p.uPhoto || 'https://via.placeholder.com/50'}" class="w-10 h-10 chokor border-2 border-orange-500">
                                 <b class="text-xs raj-title italic">${p.uName}</b>
                             </div>
@@ -67,13 +66,10 @@
                             <p class="px-4 text-[11px] font-bold text-gray-400 mb-1">${p.date || ''}</p>
                             <p class="px-4 text-xs"><b>@${p.uHandle}</b> ${p.caption}</p>
                         </div>`;
-                    if(p.uid === auth.currentUser.uid) {
-                        myPosts.innerHTML += `<img src="${p.url}" class="w-full h-32 chokor border">`;
-                    }
                 });
             });
 
-            // 2. Shop Bazaar & My Private Orders
+            // 2. Shop Bazaar
             onValue(ref(db, 'products'), s => {
                 const grid = document.getElementById('shop-grid'); grid.innerHTML = "";
                 const data = s.val();
@@ -89,7 +85,49 @@
                 });
             });
 
-            // Fetch Private Orders
+            loadProfileData(auth.currentUser.uid);
+        }
+
+        // View User Profile Logic
+        window.viewUserProfile = async (uid) => {
+            viewedUid = uid;
+            loadProfileData(uid);
+            showPage('profile');
+        };
+
+        async function loadProfileData(uid) {
+            const snap = await get(ref(db, 'users/' + uid));
+            const u = snap.val();
+            
+            document.getElementById('u-name-profile').innerText = u.name;
+            document.getElementById('u-handle-profile').innerText = "@" + u.username;
+            document.getElementById('u-bio-profile').innerText = u.bio || "Royal Member 🚩";
+            document.getElementById('u-web-btn').innerText = u.website || "VISIT WEBSITE";
+            
+            // Show/Hide Edit & Private Orders (Only for self)
+            if(uid === auth.currentUser.uid) {
+                document.getElementById('profile-actions-self').classList.remove('hide');
+                document.getElementById('private-orders-section').classList.remove('hide');
+                loadPrivateOrders();
+            } else {
+                document.getElementById('profile-actions-self').classList.add('hide');
+                document.getElementById('private-orders-section').classList.add('hide');
+            }
+
+            // Load that user's posts
+            onValue(ref(db, 'posts'), s => {
+                const myPosts = document.getElementById('my-posts-grid');
+                myPosts.innerHTML = "";
+                const data = s.val();
+                if(data) Object.keys(data).forEach(k => {
+                    if(data[k].uid === uid) {
+                        myPosts.innerHTML += `<img src="${data[k].url}" class="w-full h-32 chokor border">`;
+                    }
+                });
+            });
+        }
+
+        function loadPrivateOrders() {
             onValue(ref(db, 'orders/' + auth.currentUser.uid), s => {
                 const oGrid = document.getElementById('my-orders-list'); oGrid.innerHTML = "";
                 const data = s.val();
@@ -102,48 +140,26 @@
                         </div>`;
                 });
             });
-
-            // Profile UI
-            document.getElementById('header-id').innerText = "STUDIO ID: " + userCache.username;
-            document.getElementById('u-name-profile').innerText = userCache.name;
-            document.getElementById('u-handle-profile').innerText = "@" + userCache.username;
-            document.getElementById('u-bio-profile').innerText = userCache.bio || "Royal Member 🚩";
-            document.getElementById('u-web-btn').innerText = userCache.website || "VISIT WEBSITE";
         }
-
-        // --- ORDER FLOW (PRIVATE SAVE) ---
-        window.openOrderForm = (pName, pLink) => {
-            document.getElementById('order-p-name').innerText = pName;
-            document.getElementById('order-modal').classList.remove('hide');
-            window.currentOrderLink = pLink;
-        };
 
         window.submitOrder = async () => {
             const name = document.getElementById('ord-name').value;
             const phone = document.getElementById('ord-phone').value;
             if(!name || !phone) return alert("Hukum, poora detail bhariye!");
-            
             const btn = document.getElementById('btn-ord-final');
-            btn.innerHTML = "Thambo Sa... Entry ho rahi hai 🚩";
+            btn.innerHTML = "Thambo Sa... 🚩";
             
             const orderData = {
                 product: document.getElementById('order-p-name').innerText,
-                clientName: name,
-                phone: phone,
-                date: new Date().toLocaleString(),
-                status: "Pending"
+                clientName: name, phone: phone,
+                date: new Date().toLocaleString()
             };
-
-            // Save to User's Private Orders
             await push(ref(db, 'orders/' + auth.currentUser.uid), orderData);
-            
-            alert("Order darj ho gaya! Ab website par bhej rahe hain sa.");
             window.open(window.currentOrderLink, '_blank');
             closeM('order-modal');
             btn.innerHTML = "ORDER CONFIRM KAREIN";
         };
 
-        // --- OTHER SYSTEM LOGICS (NO CHANGE) ---
         window.toggleLike = (id) => {
             const heart = document.getElementById('like-' + id);
             heart.classList.toggle('text-red-600');
@@ -168,20 +184,14 @@
             });
         }
 
-        window.saveProfile = async () => {
-            const btn = document.getElementById('btn-save-prof');
-            btn.disabled = true; btn.innerHTML = "Thambo Sa... 🚩";
-            const up = { name: document.getElementById('edit-name').value, bio: document.getElementById('edit-bio').value, website: document.getElementById('edit-web').value };
-            await update(ref(db, 'users/' + auth.currentUser.uid), up);
-            location.reload();
-        };
-
         window.showPage = (p) => {
             document.querySelectorAll('main').forEach(m => m.classList.add('hide'));
             document.getElementById('v-' + p).classList.remove('hide');
+            if(p === 'profile' && viewedUid === null) viewUserProfile(auth.currentUser.uid);
         };
         window.openM = (id) => document.getElementById(id).classList.remove('hide');
         window.closeM = (id) => document.getElementById(id).classList.add('hide');
+        window.openOrderForm = (pName, pLink) => { document.getElementById('order-p-name').innerText = pName; openM('order-modal'); window.currentOrderLink = pLink; };
 
     </script>
 
@@ -190,10 +200,10 @@
         body { font-family: 'Montserrat', sans-serif; background: #fff; }
         .hide { display: none !important; }
         .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; border: none; cursor: pointer; }
+        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; border: none; }
         .chokor { border-radius: 10px; object-fit: cover; }
-        .web-box { border: 3px solid #ea580c; background: #fff; padding: 15px; border-radius: 15px; font-weight: 900; color: #000; text-align: center; display: block; box-shadow: 6px 6px 0px #ea580c; text-decoration: none; }
-        input, textarea { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; outline: none; font-size: 13px; }
+        .web-box { border: 3px solid #ea580c; background: #fff; padding: 15px; border-radius: 15px; font-weight: 900; text-align: center; display: block; box-shadow: 6px 6px 0px #ea580c; }
+        input { border: 1.5px solid #eee !important; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; outline: none; }
         .nav-icon { font-size: 1.5rem; color: #d1d5db; cursor: pointer; }
     </style>
 </head>
@@ -203,12 +213,12 @@
         
         <header class="sticky top-0 bg-white/95 border-b p-4 flex justify-between items-center z-50">
             <div>
-                <h1 class="text-2xl font-black raj-title italic leading-none">SAINIWALAA</h1>
-                <p id="header-id" class="text-[9px] font-black text-gray-400 -mt-1 uppercase"></p>
+                <h1 class="text-2xl font-black raj-title italic leading-none" onclick="location.reload()">SAINIWALAA</h1>
+                <p class="text-[9px] font-black text-gray-400 -mt-1 uppercase">Royal Studio Culture</p>
             </div>
             <div class="flex gap-4">
                 <i class="fa-solid fa-plus-square text-orange-600 text-2xl" onclick="openM('post-modal')"></i>
-                <i class="fa-solid fa-store text-gray-400 text-2xl" onclick="openM('prod-modal')"></i>
+                <i class="fa-solid fa-store text-gray-400 text-2xl" onclick="showPage('shop')"></i>
             </div>
         </header>
 
@@ -216,31 +226,36 @@
 
         <main id="v-shop" class="hide p-4">
             <h2 class="text-xl font-black raj-title mb-6 italic">ROYAL BAZAAR 🚩</h2>
-            <div id="shop-grid" class="grid grid-cols-2 gap-4 mb-10"></div>
-            
-            <div class="mt-10 border-t pt-6">
-                <h2 class="text-lg font-black raj-title mb-4 italic">MERE ORDERS (PRIVATE) 🚩</h2>
-                <div id="my-orders-list" class="flex flex-col gap-2"></div>
-            </div>
+            <div id="shop-grid" class="grid grid-cols-2 gap-4"></div>
         </main>
 
         <main id="v-profile" class="hide">
             <div class="h-44 bg-gray-100 relative">
-                <img id="u-banner" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1590050752117-23a9d7fc2173?auto=format&fit=crop&w=500&q=60">
-                <img id="u-prof-img" class="w-28 h-28 absolute -bottom-10 left-6 border-4 border-white shadow-xl chokor bg-white">
+                <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1590050752117-23a9d7fc2173?auto=format&fit=crop&w=500&q=60">
+                <div class="w-28 h-28 absolute -bottom-10 left-6 border-4 border-white shadow-xl bg-white chokor overflow-hidden">
+                    <img id="u-prof-img" src="https://via.placeholder.com/150" class="w-full h-full object-cover">
+                </div>
             </div>
             <div class="mt-14 p-6">
                 <h2 id="u-name-profile" class="text-3xl font-black raj-title italic leading-none"></h2>
                 <p id="u-handle-profile" class="text-orange-600 font-bold text-sm mt-1"></p>
+                
                 <div class="flex gap-4 mt-4">
-                    <button class="bg-gray-100 px-4 py-1 rounded-full text-[10px] font-bold">Follow</button>
-                    <button class="bg-gray-100 px-4 py-1 rounded-full text-[10px] font-bold">Message</button>
+                    <button class="bg-orange-600 text-white px-6 py-2 rounded-xl text-[10px] font-bold uppercase">Follow</button>
+                    <button class="bg-gray-100 px-6 py-2 rounded-xl text-[10px] font-bold uppercase text-gray-600">Message</button>
                 </div>
+
                 <p id="u-bio-profile" class="text-gray-500 text-xs mt-4 italic"></p>
-                <a id="u-web-btn" href="#" target="_blank" class="web-box mt-6 uppercase font-bold"></a>
-                <div class="grid grid-cols-2 gap-3 mt-8">
+                <a id="u-web-btn" href="#" target="_blank" class="web-box mt-6 uppercase font-bold text-sm"></a>
+
+                <div id="profile-actions-self" class="grid grid-cols-2 gap-3 mt-8 hide">
                     <button onclick="openM('edit-modal')" class="bg-black text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Edit Studio</button>
                     <button onclick="signOut(auth).then(()=>location.reload())" class="bg-red-50 text-red-600 py-3 rounded-xl text-[10px] font-black uppercase">Logout</button>
+                </div>
+
+                <div id="private-orders-section" class="mt-10 border-t pt-6 hide">
+                    <h2 class="text-lg font-black raj-title mb-4 italic">MERE ORDERS (PRIVATE) 🚩</h2>
+                    <div id="my-orders-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
             <div class="border-t p-1 grid grid-cols-3 gap-1" id="my-posts-grid"></div>
@@ -249,7 +264,7 @@
         <div id="order-modal" class="fixed inset-0 bg-black/80 z-[2000] hide flex items-center justify-center p-6">
             <div class="bg-white w-full rounded-2xl p-6 shadow-2xl">
                 <h2 class="text-xl font-black raj-title mb-1 italic">ORDER FORM 🚩</h2>
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-6" id="order-p-name"></p>
+                <p id="order-p-name" class="text-[10px] font-bold text-gray-400 uppercase mb-6"></p>
                 <input type="text" id="ord-name" placeholder="Aapka Naam">
                 <input type="number" id="ord-phone" placeholder="Aapka Mobile Number">
                 <button id="btn-ord-final" onclick="submitOrder()" class="btn-royal w-full shadow-lg">ORDER CONFIRM KAREIN</button>
@@ -262,24 +277,15 @@
             <h3 class="text-sm font-black mb-4">Comments Sa...</h3>
             <div id="comment-list" class="flex-1 overflow-y-auto mb-4"></div>
             <div class="flex gap-2">
-                <input type="text" id="com-input" placeholder="Likhiye sa..." class="!mb-0">
-                <button id="btn-com-send" onclick="sendComment()" class="bg-black text-white px-6 rounded-xl font-bold italic">Send</button>
+                <input type="text" id="com-input" placeholder="Likhiye sa..." class="!mb-0 border-none bg-gray-50">
+                <button onclick="sendComment()" class="bg-black text-white px-6 rounded-xl font-bold italic">Send</button>
             </div>
-        </div>
-
-        <div id="edit-modal" class="fixed inset-0 bg-white z-[1000] hide p-8 flex flex-col justify-center">
-            <h2 class="text-2xl font-black raj-title mb-6 italic">EDIT ROYAL STUDIO</h2>
-            <input type="text" id="edit-name" placeholder="Pura Naam">
-            <input type="text" id="edit-web" placeholder="Website Link">
-            <textarea id="edit-bio" placeholder="Aapka Bio..."></textarea>
-            <button id="btn-save-prof" onclick="saveProfile()" class="btn-royal">SAVE CHANGES 🚩</button>
-            <button onclick="closeM('edit-modal')" class="mt-4 text-xs font-bold text-gray-300 w-full">CANCEL</button>
         </div>
 
         <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-5 flex justify-around z-50">
             <i onclick="showPage('feed')" class="fa-solid fa-house nav-icon"></i>
             <i onclick="showPage('shop')" class="fa-solid fa-bag-shopping nav-icon"></i>
-            <i onclick="showPage('profile')" class="fa-solid fa-crown nav-icon"></i>
+            <i onclick="viewUserProfile(auth.currentUser.uid)" class="fa-solid fa-crown nav-icon"></i>
         </nav>
     </div>
 
