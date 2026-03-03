@@ -9,7 +9,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, update, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -30,17 +30,18 @@
 
         let currentUserData = null;
 
-        // --- AUTH OBSERVER (Session Maintenance) ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const userSnap = await get(ref(db, 'users/' + user.uid));
-                if (userSnap.exists()) {
-                    currentUserData = userSnap.val();
-                    showApp();
-                } else {
-                    document.getElementById('reg-screen').classList.remove('hide');
-                    document.getElementById('auth-screen').classList.add('hide');
-                }
+                try {
+                    const userSnap = await get(ref(db, 'users/' + user.uid));
+                    if (userSnap.exists()) {
+                        currentUserData = userSnap.val();
+                        showApp();
+                    } else {
+                        document.getElementById('reg-screen').classList.remove('hide');
+                        document.getElementById('auth-screen').classList.add('hide');
+                    }
+                } catch(e) { console.error("Data error", e); }
             } else {
                 document.getElementById('auth-screen').classList.remove('hide');
                 document.getElementById('app').classList.add('hide');
@@ -48,38 +49,53 @@
             }
         });
 
-        // --- EMAIL LOGIN & REGISTER ---
+        // --- AUTH & PASSWORD RESET ---
         window.handleAuth = (mode) => {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
-            if(!email || pass.length < 6) return alert("Hukum, email aur 6-digit password zaroori hai!");
+            if(!email || (mode !== 'reset' && pass.length < 6)) return alert("Hukum, email aur password sahi bhariye!");
 
             if(mode === 'login') {
                 signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Galti: " + err.message));
-            } else {
+            } else if(mode === 'signup') {
                 createUserWithEmailAndPassword(auth, email, pass).catch(err => alert("Galti: " + err.message));
+            } else if(mode === 'reset') {
+                sendPasswordResetEmail(auth, email)
+                    .then(() => alert("🚩 Hukum, Password Reset link aapke Email par bhej diya gaya hai!"))
+                    .catch(err => alert("Galti: " + err.message));
             }
         };
 
         window.registerUser = async () => {
-            const data = {
-                name: document.getElementById('reg-name').value,
-                bio: "SainiWalaa ka Royal Sadasya 🚩",
-                uid: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                time: Date.now()
-            };
-            if(!data.name) return alert("Pura naam likhiye sa!");
-            await set(ref(db, 'users/' + auth.currentUser.uid), data);
-            location.reload();
+            const btn = document.getElementById('btn-reg-save');
+            const name = document.getElementById('reg-name').value;
+            if(!name) return alert("Pura naam likhiye sa!");
+            
+            btn.innerText = "Saving Profile... ⏳";
+            btn.disabled = true;
+
+            try {
+                const data = {
+                    name: name,
+                    bio: "SainiWalaa ka Royal Sadasya 🚩",
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    time: Date.now()
+                };
+                await set(ref(db, 'users/' + auth.currentUser.uid), data);
+                location.reload();
+            } catch(e) {
+                alert("Database Error: " + e.message);
+                btn.disabled = false;
+                btn.innerText = "SAVE PROFILE";
+            }
         };
 
-        // --- PROFILE UPDATE ---
         window.updateProfile = async () => {
             const newBio = document.getElementById('edit-bio').value;
             const newName = document.getElementById('edit-name').value;
             await update(ref(db, 'users/' + auth.currentUser.uid), { name: newName, bio: newBio });
-            alert("🚩 Mubarak! Profile update ho gayi sa.");
+            alert("Mubarak! Profile update ho gayi sa.");
             closeM('edit-profile-modal');
             location.reload();
         };
@@ -94,7 +110,6 @@
             onValue(ref(db, 'products'), snap => renderShop(snap.val()));
         }
 
-        // --- PUBLISH (IMAGE & 90s VIDEO) ---
         window.publish = async (mode) => {
             const file = document.getElementById(mode === 'post' ? 'post-file' : 'prod-file').files[0];
             const btn = document.getElementById(mode === 'post' ? 'btn-post' : 'btn-prod');
@@ -126,23 +141,19 @@
                     item.link = document.getElementById('prod-link').value || "#";
                     await push(ref(db, 'products'), item);
                 }
-                alert("🚩 Mubarak! Post live ho gayi.");
+                alert("🚩 Mubarak! Live ho gayi.");
                 closeM(mode + '-modal');
             } catch(e) { alert("Upload fail!"); }
-            btn.disabled = false;
+            btn.disabled = false; btn.innerText = "PUBLISH";
         };
 
-        // --- RENDER FUNCTIONS ---
         function renderFeed(data) {
             let h = ""; let myGrid = ""; let myCount = 0;
             if(data) {
                 Object.keys(data).reverse().forEach(k => {
                     const p = data[k];
                     const media = p.type === 'video' ? `<video src="${p.url}" controls class="w-full max-h-[500px]"></video>` : `<img src="${p.url}" class="w-full">`;
-                    h += `<div class="bg-white mb-6 border-b shadow-sm">
-                        <div class="p-4 flex justify-between"><b>🚩 ${p.uName}</b>
-                        ${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-trash text-gray-300" onclick="del('posts','${k}')"></i>` : ''}</div>
-                        ${media}<div class="p-4 text-sm"><b>${p.uName}</b> ${p.caption || ''}</div></div>`;
+                    h += `<div class="bg-white mb-6 border-b shadow-sm"><div class="p-4 flex justify-between"><b>🚩 ${p.uName}</b>${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-trash text-gray-300" onclick="del('posts','${k}')"></i>` : ''}</div>${media}<div class="p-4 text-sm"><b>${p.uName}</b> ${p.caption || ''}</div></div>`;
                     if(p.uid === auth.currentUser.uid) { myCount++; myGrid += `<img src="${p.url}" class="aspect-square object-cover border">`; }
                 });
             }
@@ -156,12 +167,7 @@
             if(data) {
                 Object.keys(data).reverse().forEach(k => {
                     const p = data[k];
-                    h += `<div class="bg-white rounded-3xl overflow-hidden shadow-lg p-2 border relative">
-                        ${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-circle-xmark absolute top-2 right-2 text-red-500" onclick="del('products','${k}')"></i>` : ''}
-                        <img src="${p.url}" class="w-full h-40 object-cover rounded-2xl">
-                        <div class="p-3 text-center"><h3 class="font-black text-red-900 text-[11px] uppercase truncate">${p.name}</h3>
-                        <div class="text-orange-600 font-bold mb-2">₹${p.price}</div>
-                        <button onclick="window.open('${p.link}')" class="w-full bg-red-800 text-white py-2 rounded-xl text-[10px] font-bold">ORDER NOW</button></div></div>`;
+                    h += `<div class="bg-white rounded-3xl overflow-hidden shadow-lg p-2 border relative">${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-circle-xmark absolute top-2 right-2 text-red-500" onclick="del('products','${k}')"></i>` : ''}<img src="${p.url}" class="w-full h-40 object-cover rounded-2xl"><div class="p-3 text-center"><h3 class="font-black text-red-900 text-[11px] uppercase truncate">${p.name}</h3><div class="text-orange-600 font-bold mb-2">₹${p.price}</div><button onclick="window.open('${p.link}')" class="w-full bg-red-800 text-white py-2 rounded-xl text-[10px] font-bold">ORDER NOW</button></div></div>`;
                 });
             }
             document.getElementById('bazaar-grid').innerHTML = h;
@@ -181,7 +187,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
         body { font-family: 'Montserrat', sans-serif; background: #fafafa; }
         .hide { display: none !important; }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 15px; padding: 15px; width: 100%; transition: 0.3s; }
+        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 15px; padding: 15px; width: 100%; transition: 0.3s; cursor: pointer; }
         input, textarea { border: 2px solid #eee !important; padding: 15px; border-radius: 15px; margin-bottom: 12px; width: 100%; outline: none; background: #fff; }
         .nav-icon { font-size: 1.5rem; color: #d1d5db; cursor: pointer; }
     </style>
@@ -193,17 +199,19 @@
         <p class="text-center text-orange-600 font-bold mb-10 tracking-widest uppercase">Royal Studio 🚩</p>
         <input type="email" id="auth-email" placeholder="Email Address">
         <input type="password" id="auth-pass" placeholder="Password (Min 6 characters)">
-        <div class="flex gap-4">
-            <button onclick="handleAuth('login')" class="btn-royal">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="btn-royal bg-black">SIGNUP</button>
+        <div class="flex flex-col gap-3">
+            <div class="flex gap-4">
+                <button onclick="handleAuth('login')" class="btn-royal">LOGIN</button>
+                <button onclick="handleAuth('signup')" class="btn-royal bg-black">SIGNUP</button>
+            </div>
+            <button onclick="handleAuth('reset')" class="text-[10px] text-red-700 font-bold uppercase tracking-widest mt-2 underline">Password Bhul Gaye? (Reset Link)</button>
         </div>
-        <p class="text-[10px] mt-6 text-gray-400 text-center">Naya user hai toh Signup karein, purana hai toh Login.</p>
     </div>
 
     <div id="reg-screen" class="w-full max-w-[450px] min-h-screen bg-white p-10 flex flex-col justify-center hide">
-        <h2 class="text-2xl font-black text-red-900 mb-8 italic uppercase">Aapka Shubh Naam?</h2>
-        <input type="text" id="reg-name" placeholder="Pura Naam">
-        <button onclick="registerUser()" class="btn-royal">SAVE PROFILE</button>
+        <h2 class="text-2xl font-black text-red-900 mb-8 italic uppercase text-center">Aapka Shubh Naam?</h2>
+        <input type="text" id="reg-name" placeholder="Yahan apna naam likhein...">
+        <button onclick="registerUser()" id="btn-reg-save" class="btn-royal">SAVE PROFILE & START</button>
     </div>
 
     <div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-24 hide">
@@ -217,19 +225,13 @@
         </header>
 
         <main id="v-feed"></main>
-        <main id="v-shop" class="p-5 hide">
-            <div class="bg-gradient-to-r from-red-900 to-orange-600 p-8 rounded-[30px] mb-6 text-white text-center">
-                <h2 class="text-2xl font-black uppercase italic">Royal Bazaar 🚩</h2>
-            </div>
-            <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
-        </main>
-
+        <main id="v-shop" class="p-5 hide"><div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div></main>
         <main id="v-profile" class="hide">
             <div class="p-10 text-center border-b">
                 <h2 id="u-display-name" class="text-2xl font-black text-red-900"></h2>
                 <p id="u-bio" class="text-gray-400 text-xs mt-2 italic"></p>
-                <div class="flex justify-center gap-10 mt-6 border-t pt-6">
-                    <div><b id="c-posts" class="text-xl">0</b><p class="text-[9px] font-bold text-gray-400">POSTS</p></div>
+                <div class="flex justify-center gap-10 mt-6 pt-6 border-t">
+                    <div><b id="c-posts" class="text-xl">0</b><p class="text-[9px] font-bold text-gray-400 uppercase">Posts</p></div>
                     <button onclick="openM('edit-profile-modal')" class="bg-gray-100 px-6 py-2 rounded-full text-[10px] font-bold">EDIT BIO</button>
                 </div>
             </div>
@@ -243,26 +245,24 @@
         </nav>
 
         <div id="post-modal" class="fixed inset-0 bg-white z-[100] hide p-10 overflow-y-auto">
-            <div class="flex justify-between items-center mb-8"><b class="text-2xl italic">NEW POST</b><i class="fa-solid fa-xmark" onclick="closeM('post-modal')"></i></div>
+            <div class="flex justify-between items-center mb-8"><b class="text-2xl">NEW POST</b><i class="fa-solid fa-xmark text-2xl" onclick="closeM('post-modal')"></i></div>
             <input type="file" id="post-file" accept="image/*,video/*">
-            <textarea id="post-cap" placeholder="Post ki jankari..." class="h-32"></textarea>
+            <textarea id="post-cap" placeholder="Post ki jankari..."></textarea>
             <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH</button>
         </div>
-
-        <div id="prod-modal" class="fixed inset-0 bg-white z-[100] hide p-10 overflow-y-auto">
-            <div class="flex justify-between items-center mb-8"><b class="text-2xl italic">ADD ITEM</b><i class="fa-solid fa-xmark" onclick="closeM('prod-modal')"></i></div>
+        <div id="prod-modal" class="fixed inset-0 bg-white z-[100] hide p-10">
             <input type="file" id="prod-file" accept="image/*">
-            <input type="text" id="prod-name" placeholder="Item ka Naam">
-            <input type="number" id="prod-price" placeholder="Keemat (₹)">
-            <input type="text" id="prod-link" placeholder="Buy Link (URL)">
-            <button onclick="publish('prod')" id="btn-prod" class="btn-royal">LIST IN BAZAAR</button>
+            <input type="text" id="prod-name" placeholder="Item Name">
+            <input type="number" id="prod-price" placeholder="Price">
+            <input type="text" id="prod-link" placeholder="Buy Link">
+            <button onclick="publish('prod')" id="btn-prod" class="btn-royal">LIST</button>
+            <button onclick="closeM('prod-modal')" class="mt-4 w-full">Cancel</button>
         </div>
-
         <div id="edit-profile-modal" class="fixed inset-0 bg-white z-[100] hide p-10">
-            <div class="flex justify-between mb-8"><b class="text-2xl italic">EDIT PROFILE</b><i class="fa-solid fa-xmark" onclick="closeM('edit-profile-modal')"></i></div>
             <input type="text" id="edit-name" placeholder="Name">
-            <textarea id="edit-bio" placeholder="Bio..." class="h-32"></textarea>
-            <button onclick="updateProfile()" class="btn-royal">UPDATE NOW</button>
+            <textarea id="edit-bio" placeholder="Bio..."></textarea>
+            <button onclick="updateProfile()" class="btn-royal">UPDATE</button>
+            <button onclick="closeM('edit-profile-modal')" class="mt-4 w-full text-gray-400">Back</button>
         </div>
     </div>
 </body>
