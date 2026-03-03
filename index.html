@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SainiWalaa - Social Bazaar</title>
+    <title>SainiWalaa - Royal Studio & Bazaar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -26,216 +26,236 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let userCache = null;
-        let viewUid = null;
+        let currentUserData = null;
 
-        // --- AUTH & INITIALIZATION ---
+        // --- AUTH TRACKER (Refresh Logic) ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const snap = await get(ref(db, `users/${user.uid}`));
-                userCache = snap.val();
-                document.getElementById('auth-screen').classList.add('hide');
-                document.getElementById('app').classList.remove('hide');
-                showPage(localStorage.getItem('last_page') || 'feed');
-                loadGlobalFeed();
+                currentUserData = snap.val();
+                if (currentUserData) {
+                    document.getElementById('auth-screen').classList.add('hide');
+                    document.getElementById('app-interface').classList.remove('hide');
+                    initApp();
+                    goPage(localStorage.getItem('active_tab') || 'feed');
+                }
             } else {
                 document.getElementById('auth-screen').classList.remove('hide');
-                document.getElementById('app').classList.add('hide');
+                document.getElementById('app-interface').classList.add('hide');
             }
         });
 
-        // --- UNIQUE ID CHECK & REGISTER ---
-        window.registerUser = async () => {
+        // --- REGISTER SYSTEM (Unique ID Check) ---
+        window.handleSignUp = async () => {
+            const name = document.getElementById('reg-name').value;
+            const uname = document.getElementById('reg-id').value.toLowerCase().trim();
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-pass').value;
-            const uname = document.getElementById('reg-id').value.toLowerCase().replace(/\s/g, '');
-            const name = document.getElementById('reg-name').value;
 
-            if(!uname || !email) return alert("Hukum, poori jankari bharo!");
+            if(!uname || !email || !pass) return alert("Hukum, saryo detail bharo!");
 
-            // Check duplicate ID
-            const idQuery = query(ref(db, 'users'), orderByChild('username'), equalTo(uname));
-            const idSnap = await get(idQuery);
-            if(idSnap.exists()) return alert("Maafi Hukum, ye ID pehle se hai!");
+            // Check if Username exists
+            const userRef = ref(db, 'users');
+            const q = query(userRef, orderByChild('username'), equalTo(uname));
+            const snap = await get(q);
+            
+            if(snap.exists()) return alert("Maafi! Ye ID pehle se hai, dooji chuno.");
 
             try {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await set(ref(db, `users/${res.user.uid}`), {
-                    uid: res.user.uid, username: uname, name: name,
-                    photo: 'https://via.placeholder.com/150', banner: 'https://images.unsplash.com/photo-1590050752117-23a9d7fc2173',
-                    bio: 'SainiWalaa Royal Member 🚩', website: ''
-                });
-                alert("Ghani Khamma! Tharo Swagat hai.");
-            } catch(e) { alert(e.message); }
+                const userData = {
+                    uid: res.user.uid,
+                    name: name,
+                    username: uname,
+                    email: email,
+                    photo: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+                    banner: "https://images.unsplash.com/photo-1579546123315-b06dd26749c0",
+                    bio: "Royal SainiWalaa Member 🚩",
+                    website: ""
+                };
+                await set(ref(db, `users/${res.user.uid}`), userData);
+                alert("Ghani Khamma! Registration ho gayo.");
+            } catch(e) { alert("Error: " + e.message); }
         };
 
-        // --- SOCIAL & SHOP LOGIC ---
-        function loadGlobalFeed() {
-            onValue(ref(db, 'posts'), s => {
-                const feed = document.getElementById('feed-container'); feed.innerHTML = "";
-                if(s.exists()) Object.entries(s.val()).reverse().forEach(([id, p]) => {
-                    feed.innerHTML += `
-                        <div class="bg-white mb-6 shadow-sm border-b">
-                            <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="visitStudio('${p.uid}')">
-                                <img src="${p.uPhoto}" class="w-10 h-10 chokor border-2 border-orange-600">
-                                <div><b class="text-sm raj-title">${p.uName}</b><p class="text-[9px] text-gray-400">@${p.uHandle}</p></div>
-                            </div>
-                            <img src="${p.url}" class="w-full bg-gray-100" loading="lazy">
-                            <div class="p-4 flex gap-5 text-2xl">
-                                <i class="fa-regular fa-heart" onclick="likePost('${id}')"></i>
-                                <i class="fa-regular fa-comment" onclick="showComments('${id}')"></i>
-                                <i class="fa-regular fa-paper-plane" onclick="sharePost('${id}')"></i>
-                            </div>
-                            <p class="px-4 pb-4 text-xs"><b>${p.uHandle}</b> ${p.caption}</p>
-                        </div>`;
-                });
+        // --- CORE APP LOGIC ---
+        function initApp() {
+            // Load Global Feed
+            onValue(ref(db, 'posts'), (s) => {
+                const container = document.getElementById('feed-list');
+                container.innerHTML = "";
+                if(s.exists()){
+                    Object.entries(s.val()).reverse().forEach(([pid, post]) => {
+                        container.innerHTML += `
+                            <div class="post-card bg-white mb-4 border-b pb-4">
+                                <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="viewStudio('${post.uid}')">
+                                    <img src="${post.uPhoto}" class="w-10 h-10 border-2 border-orange-600 shadow-sm">
+                                    <div><b class="text-sm raj-title">${post.uName}</b><p class="text-[10px] text-gray-400 font-bold">@${post.uHandle}</p></div>
+                                </div>
+                                <img src="${post.url}" class="w-full object-cover max-h-[400px] bg-gray-50">
+                                <div class="p-4">
+                                    <div class="flex gap-5 text-2xl mb-2">
+                                        <i class="fa-regular fa-heart hover:text-red-500 transition cursor-pointer"></i>
+                                        <i class="fa-regular fa-comment cursor-pointer"></i>
+                                        <i class="fa-regular fa-paper-plane cursor-pointer"></i>
+                                    </div>
+                                    <p class="text-xs"><b>${post.uHandle}</b> ${post.caption}</p>
+                                </div>
+                            </div>`;
+                    });
+                }
             });
         }
 
-        window.visitStudio = async (uid) => {
-            viewUid = uid;
-            showPage('profile');
+        window.viewStudio = async (uid) => {
+            goPage('profile');
             const snap = await get(ref(db, `users/${uid}`));
             const d = snap.val();
+            document.getElementById('prof-name').innerText = d.name;
+            document.getElementById('prof-id').innerText = `@${d.username}`;
+            document.getElementById('prof-bio').innerText = d.bio;
+            document.getElementById('prof-img').src = d.photo;
+            document.getElementById('prof-banner').src = d.banner;
             
-            document.getElementById('p-name').innerText = d.name;
-            document.getElementById('p-id').innerText = `@${d.username}`;
-            document.getElementById('p-bio').innerText = d.bio;
-            document.getElementById('p-img').src = d.photo;
-            document.getElementById('p-banner').src = d.banner;
-            document.getElementById('p-web').href = d.website || '#';
+            const isMe = uid === auth.currentUser.uid;
+            document.getElementById('my-actions').style.display = isMe ? 'flex' : 'none';
+            document.getElementById('visit-actions').style.display = isMe ? 'none' : 'flex';
 
-            // Show/Hide Edit
-            document.getElementById('edit-controls').style.display = (uid === auth.currentUser.uid) ? 'flex' : 'none';
-            
-            loadUserContent(uid);
+            // Load Shop & Posts for this user
+            loadStudioContent(uid);
         };
 
-        function loadUserContent(uid) {
+        function loadStudioContent(uid) {
+            const postGrid = document.getElementById('prof-posts');
+            const shopGrid = document.getElementById('prof-shop');
+            postGrid.innerHTML = ""; shopGrid.innerHTML = "";
+
             onValue(ref(db, 'posts'), s => {
-                const grid = document.getElementById('p-post-grid'); grid.innerHTML = "";
                 if(s.exists()) Object.values(s.val()).forEach(p => {
-                    if(p.uid === uid) grid.innerHTML += `<img src="${p.url}" class="w-full aspect-square object-cover chokor border">`;
+                    if(p.uid === uid) postGrid.innerHTML += `<img src="${p.url}" class="w-full aspect-square object-cover border">`;
                 });
             });
+
             onValue(ref(db, 'products'), s => {
-                const grid = document.getElementById('p-shop-grid'); grid.innerHTML = "";
                 if(s.exists()) Object.values(s.val()).forEach(p => {
-                    if(p.ownerUid === uid) grid.innerHTML += `
-                        <div class="bg-white border p-2 chokor shadow-sm">
-                            <img src="${p.url}" class="w-full h-32 object-cover mb-2 chokor">
-                            <b class="text-[10px] uppercase block truncate">${p.title}</b>
-                            <span class="text-orange-600 font-bold text-xs">₹${p.price}</span>
-                            <button onclick="openOrderForm('${p.title}', '${p.price}')" class="w-full bg-black text-white text-[9px] mt-2 py-1 uppercase">Order</button>
+                    if(p.ownerUid === uid) shopGrid.innerHTML += `
+                        <div class="bg-white border p-2 shadow-sm">
+                            <img src="${p.url}" class="w-full h-32 object-cover mb-2">
+                            <b class="text-[11px] block truncate uppercase">${p.name}</b>
+                            <p class="text-orange-600 font-bold">₹${p.price}</p>
+                            <button onclick="handleOrder('${p.name}')" class="w-full bg-black text-white text-[9px] py-2 mt-2 font-bold uppercase">Buy Now</button>
                         </div>`;
                 });
             });
         }
 
-        // --- ACTION TOOLS ---
-        window.openOrderForm = (title, price) => {
-            const name = prompt("Aapno Naam?");
-            const address = prompt("Aapno Pato (Address)?");
-            if(name && address) {
-                const msg = `Hukum, mhane aa chiz chahiye: ${title} (₹${price}).\nNaam: ${name}\nPato: ${address}`;
-                window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`);
-                alert("Sabar rakho, order bhej diyo!");
+        window.handleOrder = (prodName) => {
+            const cust = prompt("Apno Naam aur Pata (Address) likho:");
+            if(cust) {
+                alert("Hukum, Tharo order bhej diyo! WhatsApp khul ryo hai.");
+                window.open(`https://wa.me/91XXXXXXXXXX?text=New Order: ${prodName}\nDetails: ${cust}`);
             }
         };
 
-        window.showPage = (id) => {
-            localStorage.setItem('last_page', id);
+        window.goPage = (id) => {
+            localStorage.setItem('active_tab', id);
             document.querySelectorAll('main').forEach(m => m.classList.add('hide'));
-            document.getElementById(`v-${id}`).classList.remove('hide');
-            if(id === 'profile' && !viewUid) visitStudio(auth.currentUser.uid);
+            document.getElementById(`page-${id}`).classList.remove('hide');
+            // Active nav color logic here if needed
         };
 
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;700;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fafafa; overflow-x: hidden; }
+        body { font-family: 'Montserrat', sans-serif; background: #fafafa; color: #1a1a1a; }
         .hide { display: none !important; }
-        .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .chokor { border-radius: 2px; }
-        .nav-active { color: #ea580c !important; border-top: 3px solid #ea580c; }
-        .btn-royal { background: #000; color: #fff; padding: 12px; font-weight: 900; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        input, textarea { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; width: 100%; outline: none; font-size: 13px; border-radius: 4px; }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 900; border-bottom: 2px solid transparent; }
-        .tab-btn.active { border-bottom-color: #ea580c; color: #ea580c; }
+        .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #800000, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .btn-royal { background: #000; color: #fff; padding: 14px; font-weight: 900; border-radius: 4px; text-transform: uppercase; width: 100%; border: none; cursor: pointer; }
+        input { border: 2px solid #f1f1f1; padding: 12px; margin-bottom: 12px; width: 100%; border-radius: 4px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #ea580c; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 15px; z-index: 1000; }
+        .nav-item { font-size: 1.4rem; color: #ccc; cursor: pointer; transition: 0.3s; }
+        .nav-item:hover { color: #ea580c; }
+        .studio-tab { flex: 1; text-align: center; padding: 10px; font-size: 12px; font-weight: 900; border-bottom: 3px solid transparent; cursor: pointer; }
+        .tab-active { border-bottom-color: #ea580c; color: #ea580c; }
     </style>
 </head>
 <body class="flex justify-center">
 
-    <div id="app" class="w-full max-w-[480px] min-h-screen bg-white relative pb-20 shadow-2xl hide">
+    <div id="auth-screen" class="w-full max-w-[480px] min-h-screen bg-white p-10 flex flex-col justify-center hide">
+        <h1 class="text-5xl font-black raj-title text-center mb-2 italic">SAINIWALAA</h1>
+        <p class="text-[10px] text-center font-bold text-gray-300 tracking-[4px] mb-12 uppercase">Royal Social Bazaar</p>
+        
+        <div id="login-form">
+            <input type="email" id="log-email" placeholder="Email">
+            <input type="password" id="log-pass" placeholder="Password">
+            <button onclick="signInWithEmailAndPassword(getAuth(), document.getElementById('log-email').value, document.getElementById('log-pass').value)" class="btn-royal">ENTER STUDIO 🚩</button>
+            <p class="mt-6 text-center text-xs text-gray-400 cursor-pointer" onclick="document.getElementById('login-form').classList.add('hide'); document.getElementById('reg-form').classList.remove('hide')">Naya ho? Registration Karo</p>
+        </div>
+
+        <div id="reg-form" class="hide">
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="text" id="reg-id" placeholder="Unique Studio ID (e.g. saini01)">
+            <input type="email" id="reg-email" placeholder="Email">
+            <input type="password" id="reg-pass" placeholder="Password">
+            <button onclick="handleSignUp()" class="btn-royal">JOIN NOW 🚩</button>
+            <p class="mt-6 text-center text-xs text-gray-400 cursor-pointer" onclick="document.getElementById('reg-form').classList.add('hide'); document.getElementById('login-form').classList.remove('hide')">Pehle se ho? Login Karo</p>
+        </div>
+    </div>
+
+    <div id="app-interface" class="w-full max-w-[480px] min-h-screen bg-white relative pb-20 shadow-2xl hide">
         
         <header class="sticky top-0 bg-white/95 border-b p-4 flex justify-between items-center z-50">
-            <h1 class="text-2xl font-black raj-title italic" onclick="showPage('feed')">SAINIWALAA</h1>
-            <div class="flex gap-4 items-center">
-                <i class="fa-solid fa-magnifying-glass text-gray-400" onclick="alert('Search feature loading...')"></i>
-                <i class="fa-solid fa-bell text-gray-400"></i>
+            <h1 class="text-2xl font-black raj-title italic cursor-pointer" onclick="goPage('feed')">SAINIWALAA</h1>
+            <div class="flex gap-4">
+                <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                <i class="fa-solid fa-circle-plus text-orange-600 text-2xl" onclick="alert('Post tool loading...')"></i>
             </div>
         </header>
 
-        <main id="v-feed" class="p-1">
-            <div id="feed-container"></div>
+        <main id="page-feed">
+            <div id="feed-list"></div>
         </main>
 
-        <main id="v-profile" class="hide">
-            <div class="h-48 bg-gray-200 relative">
-                <img id="p-banner" class="w-full h-full object-cover">
-                <img id="p-img" class="w-28 h-28 absolute -bottom-10 left-6 border-4 border-white chokor bg-white object-cover shadow-lg">
+        <main id="page-profile" class="hide">
+            <div class="h-44 bg-gray-100 relative">
+                <img id="prof-banner" class="w-full h-full object-cover">
+                <img id="prof-img" class="w-24 h-24 absolute -bottom-10 left-6 border-4 border-white shadow-xl bg-white object-cover">
             </div>
-            
-            <div class="mt-14 p-6">
+
+            <div class="mt-12 p-6">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h2 id="p-name" class="text-2xl font-black raj-title leading-none"></h2>
-                        <p id="p-id" class="text-xs text-gray-400 font-bold mt-1"></p>
+                        <h2 id="prof-name" class="text-2xl font-black raj-title"></h2>
+                        <p id="prof-id" class="text-xs font-bold text-gray-400"></p>
                     </div>
-                    <div id="edit-controls" class="flex gap-2">
-                        <button onclick="alert('Hukum, Edit tool jaldi aave!')" class="bg-gray-100 p-2 text-[10px] font-bold px-4">EDIT</button>
-                        <button onclick="signOut(auth)" class="bg-red-50 text-red-600 p-2 text-[10px] font-bold px-4">LOGOUT</button>
+                    <div id="my-actions" class="flex gap-2">
+                        <button onclick="alert('Edit logic loading...')" class="bg-gray-100 px-4 py-2 text-[10px] font-bold">EDIT</button>
+                        <button onclick="signOut(getAuth())" class="bg-red-50 text-red-600 px-4 py-2 text-[10px] font-bold uppercase">Logout</button>
+                    </div>
+                    <div id="visit-actions" class="hide">
+                        <button class="bg-black text-white px-8 py-2 text-[10px] font-bold uppercase shadow-lg">Follow 🚩</button>
                     </div>
                 </div>
-                <p id="p-bio" class="text-xs mt-4 text-gray-600 italic"></p>
-                <a id="p-web" href="#" class="block mt-4 border-2 border-black p-3 text-center font-black text-xs chokor hover:bg-black hover:text-white transition">VISIT WEBSITE</a>
+                <p id="prof-bio" class="text-xs mt-4 text-gray-600 leading-relaxed"></p>
+                <div class="mt-6 border-2 border-black p-4 text-center text-xs font-black hover:bg-black hover:text-white transition cursor-pointer uppercase tracking-widest">Visit Website</div>
             </div>
 
-            <div class="flex border-t border-b bg-gray-50">
-                <div class="tab-btn active" onclick="document.getElementById('p-post-grid').classList.remove('hide'); document.getElementById('p-shop-grid').classList.add('hide'); document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active'))">POSTS</div>
-                <div class="tab-btn" onclick="document.getElementById('p-post-grid').classList.add('hide'); document.getElementById('p-shop-grid').classList.remove('hide'); document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active'))">ROYAL BAZAAR</div>
+            <div class="flex border-t border-b sticky top-[65px] bg-white z-40">
+                <div class="studio-tab tab-active" id="tab-p" onclick="document.getElementById('prof-posts').classList.remove('hide'); document.getElementById('prof-shop').classList.add('hide'); this.classList.add('tab-active'); document.getElementById('tab-s').classList.remove('tab-active')">SOCIAL POSTS</div>
+                <div class="studio-tab" id="tab-s" onclick="document.getElementById('prof-posts').classList.add('hide'); document.getElementById('prof-shop').classList.remove('hide'); this.classList.add('tab-active'); document.getElementById('tab-p').classList.remove('tab-active')">ROYAL BAZAAR</div>
             </div>
 
-            <div id="p-post-grid" class="grid grid-cols-3 gap-1 p-1"></div>
-            <div id="p-shop-grid" class="grid grid-cols-2 gap-2 p-4 hide"></div>
+            <div id="prof-posts" class="grid grid-cols-3 gap-1 p-1"></div>
+            <div id="prof-shop" class="grid grid-cols-2 gap-3 p-4 hide"></div>
         </main>
 
-        <nav class="fixed bottom-0 w-full max-w-[480px] bg-white border-t flex justify-around py-4 z-50">
-            <i onclick="showPage('feed')" class="fa-solid fa-house text-xl text-gray-300 cursor-pointer"></i>
-            <i onclick="alert('Post tool loading...')" class="fa-solid fa-square-plus text-2xl text-orange-600 cursor-pointer"></i>
-            <i onclick="showPage('profile')" class="fa-solid fa-crown text-xl text-gray-300 cursor-pointer"></i>
+        <nav class="nav-bar">
+            <i class="fa-solid fa-house nav-item" onclick="goPage('feed')"></i>
+            <i class="fa-solid fa-bag-shopping nav-item" onclick="goPage('shop-global')"></i>
+            <i class="fa-solid fa-crown nav-item" onclick="viewStudio(getAuth().currentUser.uid)"></i>
         </nav>
-    </div>
-
-    <div id="auth-screen" class="w-full max-w-[480px] min-h-screen bg-white p-10 flex flex-col justify-center text-center hide">
-        <h1 class="text-5xl font-black raj-title mb-10 italic">SAINIWALAA</h1>
-        
-        <div id="login-box">
-            <input type="email" id="log-email" placeholder="Email">
-            <input type="password" id="log-pass" placeholder="Password">
-            <button onclick="signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value)" class="btn-royal w-full">Kholo Studio 🚩</button>
-            <p class="mt-6 text-xs text-gray-400" onclick="document.getElementById('login-box').classList.add('hide'); document.getElementById('reg-box').classList.remove('hide')">Naya ho? Register Karo</p>
-        </div>
-
-        <div id="reg-box" class="hide">
-            <input type="text" id="reg-id" placeholder="Unique Studio ID (e.g. saini01)">
-            <input type="text" id="reg-name" placeholder="Full Name">
-            <input type="email" id="reg-email" placeholder="Email">
-            <input type="password" id="reg-pass" placeholder="Password">
-            <button onclick="registerUser()" class="btn-royal w-full">Register Karo 🚩</button>
-            <p class="mt-6 text-xs text-gray-400" onclick="document.getElementById('reg-box').classList.add('hide'); document.getElementById('login-box').classList.remove('hide')">Pehle se ho? Login Karo</p>
-        </div>
     </div>
 
 </body>
