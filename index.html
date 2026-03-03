@@ -1,261 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SainiWalaa - Royal Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root { --p: #ef828a; --s: #FF9933; }
-        body { background: #fafafa; font-family: -apple-system, sans-serif; overflow-x: hidden; }
-        .hide { display: none !important; }
-        .active-nav { color: var(--s) !important; }
-        .insta-border { border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #f093fb, #f5576c) border-box; }
-        .heart-pop { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: white; font-size: 80px; transition: 0.3s; pointer-events: none; }
-        .heart-pop.animate { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    </style>
-</head>
-<body class="flex justify-center">
+// --- CONFIGURATION ---
+const API = "https://script.google.com/macros/s/AKfycbwhMBFBY0WFDz4e1J_j35tYMCYDeVGsJBKRO8HHRELDmKh_NTuRCSmaJSW0vpwxnbrdrw/exec";
+const CLOUD_NAME = "dprl2lyih"; 
+const UPLOAD_PRESET = "sainiwalaa_preset"; 
 
-<div id="app" class="w-full max-w-[450px] min-h-screen bg-white shadow-2xl relative pb-20">
+// Global Data Storage
+window.SAINI_DATA = { posts: [], products: [] };
+
+// 1. FETCH DATA (Page load hote hi data lana)
+async function fetchData() {
+    try {
+        const res = await fetch(API + "?action=getData");
+        const data = await res.json();
+        window.SAINI_DATA = data;
+        renderFeed();
+        renderShop();
+        renderProfile();
+    } catch(e) { console.error("Sync Error"); }
+}
+
+// 2. REAL-TIME PUBLISH LOGIC (Sabse Important Fix)
+async function publishData() {
+    const fileInput = document.getElementById('up-file');
+    const file = fileInput.files[0];
+    const title = document.getElementById('up-title').value.trim();
+    const type = document.getElementById('up-type').value;
+    const price = document.getElementById('up-price').value || 0;
+    const desc = document.getElementById('up-desc').value || "";
+    const weblink = document.getElementById('up-weblink').value || "";
+    const btn = document.getElementById('btn-pub');
+    const st = document.getElementById('up-status');
+
+    if(!file || !title) return alert("Hukum! Photo aur Title bharna zaroori hai.");
     
-    <header class="sticky top-0 bg-white/95 backdrop-blur-md z-[100] border-b p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-black italic text-orange-700">SainiWalaa</h1>
-        <div class="flex gap-5 text-xl text-orange-800">
-            <i class="fa-solid fa-square-plus" onclick="openM('add-modal')"></i>
-            <i class="fa-solid fa-heart"></i>
-            <i class="fa-solid fa-right-from-bracket text-red-500" onclick="logout()"></i>
-        </div>
-    </header>
+    // UI Loading State
+    btn.disabled = true;
+    btn.innerText = "Publishing... ⏳";
+    st.innerText = "Uploading to Cloudinary... ☁️";
 
-    <main id="v-feed" class="space-y-4 pt-2"></main>
-
-    <main id="v-shop" class="p-4 hide">
-        <h2 class="font-black text-orange-900 mb-4 tracking-tighter uppercase">🚩 Royal Bazaar</h2>
-        <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
-    </main>
-
-    <main id="v-profile" class="hide">
-        <div class="p-6">
-            <div class="flex items-center gap-8 mb-4">
-                <div class="w-20 h-20 rounded-full insta-border p-1">
-                    <img id="p-avatar" src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
-                </div>
-                <div class="flex gap-4 text-center text-xs">
-                    <div><b id="c-posts">0</b><p class="text-gray-400">Posts</p></div>
-                    <div><b>12.5k</b><p class="text-gray-400">Fans</p></div>
-                    <div><b>840</b><p class="text-gray-400">Orders</p></div>
-                </div>
-            </div>
-            <h2 class="font-bold text-sm">SainiWalaa Studio</h2>
-            <p class="text-[11px] text-gray-500">Artist & Creator | Jaipur Heritage 🌸</p>
-            <div class="flex gap-2 mt-4">
-                <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Edit Studio</button>
-                <button class="flex-1 bg-gray-100 py-1.5 rounded-lg font-bold text-xs">Analytics</button>
-            </div>
-        </div>
-        <div class="flex border-t text-[10px] font-bold text-gray-400">
-            <button class="flex-1 py-3 border-b-2 border-black text-black uppercase" onclick="showPage('profile')">My Posts</button>
-            <button class="flex-1 py-3 uppercase" onclick="showPage('shop')">Inventory</button>
-        </div>
-        <div id="profile-grid" class="grid grid-cols-3 gap-1"></div>
-    </main>
-
-    <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t flex justify-around p-3 z-[100] shadow-2xl">
-        <i onclick="showPage('feed')" id="n-feed" class="fa-solid fa-house text-2xl active-nav"></i>
-        <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300"></i>
-        <i onclick="showPage('shop')" id="n-shop" class="fa-solid fa-bag-shopping text-2xl text-gray-300"></i>
-        <i class="fa-solid fa-clapperboard text-2xl text-gray-300"></i>
-        <i onclick="showPage('profile')" id="n-profile" class="fa-solid fa-circle-user text-2xl text-gray-300"></i>
-    </nav>
-
-</div>
-
-<div id="order-modal" class="fixed inset-0 bg-black/50 z-[3000] hide flex items-center justify-center p-6">
-    <div class="bg-white w-full rounded-3xl p-6 shadow-2xl">
-        <h2 class="text-xl font-bold mb-4">Confirm Order 📦</h2>
-        <div class="space-y-3">
-            <input type="hidden" id="ord-pid">
-            <input type="text" id="ord-name" placeholder="Aapko Naam" class="w-full p-4 border rounded-xl outline-none">
-            <input type="number" id="ord-mob" placeholder="Mobile Number" class="w-full p-4 border rounded-xl outline-none">
-            <textarea id="ord-addr" placeholder="Full Address" class="w-full p-4 border rounded-xl outline-none h-24"></textarea>
-            <button onclick="placeOrder()" id="btn-order" class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold">SEND ORDER</button>
-            <button onclick="closeM('order-modal')" class="w-full text-gray-400 text-sm">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<div id="add-modal" class="fixed inset-0 bg-white z-[2000] hide p-8">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-xl font-bold">Create New</h2>
-        <i class="fa-solid fa-xmark text-2xl" onclick="closeM('add-modal')"></i>
-    </div>
-    <div class="space-y-4">
-        <select id="up-type" class="w-full p-4 bg-orange-50 rounded-xl outline-none font-bold text-orange-800">
-            <option value="post">Social Post</option>
-            <option value="shop">List in Bazaar (Shop)</option>
-        </select>
+    try {
+        // STEP A: Cloudinary Upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
         
-        <div class="relative w-full h-32 border-2 border-dashed border-orange-100 rounded-xl flex flex-col items-center justify-center bg-orange-50">
-            <i class="fa-solid fa-image text-3xl text-orange-300"></i>
-            <span class="text-[10px] mt-2 font-bold text-orange-800">CLICK TO UPLOAD PHOTO</span>
-            <input type="file" id="up-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
-        </div>
+        const cRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:"POST", body:formData});
+        const cData = await cRes.json();
+        if(!cData.secure_url) throw new Error("Cloud Error");
 
-        <input type="text" id="up-title" placeholder="Caption or Product Name" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
-        <input type="number" id="up-price" placeholder="Price (₹) for Shop" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
-        <input type="text" id="up-weblink" placeholder="External Web Link (Optional)" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
-        <textarea id="up-desc" placeholder="Product Description" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none h-20"></textarea>
+        // STEP B: REAL-TIME UI UPDATE (Bina wait kiye screen par dikhana)
+        // Hum ek naya array banayenge jo Sheet ke format [ID, UID, Name...] se match kare
+        const currentTime = new Date().toISOString();
+        const tempId = Date.now();
         
-        <button id="btn-pub" onclick="publishData()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black shadow-lg">KHAMA GHANI (POST)</button>
-        <p id="up-status" class="text-center text-[10px] text-orange-600 font-bold"></p>
-    </div>
-</div>
-
-<script>
-    const API = "https://script.google.com/macros/s/AKfycbwhMBFBY0WFDz4e1J_j35tYMCYDeVGsJBKRO8HHRELDmKh_NTuRCSmaJSW0vpwxnbrdrw/exec";
-    const CLOUD_NAME = "dprl2lyih"; 
-    const UPLOAD_PRESET = "sainiwalaa_preset"; // Yeh Cloudinary me 'Unsigned' wala hona chahiye
-
-    // Fetch Data from Sheet on Load
-    async function fetchData() {
-        try {
-            const res = await fetch(API + "?action=getData");
-            const data = await res.json();
-            localStorage.setItem('SAINI_LIVE_DB', JSON.stringify({ items: data.products, posts: data.posts }));
+        if(type === 'post') {
+            // [PostID, UID, MediaURL, MediaType, Caption, Date]
+            const newPost = [tempId, 'Admin', cData.secure_url, 'image', title, currentTime];
+            window.SAINI_DATA.posts.unshift(newPost); // Naya post sabse upar
             renderFeed();
-        } catch(e) { console.log("Offline mode"); renderFeed(); }
-    }
-
-    function showPage(p) {
-        ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
-        ['feed','shop','profile'].forEach(n => document.getElementById('n-'+n).classList.remove('active-nav'));
-        document.getElementById('v-'+p).classList.remove('hide');
-        document.getElementById('n-'+p).classList.add('active-nav');
-        if(p === 'shop') renderShop();
-        if(p === 'profile') renderProfile();
-    }
-
-    function openM(id) { document.getElementById(id).classList.remove('hide'); }
-    function closeM(id) { document.getElementById(id).classList.add('hide'); }
-
-    // Upload & Publish Logic
-    async function publishData() {
-        const file = document.getElementById('up-file').files[0];
-        const btn = document.getElementById('btn-pub');
-        const st = document.getElementById('up-status');
-
-        if(!file) return alert("Hukum! Photo chunna zaroori hai.");
-        
-        btn.disabled = true;
-        btn.innerText = "Processing... ⏳";
-        st.innerText = "Uploading to Cloudinary...";
-
-        try {
-            // 1. Upload to Cloudinary
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', UPLOAD_PRESET);
-            const cRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:"POST", body:formData});
-            const cData = await cRes.json();
-
-            // 2. Save to Google Sheet
-            st.innerText = "Saving to Royal Sheet...";
-            const payload = {
-                action: document.getElementById('up-type').value === 'post' ? "addPost" : "listProduct",
-                uid: localStorage.getItem('s_uid') || 'Admin',
-                name: document.getElementById('up-title').value,
-                price: document.getElementById('up-price').value,
-                desc: document.getElementById('up-desc').value,
-                weblink: document.getElementById('up-weblink').value,
-                img: cData.secure_url
-            };
-
-            await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-            alert("Success sa!");
-            location.reload();
-        } catch(e) {
-            alert("Error: Check Cloudinary Preset");
-            btn.disabled = false;
+            showPage('feed');
+        } else {
+            // [PID, SellerUID, Name, Price, Description, WebLink, ImageURL, Status, Date]
+            const newProd = [tempId, 'Admin', title, price, desc, weblink, cData.secure_url, 'show', currentTime];
+            window.SAINI_DATA.products.unshift(newProd); // Naya product sabse upar
+            renderShop();
+            showPage('shop');
         }
-    }
 
-    // Rendering Functions
-    function renderFeed() {
-        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { posts: [] };
-        let h = "";
-        db.posts.forEach(p => {
-            h += `<div class="border-b bg-white relative">
-                <div class="p-3 flex items-center gap-2"><div class="w-7 h-7 bg-orange-500 rounded-full"></div><b class="text-xs">SainiWalaa</b></div>
-                <div class="relative overflow-hidden" ondblclick="animateLike(this)">
-                    <img src="${p[2]}" class="w-full h-[400px] object-cover">
-                    <i class="fa-solid fa-heart heart-pop"></i>
-                </div>
-                <div class="p-4">
-                    <div class="flex gap-4 text-2xl mb-2 text-orange-800"><i class="fa-regular fa-heart"></i><i class="fa-regular fa-comment"></i></div>
-                    <p class="text-sm font-medium"><b>SainiWalaa</b> ${p[4]}</p>
+        // STEP C: Background Save to Google Sheet
+        st.innerText = "Syncing with Database... ✅";
+        const payload = {
+            action: type === 'post' ? "addPost" : "listProduct",
+            uid: 'Admin',
+            name: title,
+            price: price,
+            desc: desc,
+            weblink: weblink,
+            img: cData.secure_url,
+            url: cData.secure_url,
+            mType: 'image',
+            cap: title
+        };
+
+        // No-cors fetch (background process)
+        fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+
+        // Finalize
+        alert("Khama Ghani! Maal turant list ho gaya hai.");
+        closeM('add-modal');
+        resetForm();
+
+    } catch(e) {
+        alert("Error: Check Cloudinary Preset Settings");
+        console.error(e);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "KHAMA GHANI (POST)";
+        st.innerText = "";
+    }
+}
+
+// 3. RENDER SHOP (Updated for Real-time array)
+function renderShop() {
+    const items = window.SAINI_DATA.products || [];
+    let h = "";
+    items.forEach(p => {
+        if(p[7] !== 'hide') {
+            h += `
+            <div class="relative bg-white border rounded-3xl overflow-hidden shadow-sm">
+                <img src="${p[6]}" class="w-full h-40 object-cover">
+                <div class="p-3 text-center">
+                    <b class="text-[10px] block truncate text-orange-900">${p[2]}</b>
+                    <b class="text-orange-700 text-sm">₹${p[3]}</b>
+                    <button onclick="openOrder('${p[0]}')" class="w-full bg-black text-white text-[10px] mt-2 py-2 rounded-xl font-bold">ORDER NOW</button>
                 </div>
             </div>`;
-        });
-        document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-400'>No posts sa!</p>";
-    }
+        }
+    });
+    document.getElementById('bazaar-grid').innerHTML = h || "<p class='col-span-2 text-center py-10 text-gray-400 font-bold'>Bazaar Khali Hai sa!</p>";
+}
 
-    function renderShop() {
-        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { items: [] };
-        let h = "";
-        db.items.forEach(p => {
-            if(p[7] === 'show') {
-                h += `<div class="relative bg-white border rounded-3xl overflow-hidden shadow-sm">
-                    <img src="${p[6]}" class="w-full h-40 object-cover">
-                    <div class="p-3 text-center">
-                        <b class="text-[10px] block truncate">${p[2]}</b>
-                        <b class="text-orange-700 text-sm">₹${p[3]}</b>
-                        <button onclick="openOrder('${p[0]}')" class="w-full bg-black text-white text-[10px] mt-2 py-2 rounded-xl">ORDER NOW</button>
-                    </div>
-                </div>`;
-            }
-        });
-        document.getElementById('bazaar-grid').innerHTML = h;
-    }
-
-    function renderProfile() {
-        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { posts: [] };
-        document.getElementById('c-posts').innerText = db.posts.length;
-        let h = "";
-        db.posts.forEach(p => h += `<img src="${p[2]}" class="aspect-square object-cover">`);
-        document.getElementById('profile-grid').innerHTML = h;
-    }
-
-    function openOrder(pid) { 
-        document.getElementById('ord-pid').value = pid;
-        openM('order-modal'); 
-    }
-
-    async function placeOrder() {
-        const btn = document.getElementById('btn-order');
-        btn.disabled = true;
-        const payload = {
-            action: "placeOrder",
-            pid: document.getElementById('ord-pid').value,
-            bName: document.getElementById('ord-name').value,
-            bMobile: document.getElementById('ord-mob').value,
-            bAddr: document.getElementById('ord-addr').value
-        };
-        await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-        alert("Order Placed! 🚩");
-        location.reload();
-    }
-
-    function animateLike(el) {
-        const heart = el.querySelector('.heart-pop');
-        heart.classList.add('animate');
-        setTimeout(() => heart.classList.remove('animate'), 800);
-    }
-
-    function logout() { localStorage.clear(); location.reload(); }
-
-    window.onload = fetchData;
-</script>
-</body>
-</html>
+// Form Reset Helper
+function resetForm() {
+    document.getElementById('up-title').value = "";
+    document.getElementById('up-price').value = "";
+    document.getElementById('up-desc').value = "";
+    document.getElementById('up-weblink').value = "";
+    document.getElementById('up-file').value = "";
+    document.getElementById('up-preview').classList.add('hide');
+    document.getElementById('up-icon').classList.remove('hide');
+    document.getElementById('up-text').classList.remove('hide');
+}
