@@ -12,8 +12,6 @@
         .hide { display: none !important; }
         .active-nav { color: var(--s) !important; }
         .insta-border { border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #f093fb, #f5576c) border-box; }
-        .post-img { aspect-ratio: 1/1; object-fit: cover; width: 100%; border-radius: 4px; }
-        /* Like Heart Animation */
         .heart-pop { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: white; font-size: 80px; transition: 0.3s; pointer-events: none; }
         .heart-pop.animate { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
     </style>
@@ -42,7 +40,7 @@
         <div class="p-6">
             <div class="flex items-center gap-8 mb-4">
                 <div class="w-20 h-20 rounded-full insta-border p-1">
-                    <img src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
+                    <img id="p-avatar" src="https://via.placeholder.com/150" class="rounded-full w-full h-full object-cover">
                 </div>
                 <div class="flex gap-4 text-center text-xs">
                     <div><b id="c-posts">0</b><p class="text-gray-400">Posts</p></div>
@@ -58,7 +56,7 @@
             </div>
         </div>
         <div class="flex border-t text-[10px] font-bold text-gray-400">
-            <button class="flex-1 py-3 border-b-2 border-black text-black uppercase">My Posts</button>
+            <button class="flex-1 py-3 border-b-2 border-black text-black uppercase" onclick="showPage('profile')">My Posts</button>
             <button class="flex-1 py-3 uppercase" onclick="showPage('shop')">Inventory</button>
         </div>
         <div id="profile-grid" class="grid grid-cols-3 gap-1"></div>
@@ -74,6 +72,20 @@
 
 </div>
 
+<div id="order-modal" class="fixed inset-0 bg-black/50 z-[3000] hide flex items-center justify-center p-6">
+    <div class="bg-white w-full rounded-3xl p-6 shadow-2xl">
+        <h2 class="text-xl font-bold mb-4">Confirm Order 📦</h2>
+        <div class="space-y-3">
+            <input type="hidden" id="ord-pid">
+            <input type="text" id="ord-name" placeholder="Aapko Naam" class="w-full p-4 border rounded-xl outline-none">
+            <input type="number" id="ord-mob" placeholder="Mobile Number" class="w-full p-4 border rounded-xl outline-none">
+            <textarea id="ord-addr" placeholder="Full Address" class="w-full p-4 border rounded-xl outline-none h-24"></textarea>
+            <button onclick="placeOrder()" id="btn-order" class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold">SEND ORDER</button>
+            <button onclick="closeM('order-modal')" class="w-full text-gray-400 text-sm">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <div id="add-modal" class="fixed inset-0 bg-white z-[2000] hide p-8">
     <div class="flex justify-between items-center mb-8">
         <h2 class="text-xl font-bold">Create New</h2>
@@ -84,18 +96,37 @@
             <option value="post">Social Post</option>
             <option value="shop">List in Bazaar (Shop)</option>
         </select>
-        <input type="text" id="up-url" placeholder="Cloudinary Link / Image URL" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
+        
+        <div class="relative w-full h-32 border-2 border-dashed border-orange-100 rounded-xl flex flex-col items-center justify-center bg-orange-50">
+            <i class="fa-solid fa-image text-3xl text-orange-300"></i>
+            <span class="text-[10px] mt-2 font-bold text-orange-800">CLICK TO UPLOAD PHOTO</span>
+            <input type="file" id="up-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+        </div>
+
         <input type="text" id="up-title" placeholder="Caption or Product Name" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
         <input type="number" id="up-price" placeholder="Price (₹) for Shop" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
-        <button onclick="publishData()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black shadow-lg">KHAMA GHANI (POST)</button>
+        <input type="text" id="up-weblink" placeholder="External Web Link (Optional)" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none">
+        <textarea id="up-desc" placeholder="Product Description" class="w-full p-4 border-2 border-orange-50 rounded-xl outline-none h-20"></textarea>
+        
+        <button id="btn-pub" onclick="publishData()" class="w-full bg-orange-600 text-white p-4 rounded-xl font-black shadow-lg">KHAMA GHANI (POST)</button>
+        <p id="up-status" class="text-center text-[10px] text-orange-600 font-bold"></p>
     </div>
 </div>
 
 <script>
-    // System Database
-    let DB = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { items: [] };
+    const API = "https://script.google.com/macros/s/AKfycbwhMBFBY0WFDz4e1J_j35tYMCYDeVGsJBKRO8HHRELDmKh_NTuRCSmaJSW0vpwxnbrdrw/exec";
+    const CLOUD_NAME = "dprl2lyih"; 
+    const UPLOAD_PRESET = "sainiwalaa_preset"; // Yeh Cloudinary me 'Unsigned' wala hona chahiye
 
-    function save() { localStorage.setItem('SAINI_LIVE_DB', JSON.stringify(DB)); }
+    // Fetch Data from Sheet on Load
+    async function fetchData() {
+        try {
+            const res = await fetch(API + "?action=getData");
+            const data = await res.json();
+            localStorage.setItem('SAINI_LIVE_DB', JSON.stringify({ items: data.products, posts: data.posts }));
+            renderFeed();
+        } catch(e) { console.log("Offline mode"); renderFeed(); }
+    }
 
     function showPage(p) {
         ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
@@ -109,78 +140,111 @@
     function openM(id) { document.getElementById(id).classList.remove('hide'); }
     function closeM(id) { document.getElementById(id).classList.add('hide'); }
 
-    // Core Logic
-    function publishData() {
-        const item = {
-            id: Date.now(),
-            type: document.getElementById('up-type').value,
-            url: document.getElementById('up-url').value,
-            title: document.getElementById('up-title').value,
-            price: document.getElementById('up-price').value || 0,
-            status: 'show', // Show/Hide Logic
-            likes: 0
-        };
-        DB.items.unshift(item);
-        save();
-        closeM('add-modal');
-        renderFeed();
+    // Upload & Publish Logic
+    async function publishData() {
+        const file = document.getElementById('up-file').files[0];
+        const btn = document.getElementById('btn-pub');
+        const st = document.getElementById('up-status');
+
+        if(!file) return alert("Hukum! Photo chunna zaroori hai.");
+        
+        btn.disabled = true;
+        btn.innerText = "Processing... ⏳";
+        st.innerText = "Uploading to Cloudinary...";
+
+        try {
+            // 1. Upload to Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            const cRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:"POST", body:formData});
+            const cData = await cRes.json();
+
+            // 2. Save to Google Sheet
+            st.innerText = "Saving to Royal Sheet...";
+            const payload = {
+                action: document.getElementById('up-type').value === 'post' ? "addPost" : "listProduct",
+                uid: localStorage.getItem('s_uid') || 'Admin',
+                name: document.getElementById('up-title').value,
+                price: document.getElementById('up-price').value,
+                desc: document.getElementById('up-desc').value,
+                weblink: document.getElementById('up-weblink').value,
+                img: cData.secure_url
+            };
+
+            await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            alert("Success sa!");
+            location.reload();
+        } catch(e) {
+            alert("Error: Check Cloudinary Preset");
+            btn.disabled = false;
+        }
     }
 
-    function toggleStatus(id) {
-        const i = DB.items.find(x => x.id === id);
-        i.status = (i.status === 'show') ? 'hide' : 'show';
-        save();
-        renderShop();
-    }
-
+    // Rendering Functions
     function renderFeed() {
+        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { posts: [] };
         let h = "";
-        DB.items.forEach(p => {
-            h += `
-            <div class="border-b bg-white relative">
+        db.posts.forEach(p => {
+            h += `<div class="border-b bg-white relative">
                 <div class="p-3 flex items-center gap-2"><div class="w-7 h-7 bg-orange-500 rounded-full"></div><b class="text-xs">SainiWalaa</b></div>
                 <div class="relative overflow-hidden" ondblclick="animateLike(this)">
-                    <img src="${p.url}" class="w-full h-[400px] object-cover">
+                    <img src="${p[2]}" class="w-full h-[400px] object-cover">
                     <i class="fa-solid fa-heart heart-pop"></i>
                 </div>
                 <div class="p-4">
-                    <div class="flex gap-4 text-2xl mb-2 text-orange-800">
-                        <i class="fa-regular fa-heart"></i>
-                        <i class="fa-regular fa-comment"></i>
-                        ${p.type==='shop' ? `<i class="fa-solid fa-bag-shopping text-pink-600"></i>` : ''}
-                    </div>
-                    <p class="text-sm font-medium"><b>SainiWalaa</b> ${p.title}</p>
+                    <div class="flex gap-4 text-2xl mb-2 text-orange-800"><i class="fa-regular fa-heart"></i><i class="fa-regular fa-comment"></i></div>
+                    <p class="text-sm font-medium"><b>SainiWalaa</b> ${p[4]}</p>
                 </div>
             </div>`;
         });
-        document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-300'>Nothing here sa!</p>";
+        document.getElementById('v-feed').innerHTML = h || "<p class='text-center py-20 text-gray-400'>No posts sa!</p>";
     }
 
     function renderShop() {
+        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { items: [] };
         let h = "";
-        DB.items.filter(i => i.type === 'shop').forEach(p => {
-            h += `
-            <div class="relative bg-white border rounded-3xl overflow-hidden shadow-sm ${p.status==='hide' ? 'opacity-30 grayscale' : ''}">
-                <img src="${p.url}" class="w-full h-40 object-cover">
-                <div class="p-3 text-center">
-                    <b class="text-[10px] block truncate">${p.title}</b>
-                    <b class="text-orange-700 text-sm">₹${p.price}</b>
-                    <button class="w-full bg-black text-white text-[10px] mt-2 py-2 rounded-xl">ORDER NOW</button>
-                    <button onclick="toggleStatus(${p.id})" class="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-xs shadow-md">
-                        <i class="fa-solid ${p.status==='show' ? 'fa-eye text-green-500' : 'fa-eye-slash text-red-500'}"></i>
-                    </button>
-                </div>
-            </div>`;
+        db.items.forEach(p => {
+            if(p[7] === 'show') {
+                h += `<div class="relative bg-white border rounded-3xl overflow-hidden shadow-sm">
+                    <img src="${p[6]}" class="w-full h-40 object-cover">
+                    <div class="p-3 text-center">
+                        <b class="text-[10px] block truncate">${p[2]}</b>
+                        <b class="text-orange-700 text-sm">₹${p[3]}</b>
+                        <button onclick="openOrder('${p[0]}')" class="w-full bg-black text-white text-[10px] mt-2 py-2 rounded-xl">ORDER NOW</button>
+                    </div>
+                </div>`;
+            }
         });
         document.getElementById('bazaar-grid').innerHTML = h;
     }
 
     function renderProfile() {
+        const db = JSON.parse(localStorage.getItem('SAINI_LIVE_DB')) || { posts: [] };
+        document.getElementById('c-posts').innerText = db.posts.length;
         let h = "";
-        const myItems = DB.items;
-        document.getElementById('c-posts').innerText = myItems.length;
-        myItems.forEach(p => h += `<img src="${p.url}" class="aspect-square object-cover">`);
+        db.posts.forEach(p => h += `<img src="${p[2]}" class="aspect-square object-cover">`);
         document.getElementById('profile-grid').innerHTML = h;
+    }
+
+    function openOrder(pid) { 
+        document.getElementById('ord-pid').value = pid;
+        openM('order-modal'); 
+    }
+
+    async function placeOrder() {
+        const btn = document.getElementById('btn-order');
+        btn.disabled = true;
+        const payload = {
+            action: "placeOrder",
+            pid: document.getElementById('ord-pid').value,
+            bName: document.getElementById('ord-name').value,
+            bMobile: document.getElementById('ord-mob').value,
+            bAddr: document.getElementById('ord-addr').value
+        };
+        await fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        alert("Order Placed! 🚩");
+        location.reload();
     }
 
     function animateLike(el) {
@@ -191,7 +255,7 @@
 
     function logout() { localStorage.clear(); location.reload(); }
 
-    window.onload = renderFeed;
+    window.onload = fetchData;
 </script>
 </body>
 </html>
