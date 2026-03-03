@@ -1,311 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SainiWalaa - Royal Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script type="module">
+    // ... (Firebase setup wahi rahega)
+
+    // --- UPDATED PROFILE DATA ---
+    window.updateProfile = async () => {
+        const btn = document.getElementById('btn-up-prof');
+        const pFile = document.getElementById('up-p-img').files[0];
+        const bFile = document.getElementById('up-b-img').files[0];
+        const nName = document.getElementById('edit-name').value;
+        const nBio = document.getElementById('edit-bio').value;
+
+        btn.innerText = "⏳ Updating...";
+        btn.disabled = true;
+
+        let pUrl = currentUserData.photo || "";
+        let bUrl = currentUserData.banner || "";
+
+        try {
+            // Upload Profile Image if selected
+            if(pFile) {
+                const fd = new FormData(); fd.append('file', pFile); fd.append('upload_preset', 'social_preset');
+                const res = await fetch(`https://api.cloudinary.com/v1_1/dprl2lyih/image/upload`, {method:"POST", body:fd});
+                const d = await res.json(); pUrl = d.secure_url;
+            }
+            // Upload Banner if selected
+            if(bFile) {
+                const fd = new FormData(); fd.append('file', bFile); fd.append('upload_preset', 'social_preset');
+                const res = await fetch(`https://api.cloudinary.com/v1_1/dprl2lyih/image/upload`, {method:"POST", body:fd});
+                const d = await res.json(); bUrl = d.secure_url;
+            }
+
+            await update(ref(db, 'users/' + auth.currentUser.uid), {
+                name: nName, bio: nBio, photo: pUrl, banner: bUrl
+            });
+            alert("🚩 Profile Mubarak! Update ho gayi.");
+            location.reload();
+        } catch(e) { alert("Error: " + e.message); btn.disabled = false; }
+    };
+
+    // --- MODIFIED RENDER (With Images) ---
+    function showApp() {
+        document.getElementById('app').classList.remove('hide');
+        const pImg = currentUserData.photo || 'https://via.placeholder.com/150';
+        const bImg = currentUserData.banner || 'https://via.placeholder.com/800x300';
+        
+        // Display on Main Profile
+        document.getElementById('u-prof-img').src = pImg;
+        document.getElementById('u-banner-img').style.backgroundImage = `url(${bImg})`;
+        document.querySelectorAll('.u-name-display').forEach(el => el.innerText = currentUserData.name);
+        document.getElementById('u-bio-display').innerText = currentUserData.bio;
+
+        onValue(ref(db, 'posts'), snap => renderFeed(snap.val()));
+        onValue(ref(db, 'products'), snap => renderShop(snap.val()));
+        onValue(ref(db, 'orders'), snap => renderOrders(snap.val()));
+    }
+
+    // Feed with Profile Image
+    function renderFeed(data) {
+        let h = "";
+        if(data) {
+            Object.keys(data).reverse().forEach(k => {
+                const p = data[k];
+                // Hum user ki latest photo database se nikaal sakte hain ya post ke waqt save kar sakte hain
+                const userPhoto = p.uPhoto || 'https://via.placeholder.com/50';
+                const media = p.type === 'video' ? `<video src="${p.url}" controls class="w-full max-h-[70vh] bg-black"></video>` : `<img src="${p.url}" class="w-full max-h-[70vh]">`;
+                
+                h += `<div class="bg-white mb-4 border-b">
+                    <div class="p-3 flex items-center gap-3 cursor-pointer" onclick="visitProfile('${p.uid}')">
+                        <img src="${userPhoto}" class="w-8 h-8 rounded-full border border-orange-200 object-cover">
+                        <b class="text-xs uppercase italic">${p.uName}</b>
+                        ${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-trash ml-auto text-gray-200" onclick="del('posts','${k}')"></i>` : ''}
+                    </div>
+                    ${media}
+                    <div class="p-4 text-sm"><b>${p.uName}</b> ${p.caption || ''}</div>
+                </div>`;
+            });
+        }
+        document.getElementById('v-feed').innerHTML = h;
+    }
+</script>
+
+<main id="v-profile" class="hide">
+    <div id="u-banner-img" class="h-40 bg-gray-200 bg-cover bg-center relative border-b shadow-inner">
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2">
+            <img id="u-prof-img" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover bg-white">
+        </div>
+    </div>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, update, get, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
-            authDomain: "social-blog-93d38.firebaseapp.com",
-            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com",
-            projectId: "social-blog-93d38",
-            storageBucket: "social-blog-93d38.firebasestorage.app",
-            messagingSenderId: "730884874913",
-            appId: "1:730884874913:web:e2cb8f6084ee039db006e0"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const CLOUD_NAME = "dprl2lyih";
-        const UPLOAD_PRESET = "social_preset";
-
-        let currentUserData = null;
-        let selectedProduct = null;
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userSnap = await get(ref(db, 'users/' + user.uid));
-                if (userSnap.exists()) {
-                    currentUserData = userSnap.val();
-                    showApp();
-                } else {
-                    document.getElementById('reg-screen').classList.remove('hide');
-                    document.getElementById('auth-screen').classList.add('hide');
-                }
-            } else {
-                document.getElementById('auth-screen').classList.remove('hide');
-                document.getElementById('app').classList.add('hide');
-            }
-        });
-
-        // --- AUTH & PROFILE ---
-        window.handleAuth = (mode) => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if(mode === 'login') signInWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-            else createUserWithEmailAndPassword(auth, email, pass).catch(e => alert(e.message));
-        };
-
-        window.registerUser = async () => {
-            const name = document.getElementById('reg-name').value;
-            await set(ref(db, 'users/' + auth.currentUser.uid), { name, bio: "SainiWalaa Royal Sadasya 🚩", uid: auth.currentUser.uid });
-            location.reload();
-        };
-
-        window.updateProfile = async () => {
-            const nBio = document.getElementById('edit-bio').value;
-            const nName = document.getElementById('edit-name').value;
-            await update(ref(db, 'users/' + auth.currentUser.uid), { name: nName, bio: nBio });
-            alert("Mubarak! Profile chamak gayi.");
-            closeM('edit-profile-modal');
-            location.reload();
-        };
-
-        // --- SHOP & ORDERS SYSTEM ---
-        window.switchShopTab = (tab) => {
-            document.getElementById('shop-list-view').classList.add('hide');
-            document.getElementById('order-list-view').classList.add('hide');
-            document.getElementById('tab-list').className = "flex-1 py-2 text-xs font-bold text-gray-400";
-            document.getElementById('tab-orders').className = "flex-1 py-2 text-xs font-bold text-gray-400";
-            
-            document.getElementById(tab + '-view').classList.remove('hide');
-            document.getElementById('tab-' + tab.split('-')[0]).className = "flex-1 py-2 text-xs font-bold text-orange-600 border-b-2 border-orange-600";
-        };
-
-        window.openOrderForm = (id, seller, name) => {
-            selectedProduct = { prodId: id, sellerId: seller, prodName: name };
-            document.getElementById('order-prod-title').innerText = name;
-            openM('order-modal');
-        };
-
-        window.submitOrder = async () => {
-            const oData = {
-                ...selectedProduct,
-                cName: document.getElementById('c-name').value,
-                cPhone: document.getElementById('c-phone').value,
-                cAddr: document.getElementById('c-addr').value,
-                time: Date.now()
-            };
-            if(!oData.cName || !oData.cPhone) return alert("Hukum, jankari bhariye!");
-            await push(ref(db, 'orders'), oData);
-            alert("🚩 Order Safal Hua!");
-            closeM('order-modal');
-        };
-
-        // --- CORE FUNCTIONS ---
-        function showApp() {
-            document.getElementById('app').classList.remove('hide');
-            document.querySelectorAll('.u-name-display').forEach(el => el.innerText = currentUserData.name);
-            document.getElementById('u-bio-display').innerText = currentUserData.bio;
-            onValue(ref(db, 'posts'), snap => renderFeed(snap.val()));
-            onValue(ref(db, 'products'), snap => renderShop(snap.val()));
-            onValue(ref(db, 'orders'), snap => renderOrders(snap.val()));
-        }
-
-        function renderFeed(data) {
-            let h = ""; let myGrid = "";
-            if(data) {
-                Object.keys(data).reverse().forEach(k => {
-                    const p = data[k];
-                    const media = p.type === 'video' ? `<video src="${p.url}" controls class="w-full max-h-[70vh] bg-black"></video>` : `<img src="${p.url}" class="w-full max-h-[70vh]">`;
-                    h += `<div class="bg-white mb-4 border-b">
-                        <div class="p-3 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-800 text-xs">${p.uName[0]}</div>
-                            <b class="text-xs uppercase italic">${p.uName}</b>
-                            ${p.uid === auth.currentUser.uid ? `<i class="fa-solid fa-trash ml-auto text-gray-200" onclick="del('posts','${k}')"></i>` : ''}
-                        </div>
-                        ${media}
-                        <div class="p-4 text-sm"><b>${p.uName}</b> ${p.caption || ''}</div>
-                    </div>`;
-                    if(p.uid === auth.currentUser.uid) myGrid += `<img src="${p.url}" class="aspect-square object-cover border">`;
-                });
-            }
-            document.getElementById('v-feed').innerHTML = h;
-            document.getElementById('profile-grid').innerHTML = myGrid;
-        }
-
-        function renderShop(data) {
-            let h = "";
-            if(data) {
-                Object.keys(data).reverse().forEach(k => {
-                    const p = data[k];
-                    if(p.uid === auth.currentUser.uid) {
-                        h += `<div class="bg-white rounded-xl shadow border p-2 relative">
-                            <i class="fa-solid fa-circle-xmark absolute top-1 right-1 text-red-500 bg-white rounded-full" onclick="del('products','${k}')"></i>
-                            <img src="${p.url}" class="w-full h-32 object-cover rounded-lg">
-                            <h3 class="text-[10px] font-black mt-2 uppercase truncate">${p.name}</h3>
-                            <div class="text-orange-600 font-bold text-xs">₹${p.price}</div>
-                            <button onclick="openOrderForm('${k}','${p.uid}','${p.name}')" class="w-full bg-red-800 text-white py-1 rounded mt-2 text-[9px] font-bold tracking-widest">ORDER NOW</button>
-                        </div>`;
-                    }
-                });
-            }
-            document.getElementById('bazaar-grid').innerHTML = h || "<p class='col-span-2 text-center text-xs opacity-50 py-10'>Apna saaman jodein sa!</p>";
-        }
-
-        function renderOrders(data) {
-            let h = "";
-            if(data) {
-                Object.keys(data).reverse().forEach(k => {
-                    const o = data[k];
-                    if(o.sellerId === auth.currentUser.uid) {
-                        h += `<div class="bg-orange-50 p-3 rounded-lg border-l-4 border-red-800 mb-2 text-[10px] leading-tight shadow-sm">
-                            <div class="flex justify-between mb-1"><b>📦 ${o.prodName}</b><i class="fa-solid fa-trash text-red-200" onclick="del('orders','${k}')"></i></div>
-                            <b>Grahak:</b> ${o.cName} <br>
-                            <b>Phone:</b> ${o.cPhone} <br>
-                            <b>Pata:</b> ${o.cAddr}
-                        </div>`;
-                    }
-                });
-            }
-            document.getElementById('order-list-data').innerHTML = h || "Koi naya order nahi hai.";
-        }
-
-        window.publish = async (mode) => {
-            const file = document.getElementById(mode + '-file').files[0];
-            const btn = document.getElementById('btn-' + mode);
-            if(!file) return alert("File chuniye!");
-            btn.disabled = true; btn.innerText = "⏳ Rukhiye...";
-            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', UPLOAD_PRESET);
-            const type = file.type.includes('video') ? 'video' : 'image';
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {method:"POST", body:fd});
-            const cD = await res.json();
-
-            const item = { uid: auth.currentUser.uid, uName: currentUserData.name, url: cD.secure_url, type, time: Date.now(), caption: document.getElementById(mode + '-desc').value };
-            if(mode === 'prod') {
-                item.name = document.getElementById('prod-name').value;
-                item.price = document.getElementById('prod-price').value;
-                item.link = document.getElementById('prod-link').value;
-                await push(ref(db, 'products'), item);
-            } else await push(ref(db, 'posts'), item);
-            
-            alert("🚩 Live Ho Gaya!"); location.reload();
-        };
-
-        window.del = (p,k) => confirm("Hukum, hatana hai?") && remove(ref(db, `${p}/${k}`));
-        window.showPage = (p) => {
-            ['feed','shop','profile'].forEach(v => document.getElementById('v-'+v).classList.add('hide'));
-            document.getElementById('v-'+p).classList.remove('hide');
-        };
-        window.openM = (id) => document.getElementById(id).classList.remove('hide');
-        window.closeM = (id) => document.getElementById(id).classList.add('hide');
-
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;900&display=swap');
-        body { font-family: 'Montserrat', sans-serif; background: #fff; }
-        .hide { display: none !important; }
-        .raj-title { font-family: 'Marcellus', serif; background: linear-gradient(to right, #7c1212, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-royal { background: linear-gradient(45deg, #7c1212, #ea580c); color: white; font-weight: 900; border-radius: 12px; padding: 12px; width: 100%; }
-        input, textarea { border: 1.5px solid #eee !important; padding: 10px; border-radius: 10px; margin-bottom: 8px; width: 100%; font-size: 13px; outline: none; }
-        .nav-icon { font-size: 1.3rem; color: #d1d5db; cursor: pointer; }
-    </style>
-</head>
-<body class="flex justify-center">
-
-    <div id="auth-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide">
-        <h1 class="text-4xl font-black raj-title text-center mb-10 italic uppercase">SainiWalaa</h1>
-        <input type="email" id="auth-email" placeholder="Email Address">
-        <input type="password" id="auth-pass" placeholder="Password">
-        <button onclick="handleAuth('login')" class="btn-royal mb-3">LOGIN</button>
-        <button onclick="handleAuth('signup')" class="btn-royal bg-black">SIGNUP</button>
-    </div>
-
-    <div id="reg-screen" class="w-full max-w-[450px] p-10 flex flex-col justify-center min-h-screen hide text-center">
-        <h2 class="text-xl font-black raj-title mb-6">AAPKO SHUBH NAAM?</h2>
-        <input type="text" id="reg-name" placeholder="Naam likhein...">
-        <button onclick="registerUser()" class="btn-royal">START ROYAL STUDIO 🚩</button>
-    </div>
-
-    <div id="app" class="w-full max-w-[450px] min-h-screen relative pb-20 hide shadow-2xl">
-        <header class="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-50">
-            <div>
-                <h1 class="text-xl font-black raj-title italic">SAINIWALAA</h1>
-                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest u-name-display"></p>
-            </div>
-            <div class="flex gap-4">
-                <i class="fa-solid fa-plus-square nav-icon text-orange-600" onclick="openM('post-modal')"></i>
-                <i class="fa-solid fa-store nav-icon" onclick="openM('prod-modal')"></i>
-            </div>
-        </header>
-
-        <main id="v-feed"></main>
-
-        <main id="v-shop" class="hide p-4">
-            <div class="flex border-b mb-4">
-                <button id="tab-list" onclick="switchShopTab('shop-list')" class="flex-1 py-2 text-xs font-bold text-orange-600 border-b-2 border-orange-600">MERI LISTIN</button>
-                <button id="tab-orders" onclick="switchShopTab('order-list')" class="flex-1 py-2 text-xs font-bold text-gray-400">MERE ORDERS</button>
-            </div>
-            <div id="shop-list-view" class="grid grid-cols-2 gap-4">
-                <div id="bazaar-grid" class="contents"></div>
-            </div>
-            <div id="order-list-view" class="hide">
-                <div id="order-list-data"></div>
-            </div>
-        </main>
-
-        <main id="v-profile" class="hide">
-            <div class="p-8 text-center border-b bg-orange-50/30">
-                <div class="w-20 h-20 rounded-full bg-white shadow-md mx-auto mb-4 border-2 border-orange-500 flex items-center justify-center text-3xl font-black raj-title u-name-display-initial">S</div>
-                <h2 class="text-xl font-black u-name-display uppercase tracking-tight"></h2>
-                <p id="u-bio-display" class="text-[10px] text-gray-400 mt-1 italic"></p>
-                <div class="flex justify-center gap-4 mt-6">
-                    <button onclick="openM('edit-profile-modal')" class="bg-white border px-6 py-1.5 rounded-full text-[10px] font-bold shadow-sm">EDIT PROFILE</button>
-                    <button onclick="signOut(auth).then(()=>location.reload())" class="bg-red-50 text-red-600 px-6 py-1.5 rounded-full text-[10px] font-bold">LOGOUT</button>
-                </div>
-            </div>
-            <div id="profile-grid" class="grid grid-cols-3 gap-0.5"></div>
-        </main>
-
-        <nav class="fixed bottom-0 w-full max-w-[450px] bg-white border-t p-4 flex justify-around z-50 shadow-inner">
-            <i onclick="showPage('feed')" class="fa-solid fa-home nav-icon"></i>
-            <i onclick="showPage('shop')" class="fa-solid fa-bag-shopping nav-icon"></i>
-            <i onclick="showPage('profile')" class="fa-solid fa-circle-user nav-icon"></i>
-        </nav>
-
-        <div id="order-modal" class="fixed inset-0 bg-white z-[200] hide p-10 flex flex-col justify-center">
-            <h2 class="text-xl font-black raj-title mb-2">ORDER PARCHI 🚩</h2>
-            <p id="order-prod-title" class="text-xs font-bold text-gray-300 mb-6 uppercase"></p>
-            <input type="text" id="c-name" placeholder="Aapka Shubh Naam">
-            <input type="number" id="c-phone" placeholder="Mobile Number">
-            <textarea id="c-addr" placeholder="Pura Pata (Address) jahan delivery chahiye..."></textarea>
-            <button onclick="submitOrder()" class="btn-royal">ORDER CONFIRM</button>
-            <button onclick="closeM('order-modal')" class="mt-4 text-[10px] font-bold text-gray-400">Peeche Jayein</button>
-        </div>
-
-        <div id="edit-profile-modal" class="fixed inset-0 bg-white z-[100] hide p-10 flex flex-col justify-center">
-            <h2 class="text-xl font-black raj-title mb-6 uppercase">Profile Update</h2>
-            <input type="text" id="edit-name" placeholder="Naam">
-            <textarea id="edit-bio" placeholder="Bio (Royal Jankari)..."></textarea>
-            <button onclick="updateProfile()" class="btn-royal">SAVE CHANGES</button>
-            <button onclick="closeM('edit-profile-modal')" class="mt-4 text-xs">Back</button>
-        </div>
-
-        <div id="post-modal" class="fixed inset-0 bg-white z-[100] hide p-8">
-            <input type="file" id="post-file" accept="image/*,video/*">
-            <textarea id="post-desc" placeholder="Post ki jankari (Description)..." class="h-24"></textarea>
-            <button onclick="publish('post')" id="btn-post" class="btn-royal">PUBLISH</button>
-            <button onclick="closeM('post-modal')" class="mt-4 w-full">Cancel</button>
-        </div>
-
-        <div id="prod-modal" class="fixed inset-0 bg-white z-[100] hide p-8">
-            <input type="file" id="prod-file" accept="image/*">
-            <input type="text" id="prod-name" placeholder="Item Name">
-            <input type="number" id="prod-price" placeholder="Price (₹)">
-            <textarea id="prod-desc" placeholder="Product Description..."></textarea>
-            <input type="text" id="prod-link" placeholder="Purchase Link">
-            <button onclick="publish('prod')" id="btn-prod" class="btn-royal">ADD TO SHOP</button>
-            <button onclick="closeM('prod-modal')" class="mt-4 w-full">Cancel</button>
+    <div class="mt-12 p-8 text-center">
+        <h2 class="text-xl font-black u-name-display uppercase raj-title"></h2>
+        <p id="u-bio-display" class="text-[10px] text-gray-400 mt-1 italic"></p>
+        <div class="flex justify-center gap-4 mt-6">
+            <button onclick="openM('edit-profile-modal')" class="bg-white border px-6 py-1.5 rounded-full text-[10px] font-bold shadow-sm">EDIT PROFILE</button>
+            <button onclick="signOut(auth).then(()=>location.reload())" class="bg-red-50 text-red-600 px-6 py-1.5 rounded-full text-[10px] font-bold">LOGOUT</button>
         </div>
     </div>
-</body>
-</html>
+    <div id="profile-grid" class="grid grid-cols-3 gap-0.5"></div>
+</main>
+
+<div id="edit-profile-modal" class="fixed inset-0 bg-white z-[400] hide p-10 overflow-y-auto">
+    <h2 class="text-xl font-black raj-title mb-6 uppercase text-center">Update Royal Look</h2>
+    
+    <label class="text-[10px] font-bold text-gray-400">PROFILE PHOTO</label>
+    <input type="file" id="up-p-img" accept="image/*" class="text-xs">
+    
+    <label class="text-[10px] font-bold text-gray-400">BANNER IMAGE</label>
+    <input type="file" id="up-b-img" accept="image/*" class="text-xs">
+    
+    <input type="text" id="edit-name" placeholder="Apna Naam">
+    <textarea id="edit-bio" placeholder="Apni Bio likhein..." class="h-24"></textarea>
+    
+    <button onclick="updateProfile()" id="btn-up-prof" class="btn-royal">SAVE ROYAL PROFILE</button>
+    <button onclick="closeM('edit-profile-modal')" class="mt-4 w-full text-xs font-bold text-gray-400">Cancel</button>
+</div>
