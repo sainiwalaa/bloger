@@ -3,174 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SAINIWALAA - Royal Studio</title>
+    <title>SAINIWALAA | Royal Rajasthani Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // --- FAST UPLOAD SYSTEM ---
-        window.openWidget = (type) => {
-            cloudinary.openUploadWidget({
-                cloudName: "dvp58lgh3", 
-                uploadPreset: "ml_default",
-                clientAllowedFormats: ["jpg", "png", "jpeg"],
-                maxFileSize: 2000000 // 2MB limit for speed
-            }, (error, result) => {
-                if (!error && result.event === "success") {
-                    const url = result.info.secure_url;
-                    if(type === 'post') saveToFirebase('posts', { url, time: serverTimestamp(), user: 'sunil saini' });
-                    if(type === 'product') document.getElementById('p-img-url').value = url;
-                    if(type === 'avatar') update(ref(db, 'profile'), { avatar: url });
-                    alert("Chitra turant chadh gaya! 🚩");
-                }
-            });
-        };
-
-        const saveToFirebase = (path, data) => push(ref(db, path), data);
-
-        // --- REAL-TIME LOADING ---
-        onValue(ref(db, 'posts'), (snap) => {
-            const cont = document.getElementById('darbar-list'); cont.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val();
-                cont.innerHTML += `<div class="bg-zinc-900 rounded-2xl mb-4 border border-zinc-800 overflow-hidden">
-                    <img src="${d.url}" class="w-full object-cover">
-                    <p class="p-3 text-sm text-zinc-400">Post by Sunil Saini</p>
-                </div>`;
-            });
-        });
-
-        onValue(ref(db, 'products'), (snap) => {
-            const cont = document.getElementById('bazaar-list'); cont.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val();
-                cont.innerHTML += `<div class="bg-zinc-900 border gold-border rounded-2xl p-3">
-                    <img src="${d.img}" class="w-full h-32 object-cover rounded-xl mb-2">
-                    <h3 class="gold-text font-bold text-xs">${d.name}</h3>
-                    <p class="text-[10px]">₹${d.price}</p>
-                </div>`;
-            });
-        });
-
-        onValue(ref(db, 'profile'), (snap) => {
-            if(snap.exists()){
-                document.getElementById('display-bio').innerText = snap.val().bio;
-                if(snap.val().avatar) document.getElementById('main-avatar').src = snap.val().avatar;
-            }
-        });
-
-        window.saveMahal = () => {
-            const bio = document.getElementById('bio-input').value;
-            update(ref(db, 'profile'), { bio: bio });
-            document.getElementById('mahal-modal').classList.add('hidden');
-        };
-
-        window.switchPage = (p) => {
-            document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
-            document.getElementById(p + '-page').classList.remove('hidden');
-        };
-    </script>
-
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .gold-text { color: #D4AF37; }
-        .gold-border { border: 1px solid #D4AF37; }
-        .hidden { display: none; }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 </head>
-<body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 pb-20">
+<body class="bg-black text-white overflow-x-hidden">
 
-    <header class="p-4 text-center border-b border-zinc-900 sticky top-0 bg-black z-50">
-        <h1 class="gold-text tracking-[4px] font-bold text-lg uppercase">SAINIWALAA</h1>
+    <div id="loader" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+        <div class="royal-spinner mb-4"></div>
+        <p class="gold-text font-serif italic">Ghani Khamma Hukum...</p>
+    </div>
+
+    <header class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-yellow-900/30 p-4">
+        <h1 class="text-center gold-text text-2xl font-serif tracking-[8px] glow-text">SAINIWALAA</h1>
     </header>
 
-    <div id="aap-page" class="page p-5">
-        <div class="flex items-center gap-5 py-6">
-            <div class="relative">
-                <img id="main-avatar" src="https://via.placeholder.com/100" class="w-20 h-20 rounded-full border-4 border-black ring-2 ring-yellow-600 object-cover">
-                <div class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-black rounded-full"></div>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold">sunil saini</h2>
-                <p id="display-bio" class="text-xs text-zinc-500">SSSSSSSSSSSSSSS</p>
-            </div>
-        </div>
-        <div class="flex justify-between items-center mb-8 px-2">
-            <div class="flex gap-6 text-center">
-                <div><p class="text-sm font-bold">0</p><p class="text-[9px] text-zinc-500">POST</p></div>
-                <div><p class="text-sm font-bold">0</p><p class="text-[9px] text-zinc-500">SAATHI</p></div>
-            </div>
-            <button onclick="document.getElementById('mahal-modal').classList.remove('hidden')" class="gold-border px-4 py-1.5 rounded-lg text-xs gold-text bg-yellow-600/5">
-                <i class="fa-solid fa-gear mr-1"></i> Badlaav
-            </button>
-        </div>
+    <main class="mt-20 pb-24 px-4 max-w-[500px] mx-auto">
         
-        <div class="flex border-y border-zinc-900 text-[10px] tracking-widest font-bold">
-            <button onclick="switchPage('darbar')" class="flex-1 py-4 gold-text border-b border-yellow-600">DARBAR</button>
-            <button onclick="switchPage('bazaar')" class="flex-1 py-4 text-zinc-500">DUKAAN</button>
-            <button class="flex-1 py-4 text-zinc-500">SAUDA</button>
-        </div>
-    </div>
+        <section id="darbar-sec" class="page-sec">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-serif gold-text">🚩 Shahi Darbar</h2>
+                <button onclick="openPostModal()" class="royal-btn-sm">+ Likho</button>
+            </div>
+            <div id="feed-container" class="space-y-6">
+                </div>
+        </section>
 
-    <div id="darbar-page" class="page hidden p-4">
-        <div class="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800 mb-6 flex justify-between items-center">
-            <span class="text-zinc-500 text-sm italic">Kuch naya dikhao...</span>
-            <button onclick="openWidget('post')" class="bg-yellow-600 text-black px-4 py-1.5 rounded-full text-xs font-bold">+ Naya Post</button>
-        </div>
-        <div id="darbar-list"></div>
-    </div>
+        <section id="bazaar-sec" class="page-sec hidden">
+            <h2 class="text-xl font-serif gold-text mb-6">🛍 Shahi Bazaar</h2>
+            <div id="shop-container" class="grid grid-cols-2 gap-4">
+                </div>
+        </section>
 
-    <div id="bazaar-page" class="page hidden p-4">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="gold-text font-bold">Shahi Bazaar</h2>
-            <button onclick="document.getElementById('bazaar-form').classList.toggle('hidden')" class="bg-orange-700 px-3 py-2 rounded-lg text-[10px] font-bold tracking-tighter uppercase">+ Bazaar me Rakho</button>
-        </div>
-        
-        <div id="bazaar-form" class="bg-zinc-900 p-4 rounded-2xl mb-6 hidden border border-zinc-800">
-            <input id="p-name" type="text" placeholder="Maal ko Naam" class="w-full bg-black p-3 rounded mb-2 text-sm outline-none">
-            <input id="p-price" type="number" placeholder="Keemat (₹)" class="w-full bg-black p-3 rounded mb-2 text-sm outline-none">
-            <input type="hidden" id="p-img-url">
-            <button onclick="openWidget('product')" class="w-full border border-zinc-700 py-2 rounded text-[10px] mb-2">PHOTO CHUNO</button>
-            <button onclick="const n=document.getElementById('p-name').value; const p=document.getElementById('p-price').value; const i=document.getElementById('p-img-url').value; if(n&&p&&i){saveToFirebase('products',{name:n,price:p,img:i}); alert('Bazaar me maal rakha gaya!'); document.getElementById('bazaar-form').classList.add('hidden');}" class="w-full bg-yellow-600 text-black py-2 rounded font-bold text-xs uppercase">Save Karo</button>
-        </div>
-        <div id="bazaar-list" class="grid grid-cols-2 gap-4"></div>
-    </div>
-
-    <div id="mahal-modal" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
-        <div class="bg-[#111] w-full rounded-[30px] p-6 border border-zinc-800 shadow-2xl relative">
-            <button onclick="document.getElementById('mahal-modal').classList.add('hidden')" class="absolute top-5 right-5 text-zinc-600">✕</button>
-            <h3 class="gold-text font-bold mb-6 italic text-lg">Mahal Sajao</h3>
+        <section id="aap-sec" class="page-sec hidden">
+            <div class="profile-header relative mb-20">
+                <div class="banner h-32 w-full rounded-2xl bg-gradient-to-r from-yellow-900/40 to-black border border-yellow-900/20"></div>
+                <div class="absolute -bottom-12 left-6 flex items-end gap-4">
+                    <img id="user-avatar" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full border-4 border-black ring-2 ring-yellow-600 object-cover shadow-2xl">
+                    <div class="mb-2">
+                        <h3 class="text-lg font-bold">Sunil Saini</h3>
+                        <p class="text-xs text-zinc-500">@royal_studio</p>
+                    </div>
+                </div>
+            </div>
             
-            <label class="text-[10px] text-zinc-500 uppercase block mb-3">Chitra (Avatar)</label>
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 rounded-full bg-yellow-600 flex items-center justify-center text-black font-bold">SS</div>
-                <button onclick="openWidget('avatar')" class="border border-yellow-600/30 px-4 py-2 rounded-xl text-[10px] gold-text bg-yellow-600/5">Photo Daalo 📷</button>
+            <div class="stats flex justify-around py-6 border-y border-zinc-900 my-6">
+                <div class="text-center"><p class="font-bold text-lg" id="p-count">0</p><p class="text-[10px] text-zinc-500 uppercase">Post</p></div>
+                <div class="text-center"><p class="font-bold text-lg" id="f-count">0</p><p class="text-[10px] text-zinc-500 uppercase">Saathi</p></div>
+                <button onclick="switchTab('orders')" class="royal-btn-sm text-[10px]">Order List</button>
             </div>
 
-            <label class="text-[10px] text-zinc-500 uppercase block mb-3">Aapke Baare Me (Bio)</label>
-            <textarea id="bio-input" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-sm h-24 mb-6 outline-none" placeholder="SSSSSSSSSSSSSSS"></textarea>
-            
-            <button onclick="saveMahal()" class="w-full bg-yellow-600 text-black py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-yellow-600/10">Save Karo 👑</button>
-        </div>
-    </div>
+            <div id="my-products" class="grid grid-cols-2 gap-4">
+                </div>
+        </section>
 
-    <nav class="fixed bottom-0 w-full max-w-[500px] bg-black border-t border-zinc-900 flex justify-around py-4">
-        <button onclick="switchPage('darbar')" class="text-zinc-500"><i class="fa-solid fa-house"></i><p class="text-[8px] mt-1">DARBAR</p></button>
-        <button onclick="switchPage('bazaar')" class="text-zinc-500"><i class="fa-solid fa-shop"></i><p class="text-[8px] mt-1">BAZAAR</p></button>
-        <button onclick="switchPage('aap')" class="text-yellow-500"><i class="fa-solid fa-circle-user"></i><p class="text-[8px] mt-1">AAP</p></button>
+    </main>
+
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] bg-black/95 border-t border-yellow-900/20 flex justify-around py-4 z-50">
+        <button onclick="switchPage('darbar')" class="nav-btn active" id="btn-darbar">
+            <i class="fa-solid fa-fort-awesome text-xl"></i>
+            <span class="text-[10px] block mt-1">Darbar</span>
+        </button>
+        <button onclick="switchPage('bazaar')" class="nav-btn" id="btn-bazaar">
+            <i class="fa-solid fa-shop text-xl"></i>
+            <span class="text-[10px] block mt-1">Bazaar</span>
+        </button>
+        <button onclick="switchPage('aap')" class="nav-btn" id="btn-aap">
+            <i class="fa-solid fa-user-crown text-xl"></i>
+            <span class="text-[10px] block mt-1">Aap</span>
+        </button>
     </nav>
 
+    <div id="order-modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6">
+        <div class="bg-zinc-900 border border-yellow-600/30 p-8 rounded-[2rem] w-full max-w-md">
+            <h3 class="gold-text text-xl font-serif mb-6 italic">Kharidari ki Taiyari...</h3>
+            <div class="space-y-4">
+                <input type="text" id="cust-name" placeholder="Tharo Naam (Name)" class="royal-input">
+                <input type="number" id="cust-phone" placeholder="Mobile Number" class="royal-input">
+                <textarea id="cust-address" placeholder="Pura Pata (Address)" class="royal-input h-24"></textarea>
+                <button id="final-order-btn" class="royal-btn w-full py-4 mt-4">SAUDA PAKKO KARO</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
