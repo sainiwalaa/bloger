@@ -1,46 +1,72 @@
 :root {
-    --gold: #D4AF37;
-    --dark-gold: #996515;
+    --gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    --gold-solid: #d4af37;
+    --dark-bg: #0a0a0a;
+    --card-bg: #151515;
+    --text-white: #e0e0e0;
 }
 
-body { font-family: 'Poppins', sans-serif; background: #000; color: #fff; }
-.font-serif { font-family: 'Cinzel', serif; }
-.gold-text { color: var(--gold); }
-
-/* Glow Text */
-.glow-text { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
-
-/* Royal Spinner */
-.royal-spinner {
-    width: 40px; height: 40px; border: 3px solid rgba(212, 175, 55, 0.1);
-    border-top: 3px solid var(--gold); border-radius: 50%;
-    animation: spin 1s linear infinite;
+body {
+    background: var(--dark-bg);
+    color: var(--text-white);
+    font-family: 'Cinzel', 'Playfair Display', serif;
+    margin: 0; padding-bottom: 70px;
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* Royal Buttons */
-.royal-btn {
-    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
-    color: #000; font-weight: bold; border-radius: 12px;
-    transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+/* Royal Header */
+.header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--gold-solid);
+    text-align: center; padding: 15px;
+    position: sticky; top: 0; z-index: 1000;
 }
 
-.royal-btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
-
-.royal-btn-sm {
-    border: 1px solid var(--gold); color: var(--gold);
-    padding: 6px 15px; border-radius: 8px; font-size: 12px;
+.brand {
+    background: var(--gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 24px; font-weight: 900; letter-spacing: 4px;
 }
 
-/* Inputs */
-.royal-input {
-    width: 100%; background: #000; border: 1px solid #333;
-    padding: 12px; border-radius: 12px; outline: none; transition: 0.3s;
+/* Shahi Card */
+.royal-card {
+    background: var(--card-bg);
+    border: 1px solid #333;
+    border-radius: 12px;
+    margin: 15px; padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
 }
 
-.royal-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+/* Glowing Buttons */
+.gold-btn {
+    background: var(--gold);
+    color: #000; font-weight: bold;
+    border: none; border-radius: 5px;
+    padding: 12px; cursor: pointer;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    transition: 0.3s; width: 100%;
+}
 
-/* Nav */
-.nav-btn { color: #555; transition: 0.3s; }
-.nav-btn.active { color: var(--gold); transform: scale(1.1); }
+.gold-btn:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+    transform: translateY(-2px);
+}
+
+.gold-btn:disabled {
+    background: #555; cursor: wait;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed; bottom: 0; width: 100%;
+    background: var(--card-bg);
+    display: flex; justify-content: space-around;
+    padding: 12px 0; border-top: 1px solid var(--gold-solid);
+}
+
+.nav-item { color: #888; text-align: center; font-size: 11px; cursor: pointer; }
+.nav-item.active { color: var(--gold-solid); }
+.nav-item i { font-size: 20px; display: block; }
+
+.hidden { display: none !important; }
