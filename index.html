@@ -2,73 +2,139 @@
 <html lang="ra">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA - Royal Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SAINIWALAA - Royal Social & Bazaar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, update, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
+            authDomain: "social-blog-93d38.firebaseapp.com",
+            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com",
+            projectId: "social-blog-93d38",
+            storageBucket: "social-blog-93d38.firebasestorage.app",
+            messagingSenderId: "730884874913",
+            appId: "1:730884874913:web:e2cb8f6084ee039db006e0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // --- LIKE SYSTEM ---
+        window.likePost = (postId) => {
+            const uid = auth.currentUser.uid;
+            update(ref(db, `posts/${postId}/likes`), { [uid]: true });
+        };
+
+        // --- COMMENT SYSTEM ---
+        window.addComment = (postId) => {
+            const msg = prompt("Aapko vichaar likho:");
+            if(msg) {
+                push(ref(db, `posts/${postId}/comments`), {
+                    text: msg,
+                    user: auth.currentUser.displayName || "Yatri",
+                    time: serverTimestamp()
+                });
+            }
+        };
+
+        // --- FOLLOW SYSTEM ---
+        window.toggleFollow = (targetUid) => {
+            const myUid = auth.currentUser.uid;
+            update(ref(db, `users/${myUid}/following`), { [targetUid]: true });
+            update(ref(db, `users/${targetUid}/followers`), { [myUid]: true });
+            alert("Saath joda gaya! 🤝");
+        };
+
+        // --- FEED RENDERING ---
+        onValue(ref(db, 'posts'), (snap) => {
+            const feed = document.getElementById('feed-container');
+            feed.innerHTML = "";
+            snap.forEach(child => {
+                const p = child.val();
+                const likesCount = p.likes ? Object.keys(p.likes).length : 0;
+                feed.innerHTML += `
+                    <div class="bg-zinc-900 border border-yellow-900/20 rounded-2xl mb-6 overflow-hidden">
+                        <div class="p-3 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-600"></div>
+                            <span class="text-xs font-bold gold-text">Hukum Saini</span>
+                        </div>
+                        <img src="${p.url}" class="w-full aspect-square object-cover">
+                        <div class="p-4">
+                            <div class="flex gap-4 mb-2">
+                                <button onclick="likePost('${child.key}')" class="text-xl"><i class="fa-heart fa-regular"></i> ${likesCount}</button>
+                                <button onclick="addComment('${child.key}')" class="text-xl"><i class="fa-comment fa-regular"></i></button>
+                            </div>
+                            <p class="text-sm text-gray-300">${p.caption || ""}</p>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        // --- BAZAAR & ORDER LOGIC ---
+        window.placeOrder = async (pName, pPrice) => {
+            const cName = prompt("Aapko Naam:");
+            const cPhone = prompt("Mobile Number:");
+            const cAddress = prompt("Pata (Address):");
+            if(cName && cPhone && cAddress) {
+                await push(ref(db, 'orders'), {
+                    product: pName, price: pPrice, customer: cName, mobile: cPhone, pata: cAddress, time: serverTimestamp()
+                });
+                alert("Order ho gayo hukum! 📦");
+            }
+        };
+
+        // Auth state check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('app-screen').style.display = 'block';
+            }
+        });
+
+    </script>
     <style>
-        :root { --primary: #D4AF37; --accent: #A04000; }
-        body { background-color: #000; color: #fff; font-family: 'Marcellus', serif; }
-        .box-shadow-gold { shadow: 0 4px 15px rgba(212, 169, 55, 0.2); }
-        .gold-border { border: 1px solid var(--primary); }
-        .gold-text { color: var(--primary); }
+        @import url('https://fonts.googleapis.com/css2?family=Marcellus&display=swap');
+        body { background: #000; color: #fff; font-family: 'Marcellus', serif; }
+        .gold-text { color: #D4AF37; }
+        .gold-border { border: 1px solid #D4AF37; }
     </style>
 </head>
-<body>
-    <div id="root">
-        <div class="h-48 w-full bg-gradient-to-r from-yellow-900/20 to-orange-900/20 relative border-b gold-border">
-            <div class="absolute -bottom-16 left-6 flex items-end gap-4">
-                <img id="profile-img" src="https://api.dicebear.com/7.x/initials/svg?seed=Saini" class="w-32 h-32 rounded-full border-4 border-black bg-card shadow-2xl">
-                <div class="mb-4">
-                    <h1 class="text-3xl font-bold gold-text">sunil saini</h1>
-                    <p class="text-gray-400 italic">Royal Studio - Ghani Khamma!</p>
-                </div>
+<body class="max-w-[500px] mx-auto min-h-screen pb-24">
+
+    <div id="app-screen">
+        <header class="p-5 flex justify-between items-center border-b border-zinc-900">
+            <h1 class="gold-text text-xl font-bold tracking-tighter">SAINIWALAA</h1>
+            <div class="flex gap-4">
+                <i class="fa-solid fa-bell text-zinc-500"></i>
+                <i class="fa-solid fa-bars gold-text"></i>
             </div>
-        </div>
+        </header>
 
-        <div class="mt-20 px-6 flex justify-end gap-8 text-center uppercase tracking-widest text-[10px]">
-            <div><b class="text-xl block gold-text">0</b> Post</div>
-            <div><b class="text-xl block gold-text">0</b> Saathi</div>
-        </div>
+        <nav class="flex border-b border-zinc-900 sticky top-0 bg-black z-50">
+            <button onclick="document.getElementById('feed-tab').style.display='block'; document.getElementById('bazaar-tab').style.display='none';" class="flex-1 py-4 text-[10px] uppercase tracking-widest gold-text font-bold">Darbar</button>
+            <button onclick="document.getElementById('feed-tab').style.display='none'; document.getElementById('bazaar-tab').style.display='block';" class="flex-1 py-4 text-[10px] uppercase tracking-widest text-zinc-500">Bazaar</button>
+        </nav>
 
-        <div class="mt-8 flex border-y border-gray-900 sticky top-0 bg-black z-50">
-            <button onclick="showTab('feed')" class="flex-1 py-4 gold-text italic"><i class="fa-solid fa-grid-2 mr-2"></i> Darbar</button>
-            <button onclick="showTab('bazaar')" class="flex-1 py-4 text-gray-500"><i class="fa-solid fa-store mr-2"></i> Dukaan</button>
-            <button onclick="openModal('edit-modal')" class="flex-1 py-4 text-gray-500"><i class="fa-solid fa-gear mr-2"></i> Badlaav</button>
-        </div>
-
-        <main id="main-content" class="p-4 mb-24">
-             <div id="feed-view" class="view-tab">
-                <div class="bg-gray-900/40 p-4 rounded-2xl border gold-border mb-6 flex justify-between items-center">
-                    <span class="text-gray-500 italic">Kuch naya dikhao hukum...</span>
-                    <button class="bg-primary px-4 py-2 rounded-full text-black font-bold text-xs" style="background: #D4AF37;">+ Naya Post</button>
+        <div id="feed-tab" class="p-4">
+            <div id="feed-container">
                 </div>
-                <div class="text-center py-20 opacity-30">
-                    <p class="text-2xl font-bold">Sannata hai sa</p>
-                    <p>Abhi tak koi post nahi aayo.</p>
-                </div>
-             </div>
-        </main>
-    </div>
+        </div>
 
-    <div id="edit-modal" class="fixed inset-0 bg-black/90 hidden z-[100] flex items-center justify-center p-6">
-        <div class="bg-[#121212] w-full max-w-md rounded-2xl p-6 border gold-border">
-            <h2 class="gold-text text-2xl font-bold mb-6 italic">Mahal Sajao</h2>
-            <div class="space-y-4">
-                <label class="text-xs text-gray-500">Aapke Baare Me (Bio)</label>
-                <textarea class="w-full bg-black border border-gray-800 rounded-lg p-3 text-white h-24" placeholder="Kuch likho hukum..."></textarea>
-                <button onclick="closeModal('edit-modal')" class="w-full bg-yellow-600 text-black py-4 rounded-xl font-bold">SAVE KARO 👑</button>
+        <div id="bazaar-tab" class="p-4" style="display:none">
+            <div class="text-center py-10">
+                <h2 class="gold-text text-lg mb-4">Shahi Dukaan</h2>
+                <div id="bazaar-list" class="grid grid-cols-2 gap-4">
+                    </div>
             </div>
         </div>
     </div>
 
-    <script>
-        function showTab(tab) {
-            // Tab switching logic based on your React Code
-            console.log("Switching to " + tab);
-        }
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    </script>
 </body>
 </html>
