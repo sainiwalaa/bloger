@@ -91,6 +91,7 @@
                 <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center shadow-sm">
                     <h3 class="font-bold text-[#d4af37] mb-6 text-xs uppercase tracking-widest">Naya Maal Jodhein</h3>
                     <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none text-sm">
+                    <textarea id="p-desc" placeholder="Maal ki jankari (Description)..." class="w-full p-3 border-b mb-2 outline-none text-xs h-20 resize-none"></textarea>
                     <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none text-sm font-bold">
                     <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px]">
                     <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl"></div>
@@ -242,11 +243,14 @@
         };
 
         window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, l = document.getElementById('p-link').value;
+            const n = document.getElementById('p-name').value, 
+                  p = document.getElementById('p-price').value, 
+                  d = document.getElementById('p-desc').value,
+                  l = document.getElementById('p-link').value;
             if(!n || !p || !tempProdImg) return alert("Hukum, jankari bhariye!");
             document.getElementById('pub-btn').disabled = true;
             await addDoc(collection(db, "products"), {
-                name: n, price: p, img: tempProdImg, link: l || "", creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp()
+                name: n, desc: d || "", price: p, img: tempProdImg, link: l || "", creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp()
             });
             alert("Maal Shahi Shop mein jod diya gaya!");
             location.reload();
@@ -266,17 +270,16 @@
         function syncAll() {
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
-                snap.forEach(d => {
-                    const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
+                snap.forEach(docSnap => {
+                    const p = docSnap.data();
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-2 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-auto"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
                 });
             });
-            // --- UPDATED ORDERS SYNC WITH DATE & TIME ---
+
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
                 snap.forEach(d => { 
                     const o = d.data(); 
-                    // Date Format Logic
                     let timeStr = "Aabhi...";
                     if(o.time) {
                         const dt = o.time.toDate();
@@ -294,12 +297,12 @@
         }
 
         function syncMyShop(uid) {
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
                 snap.forEach(d => { 
                     const p = d.data();
                     const isOwner = (currentUser && currentUser.uid === uid);
-                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] z-10"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><p class="text-[9px] text-gray-400 line-clamp-2 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-auto"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
                 });
             });
         }
@@ -336,8 +339,6 @@
                     window.open(link, '_blank');
                 }
                 showTab('feed');
-                document.getElementById('order-cust-name').value = "";
-                document.getElementById('order-cust-phone').value = "";
             } catch (err) {
                 alert("Galti: " + err.message);
             } finally {
