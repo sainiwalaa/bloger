@@ -141,14 +141,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // PERSISTENCE SETTING: Refresh par logout na ho
         setPersistence(auth, browserLocalPersistence);
 
         let currentUser = null;
         let authMode = 'login';
         let tempProdImg = "";
 
-        // AUTH
         window.toggleAuthMode = () => {
             authMode = (authMode === 'login') ? 'signup' : 'login';
             document.getElementById('main-auth-btn').innerText = (authMode === 'login') ? 'LOG IN' : 'SIGN UP';
@@ -176,8 +174,6 @@
                 currentUser = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                
-                // REFRESH FIX: Pichla tab yaad rakhega
                 const lastTab = localStorage.getItem('lastTab') || 'feed';
                 showTab(lastTab);
                 syncAll();
@@ -187,7 +183,6 @@
             }
         });
 
-        // PROFILE LOAD
         async function loadProfile(uid) {
             const isOwner = (currentUser && currentUser.uid === uid);
             document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
@@ -198,8 +193,6 @@
                 document.getElementById('disp-bio').innerText = d.bio || "";
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
-                
-                // Social links logic
                 const wa = document.getElementById('btn-wa');
                 d.wa ? (wa.href = `https://wa.me/${d.wa}`, wa.classList.remove('hidden')) : wa.classList.add('hidden');
                 const ins = document.getElementById('btn-insta');
@@ -221,7 +214,6 @@
             loadProfile(currentUser.uid);
         };
 
-        // IMAGE COMPRESSION
         const compressImg = (f) => new Promise(res => {
             const reader = new FileReader(); reader.readAsDataURL(f);
             reader.onload = e => {
@@ -254,17 +246,14 @@
             if(!n || !p || !tempProdImg) return alert("Hukum, jankari bhariye!");
             document.getElementById('pub-btn').disabled = true;
             await addDoc(collection(db, "products"), {
-                name: n, price: p, img: tempProdImg, link: l || "", 
-                creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText,
-                time: serverTimestamp()
+                name: n, price: p, img: tempProdImg, link: l || "", creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp()
             });
             alert("Maal Shahi Shop mein jod diya gaya!");
             location.reload();
         };
 
-        // TAB NAVIGATION
         window.showTab = (t) => {
-            localStorage.setItem('lastTab', t); // REFRESH FIX
+            localStorage.setItem('lastTab', t);
             ['feed','shop','orders'].forEach(s => {
                 const sec = document.getElementById('sec-'+s);
                 const tab = document.getElementById('tab-'+s);
@@ -274,7 +263,6 @@
             if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
         };
 
-        // SYNC DATA
         function syncAll() {
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
@@ -283,11 +271,24 @@
                     grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
                 });
             });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
+            // --- UPDATED ORDERS SYNC WITH DATE & TIME ---
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
                 snap.forEach(d => { 
                     const o = d.data(); 
-                    list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm"><h4 class="font-bold text-xs">${o.item}</h4><p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p></div>`; 
+                    // Date Format Logic
+                    let timeStr = "Aabhi...";
+                    if(o.time) {
+                        const dt = o.time.toDate();
+                        timeStr = dt.toLocaleDateString('hi-IN') + " | " + dt.toLocaleTimeString('hi-IN', {hour: '2-digit', minute:'2-digit'});
+                    }
+                    list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-xs">${o.item}</h4>
+                            <span class="text-[8px] font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-500">${timeStr}</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p>
+                    </div>`; 
                 });
             });
         }
@@ -306,12 +307,10 @@
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
         window.delP = async (id) => { if(confirm("Hata dein?")) await deleteDoc(doc(db, "products", id)); };
 
-        // --- ORDER LOGIC FIXED ---
         window.orderNow = (item, cid, link) => {
-            // Hamesha modal dikhao details lene ke liye
             document.getElementById('order-item-name').value = item;
             document.getElementById('order-creator-id').value = cid;
-            document.getElementById('order-item-link').value = link; // Link ko chupa kar rakho
+            document.getElementById('order-item-link').value = link;
             document.getElementById('checkout-modal').classList.remove('hidden');
         };
 
@@ -324,30 +323,21 @@
             const item = document.getElementById('order-item-name').value;
             const cid = document.getElementById('order-creator-id').value;
             const link = document.getElementById('order-item-link').value;
-
             if(!n || !ph) return alert("Hukum, details toh bhariye!");
-
             btn.disabled = true;
             btn.innerText = "Hukumnama ja raha hai...";
-
             try {
-                // Database mein order save karo
                 await addDoc(collection(db, "orders"), {
                     item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp()
                 });
-
                 alert("Order Shahi Darbar mein darj ho gaya!");
                 closeCheckout();
-
-                // AB LINK OPEN KARO (Details lene ke baad)
                 if (link && link.trim() !== "" && link !== "undefined") {
                     window.open(link, '_blank');
                 }
-
                 showTab('feed');
                 document.getElementById('order-cust-name').value = "";
                 document.getElementById('order-cust-phone').value = "";
-
             } catch (err) {
                 alert("Galti: " + err.message);
             } finally {
