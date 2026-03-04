@@ -1,99 +1,83 @@
-import { db, auth, storage } from './firebase-config.js';
-import { collection, addDoc, onSnapshot, query, where, orderBy, serverTimestamp, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// --- BAZAAR: SAVE PRODUCT ---
+document.getElementById('save-product-btn')?.addEventListener('click', function() {
+    const btn = this;
+    safeClick(btn, async () => {
+        const name = document.getElementById('p-name').value;
+        const price = document.getElementById('p-price').value;
+        const desc = document.getElementById('p-desc').value;
+        const link = document.getElementById('p-link').value;
+        const img = document.getElementById('p-img-url').value;
 
-// --- ANTI-DOUBLE CLICK PROTECTION ---
-window.safeClick = async (btn, callback) => {
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Hukum, kaam ho ryo hai...`;
-    
-    try {
-        await callback();
-    } finally {
-        setTimeout(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }, 2000); // 2 Second cool down
-    }
-};
+        if(!name || !price || !img) {
+            alert("Hukum, Name, Price aur Photo zaroori hai!");
+            return;
+        }
 
-// --- VIDEO 90s LIMIT CHECK ---
-const validateVideo = (file) => {
-    return new Promise((resolve, reject) => {
-        if (file.type.includes('video')) {
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            video.onloadedmetadata = function() {
-                window.URL.revokeObjectURL(video.src);
-                if (video.duration > 90) reject("Hukum, video 90 second se bada nahi hona chahiye!");
-                else resolve(true);
-            };
-            video.src = URL.createObjectURL(file);
-        } else resolve(true);
-    });
-};
-
-// --- REALTIME FEED (Darbar) ---
-const loadFeed = () => {
-    const q = query(collection(db, "posts"), orderBy("time", "desc"));
-    onSnapshot(q, (snap) => {
-        const cont = document.getElementById('feed-container');
-        cont.innerHTML = "";
-        snap.forEach(doc => {
-            const d = doc.data();
-            // Shop posts filtered out (as per prompt)
-            if(!d.isShopItem) {
-                renderPost(d, doc.id, cont);
-            }
+        // Realtime Database mein Save (Creator Shop)
+        const productRef = ref(db, 'products/');
+        await push(productRef, {
+            name, price, desc, link, img,
+            creatorId: auth.currentUser.uid,
+            time: serverTimestamp()
         });
-    });
-};
 
-// --- ORDER FLOW SYSTEM ---
-window.initiatePurchase = (productData) => {
+        alert("Bazaar me maal rakha gaya! 🚩");
+        document.getElementById('bazaar-form').classList.add('hidden');
+    });
+});
+
+// --- BAZAAR: RENDER PRODUCTS ---
+onValue(ref(db, 'products'), (snap) => {
+    const cont = document.getElementById('bazaar-list');
+    cont.innerHTML = "";
+    snap.forEach(child => {
+        const d = child.val();
+        const id = child.key;
+
+        cont.innerHTML += `
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg p-3">
+                <img src="${d.img}" class="w-full h-32 object-cover rounded-xl mb-3 border border-yellow-900/20">
+                <h3 class="gold-text font-bold text-xs truncate">${d.name}</h3>
+                <p class="text-[10px] text-zinc-500 mb-2">₹${d.price}</p>
+                <button onclick="initiatePurchase('${d.name}', '${d.price}', '${d.creatorId}', '${d.link}')" 
+                    class="w-full bg-yellow-600/10 border border-yellow-600/50 text-yellow-500 py-2 rounded-lg text-[9px] font-bold uppercase tracking-tighter">
+                    Sauda Karo
+                </button>
+            </div>
+        `;
+    });
+});
+
+// --- ORDER FLOW SYSTEM (Step 1, 2, 3) ---
+window.initiatePurchase = (pName, pPrice, cId, pLink) => {
+    // Step 1: Show Form
     const modal = document.getElementById('order-modal');
-    const btn = document.getElementById('final-order-btn');
     modal.classList.remove('hidden');
 
-    btn.onclick = () => {
+    document.getElementById('final-order-btn').onclick = function() {
+        const btn = this;
         safeClick(btn, async () => {
             const name = document.getElementById('cust-name').value;
             const phone = document.getElementById('cust-phone').value;
             const addr = document.getElementById('cust-address').value;
 
-            if(!name || !phone || !addr) return alert("Hukum, saari jankari bharna zaroori hai!");
+            if(!name || !phone || !addr) throw "Khali hai";
 
-            // Save to Firestore
-            await addDoc(collection(db, "orders"), {
-                customerName: name,
-                customerPhone: phone,
+            // Step 2: Save Order Data in Realtime DB
+            const orderRef = ref(db, 'orders/' + cId); // Creator ID ke folder me
+            await push(orderRef, {
+                custName: name,
+                custPhone: phone,
                 address: addr,
-                productName: productData.name,
-                price: productData.price,
-                creatorId: productData.creatorId,
-                status: "New Order",
-                time: serverTimestamp()
+                product: pName,
+                price: pPrice,
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString()
             });
 
-            alert("Sauda Pakko! Ab aapko mukhya site par bheja ja raha hai.");
-            window.location.href = productData.link;
+            // Step 3: Redirect to External Link
+            alert("Hukum, Tharo Sauda darj ho gayo hai! Redirect ho rya ho...");
+            window.location.href = pLink;
         });
     };
 };
-
-// --- UI NAVIGATION ---
-window.switchPage = (pageId) => {
-    document.querySelectorAll('.page-sec').forEach(p => p.classList.add('hidden'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
-    document.getElementById(`${pageId}-sec`).classList.remove('hidden');
-    document.getElementById(`btn-${pageId}`).classList.add('active');
-};
-
-// --- INITIALIZE ---
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        document.getElementById('loader').style.display = 'none';
-        loadFeed();
-    }, 1500);
-});
