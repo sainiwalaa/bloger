@@ -3,46 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Control Panel</title>
+    <title>SAINIWALAA | Shahi Darbar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <style>
-        .page-section { display: none; }
-        .active-page { display: block; }
+        :root { --gold: #b8860b; --bg: #f4f7f6; }
+        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; }
+        .nav-link { cursor: pointer; font-weight: bold; color: #555; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .nav-link.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .royal-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .hidden { display: none !important; }
+        input, textarea { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 10px; margin-bottom: 10px; outline: none; }
+        .btn-gold { background: var(--gold); color: white; font-weight: bold; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <div id="auth-box" class="max-w-md mx-auto mt-20 p-6 bg-white rounded-xl shadow-lg">
-        <h2 id="auth-title" class="text-xl font-bold mb-4">Login Karein</h2>
-        <input type="email" id="email" placeholder="Email" class="w-full p-2 border mb-2">
-        <input type="password" id="pass" placeholder="Password" class="w-full p-2 border mb-4">
-        <button id="main-btn" onclick="handleAuth()" class="w-full bg-blue-600 text-white p-2 rounded">LOGIN</button>
-        <p class="text-sm mt-4 text-center cursor-pointer text-blue-500" onclick="toggleMode()">Naya Khata Banayein?</p>
+    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-[4px] text-[#b8860b]">SAINIWALAA</h1>
+            <nav id="user-nav" class="hidden flex gap-6 items-center text-xs">
+                <span onclick="show('darbar')" class="nav-link active" id="l-darbar">DARBAR</span>
+                <span onclick="show('bazaar')" class="nav-link" id="l-bazaar">BAZAAR</span>
+                <span onclick="show('profile')" class="nav-link" id="l-profile">PROFILE</span>
+                <button onclick="logout()" class="text-red-500 text-lg"><i class="fa-solid fa-power-off"></i></button>
+            </nav>
+        </div>
+    </header>
+
+    <div id="auth-section" class="max-w-md mx-auto mt-20 p-8 bg-white rounded-2xl shadow-2xl border">
+        <div id="login-box">
+            <h2 class="text-center font-bold text-xl mb-6 text-gray-700">Pravesh Karein</h2>
+            <input id="email" type="email" placeholder="Email">
+            <input id="pass" type="password" placeholder="Password">
+            <button onclick="login()" class="btn-gold">LOGIN</button>
+            <p onclick="toggleAuth(false)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Naya Khata Banayein</p>
+        </div>
+        <div id="reg-box" class="hidden">
+            <h2 class="text-center font-bold text-xl mb-6 text-gray-700">Naya Khata</h2>
+            <input id="reg-name" type="text" placeholder="Username (No spaces)">
+            <input id="reg-email" type="email" placeholder="Email">
+            <input id="reg-pass" type="password" placeholder="Password (Min. 6)">
+            <button onclick="register()" class="btn-gold">REGISTER</button>
+            <p onclick="toggleAuth(true)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Login Karein</p>
+        </div>
     </div>
 
-    <div id="app-box" class="hidden max-w-4xl mx-auto p-4">
-        <nav class="flex gap-4 mb-6">
-            <button onclick="showPage('darbar')" class="bg-gray-200 p-2 rounded">Darbar</button>
-            <button onclick="showPage('profile')" class="bg-gray-200 p-2 rounded">Profile</button>
-            <button onclick="logout()" class="bg-red-500 text-white p-2 rounded">Logout</button>
-        </nav>
-        
-        <div id="darbar-page" class="page-section active-page">
-            <h1 class="text-2xl font-bold">Darbar Feed</h1>
-            <div id="posts"></div>
+    <main id="main-app" class="hidden max-w-6xl mx-auto px-4 mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            
+            <div class="md:col-span-3">
+                <div class="sticky top-24 bg-white p-5 rounded-xl border shadow-sm">
+                    <button onclick="openPostModal()" class="btn-gold mb-4"><i class="fa-solid fa-plus mr-2"></i> NAYA POST</button>
+                    <div class="space-y-4 text-sm font-semibold text-gray-600">
+                        <p onclick="show('darbar')" class="cursor-pointer hover:text-gold"><i class="fa-solid fa-home mr-2"></i> Home Feed</p>
+                        <p onclick="show('bazaar')" class="cursor-pointer hover:text-gold"><i class="fa-solid fa-shop mr-2"></i> Bazaar</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-6">
+                <section id="darbar-sec" class="page-sec">
+                    <div id="feed-container"></div>
+                </section>
+
+                <section id="bazaar-sec" class="page-sec hidden">
+                    <div class="bg-white p-6 rounded-xl border mb-6">
+                        <h3 class="font-bold mb-4 text-gold">Product List Karein</h3>
+                        <input id="p-name" placeholder="Item Ka Naam">
+                        <input id="p-price" placeholder="Daam ₹">
+                        <input id="p-link" placeholder="WhatsApp Number / Link">
+                        <button onclick="uploadMedia('product')" class="btn-gold">UPLOAD PHOTO</button>
+                    </div>
+                    <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
+                </section>
+
+                <section id="profile-sec" class="page-sec hidden">
+                    <div class="bg-white p-10 rounded-xl border text-center shadow-sm">
+                        <div class="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 border-2 border-gold flex items-center justify-center">
+                            <i class="fa-solid fa-user text-2xl text-gray-400"></i>
+                        </div>
+                        <h2 id="user-display" class="text-2xl font-bold text-gray-700">@User</h2>
+                        <p class="text-gray-400 text-sm mt-2">Shahi Member Since 2026</p>
+                    </div>
+                </section>
+            </div>
         </div>
-        
-        <div id="profile-page" class="page-section">
-            <h1 class="text-2xl font-bold">Aapki Profile</h1>
-            <p id="user-info"></p>
+    </main>
+
+    <div id="post-modal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl">
+            <h3 class="font-bold text-lg mb-4 text-gray-700">Kuch Shahi Likhein</h3>
+            <textarea id="post-caption" class="h-32" placeholder="Aapka sandesh..."></textarea>
+            <button onclick="uploadMedia('post')" class="btn-gold">PHOTO/VIDEO CHUNEIN</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-400 text-xs">Cancel</button>
         </div>
     </div>
 
-    <script>
-        // Firebase Config (Replace with your actual one)
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
             authDomain: "social-blog-93d38.firebaseapp.com",
@@ -50,53 +113,108 @@
             storageBucket: "social-blog-93d38.appspot.com",
             appId: "1:78643219054:web:dprl2lyih"
         };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
 
-        let isLogin = true;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // --- AUTH LOGIC ---
-        function toggleMode() {
-            isLogin = !isLogin;
-            document.getElementById('auth-title').innerText = isLogin ? "Login Karein" : "Register Karein";
-            document.getElementById('main-btn').innerText = isLogin ? "LOGIN" : "REGISTER";
-        }
+        let currentUserData = null;
 
-        async function handleAuth() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            
-            try {
-                if(isLogin) {
-                    await auth.signInWithEmailAndPassword(e, p);
-                    alert("Login Safal!");
-                } else {
-                    await auth.createUserWithEmailAndPassword(e, p);
-                    alert("Account Ban Gaya!");
-                }
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
-        }
+        // --- AUTH ---
+        window.login = () => {
+            signInWithEmailAndPassword(auth, email.value, pass.value)
+                .then(() => alert("Swagat Hai!"))
+                .catch(err => alert("Galti: " + err.message));
+        };
 
-        // --- AUTH CHECK ---
-        auth.onAuthStateChanged(user => {
-            if(user) {
-                document.getElementById('auth-box').classList.add('hidden');
-                document.getElementById('app-box').classList.remove('hidden');
+        window.register = async () => {
+            const name = regName.value.trim().toLowerCase();
+            const q = query(collection(db, "users"), where("name", "==", name));
+            const s = await getDocs(q);
+            if(!s.empty) return alert("Naam pehle se hai!");
+
+            createUserWithEmailAndPassword(auth, regEmail.value, regPass.value)
+                .then(async (res) => {
+                    await setDoc(doc(db, "users", res.user.uid), { name, uid: res.user.uid });
+                    location.reload();
+                }).catch(err => alert(err.message));
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, async u => {
+            if(u) {
+                const d = await getDoc(doc(db, "users", u.uid));
+                currentUserData = d.data();
+                userDisplay.innerText = "@" + currentUserData.name;
+                authSection.classList.add('hidden'); mainApp.classList.remove('hidden'); userNav.classList.remove('hidden');
+                loadData();
             } else {
-                document.getElementById('auth-box').classList.remove('hidden');
-                document.getElementById('app-box').classList.add('hidden');
+                authSection.classList.remove('hidden'); mainApp.classList.add('hidden'); userNav.classList.add('hidden');
             }
         });
 
-        function logout() { auth.signOut(); }
+        // --- UI NAVIGATION ---
+        window.show = (id) => {
+            document.querySelectorAll('.page-sec').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById(id + '-sec').classList.remove('hidden');
+            document.getElementById('l-' + id).classList.add('active');
+        };
 
-        // --- NAVIGATION ---
-        function showPage(id) {
-            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id + '-page').classList.add('active-page');
+        window.toggleAuth = (isL) => { loginBox.classList.toggle('hidden', !isL); regBox.classList.toggle('hidden', isL); };
+        window.openPostModal = () => postModal.classList.remove('hidden');
+        window.closeModal = () => postModal.classList.add('hidden');
+
+        // --- CLOUDINARY UPLOAD ---
+        window.uploadMedia = (type) => {
+            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, async (err, res) => {
+                if(res && res.event === "success") {
+                    if(type === 'post') {
+                        await addDoc(collection(db, "posts"), { 
+                            url: res.info.secure_url, type: res.info.resource_type, 
+                            author: currentUserData.name, caption: postCaption.value, time: serverTimestamp() 
+                        });
+                        closeModal();
+                    } else {
+                        await addDoc(collection(db, "products"), { 
+                            name: pName.value, price: pPrice.value, link: pLink.value, 
+                            img: res.info.secure_url, time: serverTimestamp() 
+                        });
+                    }
+                    alert("Done Hukum!");
+                }
+            });
+        };
+
+        // --- REALTIME DATA ---
+        function loadData() {
+            onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), s => {
+                feedContainer.innerHTML = "";
+                s.forEach(d => {
+                    const p = d.data();
+                    feedContainer.innerHTML += `
+                        <div class="royal-card border">
+                            <div class="p-4 font-bold text-xs text-gold border-b">@${p.author}</div>
+                            ${p.type === 'video' ? `<video src="${p.url}" controls class="w-full"></video>` : `<img src="${p.url}" class="w-full">`}
+                            <div class="p-4 text-sm text-gray-600">${p.caption || ''}</div>
+                        </div>`;
+                });
+            });
+
+            onSnapshot(collection(db, "products"), s => {
+                bazaarGrid.innerHTML = "";
+                s.forEach(d => {
+                    const p = d.data();
+                    bazaarGrid.innerHTML += `
+                        <div class="bg-white border p-3 rounded-xl shadow-sm text-center">
+                            <img src="${p.img}" class="h-32 w-full object-cover rounded-lg mb-2">
+                            <p class="font-bold text-xs">${p.name}</p>
+                            <p class="text-gold text-xs font-bold mb-2">₹${p.price}</p>
+                            <a href="https://wa.me/${p.link}" class="block bg-black text-white text-[10px] py-2 rounded-lg font-bold">KHARIDEIN</a>
+                        </div>`;
+                });
+            });
         }
     </script>
 </body>
