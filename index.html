@@ -7,206 +7,199 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <style>
-        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; }
         .raj-font { font-family: 'Cinzel', serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .tab-btn.active { color: #d4af37; border-bottom: 3px solid #d4af37; font-weight: bold; }
+        .nav-btn.active { color: #d4af37; border-bottom: 3px solid #d4af37; font-weight: bold; }
         .hidden { display: none !important; }
-        .banner { height: 200px; background-size: cover; background-position: center; border-radius: 0 0 30px 30px; position: relative; }
-        .profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 15px rgba(0,0,0,0.1); object-fit: cover; background: #eee; }
-        .social-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; items-center: center; justify-content: center; color: white; transition: 0.3s; }
+        .banner { height: 180px; background: #eee url('https://www.transparenttextures.com/patterns/cream-paper.png'); background-size: cover; border-radius: 0 0 25px 25px; position: relative; }
+        .profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #ddd; }
+        .social-chip { padding: 8px 15px; border-radius: 50px; color: white; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .insta { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
         .yt { background: #ff0000; }
         .fb { background: #1877f2; }
+        input[type="file"] { display: none; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
-    <div id="auth-section" class="min-h-screen flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[40px] shadow-2xl w-full max-w-sm text-center border">
-            <h1 class="raj-font text-3xl text-[#d4af37] mb-8">SAINIWALAA</h1>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border rounded-2xl mb-3 outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border rounded-2xl mb-6 outline-none">
-            <button onclick="handleAuth()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl font-bold">JOIN DARBAR</button>
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6 bg-white">
+        <div class="w-full max-w-sm text-center">
+            <h1 class="raj-font text-4xl text-[#d4af37] mb-10 tracking-widest">SAINIWALAA</h1>
+            <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
+            <button onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-full font-bold shadow-xl">LOG IN / JOIN</button>
         </div>
     </div>
 
     <main id="main-app" class="hidden">
-        
-        <div id="banner-img" class="banner" style="background-image: url('https://images.unsplash.com/photo-1590050752117-23aae33aa891?q=80&w=1000');">
-            <button onclick="uploadMedia('banner')" class="absolute top-4 right-4 bg-white/50 p-2 rounded-full text-xs text-white"><i class="fa-solid fa-pen"></i></button>
-            <div class="relative">
-                <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-pic">
-                <button onclick="uploadMedia('profile')" class="absolute bottom-[-50px] left-[55%] bg-[#d4af37] text-white p-2 rounded-full border-2 border-white text-[10px]"><i class="fa-solid fa-camera"></i></button>
-            </div>
+        <div class="sticky top-0 z-50 bg-white/80 backdrop-blur-md flex justify-around border-b shadow-sm">
+            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn active p-4 text-[11px] uppercase tracking-widest">Duniya ka Maal</button>
+            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-4 text-[11px] uppercase tracking-widest">Mhari Shop</button>
+            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-4 text-[11px] uppercase tracking-widest">Orders</button>
         </div>
 
-        <div class="mt-16 text-center px-6">
-            <h2 id="disp-name" class="text-2xl font-black text-gray-800">Maharaja Creator</h2>
-            <p id="disp-bio" class="text-gray-500 text-sm mt-2 italic">Aapka shahi parichay...</p>
-            
-            <div class="flex justify-center gap-4 mt-6">
-                <a id="link-insta" href="#" target="_blank" class="social-icon insta"><i class="fa-brands fa-instagram"></i></a>
-                <a id="link-yt" href="#" target="_blank" class="social-icon yt"><i class="fa-brands fa-youtube"></i></a>
-                <a id="link-fb" href="#" target="_blank" class="social-icon fb"><i class="fa-brands fa-facebook-f"></i></a>
-            </div>
-            <button onclick="toggleBox('edit-profile')" class="mt-4 text-[10px] font-bold text-[#d4af37] uppercase tracking-tighter">Edit Profile & Links</button>
-        </div>
-
-        <div id="edit-profile" class="hidden max-w-md mx-auto p-6 bg-white rounded-3xl mt-4 shadow-lg border">
-            <input id="in-name" placeholder="Display Name">
-            <textarea id="in-bio" placeholder="Bio..."></textarea>
-            <input id="in-insta" placeholder="Insta Link">
-            <input id="in-yt" placeholder="YouTube Link">
-            <input id="in-fb" placeholder="FB Link">
-            <button onclick="saveProfile()" class="w-full bg-black text-white p-3 rounded-xl font-bold">SAVE PROFILE</button>
-        </div>
-
-        <div class="flex justify-around mt-10 border-b bg-white sticky top-0 z-40">
-            <button onclick="showTab('shop')" id="tab-shop-btn" class="tab-btn active p-4 text-xs font-bold uppercase">Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders-btn" class="tab-btn p-4 text-xs font-bold uppercase">Orders</button>
-        </div>
-
-        <section id="sec-shop" class="p-4 max-w-4xl mx-auto">
-            <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-6 rounded-3xl mb-8">
-                <h3 class="font-bold text-sm mb-4">LIST NEW PRODUCT</h3>
-                <input id="p-name" placeholder="Item Name">
-                <input id="p-price" placeholder="Price ₹">
-                <textarea id="p-desc" placeholder="Product details..."></textarea>
-                <button onclick="uploadMedia('product')" id="p-upload-btn" class="w-full border-2 border-[#d4af37] text-[#d4af37] p-3 rounded-xl font-bold mb-3">ADD PHOTO</button>
-                <button onclick="saveProduct()" id="p-save-btn" class="hidden w-full bg-[#d4af37] text-white p-3 rounded-xl font-bold shadow-lg">SAVE & PUBLISH</button>
-            </div>
-            <div id="shop-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+        <section id="sec-feed" class="p-4 max-w-4xl mx-auto">
+            <div id="feed-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <section id="sec-orders" class="p-6 hidden max-w-2xl mx-auto">
-            <h3 class="font-bold text-lg mb-6 text-[#d4af37]">Recent Orders</h3>
-            <div id="orders-list" class="space-y-4"></div>
+        <section id="sec-shop" class="hidden">
+            <div id="banner-box" class="banner">
+                <label class="absolute top-4 right-4 bg-black/40 text-white p-2 rounded-full cursor-pointer">
+                    <i class="fa-solid fa-camera"></i>
+                    <input type="file" onchange="previewImage(this, 'banner-box')">
+                </button>
+                <div class="relative">
+                    <img id="profile-img" src="https://via.placeholder.com/150" class="profile-pic">
+                    <label class="absolute bottom-[-45px] left-[55%] bg-[#d4af37] text-white p-2 rounded-full border-2 border-white cursor-pointer">
+                        <i class="fa-solid fa-pen text-[10px]"></i>
+                        <input type="file" onchange="previewImage(this, 'profile-img')">
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-14 text-center px-6">
+                <h2 id="disp-name" class="text-2xl font-black text-gray-800">Cretor Name</h2>
+                <p id="disp-bio" class="text-xs text-gray-400 mt-1 italic">Bio update karein...</p>
+                
+                <div class="flex justify-center gap-2 mt-4">
+                    <a id="lnk-insta" href="#" class="social-chip insta"><i class="fa-brands fa-instagram"></i> Insta</a>
+                    <a id="lnk-yt" href="#" class="social-chip yt"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                    <a id="lnk-fb" href="#" class="social-chip fb"><i class="fa-brands fa-facebook"></i> FB</a>
+                </div>
+                <button onclick="toggleBox('edit-profile')" class="mt-4 text-[10px] font-bold text-[#d4af37] border border-[#d4af37] px-4 py-1 rounded-full">Edit Profile</button>
+            </div>
+
+            <div id="edit-profile" class="hidden p-6 max-w-md mx-auto bg-white mt-4 rounded-3xl border shadow-sm">
+                <input id="in-name" placeholder="Name" class="w-full p-3 border rounded-xl mb-2">
+                <input id="in-bio" placeholder="Bio" class="w-full p-3 border rounded-xl mb-2">
+                <input id="in-insta" placeholder="Insta Link" class="w-full p-3 border rounded-xl mb-2">
+                <input id="in-yt" placeholder="YouTube Link" class="w-full p-3 border rounded-xl mb-2">
+                <input id="in-fb" placeholder="FB Link" class="w-full p-3 border rounded-xl mb-4">
+                <button onclick="saveProfile()" class="w-full bg-black text-white p-3 rounded-xl">SAVE PROFILE</button>
+            </div>
+
+            <div class="p-4 max-w-4xl mx-auto mt-10">
+                <div class="bg-white border-2 border-dashed rounded-[30px] p-6 text-center">
+                    <h3 class="font-bold text-gray-400 mb-4 text-sm uppercase">Naya Maal Jodhein</h3>
+                    <input id="p-name" placeholder="Item Name" class="w-full p-3 border rounded-xl mb-2">
+                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 border rounded-xl mb-2">
+                    <textarea id="p-desc" placeholder="Details..." class="w-full p-3 border rounded-xl mb-4"></textarea>
+                    
+                    <div id="p-preview" class="hidden mb-4"><img id="p-prev-img" class="h-24 mx-auto rounded-lg"></div>
+                    
+                    <div class="flex gap-2">
+                        <label class="flex-1 bg-gray-100 p-3 rounded-xl cursor-pointer text-xs font-bold">
+                            <i class="fa-solid fa-image mr-2"></i>PHOTO CHUNEIN
+                            <input type="file" onchange="previewImage(this, 'p-prev-img')">
+                        </label>
+                        <button id="p-save-btn" onclick="saveProduct()" class="flex-1 bg-[#d4af37] text-white p-3 rounded-xl text-xs font-bold shadow-lg">SAVE & PUBLISH</button>
+                    </div>
+                </div>
+                <div id="my-grid" class="grid grid-cols-2 gap-4 mt-8"></div>
+            </div>
         </section>
 
+        <section id="sec-orders" class="hidden p-6 max-w-xl mx-auto">
+            <h3 class="font-bold text-lg mb-4">Grahakon ke Orders</h3>
+            <div id="order-list" class="space-y-4"></div>
+        </section>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let user = null, tempImg = "";
+        let user = null, currentFileUrl = "";
 
         window.toggleBox = (id) => document.getElementById(id).classList.toggle('hidden');
+
+        // Photo Preview (Without Cloudinary Widget)
+        window.previewImage = (input, targetId) => {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const url = e.target.result;
+                    currentFileUrl = url; // Temporary Local URL
+                    if(targetId === 'banner-box') document.getElementById(targetId).style.backgroundImage = `url(${url})`;
+                    else if(targetId === 'p-prev-img') {
+                        document.getElementById('p-preview').classList.remove('hidden');
+                        document.getElementById(targetId).src = url;
+                    } else document.getElementById(targetId).src = url;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
 
         // Auth
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Email ya Pass galat hai!"));
         };
 
         onAuthStateChanged(auth, u => {
-            if(u) {
-                user = u;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                syncShop(); syncOrders();
-            }
+            if(u) { user = u; document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); syncAll(); }
         });
 
-        // Tabs
         window.showTab = (t) => {
-            document.getElementById('sec-shop').classList.toggle('hidden', t !== 'shop');
-            document.getElementById('sec-orders').classList.toggle('hidden', t !== 'orders');
-            document.getElementById('tab-shop-btn').classList.toggle('active', t === 'shop');
-            document.getElementById('tab-orders-btn').classList.toggle('active', t === 'orders');
-        };
-
-        // Media Upload
-        window.uploadMedia = (type) => {
-            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, (err, res) => {
-                if(res?.event === "success") {
-                    const url = res.info.secure_url;
-                    if(type === 'banner') document.getElementById('banner-img').style.backgroundImage = `url('${url}')`;
-                    else if(type === 'profile') document.getElementById('profile-img').src = url;
-                    else {
-                        tempImg = url;
-                        document.getElementById('p-save-btn').classList.remove('hidden');
-                        document.getElementById('p-upload-btn').innerText = "✓ PHOTO READY";
-                    }
-                }
+            ['feed','shop','orders'].forEach(s => {
+                document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
+                document.getElementById('tab-'+s).classList.toggle('active', s === t);
             });
         };
 
-        // Profile Logic
         window.saveProfile = () => {
             document.getElementById('disp-name').innerText = document.getElementById('in-name').value || "Creator";
-            document.getElementById('disp-bio').innerText = document.getElementById('in-bio').value || "Bio updated!";
-            document.getElementById('link-insta').href = document.getElementById('in-insta').value || "#";
-            document.getElementById('link-yt').href = document.getElementById('in-yt').value || "#";
-            document.getElementById('link-fb').href = document.getElementById('in-fb').value || "#";
-            toggleBox('edit-profile');
+            document.getElementById('disp-bio').innerText = document.getElementById('in-bio').value || "Bio update!";
+            document.getElementById('lnk-insta').href = document.getElementById('in-insta').value || "#";
+            document.getElementById('lnk-yt').href = document.getElementById('in-yt').value || "#";
+            document.getElementById('lnk-fb').href = document.getElementById('in-fb').value || "#";
+            toggleBox('edit-profile'); alert("Profile Saved!");
         };
 
-        // Product Logic
         window.saveProduct = async () => {
             const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value;
-            if(!n || !p || !tempImg) return alert("Hukum, poori jankari bharein!");
-            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, img: tempImg, time: serverTimestamp(), creatorId: user.uid });
-            alert("Maal Shahi Shop mein List ho gaya!");
-            tempImg = ""; document.getElementById('p-save-btn').classList.add('hidden');
-            document.getElementById('p-upload-btn').innerText = "ADD PHOTO";
+            if(!n || !p || !currentFileUrl) return alert("Hukum, Photo aur Jankari poori bharein!");
+            
+            // NOTE: In production, upload currentFileUrl to Storage. Here we save the Base64/Local for Demo.
+            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, img: currentFileUrl, time: serverTimestamp(), creatorEmail: user.email.split('@')[0] });
+            
+            alert("Maal Shahi Feed par Publish ho gaya!");
+            document.getElementById('p-name').value = ""; document.getElementById('p-preview').classList.add('hidden');
+            currentFileUrl = "";
         };
 
-        function syncShop() {
+        function syncAll() {
+            // Public Feed
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-                const grid = document.getElementById('shop-grid'); grid.innerHTML = "";
+                const feed = document.getElementById('feed-grid'); feed.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    grid.innerHTML += `
-                        <div class="bg-white rounded-2xl overflow-hidden border shadow-sm relative">
-                            <button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-5 h-5 rounded-full text-[8px]"><i class="fa-solid fa-trash"></i></button>
-                            <img src="${p.img}" class="w-full h-32 object-cover">
-                            <div class="p-3">
-                                <h4 class="font-bold text-[11px] truncate">${p.name}</h4>
-                                <p class="text-[#d4af37] font-bold text-xs">₹${p.price}</p>
-                                <button onclick="buyNow('${p.name}')" class="w-full bg-black text-white text-[9px] py-2 rounded-lg mt-2">ORDER NOW</button>
+                    feed.innerHTML += `<div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                        <img src="${p.img}" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-sm">@${p.creatorEmail} - ${p.name}</h4>
+                            <p class="text-[10px] text-gray-400 mt-1">${p.desc}</p>
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="font-bold text-[#d4af37]">₹${p.price}</span>
+                                <button onclick="buy('${p.name}')" class="bg-black text-white text-[10px] px-4 py-2 rounded-full font-bold">ORDER</button>
                             </div>
-                        </div>`;
+                        </div>
+                    </div>`;
                 });
             });
         }
 
-        // Order Logic
-        window.buyNow = async (itemName) => {
-            const name = prompt("Aapka Naam?"), phone = prompt("WhatsApp No?");
-            if(name && phone) {
-                await addDoc(collection(db, "orders"), { itemName, custName: name, custPhone: phone, time: serverTimestamp() });
-                alert("Hukum, Order bhej diya gaya hai!");
-            }
+        window.buy = async (item) => {
+            const n = prompt("Aapka Naam?"), ph = prompt("WhatsApp Number?");
+            if(n && ph) await addDoc(collection(db, "orders"), { item, name: n, phone: ph, time: serverTimestamp() });
         };
 
-        function syncOrders() {
-            onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), snap => {
-                const list = document.getElementById('orders-list'); list.innerHTML = "";
-                snap.forEach(d => {
-                    const o = d.data();
-                    list.innerHTML += `
-                        <div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">New Order</p>
-                            <h4 class="font-bold text-gray-800">${o.itemName}</h4>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-xs text-gray-500"><i class="fa-solid fa-user mr-1"></i> ${o.custName}</span>
-                                <a href="tel:${o.custPhone}" class="text-[#d4af37] font-bold text-xs"><i class="fa-solid fa-phone mr-1"></i> ${o.custPhone}</a>
-                            </div>
-                        </div>`;
-                });
-            });
-        }
-
-        window.delP = async (id) => { if(confirm("Mita dein?")) await deleteDoc(doc(db, "products", id)); };
-    </script>
-</body>
-</html>
+        onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), snap => {
+            const
