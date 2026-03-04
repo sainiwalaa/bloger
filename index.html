@@ -69,7 +69,21 @@
 
             <div class="mt-16 text-center px-6">
                 <h2 id="disp-name" class="text-2xl font-black text-gray-800">Shahi Creator</h2>
-                <p id="disp-bio" class="text-xs text-gray-400 mt-1 italic font-medium">Bio update karein...</p>
+                
+                <div class="mt-4 px-2">
+                    <div id="bio-container" class="relative inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-[#d4af37]/10 to-[#f3e5ab]/20 border border-[#d4af37]/20 shadow-inner">
+                        <i class="fa-solid fa-quote-left absolute top-2 left-2 text-[#d4af37]/30 text-[10px]"></i>
+                        <p id="disp-bio" class="text-gray-700 italic font-medium leading-relaxed" style="font-size: 14px;">Bio update karein...</p>
+                        <i class="fa-solid fa-quote-right absolute bottom-2 right-2 text-[#d4af37]/30 text-[10px]"></i>
+                    </div>
+
+                    <div class="flex justify-center gap-4 mt-3 owner-only hidden">
+                        <button onclick="changeFontSize(-1)" class="text-[10px] bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm active:scale-95 transition">A-</button>
+                        <span class="text-[10px] text-gray-400 self-center uppercase font-bold tracking-tighter">Font Size</span>
+                        <button onclick="changeFontSize(1)" class="text-[10px] bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm active:scale-95 transition">A+</button>
+                    </div>
+                </div>
+
                 <div class="flex justify-center gap-3 mt-6">
                     <a id="btn-wa" href="#" target="_blank" class="social-btn hidden" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
                     <a id="btn-insta" href="#" target="_blank" class="social-btn hidden" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
@@ -152,6 +166,7 @@
         let currentUser = null;
         let authMode = 'login';
         let tempProdImg = "";
+        let currentFontSize = 14;
 
         window.toggleAuthMode = () => {
             authMode = (authMode === 'login') ? 'signup' : 'login';
@@ -165,7 +180,7 @@
                 signInWithEmailAndPassword(auth, e, p).catch(err => alert("Galti: " + err.message));
             } else {
                 createUserWithEmailAndPassword(auth, e, p).then(async (cred) => {
-                    await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Shahi Creator", wa: "", insta: "", yt: "" });
+                    await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Shahi Creator", wa: "", insta: "", yt: "", bioSize: 14 });
                 }).catch(err => alert(err.message));
             }
         };
@@ -192,21 +207,47 @@
         async function loadProfile(uid) {
             const isOwner = (currentUser && currentUser.uid === uid);
             document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            
             const snap = await getDoc(doc(db, "users", uid));
             if (snap.exists()) {
                 const d = snap.data();
                 document.getElementById('disp-name').innerText = d.name || "Creator";
-                document.getElementById('disp-bio').innerText = d.bio || "";
+                document.getElementById('disp-bio').innerText = d.bio || "Bio update karein...";
+                
+                // NAYA: Font size handle karein
+                if(d.bioSize) {
+                    currentFontSize = d.bioSize;
+                    document.getElementById('disp-bio').style.fontSize = currentFontSize + 'px';
+                }
+
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
+                
                 const wa = document.getElementById('btn-wa');
                 d.wa ? (wa.href = `https://wa.me/${d.wa}`, wa.classList.remove('hidden')) : wa.classList.add('hidden');
+                
                 const ins = document.getElementById('btn-insta');
                 d.insta ? (ins.href = d.insta, ins.classList.remove('hidden')) : ins.classList.add('hidden');
+
+                const yt = document.getElementById('btn-yt');
+                d.yt ? (yt.href = d.yt, yt.classList.remove('hidden')) : yt.classList.add('hidden');
             }
             syncMyShop(uid);
-            syncUserHistory(uid); // Apne orders dekhne ke liye
+            syncUserHistory(uid);
         }
+        window.loadProfile = loadProfile;
+
+        // NAYA: Font Size Change Function
+        window.changeFontSize = async (step) => {
+            currentFontSize += step;
+            if(currentFontSize < 10) currentFontSize = 10;
+            if(currentFontSize > 26) currentFontSize = 26;
+            
+            document.getElementById('disp-bio').style.fontSize = currentFontSize + 'px';
+            if(currentUser) {
+                await setDoc(doc(db, "users", currentUser.uid), { bioSize: currentFontSize }, { merge: true });
+            }
+        };
 
         window.saveProfileData = async () => {
             const data = {
@@ -249,8 +290,8 @@
         };
 
         window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, 
-                  p = document.getElementById('p-price').value, 
+            const n = document.getElementById('p-name').value, 
+                  p = document.getElementById('p-price').value, 
                   d = document.getElementById('p-desc').value,
                   l = document.getElementById('p-link').value;
             if(!n || !p || !tempProdImg) return alert("Hukum, jankari bhariye!");
@@ -282,7 +323,6 @@
                 });
             });
 
-            // Creator ke paas aaye orders (Manageable)
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
                 snap.forEach(d => { 
@@ -315,7 +355,6 @@
             });
         }
 
-        // NAYA: User ne kahan kahan order kiya wo history
         function syncUserHistory(uid) {
             if(!currentUser) return;
             onSnapshot(query(collection(db, "orders"), where("userId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
