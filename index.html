@@ -3,42 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SAINIWALAA | Royal Login</title>
+    <title>SAINIWALAA | Royal Darbar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <style>
         :root { --gold: #FFD700; --black: #050505; }
-        body { background: var(--black); color: #fff; font-family: sans-serif; margin: 0; }
+        body { background: var(--black); color: #fff; font-family: sans-serif; margin: 0; overflow-x: hidden; }
         .gold-text { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
         .royal-input { width: 100%; background: #111; border: 1px solid #333; padding: 15px; margin-bottom: 12px; color: #fff; border-radius: 12px; outline: none; }
         .royal-btn { background: var(--gold); color: #000; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; border: none; cursor: pointer; transition: 0.3s; }
-        .royal-btn:disabled { opacity: 0.6; }
+        .royal-btn:disabled { opacity: 0.6; cursor: wait; }
         .hidden { display: none !important; }
-        .nav-bar { background: #000; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; max-width: 500px; display: flex; justify-content: space-around; padding: 12px 0; }
+        .nav-bar { background: #000; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; max-width: 500px; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+        .nav-item { color: #555; text-align: center; cursor: pointer; font-size: 10px; }
+        .nav-item.active { color: var(--gold); transform: scale(1.1); }
+        .card { background: #0f0f0f; border: 1px solid #222; border-radius: 20px; padding: 15px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
     </style>
 </head>
-<body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 pb-20">
+<body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 pb-24">
 
     <div id="auth-section" class="p-8 pt-20">
-        <h1 class="gold-text text-center text-3xl font-bold tracking-[8px] mb-10">SAINIWALAA</h1>
-        
+        <h1 class="gold-text text-center text-3xl font-bold tracking-[8px] mb-10 uppercase">SAINIWALAA</h1>
         <div id="login-box">
-            <h2 class="text-center mb-6 italic">Rajwara Pravesh (Login)</h2>
-            <input id="email" type="email" placeholder="Tharo Email" class="royal-input">
-            <input id="pass" type="password" placeholder="Gupt Shabd (Password)" class="royal-input">
-            <button id="login-btn" class="royal-btn mb-4">PRAVESH KAREIN</button>
-            <div class="flex justify-between text-[10px] text-zinc-500">
-                <span onclick="toggleAuth(false)" class="cursor-pointer">Naya Khata Banayein</span>
-                <span onclick="forgotPass()" class="cursor-pointer text-yellow-600">Password Bhool Gaye?</span>
-            </div>
+            <h2 class="text-center mb-6 italic gold-text">Pravesh Karein (Login)</h2>
+            <input id="email" type="email" placeholder="Email" class="royal-input">
+            <input id="pass" type="password" placeholder="Password" class="royal-input">
+            <button id="login-btn" class="royal-btn mb-4">LOG IN</button>
+            <p onclick="toggleAuth(false)" class="text-center text-[10px] text-zinc-500 cursor-pointer underline">Naya Khata Banayein</p>
         </div>
-
         <div id="reg-box" class="hidden">
-            <h2 class="text-center mb-6 italic">Naya Khata (Register)</h2>
+            <h2 class="text-center mb-6 italic gold-text">Naya Khata (Register)</h2>
             <input id="reg-email" type="email" placeholder="Naya Email" class="royal-input">
             <input id="reg-pass" type="password" placeholder="Naya Password" class="royal-input">
-            <button id="reg-btn" class="royal-btn mb-4">KHATA BANAYEIN</button>
-            <p onclick="toggleAuth(true)" class="text-center text-[10px] text-zinc-500 cursor-pointer">Purana Khata hai? Login karein</p>
+            <button id="reg-btn" class="royal-btn mb-4">REGISTER</button>
+            <p onclick="toggleAuth(true)" class="text-center text-[10px] text-zinc-500 cursor-pointer underline">Purana Khata hai? Login</p>
         </div>
     </div>
 
@@ -46,31 +47,70 @@
         <header class="p-5 border-b border-yellow-800/40 text-center sticky top-0 bg-black z-50 flex justify-between items-center">
             <div class="w-10"></div>
             <h1 class="gold-text font-bold text-xl tracking-[5px]">SAINIWALAA</h1>
-            <button onclick="logout()" class="text-red-500 text-[10px]"><i class="fa-solid fa-power-off"></i></button>
+            <button onclick="logout()" class="text-red-500 text-xs"><i class="fa-solid fa-power-off"></i></button>
         </header>
 
         <section id="darbar-sec" class="p-4 page">
-            <h2 class="gold-text italic mb-4">🚩 Darbar</h2>
-            <div class="text-center py-20 text-zinc-700 italic">Hukum, Darbar mein aapka swagat hai...</div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="gold-text italic">🚩 Darbar</h2>
+                <button onclick="openCloudinary('post')" class="bg-zinc-800 px-4 py-1 rounded-lg text-[10px]">+ POST</button>
+            </div>
+            <div id="feed-container" class="space-y-4"></div>
         </section>
 
         <section id="bazaar-sec" class="p-4 page hidden">
             <h2 class="gold-text italic mb-4">🛍 Bazaar</h2>
-            <div id="bazaar-list" class="grid grid-cols-2 gap-4"></div>
+            <div class="card border-yellow-600/20">
+                <input id="p-name" placeholder="Maal ko Naam" class="royal-input">
+                <input id="p-price" placeholder="Keemat ₹" class="royal-input">
+                <input id="p-link" placeholder="External Link" class="royal-input">
+                <input type="hidden" id="p-img">
+                <button onclick="openCloudinary('product')" class="w-full border border-zinc-700 py-3 rounded-xl text-xs mb-3 text-zinc-500">PHOTO CHUNO</button>
+                <button id="save-p-btn" onclick="saveProduct()" class="royal-btn">BAZAAR MEIN RAKHO</button>
+            </div>
+            <div id="bazaar-list" class="grid grid-cols-2 gap-4 mt-6"></div>
+        </section>
+
+        <section id="aap-sec" class="p-4 page hidden">
+            <h2 class="gold-text italic mb-4">👤 Aapka Darbar</h2>
+            <div class="card bg-zinc-900">
+                <h4 class="gold-text text-xs mb-3">📜 Orders History (Grahak Detail)</h4>
+                <div class="overflow-x-auto"><table id="order-table"><thead><tr><th>Grahak</th><th>Phone</th><th>Maal</th></tr></thead><tbody id="order-list"></tbody></table></div>
+            </div>
         </section>
 
         <nav class="nav-bar">
-            <div onclick="show('darbar')" class="text-yellow-700"><i class="fa-solid fa-crown text-xl"></i></div>
-            <div onclick="show('bazaar')" class="text-zinc-600"><i class="fa-solid fa-shop text-xl"></i></div>
+            <div onclick="show('darbar')" id="nav-darbar" class="nav-item active"><i class="fa-solid fa-crown text-xl"></i></div>
+            <div onclick="show('bazaar')" id="nav-bazaar" class="nav-item"><i class="fa-solid fa-shop text-xl"></i></div>
+            <div onclick="show('aap')" id="nav-aap" class="nav-item"><i class="fa-solid fa-user-ninja text-xl"></i></div>
         </nav>
+    </div>
+
+    <div id="order-modal" class="fixed inset-0 bg-black/95 z-[200] hidden flex items-center justify-center p-6">
+        <div class="bg-zinc-900 border border-yellow-600/30 p-8 rounded-[2rem] w-full">
+            <h3 class="gold-text text-center mb-6 italic">Kharidari Darj Karein</h3>
+            <input id="o-name" placeholder="Tharo Naam" class="royal-input">
+            <input id="o-phone" placeholder="Mobile Number" class="royal-input">
+            <textarea id="o-addr" placeholder="Pura Pata" class="royal-input h-20"></textarea>
+            <button id="confirm-order-btn" class="royal-btn">SAUDA PAKKO KARO</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const firebaseConfig = { databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com" };
+        // 🔥 YOUR ACTUAL CONFIG CONNECTED
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
+            authDomain: "social-blog-93d38.firebaseapp.com",
+            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com",
+            projectId: "social-blog-93d38",
+            storageBucket: "social-blog-93d38.firebasestorage.app",
+            appId: "1:730884874913:web:e2cb8f6084ee039db006e0"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
@@ -81,49 +121,83 @@
             document.getElementById('reg-box').classList.toggle('hidden', isLogin);
         };
 
-        // Click Protection Helper
-        const royalAction = async (btnId, task) => {
-            const btn = document.getElementById(btnId);
-            const oldText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = "Tharo hukum likhayo ja ryo hai...";
-            try { await task(); } catch(e) { alert(e.message); }
-            btn.disabled = false;
-            btn.innerHTML = oldText;
+        const protect = async (id, fn) => {
+            const b = document.getElementById(id); const old = b.innerHTML;
+            b.disabled = true; b.innerHTML = "Tharo hukum likhayo ja ryo hai...";
+            try { await fn(); } catch(e) { alert("Hukum, galti hui: " + e.message); }
+            b.disabled = false; b.innerHTML = old;
         };
 
-        // Login
-        document.getElementById('login-btn').onclick = () => royalAction('login-btn', () => 
-            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
-        );
+        document.getElementById('login-btn').onclick = () => protect('login-btn', () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value));
+        document.getElementById('reg-btn').onclick = () => protect('reg-btn', () => createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value));
+        window.logout = () => signOut(auth);
 
-        // Register
-        document.getElementById('reg-btn').onclick = () => royalAction('reg-btn', () => 
-            createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value)
-        );
-
-        // Forgot Password
-        window.forgotPass = () => {
-            const email = document.getElementById('email').value;
-            if(!email) return alert("Hukum, pehle email toh likhiye!");
-            sendPasswordResetEmail(auth, email).then(() => alert("Password reset link bhej diyo hai!"));
-        };
-
-        // Auth State
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-            }
+            if(user) { document.getElementById('auth-section').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); loadData(); }
+            else { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('main-app').classList.add('hidden'); }
         });
 
-        window.logout = () => signOut(auth);
+        // --- CLOUDINARY WIDGET ---
+        window.openCloudinary = (type) => {
+            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default", resourceType: type === 'post' ? 'auto' : 'image' }, (err, res) => {
+                if(!err && res.event === "success") {
+                    if(type === 'post') {
+                        if(res.info.resource_type === 'video' && res.info.duration > 90) return alert("Video 90s se zyada nahi hona chahiye!");
+                        push(ref(db, 'posts'), { url: res.info.secure_url, type: res.info.resource_type, time: serverTimestamp() });
+                    } else { document.getElementById('p-img').value = res.info.secure_url; alert("Tasveer chadh gayi!"); }
+                }
+            });
+        };
+
+        // --- BAZAAR & ORDERS ---
+        window.saveProduct = () => protect('save-p-btn', async () => {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const link = document.getElementById('p-link').value;
+            const img = document.getElementById('p-img').value;
+            if(!name || !price || !img) throw new Error("Poori jankari bhariye!");
+            await push(ref(db, 'products'), { name, price, link, img, time: serverTimestamp() });
+            alert("Maal bazaar mein rakha gaya!");
+        });
+
+        window.initOrder = (name, price, link) => {
+            document.getElementById('order-modal').classList.remove('hidden');
+            document.getElementById('confirm-order-btn').onclick = () => protect('confirm-order-btn', async () => {
+                const cName = document.getElementById('o-name').value;
+                const cPhone = document.getElementById('o-phone').value;
+                const cAddr = document.getElementById('o-addr').value;
+                if(!cName || !cPhone) throw new Error("Phone aur Naam zaroori hai!");
+                await push(ref(db, 'orders'), { customer: cName, phone: cPhone, address: cAddr, product: name, price: price, time: new Date().toLocaleString() });
+                window.location.href = link;
+            });
+        };
+
+        // --- DATA SYNC ---
+        function loadData() {
+            onValue(ref(db, 'posts'), (snap) => {
+                const cont = document.getElementById('feed-container'); cont.innerHTML = "";
+                snap.forEach(c => { const d = c.val(); 
+                    const media = d.type === 'video' ? `<video src="${d.url}" controls class="w-full rounded-xl"></video>` : `<img src="${d.url}" class="w-full rounded-xl">`;
+                    cont.innerHTML += `<div class="card">${media}</div>`;
+                });
+            });
+            onValue(ref(db, 'products'), (snap) => {
+                const list = document.getElementById('bazaar-list'); list.innerHTML = "";
+                snap.forEach(c => { const d = c.val();
+                    list.innerHTML += `<div class="card text-center"><img src="${d.img}" class="h-24 w-full object-cover rounded-lg mb-2"><p class="gold-text text-xs font-bold">${d.name}</p><p class="text-[10px] mb-2">₹${d.price}</p><button onclick="initOrder('${d.name}','${d.price}','${d.link}')" class="bg-yellow-600/20 border border-yellow-600 text-yellow-500 text-[8px] py-1 w-full rounded">SAUDA</button></div>`;
+                });
+            });
+            onValue(ref(db, 'orders'), (snap) => {
+                const list = document.getElementById('order-list'); list.innerHTML = "";
+                snap.forEach(c => { const d = c.val(); list.innerHTML += `<tr><td>${d.customer}</td><td>${d.phone}</td><td>${d.product}</td></tr>`; });
+            });
+        }
+
         window.show = (p) => {
             document.querySelectorAll('.page').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(p + '-sec').classList.remove('hidden');
+            document.getElementById('nav-' + p).classList.add('active');
         };
     </script>
 </body>
