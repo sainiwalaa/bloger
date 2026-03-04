@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SAINIWALAA - Royal Social & Bazaar</title>
+    <title>SAINIWALAA - Royal Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
@@ -11,8 +11,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, update, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Firebase Config (Wahi purani jo work kar rahi hai)
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
             authDomain: "social-blog-93d38.firebaseapp.com",
@@ -24,115 +25,145 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
-        // --- LIKE SYSTEM ---
-        window.likePost = (postId) => {
-            const uid = auth.currentUser.uid;
-            update(ref(db, `posts/${postId}/likes`), { [uid]: true });
+        // --- TAB SYSTEM (Images 05, 06, 07 ke anusaar) ---
+        window.openTab = (tabName) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(tabName + '-page').classList.remove('hidden');
+            // Active Tab Style
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('text-yellow-500', 'border-yellow-500'));
+            event.currentTarget.classList.add('text-yellow-500', 'border-yellow-500');
         };
 
-        // --- COMMENT SYSTEM ---
-        window.addComment = (postId) => {
-            const msg = prompt("Aapko vichaar likho:");
+        // --- POST SYSTEM (Image 07) ---
+        window.createPost = () => {
+            const msg = prompt("Kya likhna chahte ho hukum?");
             if(msg) {
-                push(ref(db, `posts/${postId}/comments`), {
+                push(ref(db, 'posts'), {
                     text: msg,
-                    user: auth.currentUser.displayName || "Yatri",
+                    user: "Sunil Saini",
                     time: serverTimestamp()
                 });
+                alert("Post ho gayo hukum! 🚩");
             }
         };
 
-        // --- FOLLOW SYSTEM ---
-        window.toggleFollow = (targetUid) => {
-            const myUid = auth.currentUser.uid;
-            update(ref(db, `users/${myUid}/following`), { [targetUid]: true });
-            update(ref(db, `users/${targetUid}/followers`), { [myUid]: true });
-            alert("Saath joda gaya! 🤝");
+        // --- BAZAAR SYSTEM (Image 06) ---
+        window.addToBazaar = () => {
+            const name = prompt("Maal ko Naam:");
+            const price = prompt("Keemat (₹):");
+            if(name && price) {
+                push(ref(db, 'products'), { name, price, time: serverTimestamp() });
+                alert("Maal rakha gaya! 🛒");
+            }
         };
 
-        // --- FEED RENDERING ---
+        // --- DATA LOADING ---
         onValue(ref(db, 'posts'), (snap) => {
-            const feed = document.getElementById('feed-container');
-            feed.innerHTML = "";
-            snap.forEach(child => {
-                const p = child.val();
-                const likesCount = p.likes ? Object.keys(p.likes).length : 0;
-                feed.innerHTML += `
-                    <div class="bg-zinc-900 border border-yellow-900/20 rounded-2xl mb-6 overflow-hidden">
-                        <div class="p-3 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-yellow-600"></div>
-                            <span class="text-xs font-bold gold-text">Hukum Saini</span>
-                        </div>
-                        <img src="${p.url}" class="w-full aspect-square object-cover">
-                        <div class="p-4">
-                            <div class="flex gap-4 mb-2">
-                                <button onclick="likePost('${child.key}')" class="text-xl"><i class="fa-heart fa-regular"></i> ${likesCount}</button>
-                                <button onclick="addComment('${child.key}')" class="text-xl"><i class="fa-comment fa-regular"></i></button>
-                            </div>
-                            <p class="text-sm text-gray-300">${p.caption || ""}</p>
-                        </div>
-                    </div>`;
+            const container = document.getElementById('darbar-posts');
+            if(!snap.exists()) { container.innerHTML = "<p class='text-gray-500 text-center mt-10'>Koi post nahi di.</p>"; return; }
+            container.innerHTML = "";
+            snap.forEach(c => {
+                const p = c.val();
+                container.innerHTML += `<div class="bg-zinc-900/50 p-4 border border-zinc-800 rounded-xl mb-4">
+                    <p class="text-sm">${p.text}</p>
+                    <div class="flex gap-4 mt-3 text-xs text-zinc-500">
+                        <span><i class="fa-regular fa-heart"></i> Like</span>
+                        <span><i class="fa-regular fa-comment"></i> Vichaar</span>
+                    </div>
+                </div>`;
             });
         });
-
-        // --- BAZAAR & ORDER LOGIC ---
-        window.placeOrder = async (pName, pPrice) => {
-            const cName = prompt("Aapko Naam:");
-            const cPhone = prompt("Mobile Number:");
-            const cAddress = prompt("Pata (Address):");
-            if(cName && cPhone && cAddress) {
-                await push(ref(db, 'orders'), {
-                    product: pName, price: pPrice, customer: cName, mobile: cPhone, pata: cAddress, time: serverTimestamp()
-                });
-                alert("Order ho gayo hukum! 📦");
-            }
-        };
-
-        // Auth state check
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('app-screen').style.display = 'block';
-            }
-        });
-
     </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Marcellus&display=swap');
-        body { background: #000; color: #fff; font-family: 'Marcellus', serif; }
+        body { background-color: #0a0a0a; color: #e5e5e5; font-family: sans-serif; }
         .gold-text { color: #D4AF37; }
+        .gold-bg { background-color: #D4AF37; }
         .gold-border { border: 1px solid #D4AF37; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="max-w-[500px] mx-auto min-h-screen pb-24">
+<body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 flex flex-col">
 
-    <div id="app-screen">
-        <header class="p-5 flex justify-between items-center border-b border-zinc-900">
-            <h1 class="gold-text text-xl font-bold tracking-tighter">SAINIWALAA</h1>
-            <div class="flex gap-4">
-                <i class="fa-solid fa-bell text-zinc-500"></i>
-                <i class="fa-solid fa-bars gold-text"></i>
-            </div>
-        </header>
+    <header class="p-4 text-center border-b border-zinc-900">
+        <h1 class="gold-text tracking-[4px] font-serif text-lg">SAINIWALAA</h1>
+    </header>
 
-        <nav class="flex border-b border-zinc-900 sticky top-0 bg-black z-50">
-            <button onclick="document.getElementById('feed-tab').style.display='block'; document.getElementById('bazaar-tab').style.display='none';" class="flex-1 py-4 text-[10px] uppercase tracking-widest gold-text font-bold">Darbar</button>
-            <button onclick="document.getElementById('feed-tab').style.display='none'; document.getElementById('bazaar-tab').style.display='block';" class="flex-1 py-4 text-[10px] uppercase tracking-widest text-zinc-500">Bazaar</button>
-        </nav>
-
-        <div id="feed-tab" class="p-4">
-            <div id="feed-container">
+    <main class="flex-1 overflow-y-auto pb-24">
+        
+        <div id="aap-page" class="page">
+            <div class="p-6 flex items-center gap-6">
+                <div class="relative">
+                    <div class="w-24 h-24 rounded-full gold-bg flex items-center justify-center text-black text-3xl font-bold border-4 border-black ring-2 ring-yellow-600">SS</div>
+                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-black rounded-full"></div>
                 </div>
+                <div>
+                    <h2 class="text-2xl font-bold">sunil saini</h2>
+                    <p class="text-xs text-zinc-500 tracking-tighter">SSSSSSSSSSSSSSS</p>
+                </div>
+            </div>
+
+            <div class="flex justify-around mb-6 text-center">
+                <div><p class="font-bold">0</p><p class="text-[10px] text-zinc-500 uppercase">Post</p></div>
+                <div><p class="font-bold">0</p><p class="text-[10px] text-zinc-500 uppercase">Saathi</p></div>
+                <button onclick="document.getElementById('modal').classList.remove('hidden')" class="border border-yellow-600/50 px-4 py-1 rounded text-sm gold-text bg-yellow-600/10"><i class="fa-solid fa-gear mr-2"></i>Badlaav</button>
+            </div>
+
+            <div class="flex border-y border-zinc-900">
+                <button onclick="openTab('darbar')" class="tab-btn flex-1 py-3 text-xs border-b-2 border-transparent"><i class="fa-solid fa-table-cells mr-2"></i>Darbar</button>
+                <button onclick="openTab('bazaar')" class="tab-btn flex-1 py-3 text-xs border-b-2 border-transparent"><i class="fa-solid fa-shop mr-2"></i>Dukaan</button>
+                <button class="tab-btn flex-1 py-3 text-xs border-b-2 border-transparent"><i class="fa-solid fa-box mr-2"></i>Sauda</button>
+            </div>
+            
+            <div id="darbar-posts" class="p-4">
+                <p class="text-center text-zinc-600 mt-20">Koi post nahi di.</p>
+            </div>
         </div>
 
-        <div id="bazaar-tab" class="p-4" style="display:none">
-            <div class="text-center py-10">
-                <h2 class="gold-text text-lg mb-4">Shahi Dukaan</h2>
-                <div id="bazaar-list" class="grid grid-cols-2 gap-4">
-                    </div>
+        <div id="bazaar-page" class="page hidden p-6">
+            <div class="flex justify-between items-start mb-10">
+                <div>
+                    <h2 class="gold-text text-xl">Shahi Bazaar</h2>
+                    <p class="text-xs text-zinc-500">Anmol saaman yahan milego</p>
+                </div>
+                <button onclick="addToBazaar()" class="bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Bazaar me Rakho 🚩</button>
             </div>
+            <div class="border-2 border-dashed border-zinc-800 rounded-3xl py-20 text-center">
+                <i class="fa-solid fa-tag text-zinc-800 text-4xl mb-4"></i>
+                <p class="text-zinc-600 italic">Bazaar abhi khali hai</p>
+            </div>
+        </div>
+
+        <div id="darbar-page" class="page hidden p-4">
+            <div class="bg-zinc-900/30 border border-zinc-800 p-6 rounded-2xl flex items-center justify-between mb-8">
+                <p class="text-zinc-500 text-sm">Kuch naya dikhao hukum...</p>
+                <button onclick="createPost()" class="border border-yellow-600 text-yellow-500 px-6 py-1 rounded-full text-xs">+ Naya Post</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 w-full max-w-[500px] bg-black border-t border-zinc-900 flex justify-around py-3">
+        <button onclick="openTab('darbar')" class="text-center"><i class="fa-solid fa-house block text-zinc-500"></i><span class="text-[9px] text-zinc-500">Darbar</span></button>
+        <button onclick="openTab('bazaar')" class="text-center"><i class="fa-solid fa-briefcase block text-zinc-500"></i><span class="text-[9px] text-zinc-500">Bazaar</span></button>
+        <button onclick="openTab('aap')" class="text-center text-yellow-500"><i class="fa-solid fa-circle-user block"></i><span class="text-[9px]">Aap</span></button>
+    </nav>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-6 hidden z-[100]">
+        <div class="bg-[#1a1a1a] w-full rounded-2xl p-6 border border-zinc-800">
+            <div class="flex justify-between mb-6"><h3 class="gold-text font-bold">Mahal Sajao</h3><button onclick="document.getElementById('modal').classList.add('hidden')">✕</button></div>
+            <p class="text-xs text-zinc-500 mb-2">Chitra (Avatar)</p>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full gold-bg flex items-center justify-center text-black font-bold">SS</div>
+                <button class="border border-yellow-600/30 px-4 py-2 rounded text-xs gold-text bg-yellow-600/5"><i class="fa-solid fa-image mr-2"></i>Photo Daalo 📷</button>
+            </div>
+            <p class="text-xs text-zinc-500 mb-2">Pichwada (Banner)</p>
+            <button class="w-full border border-yellow-600/30 py-3 rounded text-xs gold-text mb-6 bg-yellow-600/5"><i class="fa-solid fa-image mr-2"></i>Photo Daalo 📷</button>
+            <p class="text-xs text-zinc-500 mb-2">Aapke Baare Me (Bio)</p>
+            <textarea class="w-full bg-black border border-zinc-800 rounded-lg p-3 text-sm h-24 mb-6 outline-none" placeholder="SSSSSSSSSSSSSSS"></textarea>
+            <button class="w-full bg-yellow-600 text-black py-3 rounded-xl font-bold">Save Karo 👑</button>
         </div>
     </div>
 
