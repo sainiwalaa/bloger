@@ -254,10 +254,12 @@
         // TABS
         window.showTab = (t) => {
             ['feed','shop','orders'].forEach(s => {
-                document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s).classList.toggle('active', s === t);
+                const sec = document.getElementById('sec-'+s);
+                const tab = document.getElementById('tab-'+s);
+                if(sec) sec.classList.toggle('hidden', s !== t);
+                if(tab) tab.classList.toggle('active', s === t);
             });
-            if(t === 'shop') loadProfile(currentUser.uid);
+            if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
         };
 
         // SYNC
@@ -266,7 +268,7 @@
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
                 });
             });
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
@@ -281,7 +283,7 @@
                 snap.forEach(d => { 
                     const p = d.data();
                     const isOwner = (currentUser && currentUser.uid === uid);
-                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
                 });
             });
         }
@@ -289,30 +291,59 @@
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
         window.delP = async (id) => { if(confirm("Hata dein?")) await deleteDoc(doc(db, "products", id)); };
 
-        // ORDER SYSTEM WITH EXTERNAL LINK SUPPORT
+        // --- UPDATED ORDER SYSTEM LOGIC ---
         window.orderNow = (item, cid, link) => {
-            if (link && link.trim() !== "") {
-                window.open(link, '_blank'); // Agar link hai toh seedha kholo
+            // Check if link is valid and not "undefined" string
+            if (link && link.trim() !== "" && link !== "undefined") {
+                window.open(link, '_blank'); 
             } else {
-                // Link nahi hai toh details lo
                 document.getElementById('order-item-name').value = item;
                 document.getElementById('order-creator-id').value = cid;
                 document.getElementById('checkout-modal').classList.remove('hidden');
             }
         };
 
-        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
+        window.closeCheckout = () => {
+            document.getElementById('checkout-modal').classList.add('hidden');
+        };
 
         window.submitOrder = async () => {
             const btn = document.getElementById('order-confirm-btn');
-            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
-            const item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value;
-            if(!n || !ph) return alert("Details?");
-            btn.disabled = true; btn.innerText = "Processing...";
-            await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
-            alert("Order Sent!");
-            closeCheckout();
-            btn.disabled = false; btn.innerText = "CONFIRM";
+            const n = document.getElementById('order-cust-name').value;
+            const ph = document.getElementById('order-cust-phone').value;
+            const item = document.getElementById('order-item-name').value;
+            const cid = document.getElementById('order-creator-id').value;
+
+            if(!n || !ph) return alert("Hukum, details bhariye!");
+
+            btn.disabled = true; 
+            btn.innerText = "Processing...";
+
+            try {
+                await addDoc(collection(db, "orders"), { 
+                    item, 
+                    customer: n, 
+                    phone: ph, 
+                    creatorId: cid, 
+                    time: serverTimestamp() 
+                });
+
+                alert("Order Shahi Darbar mein darj ho gaya!");
+                closeCheckout();
+                
+                // Redirection Fix: Undefined URL se bachne ke liye tab switch karein
+                showTab('feed'); 
+                
+                // Clear inputs
+                document.getElementById('order-cust-name').value = "";
+                document.getElementById('order-cust-phone').value = "";
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "CONFIRM";
+            }
         };
     </script>
 </body>
