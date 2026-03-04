@@ -1,110 +1,121 @@
 <!DOCTYPE html>
-<html lang="ra">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Shahi Darbar</title>
+    <title>SAINIWALAA | Shahi Bazaar & Darbar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <style>
-        :root { --gold: #b8860b; --bg: #f4f7f6; }
-        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; }
-        .nav-link { cursor: pointer; font-weight: bold; color: #555; transition: 0.3s; border-bottom: 3px solid transparent; }
-        .nav-link.active { color: var(--gold); border-bottom-color: var(--gold); }
-        .royal-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        :root { --gold: #b8860b; --light: #f8f9fa; }
+        body { background: var(--light); font-family: 'Segoe UI', sans-serif; }
+        .royal-card { background: white; border-radius: 15px; border: 1px solid #e5e7eb; transition: 0.3s; }
+        .nav-active { color: var(--gold) !important; border-bottom: 3px solid var(--gold); }
         .hidden { display: none !important; }
-        input, textarea { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 10px; margin-bottom: 10px; outline: none; }
-        .btn-gold { background: var(--gold); color: white; font-weight: bold; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; }
+        input, textarea { width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px; outline: none; }
+        .btn-gold { background: var(--gold); color: white; font-weight: bold; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; border:none; }
     </style>
 </head>
 <body>
 
     <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-[4px] text-[#b8860b]">SAINIWALAA</h1>
-            <nav id="user-nav" class="hidden flex gap-6 items-center text-xs">
-                <span onclick="show('darbar')" class="nav-link active" id="l-darbar">DARBAR</span>
-                <span onclick="show('bazaar')" class="nav-link" id="l-bazaar">BAZAAR</span>
-                <span onclick="show('profile')" class="nav-link" id="l-profile">PROFILE</span>
-                <button onclick="logout()" class="text-red-500 text-lg"><i class="fa-solid fa-power-off"></i></button>
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-[3px] text-[#b8860b] cursor-pointer" onclick="showPage('darbar')">SAINIWALAA</h1>
+            <nav id="main-nav" class="hidden flex gap-5 text-[11px] font-bold text-gray-500">
+                <span onclick="showPage('darbar')" id="n-darbar" class="cursor-pointer py-2 nav-active">DARBAR</span>
+                <span onclick="showPage('bazaar')" id="n-bazaar" class="cursor-pointer py-2">BAZAAR</span>
+                <span onclick="showPage('profile')" id="n-profile" class="cursor-pointer py-2">PROFILE</span>
+                <button onclick="logout()" class="text-red-500 text-lg ml-2"><i class="fa-solid fa-power-off"></i></button>
             </nav>
         </div>
     </header>
 
-    <div id="auth-section" class="max-w-md mx-auto mt-20 p-8 bg-white rounded-2xl shadow-2xl border">
-        <div id="login-box">
-            <h2 class="text-center font-bold text-xl mb-6 text-gray-700">Pravesh Karein</h2>
-            <input id="email" type="email" placeholder="Email">
-            <input id="pass" type="password" placeholder="Password">
-            <button onclick="login()" class="btn-gold">LOGIN</button>
-            <p onclick="toggleAuth(false)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Naya Khata Banayein</p>
+    <div id="auth-box" class="max-w-md mx-auto mt-16 p-8 bg-white rounded-2xl shadow-xl border">
+        <div id="login-ui">
+            <h2 class="text-center text-xl font-bold mb-6">Hukum, Pravesh Karein</h2>
+            <input id="email" type="email" placeholder="Email (eg: test@mail.com)">
+            <input id="pass" type="password" placeholder="Password (Min 6 chars)">
+            <button onclick="authAction('login')" class="btn-gold">LOGIN</button>
+            <p onclick="toggleAuth(false)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Naya Khata Banayein?</p>
         </div>
-        <div id="reg-box" class="hidden">
-            <h2 class="text-center font-bold text-xl mb-6 text-gray-700">Naya Khata</h2>
-            <input id="reg-name" type="text" placeholder="Username (No spaces)">
+        <div id="reg-ui" class="hidden">
+            <h2 class="text-center text-xl font-bold mb-6">Naya Khata</h2>
+            <input id="reg-name" type="text" placeholder="Apna Shahi Naam (No spaces)">
             <input id="reg-email" type="email" placeholder="Email">
-            <input id="reg-pass" type="password" placeholder="Password (Min. 6)">
-            <button onclick="register()" class="btn-gold">REGISTER</button>
-            <p onclick="toggleAuth(true)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Login Karein</p>
+            <input id="reg-pass" type="password" placeholder="Password">
+            <button onclick="authAction('reg')" class="btn-gold">REGISTER</button>
+            <p onclick="toggleAuth(true)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Purana Khata Hai?</p>
         </div>
     </div>
 
-    <main id="main-app" class="hidden max-w-6xl mx-auto px-4 mt-8">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+    <main id="app-content" class="hidden max-w-5xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
             
-            <div class="md:col-span-3">
-                <div class="sticky top-24 bg-white p-5 rounded-xl border shadow-sm">
-                    <button onclick="openPostModal()" class="btn-gold mb-4"><i class="fa-solid fa-plus mr-2"></i> NAYA POST</button>
-                    <div class="space-y-4 text-sm font-semibold text-gray-600">
-                        <p onclick="show('darbar')" class="cursor-pointer hover:text-gold"><i class="fa-solid fa-home mr-2"></i> Home Feed</p>
-                        <p onclick="show('bazaar')" class="cursor-pointer hover:text-gold"><i class="fa-solid fa-shop mr-2"></i> Bazaar</p>
-                    </div>
+            <div class="md:col-span-3 hidden md:block">
+                <div class="sticky top-24 bg-white p-4 rounded-xl border">
+                    <button onclick="openModal('post')" class="btn-gold mb-3">+ NAYA LEKH</button>
+                    <button onclick="openModal('product')" class="bg-black text-white w-full py-2 rounded-lg text-sm font-bold">+ PRODUCT LIST</button>
                 </div>
             </div>
 
             <div class="md:col-span-6">
-                <section id="darbar-sec" class="page-sec">
-                    <div id="feed-container"></div>
-                </section>
+                <section id="sec-darbar" class="space-y-6"></section>
 
-                <section id="bazaar-sec" class="page-sec hidden">
-                    <div class="bg-white p-6 rounded-xl border mb-6">
-                        <h3 class="font-bold mb-4 text-gold">Product List Karein</h3>
-                        <input id="p-name" placeholder="Item Ka Naam">
-                        <input id="p-price" placeholder="Daam ₹">
-                        <input id="p-link" placeholder="WhatsApp Number / Link">
-                        <button onclick="uploadMedia('product')" class="btn-gold">UPLOAD PHOTO</button>
-                    </div>
-                    <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
-                </section>
+                <section id="sec-bazaar" class="hidden grid grid-cols-2 gap-4"></section>
 
-                <section id="profile-sec" class="page-sec hidden">
-                    <div class="bg-white p-10 rounded-xl border text-center shadow-sm">
-                        <div class="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 border-2 border-gold flex items-center justify-center">
-                            <i class="fa-solid fa-user text-2xl text-gray-400"></i>
+                <section id="sec-profile" class="hidden">
+                    <div class="bg-white p-6 rounded-xl border text-center">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center border-2 border-gold">
+                            <i class="fa-solid fa-crown text-2xl text-gold"></i>
                         </div>
-                        <h2 id="user-display" class="text-2xl font-bold text-gray-700">@User</h2>
-                        <p class="text-gray-400 text-sm mt-2">Shahi Member Since 2026</p>
+                        <h2 id="p-name-display" class="text-2xl font-bold">@User</h2>
+                        <div class="flex justify-center gap-6 mt-4 text-sm font-bold text-gray-500">
+                            <div><p id="count-posts">0</p><p class="text-[10px]">LEKH</p></div>
+                            <div><p id="count-orders">0</p><p class="text-[10px]">SAUDE</p></div>
+                        </div>
                     </div>
                 </section>
+            </div>
+
+            <div class="md:col-span-3">
+                <div class="sticky top-24 bg-white p-4 rounded-xl border">
+                    <h3 class="font-bold text-xs text-gray-400 uppercase mb-3">Haliya Saude (Orders)</h3>
+                    <div id="order-list" class="space-y-2 text-[11px]"></div>
+                </div>
             </div>
         </div>
     </main>
 
-    <div id="post-modal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl">
-            <h3 class="font-bold text-lg mb-4 text-gray-700">Kuch Shahi Likhein</h3>
-            <textarea id="post-caption" class="h-32" placeholder="Aapka sandesh..."></textarea>
-            <button onclick="uploadMedia('post')" class="btn-gold">PHOTO/VIDEO CHUNEIN</button>
-            <button onclick="closeModal()" class="w-full mt-2 text-gray-400 text-xs">Cancel</button>
+    <div id="modal-bg" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400">&times;</button>
+            <div id="post-ui" class="hidden">
+                <h3 class="font-bold mb-4">Naya Shahi Lekh</h3>
+                <textarea id="post-cap" placeholder="Kuch likhein..."></textarea>
+                <button onclick="upload('post')" class="btn-gold">UPLOAD PHOTO & POST</button>
+            </div>
+            <div id="prod-ui" class="hidden">
+                <h3 class="font-bold mb-4">Maal List Karein</h3>
+                <input id="item-name" placeholder="Item ka Naam">
+                <input id="item-price" placeholder="Daam ₹">
+                <input id="item-link" placeholder="WhatsApp / Link">
+                <button onclick="upload('product')" class="btn-gold">PHOTO & LIST KAREIN</button>
+            </div>
+            <div id="order-ui" class="hidden">
+                <h3 class="font-bold mb-4 text-red-600">Sauda Pakko Karo?</h3>
+                <input id="ord-user" placeholder="Apna Naam">
+                <input id="ord-tel" placeholder="Mobile Number">
+                <textarea id="ord-addr" placeholder="Pura Pata"></textarea>
+                <button id="buy-final-btn" class="btn-gold">CONFIRM ORDER</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -117,105 +128,142 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        let currentUser = null;
 
-        let currentUserData = null;
-
-        // --- AUTH ---
-        window.login = () => {
-            signInWithEmailAndPassword(auth, email.value, pass.value)
-                .then(() => alert("Swagat Hai!"))
-                .catch(err => alert("Galti: " + err.message));
-        };
-
-        window.register = async () => {
-            const name = regName.value.trim().toLowerCase();
-            const q = query(collection(db, "users"), where("name", "==", name));
-            const s = await getDocs(q);
-            if(!s.empty) return alert("Naam pehle se hai!");
-
-            createUserWithEmailAndPassword(auth, regEmail.value, regPass.value)
-                .then(async (res) => {
-                    await setDoc(doc(db, "users", res.user.uid), { name, uid: res.user.uid });
-                    location.reload();
+        // --- AUTH LOGIC ---
+        window.authAction = (type) => {
+            const e = document.getElementById('email').value || document.getElementById('reg-email').value;
+            const p = document.getElementById('pass').value || document.getElementById('reg-pass').value;
+            if(type === 'login') {
+                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+            } else {
+                const n = document.getElementById('reg-name').value;
+                createUserWithEmailAndPassword(auth, e, p).then(async r => {
+                    await setDoc(doc(db, "users", r.user.uid), { name: n, uid: r.user.uid });
                 }).catch(err => alert(err.message));
+            }
         };
-
-        window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, async u => {
             if(u) {
                 const d = await getDoc(doc(db, "users", u.uid));
-                currentUserData = d.data();
-                userDisplay.innerText = "@" + currentUserData.name;
-                authSection.classList.add('hidden'); mainApp.classList.remove('hidden'); userNav.classList.remove('hidden');
-                loadData();
+                currentUser = d.data();
+                document.getElementById('p-name-display').innerText = "@" + (currentUser?.name || 'User');
+                document.getElementById('auth-box').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                document.getElementById('main-nav').classList.remove('hidden');
+                sync();
             } else {
-                authSection.classList.remove('hidden'); mainApp.classList.add('hidden'); userNav.classList.add('hidden');
+                document.getElementById('auth-box').classList.remove('hidden');
+                document.getElementById('app-content').classList.add('hidden');
+                document.getElementById('main-nav').classList.add('hidden');
             }
         });
 
-        // --- UI NAVIGATION ---
-        window.show = (id) => {
-            document.querySelectorAll('.page-sec').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById(id + '-sec').classList.remove('hidden');
-            document.getElementById('l-' + id).classList.add('active');
+        window.logout = () => signOut(auth);
+        window.toggleAuth = (isL) => { 
+            document.getElementById('login-ui').classList.toggle('hidden', !isL); 
+            document.getElementById('reg-ui').classList.toggle('hidden', isL); 
         };
 
-        window.toggleAuth = (isL) => { loginBox.classList.toggle('hidden', !isL); regBox.classList.toggle('hidden', isL); };
-        window.openPostModal = () => postModal.classList.remove('hidden');
-        window.closeModal = () => postModal.classList.add('hidden');
+        // --- UI NAVIGATION ---
+        window.showPage = (id) => {
+            ['darbar', 'bazaar', 'profile'].forEach(p => {
+                document.getElementById('sec-' + p).classList.add('hidden');
+                document.getElementById('n-' + p).classList.remove('nav-active');
+            });
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            document.getElementById('n-' + id).classList.add('nav-active');
+        };
+
+        window.openModal = (type) => {
+            document.getElementById('modal-bg').classList.remove('hidden');
+            ['post', 'prod', 'order'].forEach(m => document.getElementById(m + '-ui').classList.add('hidden'));
+            document.getElementById(type + '-ui').classList.remove('hidden');
+        };
+        window.closeModal = () => document.getElementById('modal-bg').classList.add('hidden');
 
         // --- CLOUDINARY UPLOAD ---
-        window.uploadMedia = (type) => {
+        window.upload = (type) => {
             cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, async (err, res) => {
                 if(res && res.event === "success") {
                     if(type === 'post') {
-                        await addDoc(collection(db, "posts"), { 
-                            url: res.info.secure_url, type: res.info.resource_type, 
-                            author: currentUserData.name, caption: postCaption.value, time: serverTimestamp() 
-                        });
-                        closeModal();
+                        await addDoc(collection(db, "posts"), { url: res.info.secure_url, author: currentUser.name, uid: auth.currentUser.uid, caption: document.getElementById('post-cap').value, likes: [], time: serverTimestamp() });
                     } else {
-                        await addDoc(collection(db, "products"), { 
-                            name: pName.value, price: pPrice.value, link: pLink.value, 
-                            img: res.info.secure_url, time: serverTimestamp() 
-                        });
+                        await addDoc(collection(db, "products"), { img: res.info.secure_url, name: document.getElementById('item-name').value, price: document.getElementById('item-price').value, link: document.getElementById('item-link').value, time: serverTimestamp() });
                     }
-                    alert("Done Hukum!");
+                    closeModal(); alert("Shahi Entry Ho Gayi!");
                 }
             });
         };
 
-        // --- REALTIME DATA ---
-        function loadData() {
+        // --- REALTIME SYNC ---
+        function sync() {
+            // Posts
             onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), s => {
-                feedContainer.innerHTML = "";
+                const container = document.getElementById('sec-darbar');
+                container.innerHTML = "";
                 s.forEach(d => {
-                    const p = d.data();
-                    feedContainer.innerHTML += `
-                        <div class="royal-card border">
-                            <div class="p-4 font-bold text-xs text-gold border-b">@${p.author}</div>
-                            ${p.type === 'video' ? `<video src="${p.url}" controls class="w-full"></video>` : `<img src="${p.url}" class="w-full">`}
-                            <div class="p-4 text-sm text-gray-600">${p.caption || ''}</div>
+                    const p = d.data(); const id = d.id;
+                    const isLiked = p.likes?.includes(auth.currentUser.uid);
+                    container.innerHTML += `
+                        <div class="royal-card overflow-hidden shadow-sm">
+                            <div class="p-3 border-b flex justify-between items-center">
+                                <span class="font-bold text-xs text-gold">@${p.author}</span>
+                                <button class="text-[10px] bg-gray-100 px-2 py-1 rounded">FOLLOW</button>
+                            </div>
+                            <img src="${p.url}" class="w-full max-h-96 object-cover">
+                            <div class="p-4">
+                                <p class="text-sm mb-3">${p.caption || ''}</p>
+                                <div class="flex gap-4 text-xs font-bold text-gray-400">
+                                    <span onclick="like('${id}', ${JSON.stringify(p.likes)})" class="cursor-pointer ${isLiked?'text-red-500':''}"><i class="fa-${isLiked?'solid':'regular'} fa-heart"></i> ${p.likes?.length || 0}</span>
+                                    <span><i class="fa-regular fa-comment"></i> COMMENT</span>
+                                </div>
+                            </div>
                         </div>`;
                 });
             });
 
+            // Products
             onSnapshot(collection(db, "products"), s => {
-                bazaarGrid.innerHTML = "";
+                const grid = document.getElementById('sec-bazaar');
+                grid.innerHTML = "";
                 s.forEach(d => {
                     const p = d.data();
-                    bazaarGrid.innerHTML += `
-                        <div class="bg-white border p-3 rounded-xl shadow-sm text-center">
+                    grid.innerHTML += `
+                        <div class="royal-card p-2 text-center">
                             <img src="${p.img}" class="h-32 w-full object-cover rounded-lg mb-2">
-                            <p class="font-bold text-xs">${p.name}</p>
-                            <p class="text-gold text-xs font-bold mb-2">₹${p.price}</p>
-                            <a href="https://wa.me/${p.link}" class="block bg-black text-white text-[10px] py-2 rounded-lg font-bold">KHARIDEIN</a>
+                            <p class="font-bold text-[11px] truncate">${p.name}</p>
+                            <p class="text-gold font-bold text-xs mb-2">₹${p.price}</p>
+                            <button onclick="orderUI('${p.name}', '${p.link}')" class="w-full bg-black text-white text-[10px] py-2 rounded-md">KHARIDEIN</button>
                         </div>`;
                 });
             });
+
+            // Orders
+            onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), s => {
+                const list = document.getElementById('order-list');
+                list.innerHTML = "";
+                s.forEach(d => {
+                    const o = d.data();
+                    list.innerHTML += `<div class="p-2 bg-gray-50 border-l-2 border-gold mb-2"><b>${o.customer}</b> ne <b>${o.item}</b> mangwaya</div>`;
+                });
+            });
         }
+
+        window.like = async (id, likes) => {
+            const ref = doc(db, "posts", id);
+            if(likes.includes(auth.currentUser.uid)) await updateDoc(ref, { likes: arrayRemove(auth.currentUser.uid) });
+            else await updateDoc(ref, { likes: arrayUnion(auth.currentUser.uid) });
+        };
+
+        window.orderUI = (name, link) => {
+            openModal('order');
+            document.getElementById('buy-final-btn').onclick = async () => {
+                await addDoc(collection(db, "orders"), { item: name, customer: document.getElementById('ord-user').value, phone: document.getElementById('ord-tel').value, address: document.getElementById('ord-addr').value, time: serverTimestamp() });
+                window.location.href = link;
+            };
+        };
     </script>
 </body>
 </html>
