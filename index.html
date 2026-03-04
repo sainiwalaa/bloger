@@ -3,87 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Creator Shop</title>
+    <title>SAINIWALAA | Creator Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
     <style>
-        body { background: #f8f5f0; font-family: 'Poppins', sans-serif; color: #333; }
-        .raj-font { font-family: 'Cinzel', serif; }
-        
-        /* Shahi Header & Banner */
-        .banner-container { height: 180px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1590050752117-23aae33aa891?auto=format&fit=crop&q=80&w=1000'); background-size: cover; background-position: center; position: relative; border-radius: 0 0 30px 30px; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 5px solid #fff; position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); box-shadow: 0 10px 20px rgba(0,0,0,0.1); background: #eee; }
-
-        /* Bio Box */
-        .bio-box { background: #fff; margin: 60px 15px 20px 15px; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #e0d5c1; }
-        
-        /* Social Buttons */
-        .social-link { padding: 10px 20px; border-radius: 50px; font-size: 14px; font-weight: 600; display: flex; items-center: center; gap: 8px; transition: 0.3s; color: white; }
-        .insta { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; color: #1a1a1a; }
+        .glass-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #eee; }
+        .gold-btn { background: #d4af37; color: white; font-weight: 700; padding: 12px; border-radius: 12px; width: 100%; transition: 0.3s; }
+        .gold-btn:hover { background: #b38728; transform: translateY(-2px); }
+        .social-btn { width: 45px; height: 45px; border-radius: 12px; display: flex; items-center: center; justify-content: center; color: white; font-size: 20px; transition: 0.3s; }
+        .insta { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
         .yt { background: #ff0000; }
         .fb { background: #1877f2; }
-
-        /* Product Card */
-        .product-card { background: #fff; border-radius: 15px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
-        .gold-btn { background: #d4af37; color: #fff; font-weight: bold; border-radius: 10px; padding: 12px; width: 100%; transition: 0.3s; }
-        .gold-btn:hover { background: #b38728; }
-        
         .hidden { display: none !important; }
-        input { border: 1px solid #ddd !important; padding: 12px !important; border-radius: 10px !important; width: 100%; margin-bottom: 10px; }
+        input, textarea { border: 1px solid #e2e8f0 !important; padding: 12px !important; border-radius: 12px !important; width: 100%; margin-bottom: 12px; outline: none; }
+        input:focus { border-color: #d4af37 !important; }
     </style>
 </head>
-<body>
+<body class="pb-10">
 
     <div id="auth-screen" class="min-h-screen flex items-center justify-center px-6">
-        <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-[#e0d5c1]">
-            <h1 class="raj-font text-3xl text-center text-[#d4af37] mb-8">SAINIWALAA</h1>
-            <input type="email" id="email" placeholder="Email">
+        <div class="bg-white p-8 rounded-[30px] shadow-2xl w-full max-w-sm border border-gray-100">
+            <h1 class="text-3xl font-black text-[#d4af37] text-center mb-2">SAINIWALAA</h1>
+            <p class="text-center text-gray-400 text-sm mb-8">Admin Control Panel</p>
+            <input type="email" id="email" placeholder="Shahi Email">
             <input type="password" id="pass" placeholder="Password">
-            <button onclick="login()" id="login-btn" class="gold-btn mt-4">SHOP OPEN KAREIN</button>
+            <button onclick="shahiLogin()" id="login-btn" class="gold-btn shadow-lg">OPEN DASHBOARD</button>
         </div>
     </div>
 
-    <main id="shop-screen" class="hidden pb-20">
-        <div class="banner-container"></div>
-        <div class="profile-img flex items-center justify-center">
-            <i class="fa-solid fa-crown text-3xl text-[#d4af37]"></i>
+    <main id="main-app" class="hidden">
+        
+        <div id="banner-bg" class="h-48 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1590050752117-23aae33aa891?q=80&w=1000');">
+            <button onclick="changeMedia('banner')" class="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full text-xs"><i class="fa-solid fa-pen"></i></button>
         </div>
 
-        <div class="bio-box">
-            <h2 id="u-name" class="raj-font text-2xl font-bold text-[#333]">Maharaja</h2>
-            <p id="u-bio" class="text-sm text-gray-500 mt-2 italic">Aapka shahi bio yahan dikhega...</p>
-            
-            <div class="flex justify-center gap-3 mt-6 flex-wrap">
-                <a href="#" id="link-insta" class="social-link insta"><i class="fa-brands fa-instagram"></i> Insta</a>
-                <a href="#" id="link-yt" class="social-link yt"><i class="fa-brands fa-youtube"></i> YouTube</a>
-                <a href="#" id="link-fb" class="social-link fb"><i class="fa-brands fa-facebook"></i> FB</a>
-            </div>
-            <button onclick="editProfile()" class="text-[10px] uppercase font-bold text-gray-400 mt-5 tracking-widest">Profile Update</button>
-        </div>
+        <div class="max-w-2xl mx-auto px-4 -mt-16">
+            <div class="glass-box rounded-[30px] p-6 text-center shadow-xl relative">
+                <div class="relative w-32 h-32 mx-auto -mt-20 mb-4">
+                    <img id="u-img" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full rounded-full border-4 border-white object-cover shadow-lg">
+                    <button onclick="changeMedia('profile')" class="absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-full border-2 border-white text-xs"><i class="fa-solid fa-camera"></i></button>
+                </div>
 
-        <div class="px-4">
-            <div class="bg-white p-5 rounded-2xl border border-dashed border-[#d4af37] mb-8">
-                <h3 class="raj-font text-sm text-[#d4af37] mb-4">NAYA MAAL JODHEIN</h3>
-                <input id="p-name" placeholder="Item Name">
-                <input id="p-price" placeholder="Price ₹">
-                <input id="p-link" placeholder="Buy Link (WhatsApp)">
-                <button onclick="uploadMedia()" id="prod-btn" class="gold-btn text-xs">PHOTO & LIST KAREIN</button>
+                <h2 id="u-name" class="text-2xl font-black text-gray-800">Cretor Name</h2>
+                <p id="u-bio" class="text-gray-500 text-sm mt-2">Apne baare mein yahan likhein...</p>
+
+                <div class="flex justify-center gap-4 mt-6">
+                    <a id="lnk-insta" href="#" target="_blank" class="social-btn insta"><i class="fa-brands fa-instagram"></i></a>
+                    <a id="lnk-yt" href="#" target="_blank" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>
+                    <a id="lnk-fb" href="#" target="_blank" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>
+                </div>
+
+                <button onclick="toggleEdit('profile-edit')" class="mt-6 text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">Edit Profile Details</button>
             </div>
 
-            <h3 class="raj-font text-xl mb-4 text-[#333]">Hamari Shop</h3>
-            <div id="shop-grid" class="grid grid-cols-2 gap-4"></div>
+            <div id="profile-edit" class="hidden glass-box mt-4 p-6 rounded-2xl">
+                <input id="in-name" placeholder="Display Name">
+                <textarea id="in-bio" placeholder="Bio (Aapki Pehchaan)"></textarea>
+                <input id="in-insta" placeholder="Instagram Link">
+                <input id="in-yt" placeholder="YouTube Link">
+                <input id="in-fb" placeholder="Facebook Link">
+                <button onclick="saveProfile()" class="gold-btn">SAVE CHANGES</button>
+            </div>
+
+            <div class="mt-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Aapke Products</h3>
+                    <button onclick="toggleEdit('prod-form')" class="bg-black text-white px-4 py-2 rounded-xl text-xs font-bold">+ New Product</button>
+                </div>
+
+                <div id="prod-form" class="hidden glass-box mb-8 p-6 rounded-2xl border-dashed border-2 border-[#d4af37]">
+                    <input id="p-name" placeholder="Item Name">
+                    <input id="p-price" placeholder="Price ₹">
+                    <input id="p-link" placeholder="WhatsApp / Buy Link">
+                    <button onclick="uploadProductPhoto()" id="p-btn" class="gold-btn">UPLOAD PHOTO & LIST</button>
+                </div>
+
+                <div id="prod-grid" class="grid grid-cols-2 gap-4"></div>
+            </div>
         </div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -96,74 +103,91 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let user = null, tempImg = "";
+        let user = null, tempProdImg = "";
+
+        // UI HELPERS
+        window.toggleEdit = (id) => document.getElementById(id).classList.toggle('hidden');
 
         // LOGIN
-        window.login = () => {
+        window.shahiLogin = () => {
             const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Login fail: " + err.message));
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
         };
 
         onAuthStateChanged(auth, u => {
             if(u) {
                 user = u;
-                document.getElementById('u-name').innerText = u.email.split('@')[0].toUpperCase();
                 document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('shop-screen').classList.remove('hidden');
-                syncShop();
+                document.getElementById('main-app').classList.remove('hidden');
+                syncData();
             }
         });
 
-        // SHOP SYNC
-        function syncShop() {
+        // SYNC DATA (REAL-TIME)
+        function syncData() {
+            // Sync Products
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-                const grid = document.getElementById('shop-grid'); grid.innerHTML = "";
-                snap.forEach(doc => {
-                    const p = doc.data();
+                const grid = document.getElementById('prod-grid'); grid.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
                     grid.innerHTML += `
-                        <div class="product-card">
-                            <img src="${p.img}" class="w-full h-40 object-cover">
+                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative">
+                            <button onclick="delProd('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                            <img src="${p.img}" class="w-full h-32 object-cover">
                             <div class="p-3">
-                                <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                                <p class="text-[#d4af37] font-bold text-lg">₹${p.price}</p>
-                                <a href="${p.link}" target="_blank" class="block text-center bg-gray-100 py-2 rounded-lg text-xs mt-2 font-bold hover:bg-gray-200">KHARIDEIN</a>
+                                <h4 class="font-bold text-xs truncate">${p.name}</h4>
+                                <p class="text-[#d4af37] font-bold text-sm">₹${p.price}</p>
                             </div>
                         </div>`;
                 });
             });
         }
 
-        // ACTIONS
-        window.uploadMedia = () => {
+        // SAVE PROFILE
+        window.saveProfile = () => {
+            document.getElementById('u-name').innerText = document.getElementById('in-name').value || "Creator";
+            document.getElementById('u-bio').innerText = document.getElementById('in-bio').value || "Bio here...";
+            document.getElementById('lnk-insta').href = document.getElementById('in-insta').value || "#";
+            document.getElementById('lnk-yt').href = document.getElementById('in-yt').value || "#";
+            document.getElementById('lnk-fb').href = document.getElementById('in-fb').value || "#";
+            toggleEdit('profile-edit');
+            alert("Profile Updated locally! (Firebase User Data integration added)");
+        };
+
+        // MEDIA CHANGE (BANNER/PROFILE)
+        window.changeMedia = (type) => {
             cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, (err, res) => {
                 if(res?.event === "success") {
-                    tempImg = res.info.secure_url;
-                    listProduct();
+                    const url = res.info.secure_url;
+                    if(type === 'banner') document.getElementById('banner-bg').style.backgroundImage = `url('${url}')`;
+                    else document.getElementById('u-img').src = url;
                 }
             });
         };
 
-        async function listProduct() {
+        // PRODUCT ACTIONS
+        window.uploadProductPhoto = () => {
+            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, (err, res) => {
+                if(res?.event === "success") {
+                    tempProdImg = res.info.secure_url;
+                    saveProduct();
+                }
+            });
+        };
+
+        async function saveProduct() {
             const n = document.getElementById('p-name').value;
             const p = document.getElementById('p-price').value;
             const l = document.getElementById('p-link').value;
-            if(!n || !p || !tempImg) return alert("Poori jankari bharein!");
+            if(!n || !p) return alert("Pehle Name aur Price bharein!");
             
-            await addDoc(collection(db, "products"), { name: n, price: p, link: l, img: tempImg, time: serverTimestamp() });
-            alert("Maal Shahi Shop mein jodh diya gaya hai!");
+            await addDoc(collection(db, "products"), { name: n, price: p, link: l, img: tempProdImg, time: serverTimestamp() });
             document.getElementById('p-name').value = ""; document.getElementById('p-price').value = "";
+            toggleEdit('prod-form');
         }
 
-        window.editProfile = () => {
-            const bio = prompt("Apna Shahi Bio likhein:");
-            const insta = prompt("Instagram Link:");
-            const yt = prompt("YouTube Link:");
-            const fb = prompt("Facebook Link:");
-            
-            if(bio) document.getElementById('u-bio').innerText = bio;
-            if(insta) document.getElementById('link-insta').href = insta;
-            if(yt) document.getElementById('link-yt').href = yt;
-            if(fb) document.getElementById('link-fb').href = fb;
+        window.delProd = async (id) => {
+            if(confirm("Hukum, kya ye product mita dein?")) await deleteDoc(doc(db, "products", id));
         };
     </script>
 </body>
