@@ -3,78 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SAINIWALAA | Royal Darbar</title>
+    <title>SAINIWALAA | Royal Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --gold: #FFD700; --black: #050505; }
         body { background: var(--black); color: #fff; font-family: sans-serif; margin: 0; }
         .gold-text { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
-        .royal-btn { background: var(--gold); color: #000; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; border: none; cursor: pointer; }
+        .royal-input { width: 100%; background: #111; border: 1px solid #333; padding: 15px; margin-bottom: 12px; color: #fff; border-radius: 12px; outline: none; }
+        .royal-btn { background: var(--gold); color: #000; font-weight: bold; padding: 14px; border-radius: 12px; width: 100%; border: none; cursor: pointer; transition: 0.3s; }
         .royal-btn:disabled { opacity: 0.6; }
-        .royal-input { width: 100%; background: #111; border: 1px solid #333; padding: 15px; margin-bottom: 12px; color: #fff; border-radius: 10px; outline: none; }
-        .nav-bar { background: #000; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; max-width: 500px; display: flex; justify-content: space-around; padding: 12px 0; }
-        .nav-item { color: #555; text-align: center; cursor: pointer; }
-        .nav-item.active { color: var(--gold); }
         .hidden { display: none !important; }
+        .nav-bar { background: #000; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; max-width: 500px; display: flex; justify-content: space-around; padding: 12px 0; }
     </style>
 </head>
 <body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 pb-20">
 
-    <header class="p-5 border-b border-yellow-800/40 text-center sticky top-0 bg-black z-50">
-        <h1 class="gold-text font-bold text-2xl tracking-[8px]">SAINIWALAA</h1>
-    </header>
-
-    <section id="darbar-sec" class="p-6">
-        <h2 class="gold-text italic mb-6">🚩 Shahi Darbar</h2>
-        <div class="bg-zinc-900/50 p-10 rounded-3xl border border-zinc-800 text-center italic text-zinc-600">
-            Darbar khali hai... Kuch post karein hukum.
+    <div id="auth-section" class="p-8 pt-20">
+        <h1 class="gold-text text-center text-3xl font-bold tracking-[8px] mb-10">SAINIWALAA</h1>
+        
+        <div id="login-box">
+            <h2 class="text-center mb-6 italic">Rajwara Pravesh (Login)</h2>
+            <input id="email" type="email" placeholder="Tharo Email" class="royal-input">
+            <input id="pass" type="password" placeholder="Gupt Shabd (Password)" class="royal-input">
+            <button id="login-btn" class="royal-btn mb-4">PRAVESH KAREIN</button>
+            <div class="flex justify-between text-[10px] text-zinc-500">
+                <span onclick="toggleAuth(false)" class="cursor-pointer">Naya Khata Banayein</span>
+                <span onclick="forgotPass()" class="cursor-pointer text-yellow-600">Password Bhool Gaye?</span>
+            </div>
         </div>
-    </section>
 
-    <section id="bazaar-sec" class="p-6 hidden">
-        <h2 class="gold-text italic mb-6">🛍 Shahi Bazaar</h2>
-        <div class="bg-zinc-900 p-5 rounded-2xl border border-yellow-600/20">
-            <input id="p-name" placeholder="Maal ko Naam" class="royal-input">
-            <input id="p-price" placeholder="Keemat ₹" class="royal-input">
-            <button id="save-btn" onclick="saveToBazaar()" class="royal-btn">MAAL SAVE KARO 👑</button>
+        <div id="reg-box" class="hidden">
+            <h2 class="text-center mb-6 italic">Naya Khata (Register)</h2>
+            <input id="reg-email" type="email" placeholder="Naya Email" class="royal-input">
+            <input id="reg-pass" type="password" placeholder="Naya Password" class="royal-input">
+            <button id="reg-btn" class="royal-btn mb-4">KHATA BANAYEIN</button>
+            <p onclick="toggleAuth(true)" class="text-center text-[10px] text-zinc-500 cursor-pointer">Purana Khata hai? Login karein</p>
         </div>
-        <div id="list-container" class="mt-8 grid grid-cols-2 gap-4"></div>
-    </section>
+    </div>
 
-    <nav class="nav-bar">
-        <div onclick="show('darbar')" id="btn-darbar" class="nav-item active"><i class="fa-solid fa-crown text-xl"></i></div>
-        <div onclick="show('bazaar')" id="btn-bazaar" class="nav-item"><i class="fa-solid fa-shop text-xl"></i></div>
-    </nav>
+    <div id="main-app" class="hidden">
+        <header class="p-5 border-b border-yellow-800/40 text-center sticky top-0 bg-black z-50 flex justify-between items-center">
+            <div class="w-10"></div>
+            <h1 class="gold-text font-bold text-xl tracking-[5px]">SAINIWALAA</h1>
+            <button onclick="logout()" class="text-red-500 text-[10px]"><i class="fa-solid fa-power-off"></i></button>
+        </header>
 
-    <script>
-        function show(page) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(page + '-sec').classList.remove('hidden');
-            document.getElementById('btn-' + page).classList.add('active');
-        }
+        <section id="darbar-sec" class="p-4 page">
+            <h2 class="gold-text italic mb-4">🚩 Darbar</h2>
+            <div class="text-center py-20 text-zinc-700 italic">Hukum, Darbar mein aapka swagat hai...</div>
+        </section>
 
-        function saveToBazaar() {
-            const btn = document.getElementById('save-btn');
+        <section id="bazaar-sec" class="p-4 page hidden">
+            <h2 class="gold-text italic mb-4">🛍 Bazaar</h2>
+            <div id="bazaar-list" class="grid grid-cols-2 gap-4"></div>
+        </section>
+
+        <nav class="nav-bar">
+            <div onclick="show('darbar')" class="text-yellow-700"><i class="fa-solid fa-crown text-xl"></i></div>
+            <div onclick="show('bazaar')" class="text-zinc-600"><i class="fa-solid fa-shop text-xl"></i></div>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // --- AUTH LOGIC ---
+        window.toggleAuth = (isLogin) => {
+            document.getElementById('login-box').classList.toggle('hidden', !isLogin);
+            document.getElementById('reg-box').classList.toggle('hidden', isLogin);
+        };
+
+        // Click Protection Helper
+        const royalAction = async (btnId, task) => {
+            const btn = document.getElementById(btnId);
+            const oldText = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = "Tharo hukum likhayo ja ryo hai...";
-            
-            setTimeout(() => {
-                const name = document.getElementById('p-name').value;
-                const price = document.getElementById('p-price').value;
-                if(name && price) {
-                    document.getElementById('list-container').innerHTML += `
-                        <div class="bg-zinc-900 p-3 rounded-xl border border-zinc-800">
-                            <p class="gold-text text-sm font-bold">${name}</p>
-                            <p class="text-xs">₹${price}</p>
-                        </div>`;
-                }
-                btn.disabled = false;
-                btn.innerHTML = "MAAL SAVE KARO 👑";
-                alert("Hukum, maal bazaar mein darj ho gayo!");
-            }, 1500);
-        }
+            try { await task(); } catch(e) { alert(e.message); }
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        };
+
+        // Login
+        document.getElementById('login-btn').onclick = () => royalAction('login-btn', () => 
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
+        );
+
+        // Register
+        document.getElementById('reg-btn').onclick = () => royalAction('reg-btn', () => 
+            createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value)
+        );
+
+        // Forgot Password
+        window.forgotPass = () => {
+            const email = document.getElementById('email').value;
+            if(!email) return alert("Hukum, pehle email toh likhiye!");
+            sendPasswordResetEmail(auth, email).then(() => alert("Password reset link bhej diyo hai!"));
+        };
+
+        // Auth State
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+        window.show = (p) => {
+            document.querySelectorAll('.page').forEach(s => s.classList.add('hidden'));
+            document.getElementById(p + '-sec').classList.remove('hidden');
+        };
     </script>
 </body>
 </html>
