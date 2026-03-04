@@ -214,7 +214,6 @@
                 document.getElementById('disp-name').innerText = d.name || "Creator";
                 document.getElementById('disp-bio').innerText = d.bio || "Bio update karein...";
                 
-                // NAYA: Font size handle karein
                 if(d.bioSize) {
                     currentFontSize = d.bioSize;
                     document.getElementById('disp-bio').style.fontSize = currentFontSize + 'px';
@@ -237,7 +236,6 @@
         }
         window.loadProfile = loadProfile;
 
-        // NAYA: Font Size Change Function
         window.changeFontSize = async (step) => {
             currentFontSize += step;
             if(currentFontSize < 10) currentFontSize = 10;
@@ -323,12 +321,17 @@
                 });
             });
 
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
+            // SAFE ADMIN ORDERS QUERY
+            const qAdmin = query(collection(db, "orders"), where("creatorId", "==", currentUser.uid));
+            onSnapshot(qAdmin, snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
-                snap.forEach(d => { 
-                    const o = d.data(); 
+                let adminOrders = [];
+                snap.forEach(d => adminOrders.push({id: d.id, ...d.data()}));
+                adminOrders.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+
+                adminOrders.forEach(o => { 
                     let timeStr = "Aabhi...";
-                    if(o.time) {
+                    if(o.time && o.time.toDate) {
                         const dt = o.time.toDate();
                         timeStr = dt.toLocaleDateString('hi-IN') + " | " + dt.toLocaleTimeString('hi-IN', {hour: '2-digit', minute:'2-digit'});
                     }
@@ -338,41 +341,52 @@
                             <p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p>
                             <span class="text-[8px] font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-500">${timeStr}</span>
                         </div>
-                        <button onclick="delOrder('${d.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="delOrder('${o.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
                     </div>`; 
                 });
             });
         }
 
         function syncMyShop(uid) {
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid), orderBy("time", "desc")), snap => {
+            const qShop = query(collection(db, "products"), where("creatorId", "==", uid));
+            onSnapshot(qShop, snap => {
                 const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
-                snap.forEach(d => { 
-                    const p = d.data();
+                let shopData = [];
+                snap.forEach(d => shopData.push({id: d.id, ...d.data()}));
+                shopData.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+
+                shopData.forEach(p => { 
                     const isOwner = (currentUser && currentUser.uid === uid);
-                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] z-10"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><p class="text-[9px] text-gray-400 line-clamp-2 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-auto"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${p.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] z-10"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><p class="text-[9px] text-gray-400 line-clamp-2 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-auto"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
                 });
             });
         }
 
+        // SAFE USER HISTORY (Fixed No Index Required)
         function syncUserHistory(uid) {
             if(!currentUser) return;
-            onSnapshot(query(collection(db, "orders"), where("userId", "==", currentUser.uid), orderBy("time", "desc")), snap => {
+            const qHistory = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+            onSnapshot(qHistory, snap => {
                 const hList = document.getElementById('history-list'); hList.innerHTML = "";
-                if(snap.empty) hList.innerHTML = "<p class='text-[10px] text-gray-400 text-center'>Abhi koi order nahi kiya.</p>";
-                snap.forEach(d => {
-                    const o = d.data();
+                if(snap.empty) {
+                    hList.innerHTML = "<p class='text-[10px] text-gray-400 text-center'>Abhi koi order nahi kiya.</p>";
+                    return;
+                }
+                let histArray = [];
+                snap.forEach(d => histArray.push(d.data()));
+                histArray.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+
+                histArray.forEach(o => {
                     let timeStr = "Aabhi...";
-                    if(o.time) {
-                        const dt = o.time.toDate();
-                        timeStr = dt.toLocaleDateString('hi-IN');
+                    if(o.time && o.time.toDate) {
+                        timeStr = o.time.toDate().toLocaleDateString('hi-IN');
                     }
                     hList.innerHTML += `<div class="bg-gray-50 p-3 rounded-xl border border-gray-100 flex justify-between">
                         <span class="text-[10px] font-bold">${o.item}</span>
                         <span class="text-[9px] text-gray-400">${timeStr}</span>
                     </div>`;
                 });
-            });
+            }, err => console.log("History Index Wait..."));
         }
 
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
