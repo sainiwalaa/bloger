@@ -17,7 +17,7 @@
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .social-btn { width: 40px; height: 40px; border-radius: 10px; display: none; align-items: center; justify-content: center; color: white; font-size: 18px; transition: 0.2s; }
+        .social-btn { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; transition: 0.2s; }
         input[type="file"] { display: none; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
@@ -71,9 +71,9 @@
                 <h2 id="disp-name" class="text-2xl font-black text-gray-800">Shahi Creator</h2>
                 <p id="disp-bio" class="text-xs text-gray-400 mt-1 italic font-medium">Bio update karein...</p>
                 <div class="flex justify-center gap-3 mt-6">
-                    <a id="btn-wa" href="#" target="_blank" class="social-btn" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
-                    <a id="btn-insta" href="#" target="_blank" class="social-btn" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
-                    <a id="btn-yt" href="#" target="_blank" class="social-btn" style="background:#ff0000"><i class="fa-brands fa-youtube"></i></a>
+                    <a id="btn-wa" href="#" target="_blank" class="social-btn hidden" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a id="btn-insta" href="#" target="_blank" class="social-btn hidden" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
+                    <a id="btn-yt" href="#" target="_blank" class="social-btn hidden" style="background:#ff0000"><i class="fa-brands fa-youtube"></i></a>
                 </div>
                 <button id="edit-profile-btn" onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] tracking-widest bg-white shadow-sm hidden owner-only">Edit Profile & Socials</button>
             </div>
@@ -123,6 +123,7 @@
              <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
              <input type="hidden" id="order-item-name">
              <input type="hidden" id="order-creator-id">
+             <input type="hidden" id="order-item-link">
              <div class="flex gap-3">
                 <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold">CANCEL</button>
                 <button id="order-confirm-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
@@ -132,13 +133,16 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // PERSISTENCE SETTING: Refresh par logout na ho
+        setPersistence(auth, browserLocalPersistence);
 
         let currentUser = null;
         let authMode = 'login';
@@ -148,31 +152,34 @@
         window.toggleAuthMode = () => {
             authMode = (authMode === 'login') ? 'signup' : 'login';
             document.getElementById('main-auth-btn').innerText = (authMode === 'login') ? 'LOG IN' : 'SIGN UP';
-            document.getElementById('toggle-text').innerHTML = (authMode === 'login') 
-                ? 'Naya account chahiye? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button>'
-                : 'Pehle se account hai? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Login Karein</button>';
         };
 
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
             if(!e || !p) return alert("Hukum, jankari bhariye!");
             if(authMode === 'login') {
-                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+                signInWithEmailAndPassword(auth, e, p).catch(err => alert("Galti: " + err.message));
             } else {
                 createUserWithEmailAndPassword(auth, e, p).then(async (cred) => {
-                    await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Mhara Swagat hai!", wa: "", insta: "", yt: "" });
+                    await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Shahi Creator", wa: "", insta: "", yt: "" });
                 }).catch(err => alert(err.message));
             }
         };
 
-        window.logout = () => signOut(auth).then(() => location.reload());
+        window.logout = () => {
+            localStorage.removeItem('lastTab');
+            signOut(auth).then(() => location.reload());
+        }
 
         onAuthStateChanged(auth, u => {
             if(u) {
                 currentUser = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                loadProfile(u.uid);
+                
+                // REFRESH FIX: Pichla tab yaad rakhega
+                const lastTab = localStorage.getItem('lastTab') || 'feed';
+                showTab(lastTab);
                 syncAll();
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
@@ -180,7 +187,7 @@
             }
         });
 
-        // PROFILE
+        // PROFILE LOAD
         async function loadProfile(uid) {
             const isOwner = (currentUser && currentUser.uid === uid);
             document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
@@ -191,8 +198,12 @@
                 document.getElementById('disp-bio').innerText = d.bio || "";
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
-                const waBtn = document.getElementById('btn-wa');
-                d.wa ? (waBtn.href = `https://wa.me/${d.wa}`, waBtn.style.display = 'flex') : waBtn.style.display = 'none';
+                
+                // Social links logic
+                const wa = document.getElementById('btn-wa');
+                d.wa ? (wa.href = `https://wa.me/${d.wa}`, wa.classList.remove('hidden')) : wa.classList.add('hidden');
+                const ins = document.getElementById('btn-insta');
+                d.insta ? (ins.href = d.insta, ins.classList.remove('hidden')) : ins.classList.add('hidden');
             }
             syncMyShop(uid);
         }
@@ -210,16 +221,17 @@
             loadProfile(currentUser.uid);
         };
 
-        // PRODUCT & LINK SYSTEM
+        // IMAGE COMPRESSION
         const compressImg = (f) => new Promise(res => {
             const reader = new FileReader(); reader.readAsDataURL(f);
             reader.onload = e => {
                 const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
-                    const canvas = document.createElement('canvas'); const maxW = 800;
+                    const canvas = document.createElement('canvas');
+                    const maxW = 500;
                     canvas.width = maxW; canvas.height = img.height * (maxW / img.width);
                     canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    res(canvas.toDataURL('image/jpeg', 0.6));
+                    res(canvas.toDataURL('image/jpeg', 0.7));
                 };
             };
         });
@@ -239,20 +251,20 @@
 
         window.publishProduct = async () => {
             const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, l = document.getElementById('p-link').value;
-            if(!n || !p || !tempProdImg) return alert("Details?");
-            const btn = document.getElementById('pub-btn');
-            btn.disabled = true; btn.innerText = "Publishing...";
+            if(!n || !p || !tempProdImg) return alert("Hukum, jankari bhariye!");
+            document.getElementById('pub-btn').disabled = true;
             await addDoc(collection(db, "products"), {
                 name: n, price: p, img: tempProdImg, link: l || "", 
                 creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText,
                 time: serverTimestamp()
             });
-            alert("Published!");
+            alert("Maal Shahi Shop mein jod diya gaya!");
             location.reload();
         };
 
-        // TABS
+        // TAB NAVIGATION
         window.showTab = (t) => {
+            localStorage.setItem('lastTab', t); // REFRESH FIX
             ['feed','shop','orders'].forEach(s => {
                 const sec = document.getElementById('sec-'+s);
                 const tab = document.getElementById('tab-'+s);
@@ -262,7 +274,7 @@
             if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
         };
 
-        // SYNC
+        // SYNC DATA
         function syncAll() {
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
@@ -273,7 +285,10 @@
             });
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
-                snap.forEach(d => { const o = d.data(); list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm"><h4 class="font-bold text-xs">${o.item}</h4><p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p></div>`; });
+                snap.forEach(d => { 
+                    const o = d.data(); 
+                    list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm"><h4 class="font-bold text-xs">${o.item}</h4><p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p></div>`; 
+                });
             });
         }
 
@@ -291,21 +306,16 @@
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
         window.delP = async (id) => { if(confirm("Hata dein?")) await deleteDoc(doc(db, "products", id)); };
 
-        // --- UPDATED ORDER SYSTEM LOGIC ---
+        // --- ORDER LOGIC FIXED ---
         window.orderNow = (item, cid, link) => {
-            // Check if link is valid and not "undefined" string
-            if (link && link.trim() !== "" && link !== "undefined") {
-                window.open(link, '_blank'); 
-            } else {
-                document.getElementById('order-item-name').value = item;
-                document.getElementById('order-creator-id').value = cid;
-                document.getElementById('checkout-modal').classList.remove('hidden');
-            }
+            // Hamesha modal dikhao details lene ke liye
+            document.getElementById('order-item-name').value = item;
+            document.getElementById('order-creator-id').value = cid;
+            document.getElementById('order-item-link').value = link; // Link ko chupa kar rakho
+            document.getElementById('checkout-modal').classList.remove('hidden');
         };
 
-        window.closeCheckout = () => {
-            document.getElementById('checkout-modal').classList.add('hidden');
-        };
+        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
 
         window.submitOrder = async () => {
             const btn = document.getElementById('order-confirm-btn');
@@ -313,33 +323,33 @@
             const ph = document.getElementById('order-cust-phone').value;
             const item = document.getElementById('order-item-name').value;
             const cid = document.getElementById('order-creator-id').value;
+            const link = document.getElementById('order-item-link').value;
 
-            if(!n || !ph) return alert("Hukum, details bhariye!");
+            if(!n || !ph) return alert("Hukum, details toh bhariye!");
 
-            btn.disabled = true; 
-            btn.innerText = "Processing...";
+            btn.disabled = true;
+            btn.innerText = "Hukumnama ja raha hai...";
 
             try {
-                await addDoc(collection(db, "orders"), { 
-                    item, 
-                    customer: n, 
-                    phone: ph, 
-                    creatorId: cid, 
-                    time: serverTimestamp() 
+                // Database mein order save karo
+                await addDoc(collection(db, "orders"), {
+                    item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp()
                 });
 
                 alert("Order Shahi Darbar mein darj ho gaya!");
                 closeCheckout();
-                
-                // Redirection Fix: Undefined URL se bachne ke liye tab switch karein
-                showTab('feed'); 
-                
-                // Clear inputs
+
+                // AB LINK OPEN KARO (Details lene ke baad)
+                if (link && link.trim() !== "" && link !== "undefined") {
+                    window.open(link, '_blank');
+                }
+
+                showTab('feed');
                 document.getElementById('order-cust-name').value = "";
                 document.getElementById('order-cust-phone').value = "";
 
             } catch (err) {
-                alert("Error: " + err.message);
+                alert("Galti: " + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "CONFIRM";
