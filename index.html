@@ -12,7 +12,6 @@
         .raj-font { font-family: 'Cinzel', serif; }
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
-        
         .banner-box { height: 200px; background: #eee no-repeat center; background-size: cover; border-radius: 0 0 40px 40px; position: relative; }
         .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 5px solid #fff; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
@@ -20,6 +19,7 @@
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
         .social-btn { width: 40px; height: 40px; border-radius: 10px; display: none; align-items: center; justify-content: center; color: white; font-size: 18px; transition: 0.2s; }
         input[type="file"] { display: none; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body class="pb-24">
@@ -28,16 +28,12 @@
         <div class="w-full max-w-sm text-center">
             <h1 class="raj-font text-4xl text-[#d4af37] mb-2">SAINIWALAA</h1>
             <p class="text-[10px] text-gray-400 mb-10 tracking-widest uppercase font-bold">Creator Darbar</p>
-            
             <div id="auth-inputs">
                 <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
                 <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
-                
-                <button id="main-auth-btn" onclick="handleAuth('login')" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl">LOG IN</button>
-                
+                <button id="main-auth-btn" onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl">LOG IN</button>
                 <p id="toggle-text" class="text-xs text-gray-500">
-                    Naya account chahiye? 
-                    <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button>
+                    Naya account chahiye? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button>
                 </p>
             </div>
         </div>
@@ -95,7 +91,6 @@
                 <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center shadow-sm">
                     <h3 class="font-bold text-[#d4af37] mb-6 text-xs uppercase tracking-widest">Naya Maal Jodhein</h3>
                     <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none text-sm">
-                    <textarea id="p-desc" placeholder="Description..." class="w-full p-3 border-b mb-2 outline-none text-sm resize-none" rows="2"></textarea>
                     <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none text-sm font-bold">
                     <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px]">
                     <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl"></div>
@@ -122,16 +117,15 @@
     </main>
 
     <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div id="modal-content" class="bg-white w-full max-w-sm rounded-[35px] overflow-hidden shadow-2xl scale-95 transition-all p-8">
+        <div class="bg-white w-full max-w-sm rounded-[35px] overflow-hidden shadow-2xl p-8">
              <h3 class="raj-font text-xl font-bold text-center mb-6">Confirm Order</h3>
              <input id="order-cust-name" type="text" placeholder="Aapka Naam" class="w-full p-3 border-b mb-4 outline-none">
              <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
              <input type="hidden" id="order-item-name">
              <input type="hidden" id="order-creator-id">
-             <input type="hidden" id="order-item-link">
              <div class="flex gap-3">
                 <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold">CANCEL</button>
-                <button id="order-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
+                <button id="order-confirm-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
              </div>
         </div>
     </div>
@@ -150,7 +144,7 @@
         let authMode = 'login';
         let tempProdImg = "";
 
-        // AUTH LOGIC
+        // AUTH
         window.toggleAuthMode = () => {
             authMode = (authMode === 'login') ? 'signup' : 'login';
             document.getElementById('main-auth-btn').innerText = (authMode === 'login') ? 'LOG IN' : 'SIGN UP';
@@ -159,17 +153,15 @@
                 : 'Pehle se account hai? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Login Karein</button>';
         };
 
-        window.handleAuth = (type) => {
+        window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
             if(!e || !p) return alert("Hukum, jankari bhariye!");
-
             if(authMode === 'login') {
-                signInWithEmailAndPassword(auth, e, p).catch(err => alert("Login Failed: " + err.message));
+                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
             } else {
                 createUserWithEmailAndPassword(auth, e, p).then(async (cred) => {
-                    // Create empty profile for new user
                     await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Mhara Swagat hai!", wa: "", insta: "", yt: "" });
-                }).catch(err => alert("Signup Failed: " + err.message));
+                }).catch(err => alert(err.message));
             }
         };
 
@@ -188,29 +180,19 @@
             }
         });
 
-        // PROFILE SYSTEM
+        // PROFILE
         async function loadProfile(uid) {
-            const snap = await getDoc(doc(db, "users", uid));
             const isOwner = (currentUser && currentUser.uid === uid);
-            
-            // Show/Hide owner controls
-            document.querySelectorAll('.owner-only').forEach(el => {
-                isOwner ? el.classList.remove('hidden') : el.classList.add('hidden');
-            });
-
+            document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            const snap = await getDoc(doc(db, "users", uid));
             if (snap.exists()) {
                 const d = snap.data();
                 document.getElementById('disp-name').innerText = d.name || "Creator";
                 document.getElementById('disp-bio').innerText = d.bio || "";
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
-                
-                // Socials
                 const waBtn = document.getElementById('btn-wa');
-                if(d.wa) { waBtn.href = `https://wa.me/${d.wa}`; waBtn.style.display = 'flex'; } else { waBtn.style.display = 'none'; }
-                
-                const instaBtn = document.getElementById('btn-insta');
-                if(d.insta) { instaBtn.href = d.insta; instaBtn.style.display = 'flex'; } else { instaBtn.style.display = 'none'; }
+                d.wa ? (waBtn.href = `https://wa.me/${d.wa}`, waBtn.style.display = 'flex') : waBtn.style.display = 'none';
             }
             syncMyShop(uid);
         }
@@ -228,26 +210,19 @@
             loadProfile(currentUser.uid);
         };
 
-        // HELPERS
-        const compressImg = (file) => {
-            return new Promise((res) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const maxW = 800;
-                        const scale = maxW / img.width;
-                        canvas.width = maxW;
-                        canvas.height = img.height * scale;
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        res(canvas.toDataURL('image/jpeg', 0.6));
-                    };
+        // PRODUCT & LINK SYSTEM
+        const compressImg = (f) => new Promise(res => {
+            const reader = new FileReader(); reader.readAsDataURL(f);
+            reader.onload = e => {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const maxW = 800;
+                    canvas.width = maxW; canvas.height = img.height * (maxW / img.width);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    res(canvas.toDataURL('image/jpeg', 0.6));
                 };
-            });
-        };
+            };
+        });
 
         window.uploadProfileMedia = async (type, input) => {
             const compressed = await compressImg(input.files[0]);
@@ -263,20 +238,20 @@
         };
 
         window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value;
-            if(!n || !p || !tempProdImg) return alert("Puri jankari dein!");
-            
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, l = document.getElementById('p-link').value;
+            if(!n || !p || !tempProdImg) return alert("Details?");
+            const btn = document.getElementById('pub-btn');
+            btn.disabled = true; btn.innerText = "Publishing...";
             await addDoc(collection(db, "products"), {
-                name: n, price: p, img: tempProdImg, 
-                creatorId: currentUser.uid, 
-                creator: document.getElementById('disp-name').innerText,
+                name: n, price: p, img: tempProdImg, link: l || "", 
+                creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText,
                 time: serverTimestamp()
             });
-            alert("Maal Shahi Feed par aa gaya!");
+            alert("Published!");
             location.reload();
         };
 
-        // GLOBAL TABS & SYNC
+        // TABS
         window.showTab = (t) => {
             ['feed','shop','orders'].forEach(s => {
                 document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
@@ -285,12 +260,13 @@
             if(t === 'shop') loadProfile(currentUser.uid);
         };
 
+        // SYNC
         function syncAll() {
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
                 });
             });
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
@@ -305,7 +281,7 @@
                 snap.forEach(d => { 
                     const p = d.data();
                     const isOwner = (currentUser && currentUser.uid === uid);
-                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
                 });
             });
         }
@@ -313,20 +289,30 @@
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
         window.delP = async (id) => { if(confirm("Hata dein?")) await deleteDoc(doc(db, "products", id)); };
 
-        // ORDER SYSTEM
-        window.orderNow = (item, cid) => {
-            document.getElementById('order-item-name').value = item;
-            document.getElementById('order-creator-id').value = cid;
-            document.getElementById('checkout-modal').classList.remove('hidden');
+        // ORDER SYSTEM WITH EXTERNAL LINK SUPPORT
+        window.orderNow = (item, cid, link) => {
+            if (link && link.trim() !== "") {
+                window.open(link, '_blank'); // Agar link hai toh seedha kholo
+            } else {
+                // Link nahi hai toh details lo
+                document.getElementById('order-item-name').value = item;
+                document.getElementById('order-creator-id').value = cid;
+                document.getElementById('checkout-modal').classList.remove('hidden');
+            }
         };
+
         window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
+
         window.submitOrder = async () => {
+            const btn = document.getElementById('order-confirm-btn');
             const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
             const item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value;
-            if(!n || !ph) return alert("Details bhariye!");
+            if(!n || !ph) return alert("Details?");
+            btn.disabled = true; btn.innerText = "Processing...";
             await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
             alert("Order Sent!");
             closeCheckout();
+            btn.disabled = false; btn.innerText = "CONFIRM";
         };
     </script>
 </body>
