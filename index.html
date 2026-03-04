@@ -1,137 +1,223 @@
-<style>
-    /* Sirf Grid aur Image ko sahi karne ke liye updated CSS */
-    #public-grid, #my-shop-grid {
-        display: grid;
-        gap: 1.5rem;
-        grid-template-columns: repeat(2, minmax(0, 1fr)); /* Mobile pe 2 */
-    }
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAINIWALAA | Shahi Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .raj-font { font-family: 'Cinzel', serif; }
+        .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
+        .hidden { display: none !important; }
+        .shahi-card { border-radius: 20px; background: white; border: 1px solid #eee; overflow: hidden; transition: 0.3s; }
+        .shahi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .banner-box { height: 160px; background: #e5e7eb; background-size: cover; background-position: center; border-radius: 0 0 25px 25px; position: relative; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
+        .img-frame img { width: 100%; height: 100%; object-fit: cover; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body class="pb-20">
 
-    @media (min-width: 768px) {
-        #public-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr)); /* Tablet pe 3 */
-        }
-    }
+    <div id="auth-section" class="min-h-screen flex items-center justify-center p-6 bg-white">
+        <div class="w-full max-w-sm text-center">
+            <h1 class="raj-font text-4xl text-[#d4af37] mb-2">SAINIWALAA</h1>
+            <p class="text-[10px] text-gray-400 mb-10 tracking-[0.2em] uppercase">Mhari Shop, Mhari Shaan</p>
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
+            <button onclick="handleAuth('login')" class="w-full bg-black text-white p-4 rounded-full font-bold mb-3 shadow-lg">LOG IN</button>
+            <button onclick="handleAuth('signup')" class="w-full text-gray-500 text-xs font-bold uppercase tracking-widest">Naya Account (Register)</button>
+        </div>
+    </div>
 
-    @media (min-width: 1024px) {
-        #public-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr)); /* Desktop pe 4 */
-        }
-    }
+    <main id="main-app" class="hidden">
+        <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-around border-b shadow-sm">
+            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn active p-4 text-[10px] font-bold uppercase tracking-widest">Public Feed</button>
+            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-4 text-[10px] font-bold uppercase tracking-widest">Mhari Shop</button>
+            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-4 text-[10px] font-bold uppercase tracking-widest">Orders</button>
+            <button onclick="logout()" class="p-4 text-red-400"><i class="fa-solid fa-power-off"></i></button>
+        </nav>
 
-    .product-img-container {
-        width: 100%;
-        aspect-ratio: 1 / 1; /* Ekdum Square Frame */
-        overflow: hidden;
-        background: #f3f3f3;
-    }
+        <section id="sec-feed" class="p-4 max-w-6xl mx-auto">
+            <h2 class="raj-font text-xl mb-6 text-gray-800">Duniya ka Maal</h2>
+            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+        </section>
 
-    .product-img-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Image ko box mein fit karega bina phate */
-        transition: transform 0.5s;
-    }
+        <section id="sec-shop" class="hidden">
+            <div id="banner-ui" class="banner-box">
+                <label class="absolute top-4 right-4 bg-white/30 p-2 rounded-full cursor-pointer"><i class="fa-solid fa-camera text-white"></i><input type="file" onchange="previewImg(this, 'banner')"></label>
+                <div class="relative">
+                    <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
+                    <label class="absolute bottom-[-45px] left-[55%] bg-[#d4af37] text-white p-2 rounded-full border-2 border-white cursor-pointer"><i class="fa-solid fa-pen text-[10px]"></i><input type="file" onchange="previewImg(this, 'profile')"></label>
+                </div>
+            </div>
 
-    .shahi-card:hover img {
-        transform: scale(1.08);
-    }
+            <div class="mt-14 text-center px-6">
+                <h2 id="creator-name" class="text-2xl font-black text-gray-800">Creator</h2>
+                <p id="creator-bio" class="text-xs text-gray-400 mt-1 italic">Apna bio likhein...</p>
+                <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="mt-4 text-[9px] border px-4 py-1 rounded-full font-bold uppercase text-[#d4af37]">Edit Profile</button>
+            </div>
 
-    /* Fixed Height for Content to keep cards aligned */
-    .card-body {
-        height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-</style>
+            <div id="edit-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-3xl">
+                <input id="in-name" placeholder="Display Name" class="w-full p-3 border-b mb-2 outline-none">
+                <input id="in-bio" placeholder="Bio..." class="w-full p-3 border-b mb-4 outline-none">
+                <button onclick="saveProfile()" class="w-full bg-black text-white p-3 rounded-xl text-xs font-bold">SAVE PROFILE</button>
+            </div>
 
-<script type="module">
-    // ... baki firebase config aur auth wahi rahega ...
+            <div class="max-w-4xl mx-auto p-4 mt-10">
+                <div class="bg-[#d4af37]/5 border-2 border-dashed border-[#d4af37]/20 p-6 rounded-[30px] text-center">
+                    <input id="p-name" placeholder="Maal ka Naam" class="w-full p-3 bg-transparent border-b mb-2 outline-none text-sm">
+                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 bg-transparent border-b mb-4 outline-none text-sm">
+                    
+                    <div id="p-preview-box" class="hidden mb-4"><img id="p-preview-img" class="h-32 mx-auto rounded-xl shadow-md"></div>
+                    
+                    <div class="flex gap-2">
+                        <label class="flex-1 bg-white border-2 border-[#d4af37] text-[#d4af37] p-3 rounded-2xl text-[10px] font-bold cursor-pointer">
+                            <i class="fa-solid fa-image mr-2"></i>PHOTO CHUNEIN
+                            <input type="file" onchange="previewImg(this, 'product')">
+                        </label>
+                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-3 rounded-2xl text-[10px] font-bold shadow-lg">SAVE & PUBLISH</button>
+                    </div>
+                </div>
 
-    function syncData() {
-        // Public Feed Sync
-        onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-            const grid = document.getElementById('public-grid');
-            grid.innerHTML = "";
-            snap.forEach(d => {
-                const p = d.data();
-                grid.innerHTML += `
-                    <div class="shahi-card bg-white shadow-sm">
-                        <div class="product-img-container">
-                            <img src="${p.img}" loading="lazy">
-                        </div>
-                        <div class="p-4 card-body">
-                            <div>
-                                <span class="text-[9px] font-bold text-[#d4af37] tracking-widest uppercase">By @${p.creator}</span>
-                                <h4 class="font-bold text-sm text-gray-800 line-clamp-1 mt-1">${p.name}</h4>
-                                <p class="text-[10px] text-gray-400 line-clamp-2 mt-1">${p.desc}</p>
-                            </div>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="font-black text-gray-900">₹${p.price}</span>
-                                <button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-[#d4af37] text-white text-[10px] px-4 py-2 rounded-full font-bold">ORDER</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
+                <h3 class="raj-font text-lg mt-10 mb-6">Mhari Shop ka Maal</h3>
+                <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            </div>
+        </section>
+
+        <section id="sec-orders" class="hidden p-6 max-w-xl mx-auto text-center">
+            <h3 class="raj-font text-xl mb-6">Orders ki List</h3>
+            <div id="order-list" class="space-y-4"></div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+        let user = null, tempImg = "";
+
+        // AUTH
+        window.handleAuth = (type) => {
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            if(!e || !p) return alert("Hukum, email-pass bhariye!");
+            const action = type === 'login' ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
+            action(auth, e, p).catch(err => alert("Galti: " + err.message));
+        };
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, u => {
+            if(u) { user = u; document.getElementById('auth-section').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); syncAll(); }
+            else { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('main-app').classList.add('hidden'); }
         });
 
-        // My Shop Sync (Same logic for image fit)
-        onSnapshot(query(collection(db, "products"), where("creatorId", "==", user.uid)), snap => {
-            const myGrid = document.getElementById('my-shop-grid');
-            myGrid.innerHTML = "";
-            snap.forEach(d => {
-                const p = d.data();
-                myGrid.innerHTML += `
-                    <div class="bg-white rounded-2xl border relative overflow-hidden shadow-sm">
-                        <button onclick="delP('${d.id}')" class="absolute top-2 right-2 z-10 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] shadow-lg"><i class="fa-solid fa-trash"></i></button>
-                        <div class="aspect-square bg-gray-50">
-                            <img src="${p.img}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="p-2">
-                            <p class="font-bold text-[11px] truncate">${p.name}</p>
-                            <p class="text-[#d4af37] text-[11px] font-bold">₹${p.price}</p>
-                        </div>
-                    </div>`;
+        // TABS
+        window.showTab = (t) => {
+            ['feed','shop','orders'].forEach(s => {
+                document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
+                document.getElementById('tab-'+s).classList.toggle('active', s === t);
             });
-        });
-    }
+        };
 
-    // Direct Image Upload & Save to Database
-    window.publishProduct = async () => {
-        const n = document.getElementById('p-name').value;
-        const p = document.getElementById('p-price').value;
-        const d = document.getElementById('p-desc').value;
-        
-        if(!n || !p || !tempProductImg) return alert("Hukum, jankari poori bharein!");
+        // IMAGE PREVIEW
+        window.previewImg = (input, type) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const url = e.target.result;
+                if(type === 'banner') document.getElementById('banner-ui').style.backgroundImage = `url(${url})`;
+                else if(type === 'profile') document.getElementById('profile-ui').src = url;
+                else {
+                    tempImg = url;
+                    document.getElementById('p-preview-box').classList.remove('hidden');
+                    document.getElementById('p-preview-img').src = url;
+                    document.getElementById('pub-btn').classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
 
-        // Button ko disable karein taaki double click na ho
-        const btn = document.getElementById('pub-btn');
-        btn.innerText = "PUBLISHING...";
-        btn.disabled = true;
+        // SAVE LOGIC
+        window.saveProfile = () => {
+            document.getElementById('creator-name').innerText = document.getElementById('in-name').value || "Creator";
+            document.getElementById('creator-bio').innerText = document.getElementById('in-bio').value || "Bio updated!";
+            document.getElementById('edit-box').classList.add('hidden');
+        };
 
-        try {
-            await addDoc(collection(db, "products"), {
-                name: n,
-                price: p,
-                desc: d,
-                img: tempProductImg, // Yahan image data fast save ho raha hai
-                creator: user.email.split('@')[0],
-                creatorId: user.uid,
-                time: serverTimestamp()
+        window.publishProduct = async () => {
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value;
+            if(!n || !p || !tempImg) return alert("Puri jankari bhariye!");
+            
+            await addDoc(collection(db, "products"), { 
+                name: n, price: p, img: tempImg, 
+                creator: user.email.split('@')[0], creatorId: user.uid, time: serverTimestamp() 
             });
             
-            // Reset Form
-            document.getElementById('p-name').value = "";
-            document.getElementById('p-price').value = "";
-            document.getElementById('p-desc').value = "";
-            document.getElementById('p-preview').classList.add('hidden');
-            tempProductImg = "";
-            alert("Maal Shahi Feed par aa gaya hai!");
-        } catch (error) {
-            alert("Galti hui: " + error.message);
-        } finally {
-            btn.innerText = "SAVE & PUBLISH";
-            btn.disabled = false;
+            document.getElementById('p-name').value = ""; document.getElementById('p-price').value = "";
+            document.getElementById('p-preview-box').classList.add('hidden');
+            document.getElementById('pub-btn').classList.add('hidden');
+            alert("Maal Shahi Feed par Publish ho gaya!");
+        };
+
+        // SYNC DATA
+        function syncAll() {
+            // Public Feed
+            onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
+                const grid = document.getElementById('public-grid'); grid.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    grid.innerHTML += `<div class="shahi-card">
+                        <div class="img-frame"><img src="${p.img}"></div>
+                        <div class="p-3">
+                            <span class="text-[8px] font-bold text-[#d4af37]">@${p.creator}</span>
+                            <h4 class="font-bold text-[11px] truncate mt-1 text-gray-800">${p.name}</h4>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="font-bold text-xs text-gray-900">₹${p.price}</span>
+                                <button onclick="buy('${p.name}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            });
+
+            // My Shop
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", user.uid)), snap => {
+                const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    grid.innerHTML += `<div class="shahi-card relative">
+                        <button onclick="delP('${d.id}')" class="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full text-[8px] z-10"><i class="fa-solid fa-trash"></i></button>
+                        <div class="img-frame"><img src="${p.img}"></div>
+                        <div class="p-2"><p class="text-[10px] font-bold truncate">${p.name}</p><p class="text-[#d4af37] text-[10px] font-bold">₹${p.price}</p></div>
+                    </div>`;
+                });
+            });
+
+            // Orders
+            onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), snap => {
+                const list = document.getElementById('order-list'); list.innerHTML = "";
+                snap.forEach(d => {
+                    const o = d.data();
+                    list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm text-left">
+                        <h4 class="font-bold text-xs text-gray-800">${o.item}</h4>
+                        <p class="text-[10px] text-gray-400 mt-1">Customer: ${o.name} | Mob: ${o.phone}</p>
+                    </div>`;
+                });
+            });
         }
-    };
-</script>
+
+        window.buy = async (item) => {
+            const n = prompt("Aapka Naam?"), ph = prompt("WhatsApp No?");
+            if(n && ph) await addDoc(collection(db, "orders"), { item, name: n, phone: ph, time: serverTimestamp() });
+        };
+
+        window.delP = async (id) => { if(confirm("Mita dein?")) await deleteDoc(doc(db, "products", id)); };
+    </script>
+</body>
+</html>
