@@ -10,9 +10,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, get, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, get, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Tumhari Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
             authDomain: "social-blog-93d38.firebaseapp.com",
@@ -26,107 +27,227 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+        let myData = null;
 
-        // --- 1. LOGIN SYSTEM (REFRESH SAFE) ---
-        setPersistence(auth, browserLocalPersistence).then(() => {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('auth-box').classList.add('hidden');
-                    document.getElementById('app-box').classList.remove('hidden');
-                    loadDarbar();
-                } else {
-                    document.getElementById('auth-box').classList.remove('hidden');
-                    document.getElementById('app-box').classList.add('hidden');
-                }
-            });
+        // --- AUTH TRACKER ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await get(ref(db, `users/${user.uid}`));
+                myData = snap.val();
+                showApp();
+                loadProfile();
+            } else {
+                showAuth();
+            }
         });
 
-        // --- 2. NEW LIST-STYLE POST FORM (Text, Image, Video) ---
-        window.openPostForm = () => {
-            const caption = prompt("Kayi likhna chaho ho? (Text/Caption):");
-            const type = confirm("Video hai? (Cancel for Image)") ? "video" : "image";
-            
-            cloudinary.openUploadWidget({ 
-                cloudName: "dprl2lyih", 
-                uploadPreset: "ml_default",
-                resourceType: type
+        // --- CLOUDINARY UPLOAD WIDGET ---
+        // Tumhari Cloudinary Cloud Name: dvp58lgh3
+        window.openUploadWidget = (target, type) => {
+            cloudinary.openUploadWidget({
+                cloudName: "dvp58lgh3", 
+                uploadPreset: "ml_default", 
+                sources: ['local', 'camera', 'url'],
+                resourceType: type // 'image' or 'video'
             }, (err, res) => {
                 if (!err && res.event === "success") {
-                    push(ref(db, 'posts'), {
-                        url: res.info.secure_url,
-                        caption: caption || "",
-                        type: type,
-                        uid: auth.currentUser.uid,
-                        time: serverTimestamp()
-                    }).then(() => alert("Ghani Khamma! Post daraj ho gayi. 🚩"));
+                    handleUploadSuccess(target, res.info.secure_url);
                 }
             });
         };
 
-        // --- 3. LOAD DARBAR (LIST VIEW LIKE INSTAGRAM) ---
-        function loadDarbar() {
-            onValue(ref(db, 'posts'), s => {
-                const feed = document.getElementById('darbar-list');
-                feed.innerHTML = "";
-                if(s.exists()) {
-                    Object.values(s.val()).reverse().forEach(p => {
-                        const media = p.type === 'video' 
-                            ? `<video src="${p.url}" controls class="w-full h-auto"></video>`
-                            : `<img src="${p.url}" class="w-full h-auto">`;
-                        
-                        feed.innerHTML += `
-                        <div class="bg-black border-b border-gray-900 mb-6 pb-4">
-                            <div class="p-3 flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-yellow-600 border border-yellow-400"></div>
-                                <b class="text-xs gold-text italic tracking-widest">SainiWalaa User</b>
-                            </div>
-                            ${media}
-                            <div class="p-3">
-                                <p class="text-sm text-gray-200 mt-2"><b class="gold-text mr-2">SainiWalaa</b> ${p.caption}</p>
-                                <span class="text-[10px] text-gray-600 uppercase mt-1 block">Abhi Abhi</span>
-                            </div>
-                        </div>`;
-                    });
-                }
-            });
+        // --- PROFILE LOGIC ---
+        function loadProfile() {
+            if(!myData) return;
+            // Banner setup (Style based on image_0.png but uses database)
+            const banner = document.getElementById('profile-banner');
+            banner.style.backgroundImage = `url(${myData.banner || 'https://via.placeholder.com/1200x400/1a1a1a/D4AF37'})`;
+            
+            // Avatar (image_0.png style)
+            const avatar = document.getElementById('profile-avatar');
+            avatar.src = myData.photo || "https://via.placeholder.com/150/D4AF37/000?text=SS";
+            
+            document.getElementById('profile-name').innerText = myData.name || "sunil saini";
+            document.getElementById('profile-bio').innerText = myData.bio || "SSSSSSSSSSSSSS";
         }
+
+        // MAHAL SAJAO (Edit Profile Popup - image_2.png look)
+        window.openEditProfile = () => document.getElementById('edit-profile-modal').classList.remove('hidden');
+        window.closeEditProfile = () => document.getElementById('edit-profile-modal').classList.add('hidden');
+
+        window.saveProfile = async () => {
+            const name = document.getElementById('edit-name').value;
+            const bio = document.getElementById('edit-bio').value;
+            await update(ref(db, `users/${auth.currentUser.uid}`), { name, bio });
+            alert("Mahal saj gayo Hukum! 🚩");
+            closeEditProfile();
+            location.reload();
+        };
+
+        // --- POST SYSTEM (Darbar) ---
+        // image_5.png style input, but added image/video buttons
+        window.submitPost = async () => {
+            const text = document.getElementById('post-text').value;
+            const imageUrl = document.getElementById('post-image-url').value;
+            const videoUrl = document.getElementById('post-video-url').value;
+            
+            if(!text && !imageUrl && !videoUrl) return alert("Kuch toh likho ya dikhao hukum!");
+
+            await push(ref(db, 'posts'), {
+                uid: auth.currentUser.uid,
+                uName: myData.name,
+                uPhoto: myData.photo,
+                text, imageUrl, videoUrl,
+                time: serverTimestamp()
+            });
+            document.getElementById('post-text').value = "";
+            document.getElementById('post-image-url').value = "";
+            document.getElementById('post-video-url').value = "";
+            alert("Darbar me post daraj ho gayi! 🚩");
+        };
+
+        // --- HELPERS ---
+        function showApp() { document.getElementById('auth-section').classList.add('hidden'); document.getElementById('app-section').classList.remove('hidden'); }
+        function showAuth() { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
+        window.doLogin = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message));
+        window.doLogout = () => signOut(auth);
+
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&display=swap');
         body { font-family: 'Marcellus', serif; background-color: #000; color: #fff; }
         .gold-text { color: #D4AF37; }
-        .hidden { display: none; }
+        .gold-border { border-color: #D4AF37; }
+        .bg-card { background-color: #121212; }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="flex justify-center">
 
-    <div id="app-box" class="max-w-[500px] mx-auto min-h-screen relative hidden pb-20">
-        <header class="p-4 border-b border-gray-900 flex justify-between items-center sticky top-0 bg-black z-50">
-            <h1 class="text-2xl font-bold gold-text italic">SAINIWALAA</h1>
-            <div class="flex gap-6">
-                <i class="fa-solid fa-plus-square text-xl cursor-pointer" onclick="openPostForm()"></i>
-                <i class="fa-solid fa-heart text-xl"></i>
-            </div>
+    <div id="app-section" class="w-full max-w-[500px] min-h-screen bg-black relative pb-24 hidden">
+        
+        <header class="p-4 border-b border-gray-800 flex justify-center bg-black sticky top-0 z-50">
+            <h1 class="text-2xl font-bold gold-text tracking-widest">SAINIWALAA</h1>
         </header>
 
-        <main id="darbar-list" class="w-full"></main>
+        <div id="profile-banner" class="h-40 bg-cover bg-center relative bg-card border-b border-gray-800">
+            <div class="absolute -bottom-8 left-6 flex items-end gap-3">
+                <div class="relative">
+                    <img id="profile-avatar" src="" class="w-24 h-24 rounded-full border-4 border-black bg-card shadow-xl">
+                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-black"></div>
+                </div>
+                <div>
+                    <h2 id="profile-name" class="text-xl font-bold"></h2>
+                    <p id="profile-bio" class="text-xs text-gray-500"></p>
+                </div>
+            </div>
+            
+            <div class="absolute -bottom-5 right-4 flex gap-2">
+                <button onclick="openEditProfile()" class="px-4 py-1.5 border gold-border rounded-lg text-xs gold-text flex items-center gap-2 bg-black/60 shadow-lg">
+                    <i class="fa-solid fa-gear"></i> Badlaav
+                </button>
+                <button class="px-4 py-1.5 border gold-border rounded-lg text-xs gold-text flex items-center gap-2 bg-black/60 shadow-lg hover:bg-gold-500 hover:text-black">
+                    <i class="fa-solid fa-crown"></i> Saathi Bano 🚩
+                </button>
+                <button onclick="doLogout()" class="px-2 py-1.5 border border-red-900 rounded-lg text-xs text-red-500 bg-black/60">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-black border-t border-gray-900 p-4 flex justify-around text-gray-500">
-            <i class="fa-solid fa-house text-white"></i>
-            <i class="fa-solid fa-search"></i>
-            <i class="fa-solid fa-clapperboard"></i>
-            <i class="fa-solid fa-bag-shopping"></i>
-            <i class="fa-solid fa-circle-user text-yellow-500"></i>
+        <div class="mt-14 px-6 flex justify-end gap-10 text-center text-xs uppercase tracking-widest text-gray-500">
+            <div><b class="text-xl text-white block">0</b> POST</div>
+            <div><b class="text-xl text-white block">0</b> SAATHI</div>
+        </div>
+
+        <main class="p-4">
+            
+            <div id="post-box" class="bg-card p-4 rounded-xl border border-gray-800 mb-6">
+                <div class="flex items-center gap-3">
+                    <input type="text" id="post-text" placeholder="Kuch naya dikhao hukum..." class="flex-1 bg-transparent border gold-border rounded-full px-4 py-2 text-sm outline-none">
+                    <button onclick="submitPost()" class="bg-gold-text text-black px-5 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:scale-105">Naya Post</button>
+                </div>
+                <div class="flex gap-2 mt-3 text-gray-500">
+                    <button onclick="openUploadWidget('post-image-url', 'image')" class="text-xs flex items-center gap-1.5 p-2 rounded-lg hover:bg-black/50"><i class="fa-solid fa-image text-green-500"></i> Photo</button>
+                    <button onclick="openUploadWidget('post-video-url', 'video')" class="text-xs flex items-center gap-1.5 p-2 rounded-lg hover:bg-black/50"><i class="fa-solid fa-video text-red-500"></i> Video</button>
+                    <input type="hidden" id="post-image-url">
+                    <input type="hidden" id="post-video-url">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-xl font-bold gold-text">Shahi Bazaar</h3>
+                    <p class="text-xs text-gray-500">Anmol saaman yahan milego</p>
+                </div>
+                <button class="px-5 py-2 bg-orange-600 rounded-lg font-bold text-xs flex items-center gap-2 tracking-widest hover:scale-105">
+                    <i class="fa-solid fa-plus"></i> Bazaar me Rakho 🚩
+                </button>
+            </div>
+            
+            <div class="border-2 border-dashed border-gray-800 rounded-2xl p-10 text-center bg-card">
+                <i class="fa-solid fa-tag text-5xl text-gray-700 mb-3"></i>
+                <p class="text-gray-500">Bazaar abhi khali hai hukum</p>
+            </div>
+
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-black border-t border-gray-800 p-4 flex justify-around text-gray-500 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+            <button class="flex flex-col items-center gap-1 active:text-yellow-500">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[10px] tracking-widest">DARBAR</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 hover:text-yellow-500">
+                <i class="fa-solid fa-bag-shopping text-xl"></i>
+                <span class="text-[10px] tracking-widest">BAZAAR</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-yellow-500">
+                <i class="fa-solid fa-crown text-xl"></i>
+                <span class="text-[10px] tracking-widest">AAP</span>
+            </button>
         </nav>
     </div>
 
-    <div id="auth-box" class="h-screen flex flex-col justify-center items-center p-10 bg-black">
-        <h1 class="text-4xl gold-text mb-10 tracking-[8px] italic">SAINIWALAA</h1>
-        <div class="w-full max-w-xs flex flex-col gap-6">
-            <input type="email" id="email" placeholder="Email" class="bg-transparent border-b border-gray-800 p-2 outline-none">
-            <input type="password" id="pass" placeholder="Password" class="bg-transparent border-b border-gray-800 p-2 outline-none">
-            <button onclick="signInWithEmailAndPassword(getAuth(), email.value, pass.value)" class="bg-yellow-600 text-black p-3 rounded font-bold uppercase tracking-widest">Login 🚩</button>
+    <div id="edit-profile-modal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-6 hidden">
+        <div class="bg-card w-full max-w-sm rounded-2xl p-6 relative border-2 gold-border shadow-2xl">
+            <i class="fa-solid fa-xmark absolute top-4 right-4 text-gray-600 cursor-pointer" onclick="closeEditProfile()"></i>
+            
+            <h2 class="text-lg font-bold gold-text mb-6">Mahal Sajao</h2>
+            
+            <label class="text-xs text-gray-500 block mb-2 uppercase">Chitra (Avatar)</label>
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl">SS</div>
+                <button onclick="openUploadWidget('profile-avatar-url', 'image')" class="px-4 py-2 border gold-border rounded-lg text-xs gold-text flex items-center gap-2 bg-black/60">
+                    <i class="fa-solid fa-image"></i> Photo Daalo
+                </button>
+                <input type="hidden" id="profile-avatar-url">
+            </div>
+
+            <label class="text-xs text-gray-500 block mb-2 uppercase">Pichwada (Banner)</label>
+            <button onclick="openUploadWidget('profile-banner-url', 'image')" class="w-full border border-gray-800 py-3 rounded-xl text-xs flex items-center justify-center gap-2 mb-5 hover:border-gold-text">
+                <i class="fa-solid fa-image text-gray-600"></i> Photo Daalo
+            </button>
+            <input type="hidden" id="profile-banner-url">
+
+            <label class="text-xs text-gray-500 block mb-2 uppercase">Aapko Naam (Name)</label>
+            <input type="text" id="edit-name" placeholder="sunil saini" class="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm mb-5 outline-none focus:gold-border">
+
+            <label class="text-xs text-gray-500 block mb-2 uppercase">Aapke Baare Me (Bio)</label>
+            <textarea id="edit-bio" placeholder="SSSSSSSSSSSSSS" class="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm mb-6 h-24 outline-none focus:gold-border"></textarea>
+
+            <button onclick="saveProfile()" class="w-full py-3 bg-gold-text text-black rounded-lg font-bold text-sm uppercase tracking-widest hover:scale-105">
+                Save Karo 👑
+            </button>
+        </div>
+    </div>
+
+    <div id="auth-section" class="h-screen flex flex-col justify-center items-center p-10 hidden">
+        <h1 class="text-4xl font-bold gold-text mb-10 tracking-widest">SAINIWALAA</h1>
+        <div class="w-full max-w-xs flex flex-col gap-4">
+            <input type="email" id="email" placeholder="Email Hukum" class="bg-card border gold-border rounded-lg p-3 text-sm">
+            <input type="password" id="pass" placeholder="Password Hukum" class="bg-card border gold-border rounded-lg p-3 text-sm">
+            <button onclick="doLogin()" class="w-full py-3 bg-gold-text text-black rounded-lg font-bold uppercase tracking-widest">Kholo Darbar 🚩</button>
         </div>
     </div>
 
