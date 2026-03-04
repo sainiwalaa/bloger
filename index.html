@@ -10,8 +10,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, get, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, get, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -28,186 +28,153 @@
         const db = getDatabase(app);
         let myData = null;
 
-        // --- AUTH & AUTO-LOGIN ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const snap = await get(ref(db, `users/${user.uid}`));
-                myData = snap.val();
-                showApp();
-                loadProfile();
-                loadDarbar();
-            } else {
-                showAuth();
-            }
+        // --- FIXED LOGIN LOGIC (No refresh logout) ---
+        setPersistence(auth, browserLocalPersistence).then(() => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const snap = await get(ref(db, `users/${user.uid}`));
+                    myData = snap.val();
+                    document.getElementById('auth-box').classList.add('hidden');
+                    document.getElementById('app-box').classList.remove('hidden');
+                    loadProfile();
+                    loadDarbar();
+                    loadDukaan();
+                } else {
+                    document.getElementById('auth-box').classList.remove('hidden');
+                    document.getElementById('app-box').classList.add('hidden');
+                }
+            });
         });
 
-        // --- NAVIGATION ---
+        // --- DYNAMIC PRODUCT LISTING FORM ---
+        window.openBazaarUpload = () => {
+            const name = prompt("Saaman ko naam:");
+            if(!name) return;
+            const price = prompt("Daam (₹):");
+            const desc = prompt("Vivran (Description):");
+            const link = prompt("Web Link (Optional):");
+
+            cloudinary.openUploadWidget({ cloudName: "dprl2lyih", uploadPreset: "ml_default" }, (err, res) => {
+                if (!err && res.event === "success") {
+                    push(ref(db, 'products'), {
+                        url: res.info.secure_url,
+                        name, price, desc, link,
+                        uid: auth.currentUser.uid,
+                        time: serverTimestamp()
+                    });
+                    alert("Ghani Khamma! Bazaar me saaman rakho gayo. 🚩");
+                }
+            });
+        };
+
+        // --- INSTANT IMAGE SAVE (SOCIAL POST) ---
+        window.openPostUpload = () => {
+            cloudinary.openUploadWidget({ cloudName: "dprl2lyih", uploadPreset: "ml_default" }, (err, res) => {
+                if (!err && res.event === "success") {
+                    push(ref(db, 'posts'), {
+                        url: res.info.secure_url,
+                        uid: auth.currentUser.uid,
+                        uName: myData.name,
+                        time: serverTimestamp()
+                    });
+                    alert("Darbar me post daraj ho gayi! 🚩");
+                }
+            });
+        };
+
+        // --- DATA LOADERS ---
+        function loadDarbar() {
+            onValue(ref(db, 'posts'), s => {
+                const box = document.getElementById('darbar-posts');
+                box.innerHTML = "";
+                if(s.exists()) {
+                    Object.values(s.val()).reverse().forEach(p => {
+                        box.innerHTML += `<img src="${p.url}" onclick="window.open('${p.url}')" class="w-full h-40 object-cover rounded shadow-lg border border-gray-800">`;
+                    });
+                } else { box.innerHTML = "<p class='col-span-2 text-center py-10 text-gray-500'>Koi post nahi di.</p>"; }
+            });
+        }
+
+        function loadDukaan() {
+            onValue(ref(db, 'products'), s => {
+                const box = document.getElementById('dukaan-list');
+                box.innerHTML = "";
+                if(s.exists()) {
+                    Object.values(s.val()).reverse().forEach(p => {
+                        box.innerHTML += `
+                        <div class="bg-gray-900 rounded-lg p-2 border border-gray-800">
+                            <img src="${p.url}" class="w-full h-32 object-cover rounded mb-2">
+                            <b class="text-xs gold-text block truncate">${p.name}</b>
+                            <p class="text-white font-bold">₹${p.price}</p>
+                            <button onclick="window.open('${p.link || '#'}')" class="w-full bg-yellow-600 text-black text-[10px] py-1 mt-2 font-bold rounded uppercase">Kharido 🚩</button>
+                        </div>`;
+                    });
+                }
+            });
+        }
+
+        // --- REFRESH SAFE TABS ---
         window.goTab = (tab) => {
             document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
             document.getElementById(tab).classList.remove('hidden');
         };
 
-        // --- PROFILE LOGIC ---
-        async function loadProfile() {
-            if(!myData) return;
-            document.getElementById('prof-name').innerText = myData.name || "Sunil Saini";
-            document.getElementById('prof-bio').innerText = myData.bio || "SSSSSSSSSSSSSS";
-            document.getElementById('prof-img').src = myData.photo || "https://via.placeholder.com/150";
-            document.getElementById('prof-banner').style.backgroundImage = `url(${myData.banner || ''})`;
-        }
-
-        window.openEditProfile = () => document.getElementById('edit-modal').classList.remove('hidden');
-        window.closeEditProfile = () => document.getElementById('edit-modal').classList.add('hidden');
-
-        window.uploadAsset = (type) => {
-            cloudinary.openUploadWidget({ cloudName: "dprl2lyih", uploadPreset: "ml_default" }, (err, res) => {
-                if (!err && res.event === "success") {
-                    const url = res.info.secure_url;
-                    const updateData = {};
-                    updateData[type] = url;
-                    update(ref(db, `users/${auth.currentUser.uid}`), updateData);
-                    alert("Chitra badal gayo! 🚩");
-                    location.reload();
-                }
-            });
-        };
-
-        // --- POST & SHOP LOGIC ---
-        window.openBazaarUpload = () => {
-            const name = prompt("Saaman ko naam:");
-            const price = prompt("Daam (₹):");
-            cloudinary.openUploadWidget({ cloudName: "dprl2lyih", uploadPreset: "ml_default" }, (err, res) => {
-                if (!err && res.event === "success") {
-                    push(ref(db, 'products'), {
-                        url: res.info.secure_url, name, price, uid: auth.currentUser.uid, time: serverTimestamp()
-                    });
-                    alert("Bazaar me rakho gayo! 🚩");
-                }
-            });
-        };
-
-        function loadDarbar() {
-            onValue(ref(db, 'posts'), s => {
-                const box = document.getElementById('darbar-posts');
-                box.innerHTML = s.exists() ? "" : "<p class='text-center py-10 text-gray-500'>Koi post nahi di.</p>";
-                if(s.exists()) Object.values(s.val()).forEach(p => {
-                    box.innerHTML += `<img src="${p.url}" class="w-full h-40 object-cover rounded shadow-lg">`;
-                });
-            });
-        }
-
-        // --- HELPERS ---
-        function showApp() { document.getElementById('auth-box').classList.add('hidden'); document.getElementById('app-box').classList.remove('hidden'); }
-        function showAuth() { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app-box').classList.add('hidden'); }
-        window.doLogout = () => signOut(auth);
-        window.resetPass = () => { const em = prompt("Email daalo:"); if(em) sendPasswordResetEmail(auth, em).then(() => alert("Mail bhej diyo!")); };
     </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Marcellus&display=swap');
         body { font-family: 'Marcellus', serif; background-color: #000; color: #fff; }
         .gold-text { color: #D4AF37; }
         .gold-border { border-color: #D4AF37; }
-        .bg-card { background-color: #121212; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div id="app-box" class="max-w-[500px] mx-auto min-h-screen relative pb-24 hidden">
-        
         <div id="prof-banner" class="h-44 bg-gradient-to-b from-yellow-900 to-black bg-cover bg-center relative">
             <div class="absolute -bottom-10 left-6 flex items-end gap-4">
-                <div class="relative">
-                    <img id="prof-img" src="" class="w-24 h-24 rounded-full border-4 border-black bg-yellow-500">
-                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-black rounded-full"></div>
-                </div>
+                <img id="prof-img" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full border-4 border-black bg-yellow-600">
                 <div class="mb-2">
                     <h2 id="prof-name" class="text-xl font-bold">Sunil Saini</h2>
-                    <p id="prof-bio" class="text-xs text-gray-400">SSSSSSSSSSSSSS</p>
+                    <p id="prof-bio" class="text-xs text-gray-400 italic">SSSSSSSSSSSSSS</p>
                 </div>
             </div>
-            <div class="absolute bottom-[-20px] right-4 flex gap-2">
-                <button onclick="openEditProfile()" class="px-4 py-1 border gold-border text-xs rounded flex items-center gap-2 bg-black/50">
-                    <i class="fa-solid fa-gear"></i> Badlaav
-                </button>
-                <button onclick="doLogout()" class="px-2 py-1 border border-red-900 text-red-500 rounded bg-black/50">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </div>
+            <button onclick="openPostUpload()" class="absolute bottom-4 right-4 bg-yellow-600 p-2 rounded-full text-black"><i class="fa-solid fa-camera"></i></button>
         </div>
 
-        <div class="mt-16 px-6 flex justify-end gap-8 text-center text-xs uppercase tracking-widest">
-            <div><b class="block text-lg">0</b> Post</div>
-            <div><b class="block text-lg">0</b> Saathi</div>
-        </div>
-
-        <div class="mt-6 flex border-y border-gray-800">
-            <button onclick="goTab('darbar')" class="flex-1 py-3 text-xs flex items-center justify-center gap-2 border-r border-gray-800"><i class="fa-solid fa-table-cells"></i> Darbar</button>
-            <button onclick="goTab('dukaan')" class="flex-1 py-3 text-xs flex items-center justify-center gap-2 border-r border-gray-800"><i class="fa-solid fa-shop"></i> Dukaan</button>
-            <button onclick="goTab('sauda')" class="flex-1 py-3 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-box"></i> Sauda</button>
+        <div class="mt-16 flex border-y border-gray-800">
+            <button onclick="goTab('darbar')" class="flex-1 py-3 text-xs border-r border-gray-800"><i class="fa-solid fa-table-cells"></i> Darbar</button>
+            <button onclick="goTab('dukaan')" class="flex-1 py-3 text-xs border-r border-gray-800"><i class="fa-solid fa-shop"></i> Dukaan</button>
+            <button onclick="goTab('sauda')" class="flex-1 py-3 text-xs"><i class="fa-solid fa-box"></i> Sauda</button>
         </div>
 
         <main class="p-4">
-            <div id="darbar" class="tab-view grid grid-cols-2 gap-2" id="darbar-posts">
-                <p class="col-span-2 text-center py-10 text-gray-500">Koi post nahi di.</p>
+            <div id="darbar" class="tab-view grid grid-cols-2 gap-2">
+                <div id="darbar-posts" class="contents"></div>
             </div>
             
             <div id="dukaan" class="tab-view hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-orange-500 text-xl font-bold">Shahi Bazaar</h3>
-                    <button onclick="openBazaarUpload()" class="bg-orange-600 px-4 py-1 rounded-full text-xs">+ Bazaar me Rakho</button>
+                    <h3 class="gold-text text-xl">Shahi Bazaar</h3>
+                    <button onclick="openBazaarUpload()" class="bg-yellow-600 text-black px-4 py-1 rounded text-xs font-bold">+ Bazaar me Rakho</button>
                 </div>
-                <div class="text-center py-10 border-2 border-dashed border-gray-800 rounded-xl">
-                    <i class="fa-solid fa-tags text-4xl text-gray-700 mb-2"></i>
-                    <p class="text-gray-500">Bazaar abhi khali hai</p>
-                </div>
-            </div>
-
-            <div id="sauda" class="tab-view hidden text-center py-20">
-                <p class="text-gray-500">Thara order ki list yahan dikhegi.</p>
+                <div id="dukaan-list" class="grid grid-cols-2 gap-3"></div>
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-black border-t border-gray-800 p-4 flex justify-around text-gray-500">
-            <i class="fa-solid fa-house cursor-pointer" onclick="goTab('darbar')"></i>
-            <i class="fa-solid fa-bag-shopping cursor-pointer" onclick="goTab('dukaan')"></i>
+        <nav class="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-black border-t border-gray-800 p-4 flex justify-around">
+            <i class="fa-solid fa-house" onclick="goTab('darbar')"></i>
+            <i class="fa-solid fa-bag-shopping" onclick="goTab('dukaan')"></i>
             <i class="fa-solid fa-circle-user text-yellow-500"></i>
         </nav>
     </div>
 
-    <div id="edit-modal" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 hidden">
-        <div class="bg-card w-full max-w-sm rounded-2xl p-6 relative border border-gray-800">
-            <i class="fa-solid fa-xmark absolute top-4 right-4 cursor-pointer" onclick="closeEditProfile()"></i>
-            <h2 class="gold-text text-lg mb-6">Mahal Sajao</h2>
-            
-            <label class="text-xs text-gray-500 block mb-2 uppercase">Chitra (Avatar)</label>
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center font-bold">SS</div>
-                <button onclick="uploadAsset('photo')" class="text-xs border gold-border px-4 py-2 rounded flex items-center gap-2">
-                    <i class="fa-solid fa-image"></i> Photo Daalo
-                </button>
-            </div>
-
-            <label class="text-xs text-gray-500 block mb-2 uppercase">Pichwada (Banner)</label>
-            <button onclick="uploadAsset('banner')" class="w-full border border-gray-700 py-3 rounded-lg text-xs mb-6 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-image"></i> Photo Daalo
-            </button>
-
-            <label class="text-xs text-gray-500 block mb-2 uppercase">Aapke Baare Me (Bio)</label>
-            <textarea id="edit-bio-input" class="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm mb-6 h-24 outline-none focus:border-yellow-600"></textarea>
-
-            <button onclick="saveBio()" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-bold uppercase tracking-widest text-sm">Save Karo 👑</button>
-        </div>
-    </div>
-
-    <div id="auth-box" class="h-screen flex flex-col justify-center items-center p-10">
+    <div id="auth-box" class="h-screen flex flex-col justify-center items-center p-10 bg-black">
         <h1 class="text-4xl gold-text mb-10 tracking-widest">SAINIWALAA</h1>
         <div class="w-full max-w-xs flex flex-col gap-4">
-            <input type="email" id="email" placeholder="Email daalo" class="bg-transparent border-b gold-border p-2 outline-none">
-            <input type="password" id="pass" placeholder="Password daalo" class="bg-transparent border-b gold-border p-2 outline-none">
-            <button onclick="signInWithEmailAndPassword(getAuth(), email.value, pass.value)" class="bg-yellow-600 p-3 rounded font-bold mt-4 uppercase">Login 🚩</button>
-            <button onclick="resetPass()" class="text-xs text-gray-500">Password bhul gaya?</button>
+            <input type="email" id="email" placeholder="Email" class="bg-transparent border-b gold-border p-2 outline-none text-white">
+            <input type="password" id="pass" placeholder="Password" class="bg-transparent border-b gold-border p-2 outline-none text-white">
+            <button onclick="signInWithEmailAndPassword(getAuth(), email.value, pass.value)" class="bg-yellow-600 p-3 rounded font-bold uppercase text-black">Login 🚩</button>
         </div>
     </div>
 
