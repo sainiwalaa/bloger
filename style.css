@@ -1,0 +1,46 @@
+:root {
+    --gold: #D4AF37;
+    --dark-gold: #996515;
+}
+
+body { font-family: 'Poppins', sans-serif; background: #000; color: #fff; }
+.font-serif { font-family: 'Cinzel', serif; }
+.gold-text { color: var(--gold); }
+
+/* Glow Text */
+.glow-text { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+
+/* Royal Spinner */
+.royal-spinner {
+    width: 40px; height: 40px; border: 3px solid rgba(212, 175, 55, 0.1);
+    border-top: 3px solid var(--gold); border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Royal Buttons */
+.royal-btn {
+    background: linear-gradient(135deg, var(--gold), var(--dark-gold));
+    color: #000; font-weight: bold; border-radius: 12px;
+    transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.royal-btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+
+.royal-btn-sm {
+    border: 1px solid var(--gold); color: var(--gold);
+    padding: 6px 15px; border-radius: 8px; font-size: 12px;
+}
+
+/* Inputs */
+.royal-input {
+    width: 100%; background: #000; border: 1px solid #333;
+    padding: 12px; border-radius: 12px; outline: none; transition: 0.3s;
+}
+
+.royal-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+
+/* Nav */
+.nav-btn { color: #555; transition: 0.3s; }
+.nav-btn.active { color: var(--gold); transform: scale(1.1); }
