@@ -8,47 +8,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     <style>
-        :root { --gold: #b8860b; --bg: #fdfdfd; --card: #ffffff; }
-        body { background: var(--bg); color: #222; font-family: 'Segoe UI', sans-serif; margin: 0; }
-        .blog-card { background: var(--card); border: 1px solid #eee; border-radius: 12px; margin-bottom: 25px; transition: 0.3s; overflow: hidden; }
-        .blog-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.07); }
-        .royal-btn { background: var(--gold); color: #fff; font-weight: bold; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; }
-        .nav-link { cursor: pointer; font-weight: 600; color: #666; transition: 0.3s; padding-bottom: 5px; border-bottom: 3px solid transparent; }
-        .nav-link.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
+        :root { --gold: #b8860b; --bg: #f8f9fa; }
+        body { background: var(--bg); color: #333; font-family: 'Segoe UI', sans-serif; }
+        .royal-card { background: #fff; border: 1px solid #eee; border-radius: 15px; margin-bottom: 20px; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .royal-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .royal-btn { background: var(--gold); color: #fff; font-weight: bold; padding: 12px; border-radius: 10px; width: 100%; transition: 0.2s; cursor: pointer; border: none; }
+        .nav-link { cursor: pointer; font-weight: 600; color: #777; padding-bottom: 5px; border-bottom: 3px solid transparent; }
+        .nav-link.active { color: var(--gold); border-bottom-color: var(--gold); }
         .hidden { display: none !important; }
-        input, textarea { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 12px; outline: none; background: #fff; }
-        @media (max-width: 768px) { .pc-only { display: none; } .nav-text { font-size: 10px; } }
+        input, textarea { width: 100%; border: 1px solid #ddd; padding: 12px; border-radius: 10px; margin-bottom: 12px; outline: none; background: #fff; }
+        @media (max-width: 768px) { .pc-only { display: none; } }
     </style>
 </head>
 <body>
 
     <header class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-bold tracking-[5px] text-[#b8860b] cursor-pointer" onclick="show('darbar')">SAINIWALAA</h1>
-            <nav id="user-nav" class="hidden flex gap-3 md:gap-8 items-center">
-                <span onclick="show('darbar')" class="nav-link active nav-text" id="l-darbar">DARBAR</span>
-                <span onclick="show('bazaar')" class="nav-link nav-text" id="l-bazaar">BAZAAR</span>
-                <span onclick="show('profile')" class="nav-link nav-text" id="l-profile">PROFILE</span>
-                <button onclick="logout()" class="text-red-500 ml-2"><i class="fa-solid fa-power-off"></i></button>
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-[4px] text-[#b8860b] cursor-pointer" onclick="show('darbar')">SAINIWALAA</h1>
+            <nav id="user-nav" class="hidden flex gap-4 md:gap-8 items-center text-xs font-bold">
+                <span onclick="show('darbar')" class="nav-link active" id="l-darbar">DARBAR</span>
+                <span onclick="show('bazaar')" class="nav-link" id="l-bazaar">BAZAAR</span>
+                <span onclick="show('profile')" class="nav-link" id="l-profile">PROFILE</span>
+                <button onclick="logout()" class="text-red-500 text-lg"><i class="fa-solid fa-power-off"></i></button>
             </nav>
         </div>
     </header>
 
-    <div id="auth-section" class="max-w-md mx-auto mt-16 p-6 md:p-10 bg-white border shadow-2xl rounded-2xl">
+    <div id="auth-section" class="max-w-md mx-auto mt-20 p-8 bg-white border shadow-xl rounded-2xl">
         <div id="login-box">
-            <h2 class="text-center font-bold text-2xl mb-8 text-[#b8860b]">Pravesh</h2>
-            <input id="email" type="email" placeholder="Email Address">
-            <input id="pass" type="password" placeholder="Password">
-            <button onclick="login()" class="royal-btn w-full mt-2">LOGIN KAREIN</button>
-            <p onclick="toggleAuth(false)" class="text-center text-xs mt-6 text-gray-400 cursor-pointer hover:underline">Naya Khata Banayein</p>
+            <h2 class="text-center font-bold text-xl mb-6 text-[#b8860b]">Hukum, Pravesh Karein</h2>
+            <input id="email" type="email" placeholder="Email (example@gmail.com)">
+            <input id="pass" type="password" placeholder="Password (Min. 6 characters)">
+            <button onclick="login()" id="login-btn" class="royal-btn">LOGIN</button>
+            <p onclick="toggleAuth(false)" class="text-center text-xs mt-4 text-gray-400 cursor-pointer underline">Naya Khata Banayein</p>
         </div>
         <div id="reg-box" class="hidden">
-            <h2 class="text-center font-bold text-2xl mb-8 text-[#b8860b]">Naya Khata</h2>
-            <input id="reg-name" type="text" placeholder="Unique Username">
+            <h2 class="text-center font-bold text-xl mb-6 text-[#b8860b]">Naya Khata Banayein</h2>
+            <input id="reg-name" type="text" placeholder="Unique Username (No spaces)">
             <input id="reg-email" type="email" placeholder="Email">
-            <input id="reg-pass" type="password" placeholder="Password">
-            <button id="reg-btn" onclick="register()" class="royal-btn w-full mt-2">REGISTER</button>
-            <p onclick="toggleAuth(true)" class="text-center text-xs mt-6 text-gray-400 cursor-pointer hover:underline">Login Karein</p>
+            <input id="reg-pass" type="password" placeholder="Password (Min. 6 characters)">
+            <button id="reg-btn" onclick="register()" class="royal-btn">REGISTER</button>
+            <p onclick="toggleAuth(true)" class="text-center text-xs mt-4 text-gray-400 cursor-pointer underline">Purana Khata Hai? Login</p>
         </div>
     </div>
 
@@ -56,45 +56,40 @@
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             
             <div class="md:col-span-3 pc-only">
-                <div class="sticky top-24 space-y-4">
-                    <div class="p-5 bg-white border rounded-xl shadow-sm">
-                        <h3 class="font-bold border-b pb-2 mb-4 text-sm text-gray-400 uppercase tracking-widest">Navigation</h3>
-                        <div class="space-y-3 text-sm font-semibold">
-                            <p onclick="show('darbar')" class="hover:text-[#b8860b] cursor-pointer flex items-center gap-2"><i class="fa-solid fa-house"></i> Home</p>
-                            <p onclick="show('bazaar')" class="hover:text-[#b8860b] cursor-pointer flex items-center gap-2"><i class="fa-solid fa-shop"></i> Shahi Bazaar</p>
-                            <p onclick="openPostModal()" class="text-blue-600 cursor-pointer flex items-center gap-2"><i class="fa-solid fa-plus-circle"></i> Naya Lekh</p>
-                        </div>
+                <div class="sticky top-24 p-5 bg-white border rounded-xl">
+                    <h3 class="font-bold border-b pb-2 mb-4">Shahi Menu</h3>
+                    <div class="space-y-3 text-sm font-semibold text-gray-600">
+                        <p onclick="show('darbar')" class="hover:text-[#b8860b] cursor-pointer"><i class="fa-solid fa-home mr-2"></i> Home Feed</p>
+                        <p onclick="show('bazaar')" class="hover:text-[#b8860b] cursor-pointer"><i class="fa-solid fa-shopping-bag mr-2"></i> Shahi Bazaar</p>
+                        <p onclick="openPostModal()" class="text-blue-600 cursor-pointer"><i class="fa-solid fa-plus-circle mr-2"></i> Naya Post</p>
                     </div>
                 </div>
             </div>
 
             <div class="md:col-span-6">
                 <section id="darbar-sec" class="page-sec">
-                    <div id="feed-container"></div>
+                    <div id="feed-container" class="space-y-6"></div>
                 </section>
 
                 <section id="bazaar-sec" class="page-sec hidden">
-                    <div class="p-6 bg-white border rounded-xl mb-8 shadow-sm">
-                        <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-[#b8860b]"></i> Maal List Karein</h3>
+                    <div class="p-6 bg-white border rounded-xl mb-6">
+                        <h3 class="font-bold mb-4">Maal List Karein</h3>
                         <input id="p-name" placeholder="Product Name">
                         <input id="p-price" placeholder="Price ₹">
-                        <input id="p-link" placeholder="WhatsApp / Link">
-                        <button onclick="openFastUpload('product')" class="royal-btn w-full">UPLOAD PHOTO & SAVE</button>
+                        <input id="p-link" placeholder="WhatsApp / Buy Link">
+                        <button onclick="openFastUpload('product')" class="royal-btn">PHOTO & LIST KAREIN</button>
                     </div>
                     <div id="bazaar-grid" class="grid grid-cols-2 gap-4"></div>
                 </section>
 
                 <section id="profile-sec" class="page-sec hidden">
-                    <div class="p-8 bg-white border rounded-xl text-center mb-6 shadow-sm">
+                    <div class="p-8 bg-white border rounded-xl text-center mb-6">
                         <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-[#b8860b]">
                             <i class="fa-solid fa-user text-2xl text-gray-300"></i>
                         </div>
                         <h2 id="prof-user" class="text-2xl font-bold text-[#b8860b]">@User</h2>
-                        <div id="admin-orders" class="mt-10 text-left hidden">
-                            <h3 class="font-bold border-b pb-2 mb-4 flex justify-between items-center text-sm">
-                                <span>📜 Grahak Detail (Admin)</span>
-                                <i class="fa-solid fa-shield-halved text-green-600"></i>
-                            </h3>
+                        <div id="admin-orders" class="mt-10 text-left hidden border-t pt-6">
+                            <h3 class="font-bold mb-4 text-red-600">📜 Grahak Order History</h3>
                             <div id="order-log" class="space-y-3"></div>
                         </div>
                     </div>
@@ -103,44 +98,42 @@
 
             <div class="md:col-span-3">
                 <div class="sticky top-24 p-6 bg-white border rounded-xl text-center shadow-sm">
-                    <h4 class="font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-6">Aapki Statistics</h4>
-                    <div class="flex justify-around items-center">
-                        <div><p class="text-2xl font-bold text-[#b8860b]">0</p><p class="text-[10px] text-gray-500 uppercase">Lekh</p></div>
-                        <div class="w-[1px] h-8 bg-gray-100"></div>
-                        <div><p class="text-2xl font-bold text-[#b8860b]">0</p><p class="text-[10px] text-gray-500 uppercase">Sauda</p></div>
+                    <h4 class="font-bold text-gray-400 text-[10px] uppercase mb-4">Aapki Stats</h4>
+                    <div class="flex justify-around">
+                        <div><p class="text-xl font-bold" id="post-count">0</p><p class="text-[10px]">Lekh</p></div>
+                        <div class="w-[1px] bg-gray-200 h-8"></div>
+                        <div><p class="text-xl font-bold">0</p><p class="text-[10px]">Followers</p></div>
                     </div>
-                    <button onclick="openPostModal()" class="w-full mt-6 bg-gray-50 text-gray-600 py-2 rounded-lg text-xs font-bold md:hidden border">NEW POST</button>
+                    <button onclick="openPostModal()" class="w-full mt-6 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold md:hidden">NAYA POST</button>
                 </div>
             </div>
-
         </div>
     </main>
 
     <div id="post-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl">
-            <h3 class="font-bold text-lg mb-4">Naya Lekh Likhein</h3>
-            <textarea id="post-caption" placeholder="Kuch likhein hukum..." class="h-24"></textarea>
-            <button onclick="openFastUpload('post')" class="royal-btn w-full">UPLOAD MEDIA & POST</button>
-            <button onclick="closeModal('post-modal')" class="w-full mt-2 text-gray-400 text-xs py-2">Cancel</button>
+        <div class="bg-white p-6 rounded-2xl max-w-md w-full">
+            <h3 class="font-bold mb-4">Naya Blog Lekh</h3>
+            <textarea id="post-caption" placeholder="Kuch likhein hukum..."></textarea>
+            <button onclick="openFastUpload('post')" class="royal-btn">UPLOAD & POST</button>
+            <button onclick="closeModal('post-modal')" class="w-full mt-2 text-gray-400 text-xs py-2">Hataiye</button>
         </div>
     </div>
 
     <div id="order-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl max-w-sm w-full shadow-2xl">
-            <h3 class="font-bold text-lg mb-2">Kharidari Karein</h3>
-            <p class="text-xs text-gray-400 mb-6 text-center">Apni detail bhariye, hum aapse sampark karenge.</p>
+        <div class="bg-white p-8 rounded-2xl max-w-sm w-full">
+            <h3 class="font-bold text-lg mb-4">Sauda Karein</h3>
             <input id="o-name" placeholder="Apna Naam">
             <input id="o-phone" placeholder="Mobile Number">
-            <textarea id="o-addr" placeholder="Pura Pata" class="h-20"></textarea>
-            <button id="confirm-btn" class="royal-btn w-full shadow-lg shadow-yellow-800/20">SAUDA PAKKO KARO</button>
-            <button onclick="closeModal('order-modal')" class="w-full mt-2 text-gray-400 text-xs py-2">Vapas Jayein</button>
+            <textarea id="o-addr" placeholder="Pura Pata"></textarea>
+            <button id="confirm-btn" class="royal-btn">SAUDA PAKKO KARO</button>
+            <button onclick="closeModal('order-modal')" class="w-full mt-2 text-gray-400 text-xs">Vapas</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
@@ -156,20 +149,28 @@
 
         let userP = null;
 
-        // --- AUTH ---
-        window.login = () => signInWithEmailAndPassword(auth, email.value, pass.value).catch(e => alert("Hukum, email ya password galat hai!"));
+        // --- AUTH LOGIC (Updated with Error Check) ---
+        window.login = () => {
+            const e = email.value; const p = pass.value;
+            if(!e || !p) return alert("Hukum, detail poori bhariye!");
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Galti: " + err.message));
+        };
+
         window.register = async () => {
             const name = regName.value.trim().toLowerCase();
-            if(!name) return alert("Naam zaroori hai!");
+            const e = regEmail.value; const p = regPass.value;
+            if(name.length < 3) return alert("Naam bada rakhein!");
+            
             const q = query(collection(db, "users"), where("name", "==", name));
             const s = await getDocs(q);
-            if(!s.empty) return alert("Hukum, ye naam pehle se kisi ne le rakha hai!");
-            try {
-                const res = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+            if(!s.empty) return alert("Ye naam pehle se hai!");
+
+            createUserWithEmailAndPassword(auth, e, p).then(async (res) => {
                 await setDoc(doc(db, "users", res.user.uid), { name, uid: res.user.uid, joinDate: serverTimestamp() });
                 location.reload();
-            } catch(e) { alert(e.message); }
+            }).catch(err => alert("Register Galti: " + err.message));
         };
+
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, async u => {
@@ -182,104 +183,86 @@
             } else { authSection.classList.remove('hidden'); mainApp.classList.add('hidden'); userNav.classList.add('hidden'); }
         });
 
-        // --- MODAL HELPERS ---
+        // --- MEDIA UPLOAD ---
         window.openPostModal = () => postModal.classList.remove('hidden');
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // --- FAST UPLOAD ---
         window.openFastUpload = (type) => {
-            cloudinary.openUploadWidget({ 
-                cloudName: "dvp58lgh3", 
-                uploadPreset: "ml_default", 
-                maxVideoDuration: 90,
-                sources: ['local', 'url', 'camera']
-            }, async (err, res) => {
+            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default", maxVideoDuration: 90 }, async (err, res) => {
                 if(res && res.event === "success") {
                     if(type === 'post') {
                         await addDoc(collection(db, "posts"), { 
-                            url: res.info.secure_url, 
-                            type: res.info.resource_type, 
-                            author: userP.name, 
-                            caption: document.getElementById('post-caption').value,
-                            time: serverTimestamp() 
+                            url: res.info.secure_url, type: res.info.resource_type, author: userP.name, 
+                            caption: postCaption.value, likes: [], time: serverTimestamp() 
                         });
                         closeModal('post-modal');
                     } else {
                         await addDoc(collection(db, "products"), { 
-                            name: pName.value, 
-                            price: pPrice.value, 
-                            link: pLink.value, 
-                            img: res.info.secure_url, 
-                            author: userP.name, 
-                            time: serverTimestamp() 
+                            name: pName.value, price: pPrice.value, link: pLink.value, img: res.info.secure_url, author: userP.name, time: serverTimestamp() 
                         });
                     }
-                    alert("Hukum, kaam ho gayo!");
+                    alert("Hukum, post ho gaya!");
                 }
             });
         };
 
-        // --- SYNC DATA ---
+        // --- REALTIME SYNC ---
         function initSync() {
-            // Darbar Sync
+            // Blog Feed
             onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), s => {
                 feedContainer.innerHTML = "";
-                s.forEach(d => { 
-                    const p = d.data(); 
-                    const time = p.time ? new Date(p.time.toDate()).toLocaleDateString() : 'Abhi';
+                s.forEach(d => {
+                    const p = d.data(); const id = d.id;
+                    const isLiked = p.likes?.includes(auth.currentUser.uid);
                     feedContainer.innerHTML += `
-                        <div class="blog-card shadow-sm border border-gray-100 bg-white">
-                            <div class="p-4 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-[10px] font-bold text-[#b8860b] border border-yellow-200">${p.author[0].toUpperCase()}</div>
-                                    <div><p class="font-bold text-xs">@${p.author}</p><p class="text-[9px] text-gray-400">${time}</p></div>
-                                </div>
-                                <i class="fa-solid fa-ellipsis-vertical text-gray-300"></i>
+                        <div class="royal-card overflow-hidden">
+                            <div class="p-4 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gold flex items-center justify-center font-bold text-white">${p.author[0].toUpperCase()}</div>
+                                <span class="font-bold text-xs">@${p.author}</span>
                             </div>
                             ${p.type==='video'?`<video src="${p.url}" controls class="w-full"></video>`:`<img src="${p.url}" class="w-full">`}
-                            <div class="p-5">
-                                <p class="text-sm text-gray-700 leading-relaxed mb-4">${p.caption || 'No caption'}</p>
-                                <div class="flex gap-6 text-gray-400 text-xs border-t pt-4">
-                                    <span class="hover:text-red-500 cursor-pointer"><i class="fa-regular fa-heart"></i> Like</span>
-                                    <span class="hover:text-blue-500 cursor-pointer"><i class="fa-regular fa-comment"></i> Comment</span>
+                            <div class="p-4">
+                                <p class="text-sm text-gray-700 mb-4">${p.caption || ''}</p>
+                                <div class="flex gap-4 text-xs border-t pt-3">
+                                    <span onclick="likePost('${id}', ${JSON.stringify(p.likes)})" class="cursor-pointer ${isLiked?'text-red-500':'text-gray-400'}"><i class="fa-heart fa-${isLiked?'solid':'regular'}"></i> Like</span>
+                                    <span class="text-gray-400"><i class="fa-regular fa-comment"></i> Comment</span>
                                 </div>
                             </div>
-                        </div>`; 
+                        </div>`;
                 });
             });
 
-            // Bazaar Sync
+            // Bazaar Grid
             onSnapshot(collection(db, "products"), s => {
                 bazaarGrid.innerHTML = "";
                 s.forEach(d => { const p = d.data(); bazaarGrid.innerHTML += `
-                    <div class="bg-white border border-gray-100 p-3 rounded-xl shadow-sm hover:shadow-md transition">
-                        <img src="${p.img}" class="h-32 md:h-44 w-full object-cover rounded-lg mb-3">
+                    <div class="bg-white border p-3 rounded-xl text-center">
+                        <img src="${p.img}" class="h-32 w-full object-cover rounded-lg mb-2">
                         <p class="font-bold text-xs truncate">${p.name}</p>
-                        <p class="text-sm text-[#b8860b] font-bold mt-1">₹${p.price}</p>
-                        <button onclick="openOrder('${p.name}','${p.link}')" class="w-full mt-3 bg-black text-white text-[10px] py-2 rounded-lg font-bold">KHARIDEIN</button>
+                        <p class="text-xs text-[#b8860b]">₹${p.price}</p>
+                        <button onclick="openOrder('${p.name}','${p.link}')" class="w-full mt-2 bg-black text-white text-[10px] py-2 rounded-lg">KHARIDEIN</button>
                     </div>`; });
             });
 
-            // Admin Order Panel
-            if(auth.currentUser.email === "admin@test.com") { // APNA EMAIL YAHAN DAALEIN
+            // Admin Order View (Change with your email)
+            if(auth.currentUser.email === "admin@test.com") { 
                 adminOrders.classList.remove('hidden');
                 onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), s => {
                     orderLog.innerHTML = "";
-                    s.forEach(o => { const d = o.data(); orderLog.innerHTML += `
-                        <div class="bg-gray-50 p-4 rounded-xl border-l-4 border-[#b8860b] shadow-sm">
-                            <div class="flex justify-between font-bold text-xs mb-1"><span>${d.customer}</span><span class="text-[#b8860b]">₹${d.product}</span></div>
-                            <p class="text-[10px] text-gray-500">📞 ${d.phone}</p>
-                            <p class="text-[10px] text-gray-400 italic mt-1">📍 ${d.address}</p>
-                        </div>`; 
-                    });
+                    s.forEach(o => { const d = o.data(); orderLog.innerHTML += `<div class="p-3 bg-gray-50 border-l-4 border-gold text-[10px]"><b>${d.customer}</b> - ${d.product} <br> 📞 ${d.phone} <br> 📍 ${d.address}</div>`; });
                 });
             }
         }
 
+        window.likePost = async (id, likes) => {
+            const r = doc(db, "posts", id);
+            if(likes.includes(auth.currentUser.uid)) await updateDoc(r, { likes: arrayRemove(auth.currentUser.uid) });
+            else await updateDoc(r, { likes: arrayUnion(auth.currentUser.uid) });
+        };
+
         window.openOrder = (n, l) => {
             orderModal.classList.remove('hidden');
             confirmBtn.onclick = async () => {
-                if(!oName.value || !oPhone.value) return alert("Hukum, naam aur phone bhariye!");
                 await addDoc(collection(db, "orders"), { customer: oName.value, phone: oPhone.value, address: oAddr.value, product: n, time: serverTimestamp() });
                 window.location.href = l;
             };
