@@ -12,8 +12,29 @@
         .raj-font { font-family: 'Cinzel', serif; }
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
-        .banner-box { height: 200px; background: #eee no-repeat center/cover; border-radius: 0 0 40px 40px; position: relative; }
-        .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 5px solid #fff; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        /* Banner & Profile Frame Updates */
+        .banner-box { 
+            height: 200px; 
+            background: #eee no-repeat center; 
+            background-size: cover; /* Poore frame me fit karne ke liye */
+            border-radius: 0 0 40px 40px; 
+            position: relative; 
+        }
+        .profile-img { 
+            width: 110px; 
+            height: 110px; 
+            border-radius: 50%; 
+            border: 5px solid #fff; 
+            position: absolute; 
+            bottom: -55px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            object-fit: cover; /* Face/Main part ko center me rakhne ke liye */
+            background: #ddd; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
@@ -144,7 +165,7 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        const maxW = 800;
+                        const maxW = 1000; // Increased for better clarity in banner
                         const scale = maxW / img.width;
                         canvas.width = maxW;
                         canvas.height = img.height * scale;
@@ -235,7 +256,7 @@
             document.getElementById('p-preview-box').classList.add('hidden');
         };
 
-        // CHECKOUT UPDATED
+        // CHECKOUT
         window.orderNow = (itemName, cid, itemLink) => {
             document.getElementById('order-item-name').value = itemName;
             document.getElementById('order-creator-id').value = cid;
@@ -259,15 +280,13 @@
                 return alert("Hukum, jankari bhariye!"); 
             }
             
-            // Order save karein
             await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
             
             closeCheckout();
             btn.innerText = "CONFIRM ORDER"; btn.disabled = false;
             alert("Order Confirm!");
 
-            // Agar link hai toh link kholo, nahi toh WhatsApp
-            if(link && link !== "undefined") {
+            if(link && link !== "undefined" && link !== "") {
                 window.open(link, '_blank');
             } else {
                 const snap = await getDoc(doc(db, "users", cid));
