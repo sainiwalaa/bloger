@@ -2,94 +2,94 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SAINIWALAA | Shahi Darbar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
     <style>
-        :root { --gold: #d4af37; --gold-grad: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); --dark: #0a0a0a; }
-        body { background-color: var(--dark); color: #e0e0e0; font-family: 'Poppins', sans-serif; margin-bottom: 80px; }
-        .royal-font { font-family: 'Cinzel', serif; }
-        
-        /* Shahi Header */
-        .header { background: #151515; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 50; padding: 15px; text-align: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
-        .brand { background: var(--gold-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 24px; font-weight: 900; letter-spacing: 4px; }
-
-        /* Glowing Buttons */
-        .gold-btn { background: var(--gold-grad); color: #000; font-weight: bold; border-radius: 8px; padding: 12px; transition: 0.3s; width: 100%; border: none; cursor: pointer; text-transform: uppercase; }
-        .gold-btn:hover:not(:disabled) { box-shadow: 0 0 15px var(--gold); transform: translateY(-2px); }
-        .gold-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
-
-        /* Royal Card */
-        .royal-card { background: #151515; border: 1px solid #333; border-radius: 15px; padding: 15px; margin: 15px auto; max-width: 500px; position: relative; overflow: hidden; }
-        .royal-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--gold-grad); }
-
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #151515; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--gold); z-index: 100; }
-        .nav-item { color: #666; text-align: center; font-size: 10px; transition: 0.3s; cursor: pointer; }
-        .nav-item.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-        .nav-item i { font-size: 22px; display: block; margin-bottom: 4px; }
-
-        input, textarea { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; margin-bottom: 12px; outline: none; }
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .gold-text { background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .royal-card { background: #0a0a0a; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .nav-active { color: #d4af37 !important; border-top: 2px solid #d4af37; }
+        .btn-glow { box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
+        .btn-glow:active { transform: scale(0.95); }
+        input, textarea { background: #111 !important; border: 1px solid #222 !important; color: white !important; }
         .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <header class="header"><div class="brand royal-font">SAINIWALAA</div></header>
+    <header class="sticky top-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/5 p-4 flex justify-between items-center">
+        <h1 class="gold-text font-black text-2xl tracking-tighter" style="font-family: 'Cinzel';">SAINIWALAA</h1>
+        <div class="flex gap-4 items-center">
+            <i class="fa-solid fa-bell text-zinc-500"></i>
+            <div id="p-avatar" class="w-8 h-8 rounded-full bg-zinc-800 border border-gold/30 hidden"></div>
+        </div>
+    </header>
 
-    <div id="auth-ui" class="p-4">
-        <div class="royal-card">
-            <h2 class="royal-font text-center text-xl mb-6 text-[#d4af37]">KHAMMA GHANI</h2>
-            <input type="email" id="email" placeholder="Shahi Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button id="login-btn" onclick="shahiLogin()" class="gold-btn">PRAVESH KAREIN</button>
+    <div id="auth-screen" class="min-h-[80vh] flex flex-col justify-center px-6">
+        <div class="royal-card p-8">
+            <h2 class="text-3xl font-bold mb-2">Login</h2>
+            <p class="text-zinc-500 text-sm mb-8">Shahi Darbar mein aapka swagat hai.</p>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-xl mb-4 outline-none">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-xl mb-6 outline-none">
+            <button id="login-btn" onclick="shahiLogin()" class="w-full bg-[#d4af37] text-black font-bold p-4 rounded-xl btn-glow uppercase tracking-widest">Pravash Karein</button>
         </div>
     </div>
 
-    <main id="main-app" class="hidden px-4">
-        <section id="sec-darbar">
-            <div class="royal-card">
-                <textarea id="post-input" placeholder="Hukum, aaj kai vichaar hai?" rows="2"></textarea>
-                <div class="flex gap-2">
-                    <button onclick="pickMedia('post')" class="bg-[#222] border border-[#444] p-2 rounded flex-1 text-sm"><i class="fa-solid fa-image text-gold"></i> MEDIA</button>
-                    <button id="post-btn" onclick="submitPost()" class="gold-btn flex-1 text-sm">POST KAREIN</button>
+    <main id="app-screen" class="hidden px-4 pt-6 max-w-xl mx-auto">
+        
+        <section id="page-darbar" class="space-y-6">
+            <div class="royal-card p-5">
+                <textarea id="post-txt" placeholder="Hukum, aaj kya vichaar hai?" class="w-full p-0 bg-transparent border-none outline-none text-lg mb-4" rows="2"></textarea>
+                <div class="flex justify-between items-center border-t border-white/5 pt-4">
+                    <button onclick="upload('post')" class="text-zinc-400 text-sm font-bold"><i class="fa-solid fa-image text-gold mr-2"></i>Media</button>
+                    <button id="post-btn" onclick="submitPost()" class="bg-white text-black px-6 py-2 rounded-full font-bold text-sm">Post</button>
                 </div>
             </div>
-            <div id="feed-container"></div>
+            <div id="feed-list" class="space-y-6 pb-10"></div>
         </section>
 
-        <section id="sec-bazaar" class="hidden">
-            <div class="royal-card">
-                <h3 class="royal-font text-[#d4af37] mb-3">LIST NEW PRODUCT</h3>
-                <input id="p-name" placeholder="Item Name">
-                <input id="p-price" placeholder="Price ₹">
-                <input id="p-link" placeholder="WhatsApp/External Link">
-                <button id="prod-btn" onclick="pickMedia('product')" class="gold-btn">PHOTO & LIST</button>
+        <section id="page-bazaar" class="hidden pb-10">
+            <div class="royal-card p-5 mb-8">
+                <h3 class="font-bold text-gold mb-4 uppercase text-xs tracking-widest">Add New Product</h3>
+                <input id="p-name" placeholder="Item Name" class="w-full p-3 rounded-xl mb-3 outline-none">
+                <input id="p-price" placeholder="Price (₹)" class="w-full p-3 rounded-xl mb-3 outline-none">
+                <input id="p-link" placeholder="Buy Link (WhatsApp/Web)" class="w-full p-3 rounded-xl mb-4 outline-none">
+                <button id="prod-btn" onclick="upload('prod')" class="w-full border border-gold text-gold p-3 rounded-xl font-bold uppercase text-xs tracking-tighter">Photo & List Product</button>
             </div>
-            <div id="bazaar-grid" class="grid grid-cols-2 gap-4 mt-4"></div>
+            <div id="shop-grid" class="grid grid-cols-2 gap-4"></div>
         </section>
 
-        <section id="sec-profile" class="hidden text-center">
-            <div class="royal-card">
-                <div class="w-24 h-24 bg-zinc-800 rounded-full mx-auto border-2 border-[#d4af37] flex items-center justify-center mb-4">
-                    <i class="fa-solid fa-crown text-3xl text-[#d4af37]"></i>
+        <section id="page-profile" class="hidden">
+            <div class="text-center py-10">
+                <div class="w-24 h-24 bg-zinc-900 rounded-full mx-auto mb-4 border-2 border-gold flex items-center justify-center">
+                    <i class="fa-solid fa-crown text-4xl text-gold"></i>
                 </div>
-                <h2 id="u-display" class="royal-font text-2xl">@MAHARAJA</h2>
-                <button onclick="logout()" class="text-red-500 text-xs mt-4 uppercase font-bold tracking-widest">LOGOUT</button>
+                <h2 id="u-display" class="text-2xl font-black mb-1 tracking-tighter uppercase">Maharaja</h2>
+                <p id="u-bio-text" class="text-zinc-500 text-sm mb-6">Shahi Sadasya</p>
+                <button onclick="editBio()" class="bg-zinc-800 px-6 py-2 rounded-full text-xs font-bold border border-white/10">Edit Bio</button>
             </div>
-            <h3 class="royal-font text-[#d4af37] mt-6 text-left px-4">RECENT ORDERS</h3>
-            <div id="order-log" class="px-4 text-left space-y-3 mt-4"></div>
+            <div class="border-t border-white/5 pt-8">
+                <h3 class="text-gold font-bold uppercase text-[10px] tracking-widest mb-4">My Orders</h3>
+                <div id="order-list" class="space-y-3 pb-20"></div>
+            </div>
+            <button onclick="logout()" class="w-full text-red-500 font-bold text-xs py-10 uppercase tracking-widest opacity-50">Sign Out Account</button>
         </section>
     </main>
 
-    <nav id="b-nav" class="bottom-nav hidden">
-        <div onclick="switchTab('darbar')" id="n-darbar" class="nav-item active"><i class="fa-solid fa-fort-awesome"></i><span>DARBAR</span></div>
-        <div onclick="switchTab('bazaar')" id="n-bazaar" class="nav-item"><i class="fa-solid fa-shop"></i><span>BAZAAR</span></div>
-        <div onclick="switchTab('profile')" id="n-profile" class="nav-item"><i class="fa-solid fa-user-ninja"></i><span>AAP</span></div>
+    <nav id="app-nav" class="hidden fixed bottom-0 left-0 w-full bg-black/90 backdrop-blur-2xl border-t border-white/5 flex justify-around items-center py-3 px-6 z-[200]">
+        <button onclick="tab('darbar')" id="tab-darbar" class="flex flex-col items-center gap-1 nav-active flex-1 pt-2 transition-all"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[9px] font-bold uppercase">Darbar</span></button>
+        <button onclick="tab('bazaar')" id="tab-bazaar" class="flex flex-col items-center gap-1 text-zinc-500 flex-1 pt-2 transition-all"><i class="fa-solid fa-bag-shopping text-xl"></i><span class="text-[9px] font-bold uppercase">Bazaar</span></button>
+        <button onclick="tab('profile')" id="tab-profile" class="flex flex-col items-center gap-1 text-zinc-500 flex-1 pt-2 transition-all"><i class="fa-solid fa-user-large text-xl"></i><span class="text-[9px] font-bold uppercase">Aap</span></button>
     </nav>
 
     <script type="module">
@@ -108,142 +108,130 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        let user = null, tempImg = "";
 
-        let user = null;
-        let tempMedia = "";
+        // UI CORE
+        window.tab = (t) => {
+            ['darbar','bazaar','profile'].forEach(i => {
+                document.getElementById('page-'+i).classList.add('hidden');
+                document.getElementById('tab-'+i).classList.remove('nav-active', 'text-zinc-500');
+                document.getElementById('tab-'+i).classList.add('text-zinc-500');
+            });
+            document.getElementById('page-'+t).classList.remove('hidden');
+            document.getElementById('tab-'+t).classList.add('nav-active');
+            window.scrollTo(0,0);
+        };
 
-        // --- ANTI DOUBLE CLICK PROTECTOR ---
-        window.shahiAction = async (btnId, fn) => {
-            const btn = document.getElementById(btnId);
-            btn.disabled = true;
-            const oldText = btn.innerText;
-            btn.innerText = "THARO HUKUM LIKHAYO JA RYO HAI...";
+        window.action = async (id, fn) => {
+            const b = document.getElementById(id); b.disabled = true; const old = b.innerText;
+            b.innerText = "HUKUM, KAAM HO RYO HAI...";
             try { await fn(); } catch(e) { alert(e.message); }
-            finally { btn.disabled = false; btn.innerText = oldText; }
+            finally { b.disabled = false; b.innerText = old; }
         };
 
-        // --- AUTH ---
+        // AUTH
         window.shahiLogin = () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            shahiAction('login-btn', () => signInWithEmailAndPassword(auth, e, p));
+            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
+            action('login-btn', () => signInWithEmailAndPassword(auth, e, p));
         };
-
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, u => {
             if(u) {
                 user = u;
-                document.getElementById('u-display').innerText = "@" + u.email.split('@')[0];
-                document.getElementById('auth-ui').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('b-nav').classList.remove('hidden');
-                syncRealtime();
+                document.getElementById('u-display').innerText = u.email.split('@')[0];
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('app-nav').classList.remove('hidden');
+                sync();
             } else {
-                document.getElementById('auth-ui').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-                document.getElementById('b-nav').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('app-screen').classList.add('hidden');
+                document.getElementById('app-nav').classList.add('hidden');
             }
         });
 
-        // --- NAVIGATION ---
-        window.switchTab = (t) => {
-            ['darbar', 'bazaar', 'profile'].forEach(id => {
-                document.getElementById('sec-'+id).classList.add('hidden');
-                document.getElementById('n-'+id).classList.remove('active');
-            });
-            document.getElementById('sec-'+t).classList.remove('hidden');
-            document.getElementById('n-'+t).classList.add('active');
-        };
-
-        // --- REALTIME DATABASE SYNC ---
-        function syncRealtime() {
-            // Darbar Feed
+        // SYNC
+        function sync() {
             onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), snap => {
-                const cont = document.getElementById('feed-container');
-                cont.innerHTML = "";
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    cont.innerHTML += `<div class="royal-card">
-                        <p class="text-[10px] text-gold font-bold mb-2">@${p.author}</p>
-                        <p class="text-sm">${p.text || ''}</p>
-                        ${p.url ? `<img src="${p.url}" class="w-full rounded-lg mt-3 border border-[#333]">` : ''}
+                const f = document.getElementById('feed-list'); f.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    f.innerHTML += `
+                    <div class="royal-card overflow-hidden">
+                        <div class="p-4 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-zinc-800 border border-gold/20 flex items-center justify-center text-[10px] text-gold uppercase font-bold">${p.author[0]}</div>
+                            <span class="font-bold text-sm">@${p.author}</span>
+                        </div>
+                        ${p.url ? `<img src="${p.url}" class="w-full border-y border-white/5">` : ''}
+                        <div class="p-4"><p class="text-zinc-300 text-sm leading-relaxed">${p.text}</p></div>
                     </div>`;
                 });
             });
 
-            // Bazaar Grid
             onSnapshot(collection(db, "products"), snap => {
-                const grid = document.getElementById('bazaar-grid');
-                grid.innerHTML = "";
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    grid.innerHTML += `<div class="royal-card m-0 p-2 text-center">
-                        <img src="${p.img}" class="h-32 w-full object-cover rounded-lg mb-2">
-                        <h4 class="text-xs font-bold truncate">${p.name}</h4>
-                        <p class="text-gold font-bold mb-2">₹${p.price}</p>
-                        <button onclick="orderForm('${p.name}', '${p.link}')" class="gold-btn py-1 text-[10px]">KHARIDEIN</button>
+                const g = document.getElementById('shop-grid'); g.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    g.innerHTML += `
+                    <div class="royal-card overflow-hidden flex flex-col">
+                        <img src="${p.img}" class="aspect-square object-cover w-full">
+                        <div class="p-3 text-center flex-1">
+                            <h4 class="text-[10px] font-bold mb-1 truncate">${p.name}</h4>
+                            <p class="text-gold font-black text-xs mb-3">₹${p.price}</p>
+                            <button onclick="buy('${p.name}','${p.link}')" class="w-full bg-white text-black py-2 rounded-lg text-[10px] font-bold">Buy Now</button>
+                        </div>
                     </div>`;
                 });
             });
 
-            // Orders (Profile)
             onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), snap => {
-                const log = document.getElementById('order-log');
-                log.innerHTML = "";
-                snap.forEach(doc => {
-                    const o = doc.data();
-                    log.innerHTML += `<div class="bg-[#151515] p-3 border-l-2 border-gold text-[11px]">
-                        <b>${o.cust}</b> ne <b>${o.item}</b> mangwaya.<br>📞 ${o.phone}
-                    </div>`;
+                const l = document.getElementById('order-list'); l.innerHTML = "";
+                snap.forEach(d => {
+                    const o = d.data();
+                    l.innerHTML += `<div class="p-4 bg-zinc-900/50 border border-white/5 rounded-2xl text-[11px]"><b class="text-gold uppercase">${o.cust}</b> ne <b class="text-white">${o.item}</b> order kiya.<br><span class="opacity-40">📞 ${o.phone}</span></div>`;
                 });
             });
         }
 
-        // --- ACTIONS ---
-        window.pickMedia = (type) => {
+        // ACTIONS
+        window.upload = (t) => {
             cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, (err, res) => {
-                if(res && res.event === "success") {
-                    tempMedia = res.info.secure_url;
-                    if(type === 'product') submitProduct();
-                    else alert("Media Taiyaar! Post button dabayein.");
+                if(res?.event === "success") {
+                    tempImg = res.info.secure_url;
+                    if(t==='prod') listProd();
+                    else alert("Photo Selected!");
                 }
             });
         };
 
         window.submitPost = () => {
-            const txt = document.getElementById('post-input').value;
-            shahiAction('post-btn', async () => {
-                await addDoc(collection(db, "posts"), { 
-                    author: user.email.split('@')[0], 
-                    text: txt, 
-                    url: tempMedia, 
-                    time: serverTimestamp() 
-                });
-                document.getElementById('post-input').value = ""; tempMedia = "";
+            const t = document.getElementById('post-txt').value;
+            if(!t && !tempImg) return;
+            action('post-btn', async () => {
+                await addDoc(collection(db, "posts"), { author: user.email.split('@')[0], text: t, url: tempImg, time: serverTimestamp() });
+                document.getElementById('post-txt').value = ""; tempImg = "";
             });
         };
 
-        async function submitProduct() {
-            shahiAction('prod-btn', async () => {
-                await addDoc(collection(db, "products"), { 
-                    name: document.getElementById('p-name').value, 
-                    price: document.getElementById('p-price').value, 
-                    link: document.getElementById('p-link').value, 
-                    img: tempMedia, 
-                    time: serverTimestamp() 
-                });
-                tempMedia = ""; alert("Maal List Ho Gayo!");
+        async function listProd() {
+            action('prod-btn', async () => {
+                await addDoc(collection(db, "products"), { name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, link: document.getElementById('p-link').value, img: tempImg, time: serverTimestamp() });
+                tempImg = "";
             });
         }
 
-        window.orderForm = async (name, link) => {
-            const cust = prompt("Hukum, aapko naam?");
-            const phone = prompt("Aapko mobile number?");
+        window.buy = async (item, link) => {
+            const cust = prompt("Naam?"), phone = prompt("Phone?");
             if(cust && phone) {
-                await addDoc(collection(db, "orders"), { item: name, cust, phone, time: serverTimestamp() });
+                await addDoc(collection(db, "orders"), { item, cust, phone, time: serverTimestamp() });
                 window.location.href = link;
             }
+        };
+
+        window.editBio = () => {
+            const b = prompt("Update Bio:");
+            if(b) document.getElementById('u-bio-text').innerText = b;
         };
     </script>
 </body>
