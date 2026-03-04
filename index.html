@@ -115,6 +115,7 @@
                 <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none text-sm">
                 <input type="hidden" id="order-item-name">
                 <input type="hidden" id="order-creator-id">
+                <input type="hidden" id="order-item-link">
                 <div class="flex gap-3">
                     <button onclick="closeCheckout()" class="flex-1 text-[10px] font-bold text-gray-400">CANCEL</button>
                     <button id="order-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl text-[10px] font-bold">CONFIRM ORDER</button>
@@ -132,7 +133,7 @@
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
         let user = null, tempProdImg = "";
 
-        // IMAGE COMPRESSOR (FAST UPLOAD)
+        // IMAGE COMPRESSOR
         const compressImg = (file, quality = 0.5) => {
             return new Promise((res) => {
                 const reader = new FileReader();
@@ -234,29 +235,45 @@
             document.getElementById('p-preview-box').classList.add('hidden');
         };
 
-        // CHECKOUT
-        window.orderNow = (itemName, cid) => {
+        // CHECKOUT UPDATED
+        window.orderNow = (itemName, cid, itemLink) => {
             document.getElementById('order-item-name').value = itemName;
             document.getElementById('order-creator-id').value = cid;
+            document.getElementById('order-item-link').value = itemLink || "";
             document.getElementById('checkout-modal').classList.remove('hidden');
             setTimeout(() => document.getElementById('modal-content').classList.replace('scale-95', 'scale-100'), 10);
         };
+
         window.closeCheckout = () => {
             document.getElementById('modal-content').classList.replace('scale-100', 'scale-95');
             setTimeout(() => document.getElementById('checkout-modal').classList.add('hidden'), 200);
         };
+
         window.submitOrder = async () => {
             const btn = document.getElementById('order-btn');
             btn.innerText = "SAVING..."; btn.disabled = true;
-            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value, item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value;
-            if(!n || !ph) { btn.innerText = "CONFIRM ORDER"; btn.disabled = false; return alert("Hukum, jankari bhariye!"); }
+            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value, item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value, link = document.getElementById('order-item-link').value;
+            
+            if(!n || !ph) { 
+                btn.innerText = "CONFIRM ORDER"; btn.disabled = false; 
+                return alert("Hukum, jankari bhariye!"); 
+            }
+            
+            // Order save karein
             await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
-            const snap = await getDoc(doc(db, "users", cid));
-            const wa = snap.exists() ? snap.data().wa : "";
-            btn.innerText = "CONFIRM ORDER"; btn.disabled = false;
+            
             closeCheckout();
+            btn.innerText = "CONFIRM ORDER"; btn.disabled = false;
             alert("Order Confirm!");
-            if(wa) window.open(`https://wa.me/${wa}?text=Hukum, mujhe ${item} chahiye.`, '_blank');
+
+            // Agar link hai toh link kholo, nahi toh WhatsApp
+            if(link && link !== "undefined") {
+                window.open(link, '_blank');
+            } else {
+                const snap = await getDoc(doc(db, "users", cid));
+                const wa = snap.exists() ? snap.data().wa : "";
+                if(wa) window.open(`https://wa.me/${wa}?text=Hukum, mujhe ${item} chahiye.`, '_blank');
+            }
         };
 
         // SYNC
@@ -265,7 +282,7 @@
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3 flex-grow text-left"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><div class="flex gap-1">${p.link ? `<a href="${p.link}" target="_blank" class="bg-blue-500 text-white p-1.5 rounded-full text-[9px]"><i class="fa-solid fa-link"></i></a>` : ''}<button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3 flex-grow text-left"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><div class="flex gap-1"><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div></div>`;
                 });
             });
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", user.uid)), snap => {
