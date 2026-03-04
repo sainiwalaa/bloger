@@ -13,34 +13,13 @@
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        /* Banner & Profile Frame Updates */
-        .banner-box { 
-            height: 200px; 
-            background: #eee no-repeat center; 
-            background-size: cover; 
-            border-radius: 0 0 40px 40px; 
-            position: relative; 
-        }
-        .profile-img { 
-            width: 110px; 
-            height: 110px; 
-            border-radius: 50%; 
-            border: 5px solid #fff; 
-            position: absolute; 
-            bottom: -55px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            object-fit: cover; 
-            background: #ddd; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-        }
-
+        .banner-box { height: 200px; background: #eee no-repeat center; background-size: cover; border-radius: 0 0 40px 40px; position: relative; }
+        .profile-img { width: 110px; height: 110px; border-radius: 50%; border: 5px solid #fff; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
         .social-btn { width: 40px; height: 40px; border-radius: 10px; display: none; align-items: center; justify-content: center; color: white; font-size: 18px; transition: 0.2s; }
         input[type="file"] { display: none; }
-        #modal-content { transition: transform 0.3s ease-out; }
     </style>
 </head>
 <body class="pb-24">
@@ -49,10 +28,18 @@
         <div class="w-full max-w-sm text-center">
             <h1 class="raj-font text-4xl text-[#d4af37] mb-2">SAINIWALAA</h1>
             <p class="text-[10px] text-gray-400 mb-10 tracking-widest uppercase font-bold">Creator Darbar</p>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
-            <button onclick="handleAuth('login')" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl">LOG IN</button>
-            <button onclick="handleAuth('signup')" class="w-full text-gray-400 text-xs font-bold uppercase tracking-widest">Naya Account Banayein</button>
+            
+            <div id="auth-inputs">
+                <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
+                
+                <button id="main-auth-btn" onclick="handleAuth('login')" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl">LOG IN</button>
+                
+                <p id="toggle-text" class="text-xs text-gray-500">
+                    Naya account chahiye? 
+                    <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -71,10 +58,16 @@
 
         <section id="sec-shop" class="hidden">
             <div id="banner-ui" class="banner-box">
-                <label class="absolute top-4 right-4 bg-black/20 p-2 rounded-full cursor-pointer text-white backdrop-blur-md" id="banner-label"><i class="fa-solid fa-camera"></i><input type="file" onchange="uploadProfileMedia('banner', this)"></label>
+                <label class="absolute top-4 right-4 bg-black/20 p-2 rounded-full cursor-pointer text-white backdrop-blur-md hidden owner-only" id="banner-label">
+                    <i class="fa-solid fa-camera"></i>
+                    <input type="file" onchange="uploadProfileMedia('banner', this)">
+                </label>
                 <div class="relative">
                     <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
-                    <label class="absolute bottom-[-55px] left-[56%] bg-[#d4af37] text-white p-2 rounded-full border-2 border-white cursor-pointer" id="profile-label"><i class="fa-solid fa-pen text-[10px]"></i><input type="file" onchange="uploadProfileMedia('profile', this)"></label>
+                    <label class="absolute bottom-[-55px] left-[56%] bg-[#d4af37] text-white p-2 rounded-full border-2 border-white cursor-pointer hidden owner-only" id="profile-label">
+                        <i class="fa-solid fa-pen text-[10px]"></i>
+                        <input type="file" onchange="uploadProfileMedia('profile', this)">
+                    </label>
                 </div>
             </div>
 
@@ -86,7 +79,7 @@
                     <a id="btn-insta" href="#" target="_blank" class="social-btn" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
                     <a id="btn-yt" href="#" target="_blank" class="social-btn" style="background:#ff0000"><i class="fa-brands fa-youtube"></i></a>
                 </div>
-                <button onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] tracking-widest bg-white shadow-sm">Edit Profile & Socials</button>
+                <button id="edit-profile-btn" onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] tracking-widest bg-white shadow-sm hidden owner-only">Edit Profile & Socials</button>
             </div>
 
             <div id="edit-profile-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-[30px] shadow-lg">
@@ -95,26 +88,29 @@
                 <input id="in-wa" placeholder="WhatsApp (91...)" class="w-full p-3 border-b mb-2 text-xs outline-none">
                 <input id="in-insta" placeholder="Instagram URL" class="w-full p-3 border-b mb-2 text-xs outline-none">
                 <input id="in-yt" placeholder="YouTube URL" class="w-full p-3 border-b mb-4 text-xs outline-none">
-                <button id="save-prof-btn" onclick="saveProfileData()" class="w-full bg-black text-white p-4 rounded-2xl text-xs font-bold uppercase shadow-lg">Save Permanent</button>
+                <button onclick="saveProfileData()" class="w-full bg-black text-white p-4 rounded-2xl text-xs font-bold uppercase shadow-lg">Save Changes</button>
             </div>
 
-            <div class="max-w-4xl mx-auto p-4 mt-12">
+            <div class="max-w-4xl mx-auto p-4 mt-12 hidden owner-only" id="add-maal-box">
                 <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center shadow-sm">
                     <h3 class="font-bold text-[#d4af37] mb-6 text-xs uppercase tracking-widest">Naya Maal Jodhein</h3>
                     <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none text-sm">
-                    <textarea id="p-desc" placeholder="Description (Maal ki jankari...)" class="w-full p-3 border-b mb-2 outline-none text-sm resize-none" rows="2"></textarea>
+                    <textarea id="p-desc" placeholder="Description..." class="w-full p-3 border-b mb-2 outline-none text-sm resize-none" rows="2"></textarea>
                     <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none text-sm font-bold">
-                    <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px] text-blue-500">
-                    <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl shadow-lg"></div>
+                    <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px]">
+                    <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl"></div>
                     <div class="flex gap-3">
-                        <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold uppercase" id="p-img-label">
-                            <i class="fa-solid fa-image mr-2"></i>Photo Chunein
+                        <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold uppercase">
+                            <i class="fa-solid fa-image mr-2"></i>Photo
                             <input type="file" onchange="previewProduct(this)">
                         </label>
-                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-4 rounded-2xl text-[10px] font-bold uppercase shadow-lg">Publish Now</button>
+                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-4 rounded-2xl text-[10px] font-bold uppercase">Publish</button>
                     </div>
                 </div>
-                <h3 id="shop-title" class="raj-font text-lg mt-14 mb-6 text-gray-800">Aapka Maal</h3>
+            </div>
+
+            <div class="max-w-4xl mx-auto p-4">
+                <h3 id="shop-title" class="raj-font text-lg mt-14 mb-6 text-gray-800 text-center">Aapka Maal</h3>
                 <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
         </section>
@@ -126,22 +122,17 @@
     </main>
 
     <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div id="modal-content" class="bg-white w-full max-w-sm rounded-[35px] overflow-hidden shadow-2xl scale-95 transition-all">
-            <div class="bg-[#d4af37] p-6 text-center text-white">
-                <i class="fa-solid fa-bag-shopping text-3xl mb-2"></i>
-                <h3 class="raj-font text-xl font-bold uppercase">Shahi Order</h3>
-            </div>
-            <div class="p-8">
-                <input id="order-cust-name" type="text" placeholder="Aapka Naam" class="w-full p-3 border-b mb-4 outline-none text-sm">
-                <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none text-sm">
-                <input type="hidden" id="order-item-name">
-                <input type="hidden" id="order-creator-id">
-                <input type="hidden" id="order-item-link">
-                <div class="flex gap-3">
-                    <button onclick="closeCheckout()" class="flex-1 text-[10px] font-bold text-gray-400">CANCEL</button>
-                    <button id="order-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl text-[10px] font-bold">CONFIRM ORDER</button>
-                </div>
-            </div>
+        <div id="modal-content" class="bg-white w-full max-w-sm rounded-[35px] overflow-hidden shadow-2xl scale-95 transition-all p-8">
+             <h3 class="raj-font text-xl font-bold text-center mb-6">Confirm Order</h3>
+             <input id="order-cust-name" type="text" placeholder="Aapka Naam" class="w-full p-3 border-b mb-4 outline-none">
+             <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
+             <input type="hidden" id="order-item-name">
+             <input type="hidden" id="order-creator-id">
+             <input type="hidden" id="order-item-link">
+             <div class="flex gap-3">
+                <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold">CANCEL</button>
+                <button id="order-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
+             </div>
         </div>
     </div>
 
@@ -151,11 +142,94 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
-        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
-        let user = null, tempProdImg = "";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // IMAGE COMPRESSOR
-        const compressImg = (file, quality = 0.5) => {
+        let currentUser = null;
+        let authMode = 'login';
+        let tempProdImg = "";
+
+        // AUTH LOGIC
+        window.toggleAuthMode = () => {
+            authMode = (authMode === 'login') ? 'signup' : 'login';
+            document.getElementById('main-auth-btn').innerText = (authMode === 'login') ? 'LOG IN' : 'SIGN UP';
+            document.getElementById('toggle-text').innerHTML = (authMode === 'login') 
+                ? 'Naya account chahiye? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button>'
+                : 'Pehle se account hai? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Login Karein</button>';
+        };
+
+        window.handleAuth = (type) => {
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            if(!e || !p) return alert("Hukum, jankari bhariye!");
+
+            if(authMode === 'login') {
+                signInWithEmailAndPassword(auth, e, p).catch(err => alert("Login Failed: " + err.message));
+            } else {
+                createUserWithEmailAndPassword(auth, e, p).then(async (cred) => {
+                    // Create empty profile for new user
+                    await setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Mhara Swagat hai!", wa: "", insta: "", yt: "" });
+                }).catch(err => alert("Signup Failed: " + err.message));
+            }
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+
+        onAuthStateChanged(auth, u => {
+            if(u) {
+                currentUser = u;
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                loadProfile(u.uid);
+                syncAll();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        // PROFILE SYSTEM
+        async function loadProfile(uid) {
+            const snap = await getDoc(doc(db, "users", uid));
+            const isOwner = (currentUser && currentUser.uid === uid);
+            
+            // Show/Hide owner controls
+            document.querySelectorAll('.owner-only').forEach(el => {
+                isOwner ? el.classList.remove('hidden') : el.classList.add('hidden');
+            });
+
+            if (snap.exists()) {
+                const d = snap.data();
+                document.getElementById('disp-name').innerText = d.name || "Creator";
+                document.getElementById('disp-bio').innerText = d.bio || "";
+                document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
+                document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
+                
+                // Socials
+                const waBtn = document.getElementById('btn-wa');
+                if(d.wa) { waBtn.href = `https://wa.me/${d.wa}`; waBtn.style.display = 'flex'; } else { waBtn.style.display = 'none'; }
+                
+                const instaBtn = document.getElementById('btn-insta');
+                if(d.insta) { instaBtn.href = d.insta; instaBtn.style.display = 'flex'; } else { instaBtn.style.display = 'none'; }
+            }
+            syncMyShop(uid);
+        }
+
+        window.saveProfileData = async () => {
+            const data = {
+                name: document.getElementById('in-name').value,
+                bio: document.getElementById('in-bio').value,
+                wa: document.getElementById('in-wa').value,
+                insta: document.getElementById('in-insta').value,
+                yt: document.getElementById('in-yt').value
+            };
+            await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
+            document.getElementById('edit-profile-box').classList.add('hidden');
+            loadProfile(currentUser.uid);
+        };
+
+        // HELPERS
+        const compressImg = (file) => {
             return new Promise((res) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -164,178 +238,96 @@
                     img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const maxW = 1000;
+                        const maxW = 800;
                         const scale = maxW / img.width;
                         canvas.width = maxW;
                         canvas.height = img.height * scale;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        res(canvas.toDataURL('image/jpeg', quality));
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        res(canvas.toDataURL('image/jpeg', 0.6));
                     };
                 };
             });
         };
 
-        // AUTH
-        window.handleAuth = (type) => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("Puri jankari bhariye!");
-            const action = type === 'login' ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
-            action(auth, e, p).catch(err => alert(err.message));
+        window.uploadProfileMedia = async (type, input) => {
+            const compressed = await compressImg(input.files[0]);
+            await setDoc(doc(db, "users", currentUser.uid), { [type]: compressed }, { merge: true });
+            loadProfile(currentUser.uid);
         };
-        window.logout = () => signOut(auth);
-        onAuthStateChanged(auth, u => {
-            if(u) { user = u; document.getElementById('auth-section').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); loadProfile(user.uid); syncAll(); }
-            else { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('main-app').classList.add('hidden'); }
-        });
 
-        // TABS
+        window.previewProduct = async (input) => {
+            tempProdImg = await compressImg(input.files[0]);
+            document.getElementById('p-preview-box').classList.remove('hidden');
+            document.getElementById('p-preview-img').src = tempProdImg;
+            document.getElementById('pub-btn').classList.remove('hidden');
+        };
+
+        window.publishProduct = async () => {
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value;
+            if(!n || !p || !tempProdImg) return alert("Puri jankari dein!");
+            
+            await addDoc(collection(db, "products"), {
+                name: n, price: p, img: tempProdImg, 
+                creatorId: currentUser.uid, 
+                creator: document.getElementById('disp-name').innerText,
+                time: serverTimestamp()
+            });
+            alert("Maal Shahi Feed par aa gaya!");
+            location.reload();
+        };
+
+        // GLOBAL TABS & SYNC
         window.showTab = (t) => {
             ['feed','shop','orders'].forEach(s => {
                 document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
                 document.getElementById('tab-'+s).classList.toggle('active', s === t);
             });
-            if(t === 'shop') loadProfile(user.uid);
+            if(t === 'shop') loadProfile(currentUser.uid);
         };
 
-        // PROFILE
-        async function loadProfile(uid) {
-            const snap = await getDoc(doc(db, "users", uid));
-            if (snap.exists()) {
-                const d = snap.data();
-                document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
-                document.getElementById('disp-bio').innerText = d.bio || "Bio update karein...";
-                if(d.profile) document.getElementById('profile-ui').src = d.profile;
-                if(d.banner) document.getElementById('banner-ui').style.backgroundImage = `url(${d.banner})`;
-                if(d.wa) { document.getElementById('btn-wa').href = `https://wa.me/${d.wa}`; document.getElementById('btn-wa').style.display='flex'; }
-                if(d.insta) { document.getElementById('btn-insta').href = d.insta; document.getElementById('btn-insta').style.display='flex'; }
-                if(d.yt) { document.getElementById('btn-yt').href = d.yt; document.getElementById('btn-yt').style.display='flex'; }
-            }
-            syncMyShop(uid);
-        }
-
-        window.saveProfileData = async () => {
-            const btn = document.getElementById('save-prof-btn');
-            btn.innerText = "SABR RAKHEIN..."; btn.disabled = true;
-            const data = { name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value, wa: document.getElementById('in-wa').value, insta: document.getElementById('in-insta').value, yt: document.getElementById('in-yt').value };
-            await setDoc(doc(db, "users", user.uid), data, { merge: true });
-            document.getElementById('edit-profile-box').classList.add('hidden');
-            btn.innerText = "SAVE PERMANENT"; btn.disabled = false;
-            loadProfile(user.uid);
-        };
-
-        window.uploadProfileMedia = async (type, input) => {
-            const label = document.getElementById(type + '-label');
-            label.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            const compressed = await compressImg(input.files[0]);
-            await setDoc(doc(db, "users", user.uid), { [type]: compressed }, { merge: true });
-            label.innerHTML = type === 'banner' ? '<i class="fa-solid fa-camera"></i>' : '<i class="fa-solid fa-pen text-[10px]"></i>';
-            loadProfile(user.uid);
-        };
-
-        // PRODUCTS
-        window.previewProduct = async (input) => {
-            const label = document.getElementById('p-img-label');
-            label.innerText = "SABR RAKHEIN...";
-            tempProdImg = await compressImg(input.files[0]);
-            document.getElementById('p-preview-box').classList.remove('hidden');
-            document.getElementById('p-preview-img').src = tempProdImg;
-            document.getElementById('pub-btn').classList.remove('hidden');
-            label.innerHTML = '<i class="fa-solid fa-image mr-2"></i>Photo Chunein';
-        };
-
-        window.publishProduct = async () => {
-            const btn = document.getElementById('pub-btn');
-            btn.innerText = "UPLOADING..."; btn.disabled = true;
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, l = document.getElementById('p-link').value;
-            const userSnap = await getDoc(doc(db, "users", user.uid));
-            const creatorName = userSnap.exists() ? userSnap.data().name : user.email.split('@')[0];
-            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, link: l, img: tempProdImg, creator: creatorName, creatorId: user.uid, time: serverTimestamp() });
-            alert("Maal Shahi Feed par aa gaya!");
-            btn.innerText = "PUBLISH NOW"; btn.disabled = false;
-            document.getElementById('p-preview-box').classList.add('hidden');
-        };
-
-        // ORDER ACTIONS
-        window.orderNow = (itemName, cid, itemLink) => {
-            document.getElementById('order-item-name').value = itemName;
-            document.getElementById('order-creator-id').value = cid;
-            document.getElementById('order-item-link').value = itemLink || "";
-            document.getElementById('checkout-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('modal-content').classList.replace('scale-95', 'scale-100'), 10);
-        };
-
-        window.closeCheckout = () => {
-            document.getElementById('modal-content').classList.replace('scale-100', 'scale-95');
-            setTimeout(() => document.getElementById('checkout-modal').classList.add('hidden'), 200);
-        };
-
-        window.submitOrder = async () => {
-            const btn = document.getElementById('order-btn');
-            btn.innerText = "SAVING..."; btn.disabled = true;
-            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value, item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value, link = document.getElementById('order-item-link').value;
-            
-            if(!n || !ph) { 
-                btn.innerText = "CONFIRM ORDER"; btn.disabled = false; 
-                return alert("Hukum, jankari bhariye!"); 
-            }
-            
-            await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
-            
-            closeCheckout();
-            btn.innerText = "CONFIRM ORDER"; btn.disabled = false;
-            alert("Order Confirm!");
-
-            if(link && link !== "undefined" && link !== "") {
-                window.open(link, '_blank');
-            } else {
-                const snap = await getDoc(doc(db, "users", cid));
-                const wa = snap.exists() ? snap.data().wa : "";
-                if(wa) window.open(`https://wa.me/${wa}?text=Hukum, mujhe ${item} chahiye.`, '_blank');
-            }
-        };
-
-        // SYNC DATA
         function syncAll() {
             onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
                 const grid = document.getElementById('public-grid'); grid.innerHTML = "";
                 snap.forEach(d => {
                     const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3 flex-grow text-left"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><div class="flex gap-1"><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div></div>`;
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-3"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full font-bold">ORDER</button></div></div></div>`;
                 });
             });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", user.uid)), snap => {
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
-                snap.forEach(d => { const o = d.data(); list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm"><h4 class="font-bold text-xs">${o.item}</h4><p class="text-[10px] text-gray-400">Grahak: ${o.customer} | No: ${o.phone}</p></div>`; });
+                snap.forEach(d => { const o = d.data(); list.innerHTML += `<div class="bg-white p-4 rounded-2xl border-l-4 border-[#d4af37] shadow-sm"><h4 class="font-bold text-xs">${o.item}</h4><p class="text-[10px] text-gray-400">Grahak: ${o.customer} | ${o.phone}</p></div>`; });
             });
         }
 
-        // SYNC MY SHOP (Updated with Order Button)
         function syncMyShop(uid) {
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
                 const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
                 snap.forEach(d => { 
-                    const p = d.data(); 
-                    const isOwnProfile = (uid === user.uid);
-                    
-                    grid.innerHTML += `
-                        <div class="shahi-card relative">
-                            ${isOwnProfile ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px] z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
-                            <div class="img-frame"><img src="${p.img}"></div>
-                            <div class="p-3">
-                                <p class="text-[11px] font-bold truncate">${p.name}</p>
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>
-                                    ${!isOwnProfile ? `<button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full font-bold">ORDER</button>` : ''}
-                                </div>
-                            </div>
-                        </div>`; 
+                    const p = d.data();
+                    const isOwner = (currentUser && currentUser.uid === uid);
+                    grid.innerHTML += `<div class="shahi-card relative">${isOwner ? `<button onclick="delP('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-[10px]"><i class="fa-solid fa-trash"></i></button>` : ''}<div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold truncate">${p.name}</p><div class="flex justify-between items-center mt-2"><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>${!isOwner ? `<button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[8px] px-3 py-1 rounded-full">ORDER</button>` : ''}</div></div></div>`;
                 });
             });
         }
 
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); document.getElementById('shop-title').innerText = "Creator ka Maal"; };
         window.delP = async (id) => { if(confirm("Hata dein?")) await deleteDoc(doc(db, "products", id)); };
+
+        // ORDER SYSTEM
+        window.orderNow = (item, cid) => {
+            document.getElementById('order-item-name').value = item;
+            document.getElementById('order-creator-id').value = cid;
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        };
+        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
+        window.submitOrder = async () => {
+            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
+            const item = document.getElementById('order-item-name').value, cid = document.getElementById('order-creator-id').value;
+            if(!n || !ph) return alert("Details bhariye!");
+            await addDoc(collection(db, "orders"), { item, customer: n, phone: ph, creatorId: cid, time: serverTimestamp() });
+            alert("Order Sent!");
+            closeCheckout();
+        };
     </script>
 </body>
 </html>
