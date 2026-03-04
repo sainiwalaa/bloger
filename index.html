@@ -1,121 +1,76 @@
 <!DOCTYPE html>
-<html lang="ra">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SAINIWALAA - Royal Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAINIWALAA LIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Aapka asli Firebase link
         const firebaseConfig = {
-            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
-            authDomain: "social-blog-93d38.firebaseapp.com",
-            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com",
-            projectId: "social-blog-93d38",
-            storageBucket: "social-blog-93d38.firebasestorage.app"
+            databaseURL: "https://social-blog-93d38-default-rtdb.firebaseio.com"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL FUNCTIONS (Dono system ke liye) ---
-        window.openUpload = (type) => {
-            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, (err, res) => {
-                if (!err && res.event === "success") {
-                    if(type === 'post') savePost(res.info.secure_url);
-                    if(type === 'bazaar') document.getElementById('b-img').value = res.info.secure_url;
-                    alert("Photo chadh gayi sa! 🚩");
-                }
-            });
-        };
-
-        // Darbar Logic (Image 07)
-        window.savePost = (url) => {
-            const cap = prompt("Kuch vichaar likho:");
-            push(ref(db, 'posts'), { url, caption: cap, user: "sunil saini", time: serverTimestamp() });
-        };
-
-        // Bazaar Logic (Image 06)
-        window.saveProduct = () => {
-            const n = document.getElementById('p-name').value;
-            const p = document.getElementById('p-price').value;
-            const i = document.getElementById('b-img').value;
-            if(n && p && i) {
-                push(ref(db, 'products'), { name: n, price: p, img: i });
-                document.getElementById('bazaar-form').classList.add('hidden');
+        // POST DALNE KA SYSTEM
+        window.bhejoPost = () => {
+            const msg = document.getElementById('postInput').value;
+            if(msg) {
+                push(ref(db, 'darbar'), { sandesh: msg });
+                document.getElementById('postInput').value = "";
             }
         };
 
-        // Real-time Data Loading
-        onValue(ref(db, 'posts'), s => {
-            const div = document.getElementById('post-list'); div.innerHTML = "";
-            s.forEach(c => { const d = c.val(); div.innerHTML += `<div class="bg-zinc-900 mb-4 rounded-xl overflow-hidden border border-zinc-800"><img src="${d.url}" class="w-full"><p class="p-3 text-sm">${d.caption}</p></div>`; });
-        });
-
-        onValue(ref(db, 'products'), s => {
-            const div = document.getElementById('bazaar-list'); div.innerHTML = "";
-            s.forEach(c => { const d = c.val(); div.innerHTML += `<div class="bg-zinc-900 p-3 rounded-xl border border-yellow-900/20"><img src="${d.img}" class="h-32 w-full object-cover rounded-lg mb-2"><h3 class="gold-text text-xs font-bold">${d.name}</h3><p class="text-[10px]">₹${d.price}</p><button class="w-full bg-orange-700 mt-2 py-1 rounded text-[10px]">KHARIDO</button></div>`; });
-        });
-
-        window.switchTab = (t) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(t + '-page').classList.remove('hidden');
+        // BAZAAR ME MAAL DALNA
+        window.bhejoMaal = () => {
+            const naam = prompt("Saaman ka naam:");
+            const price = prompt("Keemat (₹):");
+            if(naam && price) {
+                push(ref(db, 'bazaar'), { naam: naam, price: price });
+            }
         };
+
+        // DATA DIKHANE KA SYSTEM (REAL-TIME)
+        onValue(ref(db, 'darbar'), (snap) => {
+            const list = document.getElementById('darbarList');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                list.innerHTML += `<div class="bg-gray-800 p-3 mb-2 rounded">${child.val().sandesh}</div>`;
+            });
+        });
+
+        onValue(ref(db, 'bazaar'), (snap) => {
+            const list = document.getElementById('bazaarList');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                list.innerHTML += `<div class="border border-yellow-600 p-2 rounded">
+                    <b>${child.val().naam}</b><br>₹${child.val().price}
+                </div>`;
+            });
+        });
     </script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .gold-text { color: #D4AF37; }
-        .hidden { display: none; }
-    </style>
 </head>
-<body class="max-w-[500px] mx-auto min-h-screen border-x border-zinc-900 pb-20">
+<body class="bg-black text-white p-5 font-sans">
+    <h1 class="text-yellow-500 text-2xl font-bold mb-5 italic">SAINIWALAA</h1>
 
-    <header class="p-5 text-center border-b border-zinc-900 sticky top-0 bg-black z-50">
-        <h1 class="gold-text tracking-[6px] font-bold">SAINIWALAA</h1>
-    </header>
-
-    <div id="aap-page" class="page p-4">
-        <div class="flex items-center gap-6 py-6">
-            <div class="w-20 h-20 rounded-full bg-yellow-600 flex items-center justify-center text-black text-2xl font-bold border-4 border-black ring-2 ring-yellow-600">SS</div>
-            <div><h2 class="text-xl font-bold">sunil saini</h2><p class="text-xs text-zinc-500">Royal Studio - GHANI KHAMMA!</p></div>
-        </div>
-        <div class="flex justify-around text-center mb-6">
-            <div><p class="font-bold">0</p><p class="text-[9px] text-zinc-500">Post</p></div>
-            <div><p class="font-bold">0</p><p class="text-[9px] text-zinc-500">Saathi</p></div>
-            <button class="border border-yellow-600/30 px-4 py-1 rounded text-xs gold-text">Badlaav</button>
-        </div>
-        <div class="flex border-y border-zinc-900 mb-4">
-            <button onclick="switchTab('darbar')" class="flex-1 py-4 text-[10px] gold-text">DARBAR</button>
-            <button onclick="switchTab('bazaar')" class="flex-1 py-4 text-[10px] text-zinc-500">DUKAAN</button>
-        </div>
+    <div class="mb-10">
+        <h2 class="text-lg mb-2">🚩 DARBAR (Feed)</h2>
+        <input id="postInput" class="bg-gray-900 w-full p-2 rounded mb-2" placeholder="Kuch likho hukum...">
+        <button onclick="bhejoPost()" class="bg-yellow-600 text-black px-4 py-1 rounded font-bold">POST</button>
+        <div id="darbarList" class="mt-4"></div>
     </div>
 
-    <div id="darbar-page" class="page hidden p-4">
-        <button onclick="openUpload('post')" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl mb-6 text-zinc-500 text-left text-sm">+ Naya Post Daalo Hukum...</button>
-        <div id="post-list"></div>
-    </div>
+    <hr class="border-gray-800 mb-10">
 
-    <div id="bazaar-page" class="page hidden p-4">
-        <button onclick="document.getElementById('bazaar-form').classList.toggle('hidden')" class="w-full bg-orange-700 py-3 rounded-xl text-xs font-bold mb-6">+ BAZAAR ME RAKHO 🚩</button>
-        <div id="bazaar-form" class="bg-zinc-900 p-4 rounded-xl mb-6 hidden">
-            <input id="p-name" type="text" placeholder="Naam" class="w-full bg-black p-2 rounded mb-2 text-sm">
-            <input id="p-price" type="number" placeholder="₹ Keemat" class="w-full bg-black p-2 rounded mb-2 text-sm">
-            <input type="hidden" id="b-img">
-            <button onclick="openUpload('bazaar')" class="w-full border border-zinc-700 py-2 rounded text-xs mb-2">PHOTO CHUNO</button>
-            <button onclick="saveProduct()" class="w-full bg-yellow-600 text-black py-2 rounded font-bold">SAVE</button>
-        </div>
-        <div id="bazaar-list" class="grid grid-cols-2 gap-4"></div>
+    <div>
+        <h2 class="text-lg mb-2">🛒 BAZAAR (Dukaan)</h2>
+        <button onclick="bhejoMaal()" class="bg-orange-600 px-4 py-1 rounded font-bold mb-4">+ MAAL JODO</button>
+        <div id="bazaarList" class="grid grid-cols-2 gap-2"></div>
     </div>
-
-    <nav class="fixed bottom-0 w-full max-w-[500px] bg-black border-t border-zinc-900 flex justify-around py-4">
-        <button onclick="switchTab('darbar')" class="text-zinc-500"><i class="fa-solid fa-house"></i></button>
-        <button onclick="switchTab('bazaar')" class="text-zinc-500"><i class="fa-solid fa-shop"></i></button>
-        <button onclick="switchTab('aap')" class="text-yellow-500"><i class="fa-solid fa-circle-user"></i></button>
-    </nav>
 </body>
 </html>
