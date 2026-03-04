@@ -3,267 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Shahi Bazaar & Darbar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SAINIWALAA | Royal Darbar</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-    <style>
-        :root { --gold: #b8860b; --light: #f8f9fa; }
-        body { background: var(--light); font-family: 'Segoe UI', sans-serif; }
-        .royal-card { background: white; border-radius: 15px; border: 1px solid #e5e7eb; transition: 0.3s; }
-        .nav-active { color: var(--gold) !important; border-bottom: 3px solid var(--gold); }
-        .hidden { display: none !important; }
-        input, textarea { width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px; outline: none; }
-        .btn-gold { background: var(--gold); color: white; font-weight: bold; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; border:none; }
-    </style>
 </head>
 <body>
 
-    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-[3px] text-[#b8860b] cursor-pointer" onclick="showPage('darbar')">SAINIWALAA</h1>
-            <nav id="main-nav" class="hidden flex gap-5 text-[11px] font-bold text-gray-500">
-                <span onclick="showPage('darbar')" id="n-darbar" class="cursor-pointer py-2 nav-active">DARBAR</span>
-                <span onclick="showPage('bazaar')" id="n-bazaar" class="cursor-pointer py-2">BAZAAR</span>
-                <span onclick="showPage('profile')" id="n-profile" class="cursor-pointer py-2">PROFILE</span>
-                <button onclick="logout()" class="text-red-500 text-lg ml-2"><i class="fa-solid fa-power-off"></i></button>
-            </nav>
-        </div>
+    <header class="header">
+        <div class="brand">SAINIWALAA</div>
     </header>
 
-    <div id="auth-box" class="max-w-md mx-auto mt-16 p-8 bg-white rounded-2xl shadow-xl border">
-        <div id="login-ui">
-            <h2 class="text-center text-xl font-bold mb-6">Hukum, Pravesh Karein</h2>
-            <input id="email" type="email" placeholder="Email (eg: test@mail.com)">
-            <input id="pass" type="password" placeholder="Password (Min 6 chars)">
-            <button onclick="authAction('login')" class="btn-gold">LOGIN</button>
-            <p onclick="toggleAuth(false)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Naya Khata Banayein?</p>
-        </div>
-        <div id="reg-ui" class="hidden">
-            <h2 class="text-center text-xl font-bold mb-6">Naya Khata</h2>
-            <input id="reg-name" type="text" placeholder="Apna Shahi Naam (No spaces)">
-            <input id="reg-email" type="email" placeholder="Email">
-            <input id="reg-pass" type="password" placeholder="Password">
-            <button onclick="authAction('reg')" class="btn-gold">REGISTER</button>
-            <p onclick="toggleAuth(true)" class="text-center text-xs mt-4 text-blue-500 cursor-pointer">Purana Khata Hai?</p>
+    <div id="auth-section" class="container">
+        <div class="royal-card">
+            <h2 style="text-align: center; color: #d4af37;">Khamma Ghani!</h2>
+            <input type="email" id="email" placeholder="Shahi Email" style="width: 90%; margin: 10px auto; display: block;">
+            <input type="password" id="password" placeholder="Password" style="width: 90%; margin: 10px auto; display: block;">
+            <button id="login-btn" class="gold-btn">PRAVESH KAREIN</button>
         </div>
     </div>
 
-    <main id="app-content" class="hidden max-w-5xl mx-auto px-4 mt-6">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <main id="app-container" class="hidden">
+        <section id="darbar-sec">
+            <div class="royal-card">
+                <textarea id="post-text" placeholder="Hukum, aaj kai vichaar hai?" style="width:100%; background:transparent; color:white; border:none;"></textarea>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <button onclick="openUpload('post')" class="gold-btn" style="width: 45%;">PHOTO/VIDEO</button>
+                    <button id="post-final-btn" class="gold-btn" style="width: 45%;">POST</button>
+                </div>
+            </div>
+            <div id="feed-container"></div>
+        </section>
+
+        <section id="bazaar-sec" class="hidden">
+            <div id="bazaar-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px;"></div>
+        </section>
+
+        <section id="profile-sec" class="hidden">
+            <div class="royal-card" style="text-align: center;">
+                <div id="profile-banner" style="height: 100px; background: var(--gold); border-radius: 8px;"></div>
+                <h2 id="display-name" style="margin-top: 10px;">Maharaja</h2>
+                <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+                    <div><b>12</b><br>Lekh</div>
+                    <div><b>500</b><br>Folower</div>
+                </div>
+                <button onclick="openUpload('product')" class="gold-btn">LIST NEW PRODUCT</button>
+            </div>
+            <h3 style="padding-left: 20px; color: var(--gold-solid);">Aapka Bazaar</h3>
+            <div id="my-products" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px;"></div>
             
-            <div class="md:col-span-3 hidden md:block">
-                <div class="sticky top-24 bg-white p-4 rounded-xl border">
-                    <button onclick="openModal('post')" class="btn-gold mb-3">+ NAYA LEKH</button>
-                    <button onclick="openModal('product')" class="bg-black text-white w-full py-2 rounded-lg text-sm font-bold">+ PRODUCT LIST</button>
-                </div>
-            </div>
-
-            <div class="md:col-span-6">
-                <section id="sec-darbar" class="space-y-6"></section>
-
-                <section id="sec-bazaar" class="hidden grid grid-cols-2 gap-4"></section>
-
-                <section id="sec-profile" class="hidden">
-                    <div class="bg-white p-6 rounded-xl border text-center">
-                        <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center border-2 border-gold">
-                            <i class="fa-solid fa-crown text-2xl text-gold"></i>
-                        </div>
-                        <h2 id="p-name-display" class="text-2xl font-bold">@User</h2>
-                        <div class="flex justify-center gap-6 mt-4 text-sm font-bold text-gray-500">
-                            <div><p id="count-posts">0</p><p class="text-[10px]">LEKH</p></div>
-                            <div><p id="count-orders">0</p><p class="text-[10px]">SAUDE</p></div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <div class="md:col-span-3">
-                <div class="sticky top-24 bg-white p-4 rounded-xl border">
-                    <h3 class="font-bold text-xs text-gray-400 uppercase mb-3">Haliya Saude (Orders)</h3>
-                    <div id="order-list" class="space-y-2 text-[11px]"></div>
-                </div>
-            </div>
-        </div>
+            <h3 style="padding-left: 20px; color: var(--gold-solid);">Recent Orders</h3>
+            <div id="order-history" class="royal-card"></div>
+        </section>
     </main>
 
-    <div id="modal-bg" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-sm relative">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400">&times;</button>
-            <div id="post-ui" class="hidden">
-                <h3 class="font-bold mb-4">Naya Shahi Lekh</h3>
-                <textarea id="post-cap" placeholder="Kuch likhein..."></textarea>
-                <button onclick="upload('post')" class="btn-gold">UPLOAD PHOTO & POST</button>
-            </div>
-            <div id="prod-ui" class="hidden">
-                <h3 class="font-bold mb-4">Maal List Karein</h3>
-                <input id="item-name" placeholder="Item ka Naam">
-                <input id="item-price" placeholder="Daam ₹">
-                <input id="item-link" placeholder="WhatsApp / Link">
-                <button onclick="upload('product')" class="btn-gold">PHOTO & LIST KAREIN</button>
-            </div>
-            <div id="order-ui" class="hidden">
-                <h3 class="font-bold mb-4 text-red-600">Sauda Pakko Karo?</h3>
-                <input id="ord-user" placeholder="Apna Naam">
-                <input id="ord-tel" placeholder="Mobile Number">
-                <textarea id="ord-addr" placeholder="Pura Pata"></textarea>
-                <button id="buy-final-btn" class="btn-gold">CONFIRM ORDER</button>
-            </div>
+    <div id="order-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; align-items:center; justify-content:center;">
+        <div class="royal-card" style="width: 80%;">
+            <h3>Sauda Pakko Karo</h3>
+            <input type="text" id="cust-name" placeholder="Aapko Naam" style="width:100%; margin-bottom:10px;">
+            <input type="text" id="cust-phone" placeholder="Mobile Number" style="width:100%; margin-bottom:10px;">
+            <textarea id="cust-addr" placeholder="Pura Pata" style="width:100%; margin-bottom:10px;"></textarea>
+            <button id="confirm-order-btn" class="gold-btn">CONFIRM & BUY</button>
+            <button onclick="closeOrderModal()" style="background:transparent; color:white; border:none; width:100%; margin-top:10px;">Cancel</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <nav class="bottom-nav hidden" id="nav-bar">
+        <div class="nav-item active" onclick="switchPage('darbar')"><i class="fa-solid fa-fort-awesome"></i>Darbar</div>
+        <div class="nav-item" onclick="switchPage('bazaar')"><i class="fa-solid fa-shop"></i>Bazaar</div>
+        <div class="nav-item" onclick="switchPage('profile')"><i class="fa-solid fa-user-ninja"></i>Aap</div>
+    </nav>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
-            authDomain: "social-blog-93d38.firebaseapp.com",
-            projectId: "social-blog-93d38",
-            storageBucket: "social-blog-93d38.appspot.com",
-            appId: "1:78643219054:web:dprl2lyih"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        let currentUser = null;
-
-        // --- AUTH LOGIC ---
-        window.authAction = (type) => {
-            const e = document.getElementById('email').value || document.getElementById('reg-email').value;
-            const p = document.getElementById('pass').value || document.getElementById('reg-pass').value;
-            if(type === 'login') {
-                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-            } else {
-                const n = document.getElementById('reg-name').value;
-                createUserWithEmailAndPassword(auth, e, p).then(async r => {
-                    await setDoc(doc(db, "users", r.user.uid), { name: n, uid: r.user.uid });
-                }).catch(err => alert(err.message));
-            }
-        };
-
-        onAuthStateChanged(auth, async u => {
-            if(u) {
-                const d = await getDoc(doc(db, "users", u.uid));
-                currentUser = d.data();
-                document.getElementById('p-name-display').innerText = "@" + (currentUser?.name || 'User');
-                document.getElementById('auth-box').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
-                document.getElementById('main-nav').classList.remove('hidden');
-                sync();
-            } else {
-                document.getElementById('auth-box').classList.remove('hidden');
-                document.getElementById('app-content').classList.add('hidden');
-                document.getElementById('main-nav').classList.add('hidden');
-            }
-        });
-
-        window.logout = () => signOut(auth);
-        window.toggleAuth = (isL) => { 
-            document.getElementById('login-ui').classList.toggle('hidden', !isL); 
-            document.getElementById('reg-ui').classList.toggle('hidden', isL); 
-        };
-
-        // --- UI NAVIGATION ---
-        window.showPage = (id) => {
-            ['darbar', 'bazaar', 'profile'].forEach(p => {
-                document.getElementById('sec-' + p).classList.add('hidden');
-                document.getElementById('n-' + p).classList.remove('nav-active');
-            });
-            document.getElementById('sec-' + id).classList.remove('hidden');
-            document.getElementById('n-' + id).classList.add('nav-active');
-        };
-
-        window.openModal = (type) => {
-            document.getElementById('modal-bg').classList.remove('hidden');
-            ['post', 'prod', 'order'].forEach(m => document.getElementById(m + '-ui').classList.add('hidden'));
-            document.getElementById(type + '-ui').classList.remove('hidden');
-        };
-        window.closeModal = () => document.getElementById('modal-bg').classList.add('hidden');
-
-        // --- CLOUDINARY UPLOAD ---
-        window.upload = (type) => {
-            cloudinary.openUploadWidget({ cloudName: "dvp58lgh3", uploadPreset: "ml_default" }, async (err, res) => {
-                if(res && res.event === "success") {
-                    if(type === 'post') {
-                        await addDoc(collection(db, "posts"), { url: res.info.secure_url, author: currentUser.name, uid: auth.currentUser.uid, caption: document.getElementById('post-cap').value, likes: [], time: serverTimestamp() });
-                    } else {
-                        await addDoc(collection(db, "products"), { img: res.info.secure_url, name: document.getElementById('item-name').value, price: document.getElementById('item-price').value, link: document.getElementById('item-link').value, time: serverTimestamp() });
-                    }
-                    closeModal(); alert("Shahi Entry Ho Gayi!");
-                }
-            });
-        };
-
-        // --- REALTIME SYNC ---
-        function sync() {
-            // Posts
-            onSnapshot(query(collection(db, "posts"), orderBy("time", "desc")), s => {
-                const container = document.getElementById('sec-darbar');
-                container.innerHTML = "";
-                s.forEach(d => {
-                    const p = d.data(); const id = d.id;
-                    const isLiked = p.likes?.includes(auth.currentUser.uid);
-                    container.innerHTML += `
-                        <div class="royal-card overflow-hidden shadow-sm">
-                            <div class="p-3 border-b flex justify-between items-center">
-                                <span class="font-bold text-xs text-gold">@${p.author}</span>
-                                <button class="text-[10px] bg-gray-100 px-2 py-1 rounded">FOLLOW</button>
-                            </div>
-                            <img src="${p.url}" class="w-full max-h-96 object-cover">
-                            <div class="p-4">
-                                <p class="text-sm mb-3">${p.caption || ''}</p>
-                                <div class="flex gap-4 text-xs font-bold text-gray-400">
-                                    <span onclick="like('${id}', ${JSON.stringify(p.likes)})" class="cursor-pointer ${isLiked?'text-red-500':''}"><i class="fa-${isLiked?'solid':'regular'} fa-heart"></i> ${p.likes?.length || 0}</span>
-                                    <span><i class="fa-regular fa-comment"></i> COMMENT</span>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-            });
-
-            // Products
-            onSnapshot(collection(db, "products"), s => {
-                const grid = document.getElementById('sec-bazaar');
-                grid.innerHTML = "";
-                s.forEach(d => {
-                    const p = d.data();
-                    grid.innerHTML += `
-                        <div class="royal-card p-2 text-center">
-                            <img src="${p.img}" class="h-32 w-full object-cover rounded-lg mb-2">
-                            <p class="font-bold text-[11px] truncate">${p.name}</p>
-                            <p class="text-gold font-bold text-xs mb-2">₹${p.price}</p>
-                            <button onclick="orderUI('${p.name}', '${p.link}')" class="w-full bg-black text-white text-[10px] py-2 rounded-md">KHARIDEIN</button>
-                        </div>`;
-                });
-            });
-
-            // Orders
-            onSnapshot(query(collection(db, "orders"), orderBy("time", "desc")), s => {
-                const list = document.getElementById('order-list');
-                list.innerHTML = "";
-                s.forEach(d => {
-                    const o = d.data();
-                    list.innerHTML += `<div class="p-2 bg-gray-50 border-l-2 border-gold mb-2"><b>${o.customer}</b> ne <b>${o.item}</b> mangwaya</div>`;
-                });
-            });
-        }
-
-        window.like = async (id, likes) => {
-            const ref = doc(db, "posts", id);
-            if(likes.includes(auth.currentUser.uid)) await updateDoc(ref, { likes: arrayRemove(auth.currentUser.uid) });
-            else await updateDoc(ref, { likes: arrayUnion(auth.currentUser.uid) });
-        };
-
-        window.orderUI = (name, link) => {
-            openModal('order');
-            document.getElementById('buy-final-btn').onclick = async () => {
-                await addDoc(collection(db, "orders"), { item: name, customer: document.getElementById('ord-user').value, phone: document.getElementById('ord-tel').value, address: document.getElementById('ord-addr').value, time: serverTimestamp() });
-                window.location.href = link;
-            };
-        };
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
