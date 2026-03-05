@@ -26,6 +26,8 @@
         .hidden { display: none !important; }
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
+        .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
     </style>
 </head>
 <body class="pb-20">
@@ -72,6 +74,7 @@
                     </div>
                     <div class="mb-8 text-left">
                         <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
+                        <div id="u-socials" class="flex gap-2 mt-1"></div>
                         <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
                     </div>
                 </div>
@@ -117,10 +120,18 @@
 
     <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6 overflow-y-auto">
         <div class="bg-white w-full max-w-md rounded-[40px] p-8 my-10">
-            <h3 class="raj-font text-xl mb-6 text-center">Edit Identity & Banner</h3>
+            <h3 class="raj-font text-xl mb-6 text-center">Edit Identity & Socials</h3>
             <div class="space-y-4 text-sm">
                 <input id="en" placeholder="Display Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="eb" placeholder="Bio Message" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-yt" placeholder="YouTube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-fb" placeholder="FB Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                </div>
+
                 <hr class="my-4">
                 <p class="font-bold text-xs uppercase text-[#d4af37]">Banner Settings</p>
                 <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
@@ -128,16 +139,10 @@
                     <option value="text">Mode: Show Text</option>
                 </select>
                 <div id="banner-text-edit-fields" class="space-y-4 hidden">
-                    <input id="eb-text" placeholder="Banner Text (e.g. Royal Welcome)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] block mb-1">BG Color</label>
-                            <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="text-[10px] block mb-1">Text Color</label>
-                            <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
-                        </div>
+                        <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
+                        <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
                     </div>
                     <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
@@ -154,14 +159,13 @@
                 <input id="on" placeholder="Your Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="op" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="oc" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                
                 <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
                     <input type="checkbox" id="collab-check" class="w-5 h-5 accent-red-600">
-                    <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Do you want a collaboration contact with this influencer?</label>
+                    <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Collaboration contact with influencer?</label>
                 </div>
             </div>
             <button onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-lg">PLACE ORDER</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs font-bold uppercase tracking-widest">CLOSE</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs font-bold uppercase">CLOSE</button>
         </div>
     </div>
 
@@ -190,7 +194,7 @@
                 renderGrid(allProds, 'grid-feed', false);
             });
 
-            // Improved Order Listener for Creator
+            // Order Listener with Date/Time System
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
@@ -248,21 +252,27 @@
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
 
+                // Render Social Links
+                const socDiv = document.getElementById('u-socials');
+                socDiv.innerHTML = "";
+                if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
+                if(d.yt) socDiv.innerHTML += `<a href="${d.yt}" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i></a>`;
+                if(d.fb) socDiv.innerHTML += `<a href="${d.fb}" target="_blank" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>`;
+                if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
+
                 const bCont = document.getElementById('banner-container');
                 const bImg = document.getElementById('b-img');
                 const bTextCont = document.getElementById('b-text-container');
                 const bTextDisp = document.getElementById('b-text-display');
 
                 if(d.bannerMode === 'text') {
-                    bImg.classList.add('hidden');
-                    bTextCont.classList.remove('hidden');
+                    bImg.classList.add('hidden'); bTextCont.classList.remove('hidden');
                     bCont.style.background = d.bannerBg || '#111';
                     bTextDisp.innerText = d.bannerText || "Royal Studio";
                     bTextDisp.style.color = d.bannerColor || '#d4af37';
                     bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
                 } else {
-                    bTextCont.classList.add('hidden');
-                    bImg.classList.remove('hidden');
+                    bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
                     bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
                 }
             }
@@ -280,6 +290,10 @@
             await setDoc(doc(db, "users", curU.uid), { 
                 name: document.getElementById('en').value, 
                 bio: document.getElementById('eb').value,
+                insta: document.getElementById('e-insta').value,
+                yt: document.getElementById('e-yt').value,
+                fb: document.getElementById('e-fb').value,
+                wa: document.getElementById('e-wa').value,
                 bannerMode: document.getElementById('eb-mode').value,
                 bannerText: document.getElementById('eb-text').value,
                 bannerBg: document.getElementById('eb-bg').value,
@@ -306,30 +320,14 @@
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value;
-            const p = document.getElementById('op').value;
-            const city = document.getElementById('oc').value;
-            const collab = document.getElementById('collab-check').checked;
-            
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
             if(!n || !p || !city) return alert("Please fill all fields!");
-            
             const now = new Date();
-            const dateStr = now.toLocaleDateString('en-GB');
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
             await addDoc(collection(db, "orders"), { 
-                item: window.activeOrder.name, 
-                price: window.activeOrder.price, 
-                customer: n, 
-                phone: p, 
-                city: city,
-                collab: collab,
-                date: dateStr,
-                time_str: timeStr,
-                creatorId: window.activeOrder.creatorId, 
-                time: serverTimestamp() 
+                item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab,
+                date: now.toLocaleDateString('en-GB'), time_str: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                creatorId: window.activeOrder.creatorId, time: serverTimestamp() 
             });
-            
             window.open(window.activeOrder.link, '_blank');
             document.getElementById('order-modal').classList.add('hidden');
         };
