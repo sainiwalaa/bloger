@@ -11,14 +11,68 @@
         :root { --gold: #d4af37; --dark: #111; }
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
+        
+        /* Updated Header Animation & Background */
+        .saini-header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            overflow: hidden;
+        }
+
+        /* Animated Pulse Background behind header */
+        .header-bg-animate {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: pulse-bg 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
         .saini-header {
-            background: linear-gradient(to right, #b8860b, #d4af37, #fff, #d4af37, #b8860b);
+            background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 4s linear infinite;
+            animation: shine 3s linear infinite;
         }
+
         @keyframes shine { to { background-position: 200% center; } }
+
+        .tagline-anim {
+            letter-spacing: 0.3em;
+            font-weight: 800;
+            font-size: 9px;
+            color: #888;
+            position: relative;
+            display: inline-block;
+        }
+
+        .tagline-anim::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            animation: line-grow 2s ease-out forwards;
+        }
+
+        @keyframes line-grow { to { width: 100%; } }
+
+        /* Rest of the previous styles */
         .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
@@ -47,9 +101,12 @@
     </section>
 
     <main id="app" class="hidden">
-        <header class="bg-white py-6 text-center border-b sticky top-0 z-[100] backdrop-blur-md bg-white/90">
-            <h1 class="raj-font text-3xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
-            <div class="flex justify-center gap-8 mt-4 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
+        <header class="saini-header-container py-6 text-center">
+            <div class="header-bg-animate"></div>
+            <h1 class="raj-font text-4xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
+            <p class="tagline-anim uppercase">Premium Influencer Marketplace</p>
+            
+            <div class="flex justify-center gap-8 mt-6 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
                 <button onclick="nav('feed')" id="n-feed" class="pb-1 transition">Trending</button>
                 <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-1 transition">My Studio</button>
                 <button onclick="nav('orders')" id="n-orders" class="pb-1 transition">Orders</button>
@@ -124,14 +181,12 @@
             <div class="space-y-4 text-sm">
                 <input id="en" placeholder="Display Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="eb" placeholder="Bio Message" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                
                 <div class="grid grid-cols-2 gap-3">
                     <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                     <input id="e-yt" placeholder="YouTube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                     <input id="e-fb" placeholder="FB Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                     <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
-
                 <hr class="my-4">
                 <p class="font-bold text-xs uppercase text-[#d4af37]">Banner Settings</p>
                 <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
@@ -194,7 +249,6 @@
                 renderGrid(allProds, 'grid-feed', false);
             });
 
-            // Order Listener with Date/Time System
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
@@ -252,7 +306,6 @@
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
 
-                // Render Social Links
                 const socDiv = document.getElementById('u-socials');
                 socDiv.innerHTML = "";
                 if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
