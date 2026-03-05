@@ -15,7 +15,7 @@
         .shahi-header { background: #1a1a1a; color: #d4af37; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d4af37; }
         .banner-box { height: 220px; background: #e5e5e5; background-position: center; background-size: cover; border-radius: 0 0 40px 40px; position: relative; box-shadow: inset 0 -50px 50px rgba(0,0,0,0.1); }
         .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #fff; position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
+        .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; position: relative; }
         .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
         .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
@@ -40,7 +40,7 @@
     <main id="main-app" class="hidden">
         <header class="shahi-header">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-crown text-xl"></i>
+                <i class="fa-solid fa-crown text-xl" onclick="location.href=window.location.origin+window.location.pathname" style="cursor:pointer"></i>
                 <div>
                     <h1 class="raj-font text-sm font-bold tracking-tighter">SAINIWALAA</h1>
                     <p class="text-[8px] uppercase tracking-widest text-white/70">Influencer Blog & Shop</p>
@@ -84,7 +84,7 @@
                 </div>
                 
                 <div class="mt-4">
-                    <button onclick="copyShopLink()" class="text-[10px] bg-gray-100 px-4 py-2 rounded-full font-bold text-gray-600 border border-gray-200">
+                    <button id="btn-share-shop" onclick="copyShopLink()" class="text-[10px] bg-gray-100 px-4 py-2 rounded-full font-bold text-gray-600 border border-gray-200">
                         <i class="fa-solid fa-share-nodes mr-2"></i>SHARE SHOP
                     </button>
                 </div>
@@ -171,13 +171,25 @@
         setPersistence(auth, browserLocalPersistence);
         let currentUser = null;
         let allProducts = [];
+        let viewingCreatorId = null;
 
         onAuthStateChanged(auth, u => {
             if(u) {
                 currentUser = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                showTab(localStorage.getItem('lastTab') || 'feed');
+                
+                // URL Se Profile Check Karein
+                const urlParams = new URLSearchParams(window.location.search);
+                const shopId = urlParams.get('shop');
+                
+                if(shopId) {
+                    showTab('shop');
+                    loadProfile(shopId);
+                } else {
+                    showTab(localStorage.getItem('lastTab') || 'feed');
+                }
+                
                 syncAll();
                 syncUserHistory(u.uid);
             } else {
@@ -187,8 +199,10 @@
         });
 
         window.loadProfile = async (uid) => {
+            viewingCreatorId = uid;
             const isOwner = (currentUser && currentUser.uid === uid);
             document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            
             const snap = await getDoc(doc(db, "users", uid));
             if (snap.exists()) {
                 const d = snap.data();
@@ -208,8 +222,9 @@
         };
 
         window.copyShopLink = () => {
-            const link = window.location.origin + "?shop=" + currentUser.uid;
-            navigator.clipboard.writeText(link).then(() => alert("Shop Link Copied! WhatsApp par share karein."));
+            const idToCopy = viewingCreatorId || currentUser.uid;
+            const link = window.location.origin + window.location.pathname + "?shop=" + idToCopy;
+            navigator.clipboard.writeText(link).then(() => alert("Profile Link Copy Ho Gayi!"));
         };
 
         window.saveProfileData = async () => {
@@ -229,9 +244,15 @@
 
         window.publishProduct = async () => {
             const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, l = document.getElementById('p-link').value, c = document.getElementById('p-cat').value;
-            if(!n || !p || !window.tempProdImg) return alert("Details poori bhariye!");
+            if(!n || !p || !window.tempProdImg) return alert("Details bhariye!");
             await addDoc(collection(db, "products"), { name: n, price: p, desc: d, link: l, category: c, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
             location.reload();
+        };
+
+        window.deleteProduct = async (id) => {
+            if(confirm("Ye Product Delete Karein?")) {
+                await deleteDoc(doc(db, "products", id));
+            }
         };
 
         window.filterFeed = () => {
@@ -272,7 +293,19 @@
         function syncMyShop(uid) {
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
                 const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
-                snap.forEach(d => { const p = d.data(); grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold">${p.name}</p><p class="text-gray-500 text-[9px] mb-1">${p.desc || ''}</p><p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p></div></div>`; });
+                const isOwner = (currentUser && currentUser.uid === uid);
+                snap.forEach(d => { 
+                    const p = d.data(); 
+                    grid.innerHTML += `<div class="shahi-card">
+                        ${isOwner ? `<button onclick="deleteProduct('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-[10px] z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        <div class="img-frame"><img src="${p.img}"></div>
+                        <div class="p-3">
+                            <p class="text-[11px] font-bold">${p.name}</p>
+                            <p class="text-gray-500 text-[9px] mb-1">${p.desc || ''}</p>
+                            <p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>
+                        </div>
+                    </div>`; 
+                });
             });
         }
 
@@ -282,13 +315,13 @@
                 document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
                 document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
             });
-            if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
+            if(t === 'shop' && !viewingCreatorId) loadProfile(currentUser.uid);
         };
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
             signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
         };
-        window.logout = () => signOut(auth).then(() => location.reload());
+        window.logout = () => signOut(auth).then(() => { localStorage.clear(); location.href=window.location.origin+window.location.pathname; });
         window.toggleAuthMode = () => {
             const btn = document.getElementById('main-auth-btn');
             btn.innerText = (btn.innerText === 'LOG IN') ? 'SIGN UP' : 'LOG IN';
@@ -309,6 +342,7 @@
         };
         window.delOrder = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "orders", id)); };
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); };
+        
         const compressImg = (f) => new Promise(res => {
             const r = new FileReader(); r.readAsDataURL(f);
             r.onload = e => {
