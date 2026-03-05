@@ -30,12 +30,18 @@
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         
-        /* Inquiry Alert Pulse */
-        .inquiry-alert {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            animation: pulse-red 2s infinite;
+        /* Business Inquiry Highlighting */
+        .inquiry-card {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white !important;
+            border: none !important;
+            animation: pulse-border 2s infinite;
         }
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        @keyframes pulse-border {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -83,6 +89,10 @@
                         </div>
                     </div>
                 </div>
+                <label class="absolute top-4 right-4 bg-white/20 p-3 rounded-full text-white cursor-pointer owner-only">
+                    <i class="fa-solid fa-panorama"></i>
+                    <input type="file" class="hidden" onchange="upMedia('banner', this)">
+                </label>
             </div>
 
             <div class="mt-16 px-6 max-w-4xl mx-auto">
@@ -100,11 +110,12 @@
                         <textarea id="pd" placeholder="Tell the story of this product..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
                         <div class="flex items-center gap-4">
                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
-                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">PHOTO</label>
+                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">CHOOSE PHOTO</label>
                             <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
                         </div>
                     </div>
                 </div>
+
                 <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
             </div>
         </section>
@@ -118,32 +129,34 @@
         </section>
 
         <section id="sec-orders" class="hidden p-6">
-            <h2 class="raj-font text-3xl mb-8">Sales History</h2>
+            <h2 class="raj-font text-3xl mb-2">Sales History</h2>
+            <p class="text-[10px] text-gray-400 mb-8 uppercase tracking-widest">Personal Order Tracking & Inquiries</p>
             <div id="list-orders" class="space-y-4"></div>
         </section>
     </main>
 
     <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[50px] p-10 text-center">
-            <h3 class="raj-font text-2xl mb-2">Finalize Purchase</h3>
-            <p class="text-[10px] text-gray-400 font-bold mb-8 tracking-widest uppercase">Direct connection to creator</p>
-            <input id="on" placeholder="Your Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="op" placeholder="Mobile Number" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="oc" placeholder="City" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border">
+            <h3 class="raj-font text-2xl mb-2">Finalize Order</h3>
+            <p class="text-[10px] text-gray-400 font-bold mb-8 tracking-widest uppercase">Creator direct connection</p>
+            <input id="on" placeholder="Your Full Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
+            <input id="op" placeholder="10-Digit Mobile" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
+            <input id="oc" placeholder="Your City" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border">
             
-            <div class="bg-gray-50 p-4 rounded-3xl mb-8 border">
-                <p class="text-[11px] font-bold mb-2">Kya aap Influencer se business sampark karna chahte hain?</p>
-                <div class="flex gap-4 justify-center">
-                    <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                        <input type="radio" name="collab" value="YES" class="accent-gold"> YES
+            <div class="bg-gray-50 p-5 rounded-[30px] border mb-8 text-left">
+                <p class="text-[12px] font-extrabold leading-tight mb-3">क्या आप इस Influencer के साथ Business Deal (Collab) करना चाहते हैं?</p>
+                <div class="flex gap-6">
+                    <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
+                        <input type="radio" name="biz" value="YES" class="w-4 h-4 accent-red-500"> YES
                     </label>
-                    <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                        <input type="radio" name="collab" value="NO" checked class="accent-black"> NO
+                    <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
+                        <input type="radio" name="biz" value="NO" checked class="w-4 h-4 accent-black"> NO
                     </label>
                 </div>
             </div>
 
             <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-[10px] font-bold">CANCEL</button>
         </div>
     </div>
 
@@ -184,40 +197,50 @@
                 initApp();
             } else {
                 document.getElementById('auth-box').classList.remove('hidden');
+                document.getElementById('app').classList.add('hidden');
             }
         });
 
         function initApp() {
             nav('feed');
+            
+            // Global Products Feed
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed');
             });
-            
-            // SECURITY: Seller only sees orders for their creatorId
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
+
+            // Personal Orders - ONLY SECURE FOR CREATOR
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = "";
-                s.forEach(d => {
-                    const o = d.data();
-                    const isInquiry = o.collab === "YES";
+                
+                // Sorting orders by time manually if serverTimestamp hasn't updated yet
+                const sortedOrders = s.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
+
+                sortedOrders.forEach(o => {
+                    const isBiz = o.businessInquiry === "YES";
                     list.innerHTML += `
-                        <div class="p-6 rounded-3xl border shadow-sm flex flex-col gap-4 ${isInquiry ? 'inquiry-alert border-none text-white' : 'bg-white text-black'}">
-                            <div class="flex justify-between items-center">
+                        <div class="p-6 rounded-[30px] border shadow-sm flex flex-col gap-4 ${isBiz ? 'inquiry-card' : 'bg-white'}">
+                            <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="font-bold text-lg leading-tight">${o.item}</p>
-                                    <p class="text-xs ${isInquiry ? 'text-white/80' : 'text-gray-400'}">Customer: ${o.customer}</p>
+                                    <h4 class="font-extrabold text-lg leading-tight">${o.item}</h4>
+                                    <p class="text-[10px] opacity-70 uppercase font-bold">Buyer: ${o.customer}</p>
                                 </div>
-                                <p class="font-black text-xl">₹${o.price}</p>
+                                <span class="font-black text-xl">₹${o.price}</span>
                             </div>
-                            <div class="flex justify-between items-end border-t ${isInquiry ? 'border-white/20' : 'border-gray-50'} pt-4">
-                                <div class="text-[10px] font-bold uppercase tracking-tighter">
-                                    <p><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</p>
-                                    <p><i class="fa-solid fa-location-dot mr-1"></i> ${o.city}</p>
+                            <div class="flex flex-wrap gap-3 text-[11px] font-bold">
+                                <span class="px-3 py-1 bg-black/10 rounded-full"><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</span>
+                                <span class="px-3 py-1 bg-black/10 rounded-full"><i class="fa-solid fa-city mr-1"></i> ${o.city}</span>
+                            </div>
+                            ${isBiz ? `
+                                <div class="mt-2 p-3 bg-white/20 rounded-2xl border border-white/30 text-center">
+                                    <p class="text-[11px] font-black uppercase tracking-tighter">🔥 IMPORTANT: YE CUSTOMER BUSINESS COLLAB CHAHTA HAI!</p>
                                 </div>
-                                <p class="text-[9px] font-black">${o.time?.toDate().toLocaleString() || 'Process...'}</p>
+                            ` : ''}
+                            <div class="text-[9px] opacity-50 font-bold border-t pt-3 ${isBiz ? 'border-white/20' : 'border-gray-100'}">
+                                Order Time: ${o.time?.toDate().toLocaleString() || 'Process...'}
                             </div>
-                            ${isInquiry ? '<div class="bg-white/20 p-2 rounded-xl text-center text-[10px] font-black tracking-widest uppercase">⚠️ CUSTOMER WANTS BUSINESS CHAT - CONTACT NOW!</div>' : ''}
                         </div>
                     `;
                 });
@@ -240,8 +263,8 @@
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()) {
                 const d = s.data();
-                document.getElementById('u-name').innerText = d.name || "Saini Creator";
-                document.getElementById('u-bio').innerText = d.bio || "Mhara Swagat hai!";
+                document.getElementById('u-name').innerText = d.name || "Creator";
+                document.getElementById('u-bio').innerText = d.bio || "Welcome to my store!";
                 document.getElementById('u-bio').style.color = d.bioColor || "#999";
                 document.getElementById('u-bio').style.fontSize = (d.bioSize || 15) + "px";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
@@ -249,8 +272,7 @@
             }
 
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = s.docs.map(d => ({id:d.id, ...d.data()}));
-                renderGrid(p, 'grid-shop', isMe);
+                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
             });
         };
 
@@ -265,7 +287,7 @@
                             <p class="text-[9px] font-black text-gold uppercase mb-1">@${p.creator}</p>
                             <h4 class="font-bold text-sm truncate">${p.name}</h4>
                             <div class="mt-4 flex justify-between items-center">
-                                <span class="font-black text-sm">₹${p.price}</span>
+                                <span class="font-black">₹${p.price}</span>
                                 <div class="flex gap-2">
                                     ${mine ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
                                     <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
@@ -278,8 +300,7 @@
         };
 
         window.orderForm = (pid) => {
-            const p = allProds.find(i => i.id === pid);
-            window.activeOrder = p;
+            window.activeOrder = allProds.find(i => i.id === pid);
             document.getElementById('order-modal').classList.remove('hidden');
         };
 
@@ -287,15 +308,11 @@
             const n = document.getElementById('on').value.trim();
             const p = document.getElementById('op').value.trim();
             const c = document.getElementById('oc').value.trim();
-            const collab = document.querySelector('input[name="collab"]:checked').value;
+            const biz = document.querySelector('input[name="biz"]:checked').value;
             const btn = document.getElementById('buy-btn');
 
-            const nameCheck = /^[a-zA-Z\s]+$/;
-            const phoneCheck = /^[0-9]{10}$/;
-
-            if(!n || !p || !c) return alert("Pura form bhariye!");
-            if(!nameCheck.test(n)) return alert("Naam sahi likhiye!");
-            if(!phoneCheck.test(p)) return alert("Mobile No. me 10 digit daalein!");
+            if(!n || !p || !c) return alert("Sari jankari bharna zaruri hai!");
+            if(p.length < 10) return alert("Valid mobile number dalein!");
 
             btn.disabled = true;
             btn.innerText = "WAIT...";
@@ -307,36 +324,29 @@
                     customer: n,
                     phone: p,
                     city: c,
-                    collab: collab,
+                    businessInquiry: biz,
                     creatorId: window.activeOrder.creatorId,
                     time: serverTimestamp()
                 });
                 document.getElementById('order-modal').classList.add('hidden');
+                alert("Order Placed! Redirecting to link...");
                 window.open(window.activeOrder.link, '_blank');
             } catch(e) {
-                alert("Error!");
+                alert("Database Error!");
                 btn.disabled = false;
             }
         };
 
-        window.authAction = () => {
-            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
-        };
-
         window.pubProd = async () => {
-            const name = document.getElementById('pn').value.trim();
-            const price = document.getElementById('pp').value.trim();
-            const cat = document.getElementById('pc').value.trim();
-            const link = document.getElementById('pl').value.trim();
-            const desc = document.getElementById('pd').value.trim();
-            const btn = document.getElementById('pub-btn');
-
-            if(!name || !price || !cat || !link || !desc || !window.tempP) return alert("All fields required!");
-            btn.disabled = true;
+            const n = document.getElementById('pn').value.trim();
+            const p = document.getElementById('pp').value.trim();
+            const c = document.getElementById('pc').value.trim();
+            const l = document.getElementById('pl').value.trim();
+            const d = document.getElementById('pd').value.trim();
+            if(!n || !p || !window.tempP) return alert("Fill all data!");
 
             await addDoc(collection(db, "products"), {
-                name, price, cat, link, desc,
+                name: n, price: p, cat: c, link: l, desc: d,
                 img: window.tempP,
                 creatorId: curU.uid,
                 creator: document.getElementById('u-name').innerText,
@@ -347,8 +357,14 @@
 
         window.preProd = (i) => {
             const r = new FileReader();
-            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO OK ✅"; };
+            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO LOADED ✅"; };
             r.readAsDataURL(i.files[0]);
+        };
+
+        window.authAction = () => {
+            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
+            if(!e || !p) return alert("Email/Pass bhariye!");
+            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
         };
 
         window.saveProfile = async () => {
@@ -367,7 +383,7 @@
             r.readAsDataURL(i.files[0]);
         };
 
-        window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
+        window.delP = async (id) => { if(confirm("Delete Product?")) await deleteDoc(doc(db, "products", id)); };
         window.logout = () => signOut(auth).then(() => location.reload());
         window.search = (v) => {
             const f = allProds.filter(p => p.name.toLowerCase().includes(v.toLowerCase()));
