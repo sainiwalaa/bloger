@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Shahi Darbar</title>
+    <title>SAINIWALAA | Creator Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        /* SHAHI PROFILE LAYOUT */
-        .banner-box { height: 230px; background: #1a1a1a; background-size: cover; background-position: center; border-radius: 0 0 40px 40px; position: relative; border-bottom: 3px solid #d4af37; }
-        .profile-area { position: absolute; bottom: -60px; left: 20px; display: flex; align-items: flex-end; gap: 15px; }
-        .profile-img { width: 110px; height: 110px; border-radius: 28px; border: 5px solid #fff; object-fit: cover; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        /* BANNER & PROFILE AREA */
+        .banner-box { height: 260px; background: #1a1a1a; background-size: cover; background-position: center; position: relative; border-radius: 0 0 50px 50px; }
+        .profile-stack { position: absolute; bottom: -40px; left: 25px; display: flex; align-items: flex-end; gap: 20px; }
+        .p-wrapper { position: relative; }
+        .profile-img { width: 120px; height: 120px; border-radius: 35px; border: 6px solid #fff; object-fit: cover; background: #fff; box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
         
-        .badge-count { position: absolute; top: -5px; right: -5px; background: #ff0000; color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; font-weight: bold; border: 2px solid white; }
-        .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; }
-        .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; }
+        /* INBOX BADGE ON PROFILE */
+        .inbox-trigger { background: #fff; padding: 8px 15px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
+        .inbox-trigger:hover { transform: translateY(-3px); border-color: #d4af37; }
+        .badge { background: #ff3b30; color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; }
+        
+        .shahi-card { background: white; border-radius: 25px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.3s; }
+        .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
@@ -36,30 +41,32 @@
     </div>
 
     <main id="main-app" class="hidden">
-        <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-around border-b shadow-sm">
+        <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-around border-b">
             <button onclick="showTab('feed')" id="tab-feed" class="nav-btn active p-4 text-[10px] font-bold uppercase">Trending</button>
             <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-4 text-[10px] font-bold uppercase">Mhari Shop</button>
-            <button onclick="showTab('chats')" id="tab-chats" class="nav-btn p-4 text-[10px] font-bold uppercase relative">
-                Inbox <span id="msg-count" class="hidden badge-count">0</span>
-            </button>
             <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-4 text-[10px] font-bold uppercase">Orders</button>
             <button onclick="logout()" class="p-4 text-red-500"><i class="fa-solid fa-power-off"></i></button>
         </nav>
 
         <section id="sec-shop" class="hidden">
             <div id="banner-ui" class="banner-box">
-                <div class="profile-area">
-                    <div class="relative">
+                <div class="profile-stack">
+                    <div class="p-wrapper">
                         <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
-                        <label class="absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-lg cursor-pointer owner-only hidden">
-                            <i class="fa-solid fa-camera"></i><input type="file" onchange="uploadMedia('profile', this)">
+                        <label class="absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-xl cursor-pointer owner-only hidden shadow-lg">
+                            <i class="fa-solid fa-camera text-xs"></i><input type="file" onchange="uploadMedia('profile', this)">
                         </label>
                     </div>
-                    <div class="mb-4">
-                        <h2 id="disp-name" class="font-black text-white text-xl drop-shadow-md">Creator</h2>
-                        <div class="flex gap-2 mt-1">
-                            <button id="follow-btn" onclick="toggleFollow()" class="bg-white text-black text-[9px] px-4 py-1.5 rounded-full font-bold uppercase shadow-sm">Follow</button>
-                            <button id="msg-btn" onclick="openChatBox()" class="bg-[#d4af37] text-white text-[9px] px-4 py-1.5 rounded-full font-bold uppercase shadow-sm">Message</button>
+                    <div class="mb-5 space-y-2">
+                        <h2 id="disp-name" class="font-black text-white text-2xl drop-shadow-md">Creator</h2>
+                        <div class="flex gap-2">
+                            <button id="follow-btn" onclick="toggleFollow()" class="bg-white/20 backdrop-blur text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase border border-white/30">Follow</button>
+                            <button id="msg-btn" onclick="openChatPrompt()" class="bg-[#d4af37] text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase shadow-lg">Message</button>
+                            <div onclick="showTab('chats')" class="inbox-trigger owner-only hidden">
+                                <i class="fa-solid fa-envelope text-[#d4af37]"></i>
+                                <span class="text-[10px] font-bold text-gray-700">INBOX</span>
+                                <span id="msg-count" class="badge hidden">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -69,64 +76,63 @@
             </div>
 
             <div class="mt-20 px-6 max-w-4xl mx-auto text-center">
-                <p id="disp-bio" class="text-gray-700 italic bg-white p-3 rounded-xl shadow-sm inline-block">Bio loading...</p>
+                <div id="disp-bio" class="text-gray-600 font-medium bg-white p-4 rounded-2xl shadow-sm border border-gray-100 inline-block min-w-[250px]">No Bio</div>
                 <div class="mt-6 flex justify-center gap-3">
-                    <button onclick="copyShopLink()" class="text-[9px] bg-gray-100 px-6 py-2 rounded-full font-bold">SHARE SHOP</button>
-                    <button id="block-btn" onclick="toggleBlock()" class="text-[9px] border border-red-200 text-red-500 px-6 py-2 rounded-full font-bold">BLOCK</button>
+                    <button onclick="copyShopLink()" class="text-[10px] bg-gray-100 px-8 py-3 rounded-full font-bold text-gray-500 uppercase">Share Shop</button>
+                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] border px-8 py-3 rounded-full font-bold text-[#d4af37] owner-only hidden uppercase">Settings</button>
                 </div>
-                <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="mt-4 text-[9px] border p-2 rounded owner-only hidden">Settings</button>
             </div>
 
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-[30px] space-y-3">
-                <input id="in-name" placeholder="Name" class="w-full p-2 border-b outline-none">
-                <input id="in-bio" placeholder="Bio" class="w-full p-2 border-b outline-none">
-                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white p-3 rounded-xl font-bold">SAVE</button>
+            <div id="edit-box" class="hidden max-w-sm mx-auto p-6 mt-6 bg-white border rounded-[35px] shadow-xl space-y-4">
+                <input id="in-name" placeholder="Creator Name" class="w-full p-3 border-b outline-none">
+                <input id="in-bio" placeholder="Bio description" class="w-full p-3 border-b outline-none">
+                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl font-bold">SAVE PROFILE</button>
             </div>
 
             <div class="max-w-4xl mx-auto p-4 mt-12 owner-only hidden">
-                <div class="bg-white border-2 border-dashed p-6 rounded-[30px] text-center">
-                    <input id="p-name" placeholder="Item Name" class="w-full p-2 border-b mb-2 outline-none">
-                    <input id="p-price" placeholder="Price ₹" class="w-full p-2 border-b mb-2 outline-none">
-                    <input id="p-link" placeholder="External WebLink (Amazon/Website)" class="w-full p-2 border-b mb-4 outline-none">
+                <div class="bg-white border-2 border-dashed border-[#d4af37]/20 p-8 rounded-[40px] text-center shadow-sm">
+                    <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-3 outline-none">
+                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-3 outline-none">
+                    <input id="p-link" placeholder="Affiliate/Direct Link" class="w-full p-3 border-b mb-6 outline-none text-blue-500">
                     <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
-                    <label for="p-file" class="bg-gray-100 p-4 block rounded-xl cursor-pointer font-bold mb-4">UPLOAD PHOTO</label>
-                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-4 rounded-xl font-bold uppercase">Publish Product</button>
+                    <label for="p-file" class="bg-gray-50 p-5 block rounded-2xl cursor-pointer font-bold text-gray-400 mb-4 border border-gray-100">PHOTO UPLOAD</label>
+                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-black text-white p-4 rounded-2xl font-bold uppercase tracking-widest">Publish Item</button>
                 </div>
             </div>
 
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 max-w-6xl mx-auto"></div>
+            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 max-w-6xl mx-auto mt-8"></div>
         </section>
 
         <section id="sec-feed" class="p-4 max-w-6xl mx-auto">
-            <input type="text" id="search-input" oninput="filterFeed()" placeholder="Search..." class="w-full p-3 bg-gray-100 rounded-xl mb-6 outline-none">
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            <input type="text" id="search-input" oninput="filterFeed()" placeholder="Search Products or Creators..." class="w-full p-4 bg-white border rounded-2xl mb-8 outline-none shadow-sm">
+            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
         </section>
 
         <section id="sec-chats" class="hidden p-6 max-w-xl mx-auto">
-            <h3 class="raj-font text-xl mb-6">Inbox Messages</h3>
+            <h3 class="raj-font text-2xl mb-6 text-[#d4af37]">Messages</h3>
             <div id="chat-list" class="space-y-4"></div>
         </section>
 
         <section id="sec-orders" class="hidden p-6 max-w-xl mx-auto">
-            <h3 class="raj-font text-xl mb-6 text-center">Customer Orders</h3>
+            <h3 class="raj-font text-2xl mb-6 text-center">Recent Orders</h3>
             <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
 
-    <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[35px] p-8 text-center">
-             <h3 class="raj-font text-xl mb-6">Order Details</h3>
-             <input id="order-cust-name" placeholder="Your Name" class="w-full p-3 border-b mb-4 outline-none">
-             <input id="order-cust-phone" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
-             <button onclick="submitOrder()" class="w-full bg-black text-white py-4 rounded-2xl font-bold">CONFIRM & OPEN LINK</button>
-             <button onclick="document.getElementById('checkout-modal').classList.add('hidden')" class="mt-4 text-gray-400">Cancel</button>
+    <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 text-center shadow-2xl">
+             <h3 class="raj-font text-2xl mb-6 text-black">Order Details</h3>
+             <input id="order-cust-name" placeholder="Enter Your Name" class="w-full p-4 border-b mb-4 outline-none">
+             <input id="order-cust-phone" placeholder="WhatsApp Number" class="w-full p-4 border-b mb-8 outline-none">
+             <button onclick="submitOrder()" class="w-full bg-black text-white py-5 rounded-3xl font-bold uppercase">Confirm & Open Link</button>
+             <button onclick="document.getElementById('checkout-modal').classList.add('hidden')" class="mt-6 text-gray-400 font-bold uppercase text-[10px] tracking-widest">Close</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
@@ -141,7 +147,7 @@
                 currentUser = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                syncData();
+                initSystem();
                 const sid = new URLSearchParams(window.location.search).get('shop');
                 if(sid) viewCreator(sid); else showTab('feed');
             } else {
@@ -149,18 +155,18 @@
             }
         });
 
-        function syncData() {
-            // FEED ALGO
+        function initSystem() {
+            // TRENDING FEED
             onSnapshot(collection(db, "products"), snap => {
                 allProducts = []; snap.forEach(d => allProducts.push({id: d.id, ...d.data()}));
                 renderGrid(allProducts.sort(() => Math.random() - 0.5), 'public-grid');
             });
 
-            // INBOX COUNT
-            onSnapshot(query(collection(db, "chats"), where("to", "==", currentUser.uid)), snap => {
+            // INBOX HANDLER
+            onSnapshot(query(collection(db, "chats"), where("to", "==", currentUser.uid), orderBy("time", "desc")), snap => {
                 const count = snap.size;
                 const badge = document.getElementById('msg-count');
-                if(count > 0) {
+                if(count > 0 && localStorage.getItem('lastSeenMsgCount') != count) {
                     badge.innerText = count;
                     badge.classList.remove('hidden');
                 } else {
@@ -169,9 +175,12 @@
                 const list = document.getElementById('chat-list'); list.innerHTML = "";
                 snap.forEach(d => {
                     const c = d.data();
-                    list.innerHTML += `<div class="bg-white p-4 rounded-xl border-l-4 border-[#d4af37] shadow-sm">
-                        <p class="text-sm">${c.msg}</p>
-                        <button onclick="viewCreator('${c.from}')" class="text-xs font-bold text-[#d4af37] mt-2">REPLY</button>
+                    list.innerHTML += `<div class="bg-white p-5 rounded-[25px] border shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-800 font-medium">${c.msg}</p>
+                            <button onclick="viewCreator('${c.from}')" class="text-[10px] font-bold text-[#d4af37] mt-2 uppercase">Reply to User</button>
+                        </div>
+                        <button onclick="blockUser('${c.from}')" class="text-red-400 text-xs font-bold uppercase p-2">Block</button>
                     </div>`;
                 });
             });
@@ -181,10 +190,31 @@
                 const list = document.getElementById('order-list'); list.innerHTML = "";
                 snap.forEach(d => {
                     const o = d.data();
-                    list.innerHTML += `<div class="bg-white p-4 rounded-xl border shadow-sm"><b>${o.item}</b><br><small>${o.customer} (${o.phone})</small></div>`;
+                    list.innerHTML += `<div class="bg-white p-5 rounded-[25px] border shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-gray-800">${o.item}</h4>
+                            <span class="text-[10px] bg-green-100 text-green-600 px-3 py-1 rounded-full font-bold">NEW</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">${o.customer} • ${o.phone}</p>
+                    </div>`;
                 });
             });
         }
+
+        window.showTab = (t) => {
+            if(t === 'chats') {
+                document.getElementById('msg-count').classList.add('hidden');
+                getDoc(doc(db, "chats_meta", currentUser.uid)).then(() => {
+                    // Logic to clear count on click
+                    localStorage.setItem('lastSeenMsgCount', document.getElementById('msg-count').innerText);
+                });
+            }
+            ['feed','shop','chats','orders'].forEach(s => {
+                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
+                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
+            });
+            if(t === 'shop' && !viewId) viewCreator(currentUser.uid);
+        };
 
         window.viewCreator = async (uid) => {
             viewId = uid;
@@ -196,14 +226,14 @@
             const snap = await getDoc(doc(db, "users", uid));
             if(snap.exists()){
                 const d = snap.data();
-                document.getElementById('disp-name').innerText = d.name || "Creator";
-                document.getElementById('disp-bio').innerText = d.bio || "No Bio";
+                document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
+                document.getElementById('disp-bio').innerText = d.bio || "Welcome to my Shahi shop!";
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').style.backgroundImage = `url(${d.banner})`;
+                if(d.banner) document.getElementById('banner-ui').style.backgroundImage = `url(${d.banner})`;
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
-                const prod = []; snap.forEach(d => prod.push(d.data()));
-                renderGrid(prod, 'my-shop-grid', true);
+                const prd = []; snap.forEach(d => prd.push(d.data()));
+                renderGrid(prd, 'my-shop-grid', true);
             });
             showTab('shop');
         };
@@ -212,41 +242,41 @@
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
                 g.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div>
-                <div class="p-3">
-                    ${!isOwner ? `<button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-bold text-[#d4af37]">@${p.creator}</button>` : ''}
-                    <h4 class="font-bold text-[11px] truncate">${p.name}</h4>
-                    <div class="flex justify-between items-center mt-2"><b>₹${p.price}</b>
-                    <button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full">ORDER</button></div>
+                <div class="p-4">
+                    ${!isOwner ? `<button onclick="viewCreator('${p.creatorId}')" class="text-[9px] font-bold text-[#d4af37] mb-1">@${p.creator}</button>` : ''}
+                    <h4 class="font-bold text-[12px] text-gray-800 truncate">${p.name}</h4>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="font-bold text-gray-900">₹${p.price}</span>
+                        <button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link}')" class="bg-black text-white text-[10px] px-4 py-2 rounded-full font-bold uppercase">Order</button>
+                    </div>
                 </div></div>`;
             });
         };
 
-        // ORDER LOGIC (PAHALE JESA)
         window.orderNow = (name, cid, link) => {
-            window.targetLink = link;
-            window.targetItem = name;
-            window.targetCreator = cid;
+            window.targetLink = link; window.targetItem = name; window.targetCreator = cid;
             document.getElementById('checkout-modal').classList.remove('hidden');
         };
 
         window.submitOrder = async () => {
             const n = document.getElementById('order-cust-name').value;
             const ph = document.getElementById('order-cust-phone').value;
-            if(!n || !ph) return alert("Bhai details toh bharo!");
-            
+            if(!n || !ph) return alert("Details bhariye!");
             await addDoc(collection(db, "orders"), { item: window.targetItem, customer: n, phone: ph, creatorId: window.targetCreator, userId: currentUser.uid, time: serverTimestamp() });
-            
             document.getElementById('checkout-modal').classList.add('hidden');
-            if(window.targetLink && window.targetLink !== "undefined") {
-                window.open(window.targetLink, '_blank');
-            } else {
-                alert("Order Saved! (No external link provided)");
-            }
+            if(window.targetLink && window.targetLink != "undefined") window.open(window.targetLink, '_blank');
         };
 
-        window.openChatBox = () => {
-            const msg = prompt("Apna Message likhein:");
+        window.openChatPrompt = () => {
+            const msg = prompt("Write message to Creator:");
             if(msg) addDoc(collection(db, "chats"), { from: currentUser.uid, to: viewId, msg: msg, time: serverTimestamp() });
+        };
+
+        window.blockUser = async (uid) => {
+            if(confirm("Block this user? Unke messages nahi dikhenge.")){
+                await setDoc(doc(db, "blocked", currentUser.uid), { [uid]: true }, { merge: true });
+                alert("User Blocked");
+            }
         };
 
         window.publish = async () => {
@@ -254,40 +284,17 @@
             location.reload();
         };
 
-        window.previewProd = (input) => {
-            const reader = new FileReader(); reader.readAsDataURL(input.files[0]);
-            reader.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); };
-        };
-
-        window.uploadMedia = (type, input) => {
-            const reader = new FileReader(); reader.readAsDataURL(input.files[0]);
-            reader.onload = async e => { await setDoc(doc(db, "users", currentUser.uid), { [type]: e.target.result }, { merge: true }); location.reload(); };
-        };
-
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", currentUser.uid), { name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value }, { merge: true });
-            location.reload();
-        };
-
-        window.showTab = (t) => {
-            ['feed','shop','chats','orders'].forEach(s => {
-                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && currentUser && !viewId) viewCreator(currentUser.uid);
-        };
-
-        window.handleAuth = () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
-        };
+        window.previewProd = (i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); } };
+        window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", currentUser.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
+        window.saveProfile = async () => { await setDoc(doc(db, "users", currentUser.uid), { name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value }, { merge: true }); location.reload(); };
+        window.handleAuth = () => { const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value; signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p)); };
         window.logout = () => signOut(auth).then(() => location.reload());
+        window.copyShopLink = () => { navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?shop=" + currentUser.uid); alert("Shop Link Copied!"); };
         window.filterFeed = () => {
-            const term = document.getElementById('search-input').value.toLowerCase();
-            const filt = allProducts.filter(p => p.name.toLowerCase().includes(term));
-            renderGrid(filt, 'public-grid');
+            const t = document.getElementById('search-input').value.toLowerCase();
+            const f = allProducts.filter(p => p.name.toLowerCase().includes(t) || p.creator.toLowerCase().includes(t));
+            renderGrid(f, 'public-grid');
         };
-        window.copyShopLink = () => { navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?shop=" + currentUser.uid); alert("Link Copied!"); };
     </script>
 </body>
 </html>
