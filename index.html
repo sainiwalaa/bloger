@@ -11,7 +11,6 @@
         :root { --gold: #d4af37; --dark: #111; }
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
-        
         .saini-header {
             background: linear-gradient(to right, #b8860b, #d4af37, #fff, #d4af37, #b8860b);
             background-size: 200% auto;
@@ -20,30 +19,15 @@
             animation: shine 4s linear infinite;
         }
         @keyframes shine { to { background-position: 200% center; } }
-
         .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; }
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
-        
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        
-        /* Business Inquiry Highlighting */
-        .inquiry-card {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b) !important;
-            color: white !important;
-            border: none !important;
-            animation: pulse-border 2s infinite;
-        }
-        .inquiry-card p, .inquiry-card span, .inquiry-card h4 { color: white !important; }
-        
-        @keyframes pulse-border {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
+        .inquiry-card { background: linear-gradient(135deg, #ff416c, #ff4b2b) !important; color: white !important; border: none !important; animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
 <body class="pb-20">
@@ -64,10 +48,10 @@
 
     <main id="app" class="hidden">
         <header class="bg-white py-6 text-center border-b sticky top-0 z-[100] backdrop-blur-md bg-white/90">
-            <h1 class="raj-font text-3xl saini-header font-black tracking-widest">SAINIWALAA</h1>
+            <h1 class="raj-font text-3xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
             <div class="flex justify-center gap-8 mt-4 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
                 <button onclick="nav('feed')" id="n-feed" class="pb-1 transition">Trending</button>
-                <button onclick="nav('shop')" id="n-shop" class="pb-1 transition">My Studio</button>
+                <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-1 transition">My Studio</button>
                 <button onclick="nav('orders')" id="n-orders" class="pb-1 transition">Orders</button>
                 <button onclick="logout()" class="text-red-400"><i class="fa-solid fa-power-off"></i></button>
             </div>
@@ -79,40 +63,33 @@
                 <div class="profile-side">
                     <div class="relative group">
                         <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
-                        <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer transition owner-only">
+                        <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer transition owner-btn hidden">
                             <i class="fa-solid fa-camera"></i>
                             <input type="file" class="hidden" onchange="upMedia('profile', this)">
                         </label>
                     </div>
                     <div class="mb-8">
                         <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
-                        <div class="flex gap-2 mt-2">
-                            <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-only">EDIT PROFILE</button>
-                        </div>
+                        <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
                     </div>
                 </div>
-                <label class="absolute top-4 right-4 bg-white/20 p-3 rounded-full text-white cursor-pointer owner-only">
-                    <i class="fa-solid fa-panorama"></i>
-                    <input type="file" class="hidden" onchange="upMedia('banner', this)">
-                </label>
             </div>
 
             <div class="mt-16 px-6 max-w-4xl mx-auto">
                 <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
                 
-                <div class="mt-10 owner-only">
-                    <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200 hover:border-gold transition">
+                <div id="add-prod-box" class="mt-10 hidden">
+                    <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
                         <h3 class="raj-font text-lg mb-6">List New Creation</h3>
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <input id="pn" placeholder="Item Name" class="p-4 bg-gray-50 rounded-2xl outline-none border">
                             <input id="pp" placeholder="Price (₹)" type="number" class="p-4 bg-gray-50 rounded-2xl outline-none border">
-                            <input id="pc" placeholder="Category" class="p-4 bg-gray-50 rounded-2xl outline-none border">
-                            <input id="pl" placeholder="External Web Link" class="p-4 bg-gray-50 rounded-2xl outline-none border">
+                            <input id="pl" placeholder="External Web Link" class="p-4 bg-gray-50 rounded-2xl outline-none border col-span-2">
                         </div>
-                        <textarea id="pd" placeholder="Tell the story of this product (Description)..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
+                        <textarea id="pd" placeholder="Product Description..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
                         <div class="flex items-center gap-4">
                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
-                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">CHOOSE PHOTO</label>
+                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border">CHOOSE PHOTO</label>
                             <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
                         </div>
                     </div>
@@ -122,51 +99,35 @@
         </section>
 
         <section id="sec-feed" class="hidden px-6 pt-6">
-            <div class="mb-8 relative">
-                <input type="text" oninput="search(this.value)" placeholder="Search Elite Products..." class="w-full p-5 pl-12 bg-white rounded-3xl border-none shadow-md outline-none focus:ring-2 ring-gold/20">
-                <i class="fa-solid fa-magnifying-glass absolute left-5 top-6 text-gray-300"></i>
-            </div>
             <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
         </section>
 
         <section id="sec-orders" class="hidden p-6">
-            <h2 class="raj-font text-3xl mb-2">Sales History</h2>
+            <h2 class="raj-font text-3xl mb-2">Orders</h2>
             <div id="list-orders" class="space-y-4"></div>
         </section>
     </main>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[50px] p-10 text-center">
-            <h3 class="raj-font text-2xl mb-2">Finalize Order</h3>
-            <input id="on" placeholder="Your Full Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="op" placeholder="10-Digit Mobile" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="oc" placeholder="Your City" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border">
-            <div class="bg-gray-50 p-5 rounded-[30px] border mb-8 text-left text-xs font-bold">
-                <p class="mb-3">क्या आप Business Collab करना चाहते हैं?</p>
-                <div class="flex gap-6">
-                    <label><input type="radio" name="biz" value="YES" class="accent-red-500"> YES</label>
-                    <label><input type="radio" name="biz" value="NO" checked class="accent-black"> NO</label>
-                </div>
+    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8">
+            <h3 class="raj-font text-xl mb-6 text-center">Update Profile</h3>
+            <div class="space-y-4">
+                <input id="en" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border">
+                <input id="eb" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border">
+                <input type="color" id="ec" class="w-full h-10 border-none cursor-pointer">
+                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold">SAVE CHANGES</button>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs">CANCEL</button>
             </div>
-            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl">PLACE ORDER</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-[10px] font-bold">CANCEL</button>
         </div>
     </div>
 
-    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl">
-            <h3 class="raj-font text-xl mb-6 text-center">Update Identity</h3>
-            <div class="space-y-4">
-                <input id="en" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-gold">
-                <input id="eb" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-gold">
-                <div class="flex items-center gap-4">
-                    <label class="text-xs font-bold text-gray-400">Bio Color:</label>
-                    <input type="color" id="ec" class="h-10 w-10 border-none cursor-pointer">
-                    <input type="number" id="es" placeholder="Font Size" class="flex-1 p-4 bg-gray-50 rounded-2xl outline-none border">
-                </div>
-                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg hover:brightness-110 transition">SAVE CHANGES</button>
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs font-bold py-2">DISCARD</button>
-            </div>
+    <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[50px] p-10 text-center">
+            <h3 class="raj-font text-2xl mb-6">Finalize Order</h3>
+            <input id="on" placeholder="Your Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl border outline-none">
+            <input id="op" placeholder="Mobile Number" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl border outline-none">
+            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black">PLACE ORDER</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs">CLOSE</button>
         </div>
     </div>
 
@@ -180,7 +141,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let curU = null; let viewUid = null; let allProds = [];
+        window.curU = null; let allProds = [];
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
@@ -192,26 +153,21 @@
             nav('feed');
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
-                renderGrid(allProds, 'grid-feed');
+                renderGrid(allProds, 'grid-feed', false);
             });
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
-                list.innerHTML = "";
-                const sorted = s.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
-                sorted.forEach(o => {
-                    const isBiz = o.businessInquiry === "YES";
-                    list.innerHTML += `<div class="p-6 rounded-[30px] border shadow-sm flex flex-col gap-4 ${isBiz ? 'inquiry-card' : 'bg-white'}">
-                        <div class="flex justify-between items-start">
-                            <div><h4 class="font-extrabold text-lg leading-tight">${o.item}</h4><p class="text-[10px] opacity-70 uppercase font-bold">Buyer: ${o.customer}</p></div>
-                            <span class="font-black text-xl">₹${o.price}</span>
-                        </div>
-                        <div class="flex gap-3 text-[11px] font-bold"><span>📞 ${o.phone}</span><span>📍 ${o.city}</span></div>
+                list.innerHTML = s.docs.map(d => {
+                    const o = d.data();
+                    return `<div class="p-6 bg-white rounded-[30px] border shadow-sm">
+                        <h4 class="font-bold">${o.item}</h4>
+                        <p class="text-xs text-gray-400">Buyer: ${o.customer} | 📞 ${o.phone}</p>
                     </div>`;
-                });
+                }).join('');
             });
         }
 
-        window.renderGrid = (data, cid, mine = false) => {
+        window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
                 g.innerHTML += `
@@ -220,11 +176,11 @@
                         <div class="p-4">
                             <p class="text-[9px] font-black text-gold uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                             <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                            <p class="text-[10px] text-red-600 font-semibold line-clamp-2 mt-1">${p.desc || ''}</p>
+                            <p class="text-[10px] text-red-600 font-semibold mt-1">${p.desc || ''}</p>
                             <div class="mt-4 flex justify-between items-center">
                                 <span class="font-black">₹${p.price}</span>
                                 <div class="flex gap-2">
-                                    ${mine ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                                    ${isOwnerView ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
                                     <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
                                 </div>
                             </div>
@@ -234,9 +190,13 @@
         };
 
         window.viewProfile = async (uid) => {
-            viewUid = uid; const isMe = (uid === curU.uid);
-            nav('shop'); // Profile view ke liye shop section par switch karein
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            nav('shop');
+            const isMe = (uid === curU.uid);
+            
+            // UI Safety: Hide/Show based on ownership
+            document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
+            document.getElementById('add-prod-box').classList.toggle('hidden', !isMe);
+
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
@@ -244,32 +204,12 @@
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('u-bio').style.color = d.bioColor || "#999";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
-                document.getElementById('b-img').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
             }
+
+            // Load only this user's products
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
                 renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
             });
-        };
-
-        window.pubProd = async () => {
-            const n = document.getElementById('pn').value, p = document.getElementById('pp').value, d = document.getElementById('pd').value;
-            if(!n || !p || !window.tempP) return alert("Fill data!");
-            await addDoc(collection(db, "products"), {
-                name: n, price: p, desc: d, link: document.getElementById('pl').value,
-                img: window.tempP, creatorId: curU.uid, creatorName: document.getElementById('u-name').innerText, time: serverTimestamp()
-            });
-            location.reload();
-        };
-
-        window.saveProfile = async () => {
-            const btn = event.target; btn.innerText = "SAVING...";
-            await setDoc(doc(db, "users", curU.uid), { 
-                name: document.getElementById('en').value, 
-                bio: document.getElementById('eb').value,
-                bioColor: document.getElementById('ec').value,
-                bioSize: document.getElementById('es').value
-            }, {merge:true});
-            location.reload();
         };
 
         window.nav = (t) => {
@@ -277,29 +217,48 @@
                 document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
                 document.getElementById('n-'+s).classList.toggle('nav-active', s === t);
             });
-            if(t === 'shop' && !viewUid) viewProfile(curU.uid);
+        };
+
+        window.pubProd = async () => {
+            const n = document.getElementById('pn').value, p = document.getElementById('pp').value;
+            if(!n || !p || !window.tempP) return alert("Details missing!");
+            const uSnap = await getDoc(doc(db, "users", curU.uid));
+            await addDoc(collection(db, "products"), {
+                name: n, price: p, desc: document.getElementById('pd').value,
+                img: window.tempP, link: document.getElementById('pl').value,
+                creatorId: curU.uid, creatorName: uSnap.data()?.name || 'Creator', time: serverTimestamp()
+            });
+            location.reload();
+        };
+
+        window.saveProfile = async () => {
+            await setDoc(doc(db, "users", curU.uid), { 
+                name: document.getElementById('en').value, 
+                bio: document.getElementById('eb').value,
+                bioColor: document.getElementById('ec').value
+            }, {merge:true});
+            location.reload();
         };
 
         window.preProd = (i) => {
             const r = new FileReader();
-            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO LOADED ✅"; };
+            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; };
             r.readAsDataURL(i.files[0]);
         };
 
+        window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, c = document.getElementById('oc').value;
-            if(!n || !p) return alert("Fill Name/Phone!");
-            await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: c, creatorId: window.activeOrder.creatorId, time: serverTimestamp() });
+            const n = document.getElementById('on').value, p = document.getElementById('op').value;
+            if(!n || !p) return alert("Fill data!");
+            await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, creatorId: window.activeOrder.creatorId, time: serverTimestamp() });
             window.open(window.activeOrder.link, '_blank');
             document.getElementById('order-modal').classList.add('hidden');
         };
 
-        window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
         window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
-        window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.search = (v) => renderGrid(allProds.filter(p => p.name.toLowerCase().includes(v.toLowerCase())), 'grid-feed');
+        window.delP = async (id) => { if(confirm("Delete this?")) await deleteDoc(doc(db, "products", id)); };
     </script>
 </body>
 </html>
