@@ -1,320 +1,256 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Secure System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .raj-font { font-family: 'Cinzel', serif; }
-        .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
-        .hidden { display: none !important; }
-        
-        .banner-container { height: 250px; width: 100%; position: relative; background: #222; overflow: hidden; border-radius: 0 0 40px 40px; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-holder { position: absolute; bottom: -50px; left: 20px; z-index: 10; display: flex; align-items: flex-end; gap: 15px; }
-        .p-img { width: 120px; height: 120px; border-radius: 30px; border: 5px solid white; object-fit: cover; background: #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        
-        .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 700; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .badge-msg { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; border: 2px solid white; }
-        
-        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.3s; }
-    </style>
-</head>
-<body class="pb-24">
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <div id="loading-screen" class="min-h-screen flex items-center justify-center bg-white fixed inset-0 z-[2000]">
-        <h2 class="raj-font text-2xl animate-pulse text-[#d4af37]">SAINIWALAA...</h2>
-    </div>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", 
+        authDomain: "social-blog-93d38.firebaseapp.com", 
+        projectId: "social-blog-93d38", 
+        storageBucket: "social-blog-93d38.appspot.com", 
+        appId: "1:78643219054:web:dprl2lyih" 
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    <div id="auth-section" class="min-h-screen flex items-center justify-center bg-white hidden">
-        <div class="w-full max-w-sm p-8 text-center">
-            <h1 class="raj-font text-5xl text-[#d4af37] mb-10">SAINIWALAA</h1>
-            <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-4 border-b mb-4 outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-10 outline-none">
-            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-3xl font-bold shadow-2xl">ENTER THE HUB</button>
-        </div>
-    </div>
+    let curU = null; let viewId = null; let allProds = [];
 
-    <main id="main-app" class="hidden">
-        <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md flex justify-around border-b border-gray-100">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Trending</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Mhari Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Orders</button>
-            <button onclick="logout()" class="p-5 text-red-500"><i class="fa-solid fa-power-off"></i></button>
-        </nav>
+    setPersistence(auth, browserLocalPersistence);
 
-        <section id="sec-shop" class="hidden">
-            <div class="banner-container">
-                <img id="banner-ui" src="" class="banner-img">
-                <div class="profile-holder">
-                    <div class="relative">
-                        <img id="profile-ui" src="" class="p-img">
-                        <label class="absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-xl cursor-pointer owner-only hidden">
-                            <i class="fa-solid fa-camera"></i>
-                            <input type="file" onchange="uploadMedia('profile', this)" class="hidden">
-                        </label>
-                    </div>
-                    <div class="mb-4">
-                        <h2 id="disp-name" class="font-black text-white text-2xl drop-shadow-lg">Creator</h2>
-                        <div class="flex gap-2 mt-2">
-                            <button id="msg-btn" onclick="openMsg()" class="bg-[#d4af37] text-white text-[10px] px-6 py-2 rounded-full font-bold uppercase shadow-lg">Message</button>
-                            <div onclick="showTab('chats')" class="relative bg-white p-2 rounded-xl cursor-pointer owner-only hidden">
-                                <i class="fa-solid fa-envelope text-gray-700"></i>
-                                <span id="msg-count" class="badge-msg hidden">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <label class="absolute top-4 right-4 bg-black/30 p-3 rounded-xl cursor-pointer text-white owner-only hidden">
-                    <i class="fa-solid fa-image"></i>
-                    <input type="file" onchange="uploadMedia('banner', this)" class="hidden">
-                </label>
-            </div>
+    onAuthStateChanged(auth, u => {
+        document.getElementById('loading-screen').classList.add('hidden');
+        if(u) {
+            curU = u;
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            loadCore();
+            
+            const lastTab = localStorage.getItem('activeTab') || 'feed';
+            const lastShop = localStorage.getItem('viewingShopId');
+            if(lastTab === 'shop' && lastShop) viewProfile(lastShop);
+            else showTab(lastTab);
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+    });
 
-            <div class="mt-20 px-6 text-center">
-                <p id="disp-bio" class="inline-block p-4 rounded-2xl shadow-sm border border-gray-100 bg-white min-w-[280px]">Loading bio...</p>
-                <div class="mt-6 flex justify-center gap-3">
-                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-8 py-3 rounded-full font-bold owner-only hidden uppercase">Edit Profile</button>
-                </div>
-            </div>
-
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-6 mt-6 bg-white border rounded-[35px] shadow-xl space-y-4">
-                <input id="in-name" placeholder="Display Name" class="w-full p-3 border-b outline-none">
-                <input id="in-bio" placeholder="Bio text" class="w-full p-3 border-b outline-none">
-                <div class="flex gap-2">
-                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer">
-                    <input type="number" id="in-bio-size" placeholder="Size (e.g. 16)" class="w-full p-2 border-b outline-none">
-                </div>
-                <button onclick="saveProfile()" class="w-full bg-black text-white p-4 rounded-2xl font-bold">SAVE UPDATES</button>
-            </div>
-
-            <div class="max-w-4xl mx-auto p-6 mt-10 owner-only hidden">
-                <div class="bg-white border-2 border-dashed p-8 rounded-[40px] shadow-sm text-center">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-left">
-                        <input id="p-name" placeholder="Item Name" class="p-3 border-b outline-none">
-                        <input id="p-price" placeholder="Price ₹" class="p-3 border-b outline-none">
-                        <input id="p-cat" placeholder="Category" class="p-3 border-b outline-none">
-                        <input id="p-link" placeholder="Product Link" class="p-3 border-b outline-none">
-                    </div>
-                    <textarea id="p-desc" placeholder="Product description (Red text)" class="w-full p-3 border-b mb-6 outline-none h-20"></textarea>
-                    <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
-                    <label for="p-file" class="bg-gray-50 p-6 block rounded-2xl cursor-pointer font-bold text-gray-400 mb-6 border">CHOOSE PRODUCT IMAGE</label>
-                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-5 rounded-3xl font-bold uppercase">Publish Now</button>
-                </div>
-            </div>
-
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 max-w-7xl mx-auto mt-10"></div>
-        </section>
-
-        <section id="sec-feed" class="hidden p-6 max-w-7xl mx-auto">
-            <input type="text" id="search-input" oninput="filterFeed()" placeholder="Search anything..." class="w-full p-5 bg-white border-b rounded-3xl shadow-sm outline-none mb-10">
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
-        </section>
-
-        <section id="sec-chats" class="hidden p-6 max-w-xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Messages</h2>
-            <div id="chat-list" class="space-y-4"></div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Order Management</h2>
-            <div id="order-list" class="space-y-4"></div>
-        </section>
-    </main>
-
-    <div id="order-modal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-10 text-center">
-            <h3 class="raj-font text-2xl mb-8">Confirm Order</h3>
-            <input id="o-name" placeholder="Full Name" class="w-full p-4 border-b mb-4 outline-none">
-            <input id="o-phone" placeholder="Phone Number" class="w-full p-4 border-b mb-8 outline-none">
-            <button onclick="confirmOrder()" class="w-full bg-black text-white py-5 rounded-3xl font-bold uppercase shadow-xl">Confirm & Open</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-6 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let curU = null; let viewId = null; let allProds = [];
-
-        setPersistence(auth, browserLocalPersistence);
-
-        // --- AUTH LOGIC ---
-        onAuthStateChanged(auth, u => {
-            document.getElementById('loading-screen').classList.add('hidden');
-            if(u) {
-                curU = u;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                loadCore();
-                
-                // Restore state
-                const lastTab = localStorage.getItem('activeTab') || 'feed';
-                const lastShop = localStorage.getItem('viewingShopId');
-                if(lastTab === 'shop' && lastShop) viewProfile(lastShop);
-                else showTab(lastTab);
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-            }
+    function loadCore() {
+        // Load Feed
+        onSnapshot(collection(db, "products"), s => {
+            allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
+            render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
         });
 
-        function loadCore() {
-            onSnapshot(collection(db, "products"), s => {
-                allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
-                render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
+        // Load Chats
+        onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid)), s => {
+            document.getElementById('msg-count').innerText = s.size;
+            document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
+            const l = document.getElementById('chat-list'); l.innerHTML = "";
+            s.forEach(d => {
+                const c = d.data();
+                l.innerHTML += `<div class="bg-white p-5 rounded-3xl border shadow-sm flex justify-between items-center">
+                    <p class="text-sm">"${c.msg}"</p>
+                    <button onclick="viewProfile('${c.from}')" class="text-xs font-bold text-[#d4af37]">OPEN</button>
+                </div>`;
             });
+        });
 
-            onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid)), s => {
-                document.getElementById('msg-count').innerText = s.size;
-                document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
-                const l = document.getElementById('chat-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const c = d.data();
-                    l.innerHTML += `<div class="bg-white p-5 rounded-3xl border shadow-sm flex justify-between items-center">
-                        <p class="text-sm">"${c.msg}"</p>
-                        <button onclick="viewProfile('${c.from}')" class="text-xs font-bold text-[#d4af37]">OPEN</button>
-                    </div>`;
-                });
-            });
-
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
-                const l = document.getElementById('order-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const o = d.data();
-                    const dt = o.time ? o.time.toDate().toLocaleString('en-IN') : '...';
-                    l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm mb-3">
-                        <div class="flex justify-between font-bold"><span>${o.item}</span><span class="text-green-500">₹${o.price}</span></div>
-                        <p class="text-xs text-gray-500">By: ${o.customer} (${o.phone})</p>
-                        <p class="text-[10px] text-gray-400 mt-2">${dt}</p>
-                    </div>`;
-                });
-            });
-        }
-
-        // --- GLOBAL FUNCTIONS ---
-        window.showTab = (t) => {
-            localStorage.setItem('activeTab', t);
-            ['feed','shop','chats','orders'].forEach(s => {
-                const section = document.getElementById('sec-'+s);
-                const btn = document.getElementById('tab-'+s);
-                if(section) section.classList.toggle('hidden', s !== t);
-                if(btn) btn.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && !viewId) viewProfile(curU.uid);
-        };
-
-        window.viewProfile = async (uid) => {
-            viewId = uid;
-            localStorage.setItem('viewingShopId', uid);
-            const isMe = (curU.uid === uid);
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
-            document.getElementById('msg-btn').classList.toggle('hidden', isMe);
-
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){
-                const d = s.data();
-                document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
-                const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Welcome to my shop!";
-                b.style.color = d.bioColor || '#444';
-                b.style.fontSize = (d.bioSize || '14') + 'px';
-                document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop";
-            }
+        // --- ORDER HISTORY LOGIC UPDATE ---
+        // Humne orderBy ko hataya hai temporarily taaki agar index na ho tab bhi orders dikhen
+        const qOrders = query(collection(db, "orders"), where("creatorId", "==", curU.uid));
+        onSnapshot(qOrders, s => {
+            const l = document.getElementById('order-list'); 
+            l.innerHTML = "";
+            let ordersArr = [];
             
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                render(p, 'my-shop-grid', isMe);
-            });
-            showTab('shop');
-        };
+            s.forEach(d => ordersArr.push({id: d.id, ...d.data()}));
+            
+            // Manual Sorting (Latest First)
+            ordersArr.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
 
-        window.previewProd = (input) => {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    window.tempImg = e.target.result;
-                    document.getElementById('pub-btn').classList.remove('hidden');
-                    alert("Image Ready!");
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        };
+            ordersArr.forEach(o => {
+                // Time Formatting Logic
+                let timeStr = "Processing...";
+                if(o.time) {
+                    const date = o.time.toDate();
+                    timeStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
+                              " | " + 
+                              date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                }
 
-        window.render = (data, cid, mine = false) => {
-            const g = document.getElementById(cid); g.innerHTML = "";
-            data.forEach(p => {
-                g.innerHTML += `<div class="product-card">
-                    <div class="aspect-square overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
-                    <div class="p-4">
-                        <button onclick="viewProfile('${p.creatorId}')" class="text-[10px] font-bold text-gray-400 mb-1">BY @${p.creator.split(' ')[0]}</button>
-                        <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="desc-text">${p.desc || ''}</p>
-                        <div class="flex justify-between items-center mt-4">
-                            <span class="font-bold text-lg">₹${p.price}</span>
-                            <div class="flex gap-2">
-                                ${mine ? `<button onclick="delProd('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
-                                <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase">Order</button>
-                            </div>
-                        </div>
+                l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm mb-3">
+                    <div class="flex justify-between font-bold">
+                        <span class="text-gray-800">${o.item}</span>
+                        <span class="text-green-600">₹${o.price || '0'}</span>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-600">
+                        <p><i class="fa-solid fa-user mr-2 text-[10px]"></i>${o.customer}</p>
+                        <p><i class="fa-solid fa-phone mr-2 text-[10px]"></i>${o.phone}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-dashed">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${timeStr}</span>
+                        <span class="text-[10px] bg-gray-100 px-3 py-1 rounded-full text-gray-500">NEW ORDER</span>
                     </div>
                 </div>`;
             });
-        };
 
-        window.handleAuth = () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("Fill details");
-            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
-        };
+            if(ordersArr.length === 0) {
+                l.innerHTML = "<p class='text-center text-gray-400 mt-10'>No orders yet.</p>";
+            }
+        });
+    }
 
-        window.publish = async () => {
-            const name = document.getElementById('p-name').value;
-            if(!name || !window.tempImg) return alert("Photo + Name required");
-            await addDoc(collection(db, "products"), { 
-                name, price: document.getElementById('p-price').value, 
-                cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value,
-                link: document.getElementById('p-link').value, img: window.tempImg, 
-                creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() 
+    // --- REMAINDER FUNCTIONS (NO CHANGES TO UI/STYLE) ---
+    window.showTab = (t) => {
+        localStorage.setItem('activeTab', t);
+        ['feed','shop','chats','orders'].forEach(s => {
+            const section = document.getElementById('sec-'+s);
+            const btn = document.getElementById('tab-'+s);
+            if(section) section.classList.toggle('hidden', s !== t);
+            if(btn) btn.classList.toggle('active', s === t);
+        });
+        if(t === 'shop' && !viewId) viewProfile(curU.uid);
+    };
+
+    window.viewProfile = async (uid) => {
+        viewId = uid;
+        localStorage.setItem('viewingShopId', uid);
+        const isMe = (curU.uid === uid);
+        document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
+        document.getElementById('msg-btn').classList.toggle('hidden', isMe);
+
+        const s = await getDoc(doc(db, "users", uid));
+        if(s.exists()){
+            const d = s.data();
+            document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
+            const b = document.getElementById('disp-bio');
+            b.innerText = d.bio || "Welcome to my shop!";
+            b.style.color = d.bioColor || '#444';
+            b.style.fontSize = (d.bioSize || '14') + 'px';
+            document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
+            document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop";
+        }
+        
+        onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
+            const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
+            render(p, 'my-shop-grid', isMe);
+        });
+        showTab('shop');
+    };
+
+    window.render = (data, cid, mine = false) => {
+        const g = document.getElementById(cid); g.innerHTML = "";
+        data.forEach(p => {
+            g.innerHTML += `<div class="product-card">
+                <div class="aspect-square overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
+                <div class="p-4">
+                    <button onclick="viewProfile('${p.creatorId}')" class="text-[10px] font-bold text-gray-400 mb-1">BY @${p.creator ? p.creator.split(' ')[0] : 'User'}</button>
+                    <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                    <p class="desc-text">${p.desc || ''}</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="font-bold text-lg">₹${p.price}</span>
+                        <div class="flex gap-2">
+                            ${mine ? `<button onclick="delProd('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            <button onclick="triggerOrder('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase">Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    };
+
+    window.handleAuth = () => {
+        const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+        if(!e || !p) return alert("Fill details");
+        signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
+    };
+
+    window.publish = async () => {
+        const name = document.getElementById('p-name').value;
+        if(!name || !window.tempImg) return alert("Photo + Name required");
+        await addDoc(collection(db, "products"), { 
+            name, 
+            price: document.getElementById('p-price').value || "0", 
+            cat: document.getElementById('p-cat').value || "General", 
+            desc: document.getElementById('p-desc').value || "",
+            link: document.getElementById('p-link').value || "", 
+            img: window.tempImg, 
+            creatorId: curU.uid, 
+            creator: document.getElementById('disp-name').innerText, 
+            time: serverTimestamp() 
+        });
+        alert("Published!");
+        location.reload();
+    };
+
+    window.triggerOrder = (n, cid, l, p) => { 
+        window.target = { n, cid, l, p }; 
+        document.getElementById('order-modal').classList.remove('hidden'); 
+    };
+
+    window.confirmOrder = async () => {
+        const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
+        if(!cn || !ph) return alert("Please fill Name and Phone");
+        
+        try {
+            await addDoc(collection(db, "orders"), { 
+                item: window.target.n, 
+                customer: cn, 
+                phone: ph, 
+                creatorId: window.target.cid, 
+                price: window.target.p || "0", 
+                time: serverTimestamp() 
             });
-            location.reload();
-        };
-
-        window.logout = () => { if(confirm("Logout?")) { localStorage.clear(); signOut(auth).then(() => location.reload()); } };
-        window.triggerOrder = (n, cid, l, p) => { window.target = { n, cid, l, p }; document.getElementById('order-modal').classList.remove('hidden'); };
-        window.confirmOrder = async () => {
-            const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
-            if(!cn || !ph) return alert("Details?");
-            await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
+            
             document.getElementById('order-modal').classList.add('hidden');
-            if(window.target.l && window.target.l !== "undefined") window.open(window.target.l, '_blank');
-        };
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", curU.uid), { 
-                name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value,
-                bioColor: document.getElementById('in-bio-color').value, bioSize: document.getElementById('in-bio-size').value
-            }, { merge: true });
-            location.reload();
-        };
-        window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
-        window.openMsg = () => { const m = prompt("Message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
-        window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.filterFeed = () => {
-            const val = document.getElementById('search-input').value.toLowerCase();
-            render(allProds.filter(p => p.name.toLowerCase().includes(val) || p.cat?.toLowerCase().includes(val)), 'public-grid');
-        };
-    </script>
-</body>
-</html>
+            alert("Order Placed Successfully!");
+            
+            if(window.target.l && window.target.l !== "undefined" && window.target.l !== "") {
+                window.open(window.target.l, '_blank');
+            }
+        } catch(e) {
+            alert("Order Error: " + e.message);
+        }
+    };
+
+    window.saveProfile = async () => {
+        await setDoc(doc(db, "users", curU.uid), { 
+            name: document.getElementById('in-name').value, 
+            bio: document.getElementById('in-bio').value,
+            bioColor: document.getElementById('in-bio-color').value, 
+            bioSize: document.getElementById('in-bio-size').value
+        }, { merge: true });
+        location.reload();
+    };
+
+    window.uploadMedia = (t, i) => { 
+        const r = new FileReader(); 
+        r.readAsDataURL(i.files[0]); 
+        r.onload = async e => { 
+            await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); 
+            location.reload(); 
+        } 
+    };
+
+    window.logout = () => { if(confirm("Logout?")) { localStorage.clear(); signOut(auth).then(() => location.reload()); } };
+    window.openMsg = () => { const m = prompt("Message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
+    window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
+    window.filterFeed = () => {
+        const val = document.getElementById('search-input').value.toLowerCase();
+        render(allProds.filter(p => p.name.toLowerCase().includes(val) || p.cat?.toLowerCase().includes(val)), 'public-grid');
+    };
+    window.previewProd = (input) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                window.tempImg = e.target.result;
+                document.getElementById('pub-btn').classList.remove('hidden');
+                alert("Image Selected!");
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+</script>
