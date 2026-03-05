@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Elite Influencer Hub</title>
+    <title>SAINIWALAA | Elite Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #0a0a0a; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background: #0a0a0a; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         .raj-font { font-family: 'Cinzel', serif; }
-        
         .saini-header {
             background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fcf6ba, #bf953f);
             background-size: 400% 400%;
@@ -19,117 +18,119 @@
             animation: gradient-flow 5s ease infinite;
             font-weight: 900;
         }
-
-        @keyframes gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .nav-btn { position: relative; transition: 0.3s; color: #666; font-size: 10px; font-weight: 800; letter-spacing: 2px; }
-        .nav-btn.active { color: #d4af37; }
-        .nav-btn.active::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 20px; height: 2px; background: #d4af37; box-shadow: 0 0 10px #d4af37; }
-
-        .banner-container { height: 280px; width: 100%; position: relative; background: #111; overflow: hidden; border-radius: 0 0 40px 40px; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        .profile-holder { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); z-index: 100; text-align: center; width: 100%; }
-        .p-img { width: 140px; height: 140px; border-radius: 50%; border: 4px solid #1a1a1a; object-fit: cover; background: #222; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
-        .product-card { background: #151515; border-radius: 25px; overflow: hidden; border: 1px solid #222; transition: 0.4s; }
-        .product-card:hover { transform: translateY(-10px); border-color: #d4af37; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; }
+        .nav-btn { color: #666; font-size: 11px; font-weight: 800; letter-spacing: 2px; transition: 0.3s; }
+        .nav-btn.active { color: #d4af37; border-bottom: 2px solid #d4af37; }
         
-        .desc-text { color: #ff3e3e !important; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 5px; }
-        input, textarea { background: #1a1a1a !important; color: white !important; border: 1px solid #333 !important; }
+        .p-img { width: 130px; height: 130px; border-radius: 50%; border: 3px solid #d4af37; object-fit: cover; }
+        .product-card { background: #111; border-radius: 20px; border: 1px solid #222; overflow: hidden; }
+        
+        input, select, textarea { background: #151515 !important; color: white !important; border: 1px solid #333 !important; padding: 12px; border-radius: 12px; width: 100%; outline: none; }
         .hidden { display: none !important; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
-    <div id="loading-screen" class="fixed inset-0 z-[3000] bg-black flex flex-col items-center justify-center">
-        <h1 class="raj-font text-4xl saini-header animate-pulse tracking-[0.5em]">SAINIWALAA</h1>
+    <div id="loading-screen" class="fixed inset-0 z-[5000] bg-black flex items-center justify-center">
+        <h1 class="raj-font text-3xl saini-header animate-pulse">SAINIWALAA</h1>
     </div>
 
     <div id="auth-section" class="min-h-screen flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-sm glass-card p-10 text-center">
-            <h1 class="raj-font text-6xl saini-header mb-2">S</h1>
-            <p class="text-gray-500 text-[8px] tracking-[0.5em] uppercase mb-10">Elite Influencer Blog</p>
-            <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-5 rounded-2xl mb-4 outline-none">
-            <input type="password" id="auth-pass" placeholder="Secret Password" class="w-full p-5 rounded-2xl mb-8 outline-none">
-            <button onclick="handleAuth()" class="w-full bg-gradient-to-r from-[#bf953f] to-[#b38728] text-black font-black py-5 rounded-2xl shadow-lg hover:scale-95 transition">SIGN IN / JOIN ELITE</button>
+            <h1 class="raj-font text-5xl saini-header mb-8">S</h1>
+            <input type="email" id="auth-email" placeholder="Email" class="mb-4">
+            <input type="password" id="auth-pass" placeholder="Password" class="mb-6">
+            <button onclick="handleAuth()" class="w-full bg-gradient-to-r from-[#bf953f] to-[#b38728] text-black font-bold py-4 rounded-xl">ENTER ELITE</button>
         </div>
     </div>
 
     <main id="main-app" class="hidden">
-        <header class="bg-black/80 backdrop-blur-md pt-8 pb-4 text-center sticky top-0 z-[200] border-b border-white/5">
-            <h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">SAINIWALAA</h1>
-            <p class="text-[8px] tracking-[0.6em] text-gray-500 uppercase mt-2">Influencer Blog & Marketplace</p>
+        <header class="bg-black/90 backdrop-blur-md p-6 text-center sticky top-0 z-[100] border-b border-white/5">
+            <h1 class="raj-font text-2xl saini-header tracking-widest">SAINIWALAA</h1>
         </header>
 
-        <nav class="sticky top-[85px] z-[150] bg-black/90 backdrop-blur-xl flex justify-around border-b border-white/5 px-4 mb-2">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-6 uppercase">Trending</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-6 uppercase">My Profile</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn py-6 uppercase">Inbox</button>
-            <button onclick="logout()" class="py-6 text-red-500/50"><i class="fa-solid fa-power-off"></i></button>
+        <nav class="flex justify-around bg-black border-b border-white/5">
+            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-4 uppercase">Feed</button>
+            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-4 uppercase">Profile</button>
+            <button onclick="logout()" class="py-4 text-red-800"><i class="fa-solid fa-power-off"></i></button>
         </nav>
 
-        <section id="sec-feed" class="hidden p-6 max-w-7xl mx-auto">
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
-        </section>
+        <section id="sec-feed" class="p-6 grid grid-cols-2 gap-4 hidden"></section>
 
         <section id="sec-shop" class="hidden">
-            <div class="banner-container">
-                <img id="banner-ui" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000" class="banner-img">
-                <div class="profile-holder">
-                    <img id="profile-ui" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Saini" class="p-img mx-auto">
-                    <h2 id="disp-name" class="raj-font font-bold text-2xl mt-4 saini-header">Creator</h2>
-                    <p id="disp-bio" class="text-gray-400 text-xs mt-2 italic px-10">Mhara Swagat hai!</p>
+            <div class="relative h-48 bg-gradient-to-b from-[#1a1a1a] to-black"></div>
+            <div class="text-center -mt-16 px-6 relative z-10">
+                <img id="profile-ui" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Saini" class="p-img mx-auto mb-4">
+                <h2 id="disp-name" class="raj-font font-bold">Creator</h2>
+                <p id="disp-bio" class="text-gray-400 text-sm italic mb-4">Mhara Swagat hai!</p>
+                
+                <div class="flex justify-center gap-3 mb-8">
+                    <button class="bg-[#d4af37] text-black px-6 py-2 rounded-full font-bold text-xs uppercase">Follow</button>
+                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-xs uppercase owner-only">Edit</button>
                 </div>
             </div>
 
-            <div class="mt-24 px-6 flex justify-center gap-4 owner-only hidden">
-                <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="bg-white/5 border border-white/10 px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest">Edit Profile</button>
-                <button onclick="document.getElementById('add-prod-box').classList.toggle('hidden')" class="bg-[#d4af37] text-black px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest">Add Product</button>
+            <div id="edit-box" class="hidden p-6 mx-6 glass-card space-y-3 mb-6">
+                <p class="text-[10px] text-[#d4af37] font-bold">PROFILE SETTINGS</p>
+                <input id="in-name" placeholder="Display Name">
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-name-color" type="color" title="Name Color">
+                    <input id="in-name-size" type="number" placeholder="Name Size (px)">
+                </div>
+                <textarea id="in-bio" placeholder="Bio"></textarea>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="in-bio-color" type="color" title="Bio Color">
+                    <input id="in-bio-size" type="number" placeholder="Bio Size (px)">
+                </div>
+                <button onclick="saveProfile()" class="w-full bg-white text-black py-3 rounded-xl font-bold">SAVE CHANGES</button>
             </div>
 
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-8 mt-6 glass-card space-y-4">
-                <input id="in-name" placeholder="Display Name" class="w-full p-4 rounded-xl outline-none">
-                <input id="in-bio" placeholder="Bio Message" class="w-full p-4 rounded-xl outline-none">
-                <button onclick="saveProfile()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase">Update Profile</button>
+            <div class="px-6 mb-10 owner-only">
+                <button onclick="document.getElementById('add-prod-box').classList.toggle('hidden')" class="w-full border border-dashed border-[#d4af37] py-4 rounded-2xl text-[#d4af37] text-xs font-bold">+ ADD NEW PRODUCT</button>
+                <div id="add-prod-box" class="hidden mt-4 glass-card p-6 space-y-3">
+                    <input id="p-name" placeholder="Product Name">
+                    <select id="p-cat">
+                        <option value="Elite">Elite</option>
+                        <option value="Gadgets">Gadgets</option>
+                        <option value="Fashion">Fashion</option>
+                    </select>
+                    <textarea id="p-desc" placeholder="Full Description"></textarea>
+                    <input id="p-price" placeholder="Price (₹)">
+                    <p class="text-[10px] text-gray-500">Upload Product Image:</p>
+                    <input type="file" id="p-file" accept="image/*">
+                    <button onclick="uploadProduct()" class="w-full bg-[#d4af37] text-black py-3 rounded-xl font-bold">PUBLISH</button>
+                </div>
             </div>
 
-            <div id="add-prod-box" class="hidden max-w-sm mx-auto p-8 mt-6 glass-card space-y-4">
-                <input id="p-name" placeholder="Product Name" class="w-full p-4 rounded-xl outline-none">
-                <input id="p-price" placeholder="Price (₹)" class="w-full p-4 rounded-xl outline-none">
-                <input id="p-desc" placeholder="Special Tag (e.g. 20% OFF)" class="w-full p-4 rounded-xl outline-none">
-                <input id="p-img" placeholder="Image URL" class="w-full p-4 rounded-xl outline-none">
-                <input id="p-link" placeholder="Purchase Link" class="w-full p-4 rounded-xl outline-none">
-                <button onclick="addProduct()" class="w-full bg-[#d4af37] text-black py-4 rounded-xl font-bold uppercase">Publish to Market</button>
+            <div class="px-6 space-y-10">
+                <div class="owner-only">
+                    <h3 class="raj-font text-[#d4af37] mb-4 border-b border-white/5 pb-2">Sales Inbox</h3>
+                    <div id="order-list" class="space-y-3"></div>
+                </div>
+
+                <div>
+                    <h3 class="raj-font text-[#d4af37] mb-4 border-b border-white/5 pb-2">My Shop</h3>
+                    <div id="my-shop-grid" class="grid grid-cols-2 gap-4"></div>
+                </div>
+
+                <div>
+                    <h3 class="raj-font text-blue-400 mb-4 border-b border-white/5 pb-2">My Orders (History)</h3>
+                    <div id="my-history" class="space-y-3 pb-10"></div>
+                </div>
             </div>
-
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 mt-10"></div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
-            <h2 class="raj-font text-2xl mb-8 border-l-4 border-[#d4af37] pl-4">Order Inbox</h2>
-            <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-[2000] bg-black/95 backdrop-blur-md flex items-center justify-center p-6">
-        <div class="glass-card w-full max-w-md p-10 text-center border-white/10">
-            <h3 class="raj-font text-2xl mb-2 saini-header">Checkout</h3>
-            <p id="modal-item-name" class="text-gray-500 text-xs uppercase mb-8"></p>
-            <input id="o-name" type="text" placeholder="Full Name" class="w-full p-5 rounded-2xl mb-4 outline-none">
-            <input id="o-phone" type="tel" placeholder="Mobile Number" class="w-full p-5 rounded-2xl mb-4 outline-none">
-            <input id="o-city" type="text" placeholder="City" class="w-full p-5 rounded-2xl mb-8 outline-none">
-            <button onclick="confirmOrder()" class="w-full bg-[#d4af37] text-black py-5 rounded-2xl font-black uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.3)]">Place Order Now</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-6 text-gray-500 text-[10px] font-bold uppercase tracking-widest">Cancel</button>
+    <div id="order-modal" class="hidden fixed inset-0 z-[2000] bg-black/90 flex items-center justify-center p-6">
+        <div class="glass-card w-full max-w-sm p-8 text-center">
+            <h3 class="raj-font saini-header text-xl mb-6">Confirm Purchase</h3>
+            <input id="o-name" placeholder="Your Name" class="mb-3">
+            <input id="o-phone" placeholder="Mobile Number" class="mb-3">
+            <input id="o-city" placeholder="City" class="mb-6">
+            <button onclick="confirmOrder()" class="w-full bg-[#d4af37] text-black py-4 rounded-xl font-bold">ORDER NOW</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-500 text-xs">CANCEL</button>
         </div>
     </div>
 
@@ -151,7 +152,7 @@
                 curU = u;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                loadAllData();
+                loadData();
                 showTab('feed');
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
@@ -159,42 +160,88 @@
             }
         });
 
-        function loadAllData() {
-            // Public Market Feed
+        function loadData() {
+            // Feed
             onSnapshot(collection(db, "products"), s => {
-                let p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                renderGrid(p, 'public-grid');
-            });
-
-            // My Inbox (Orders)
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
-                const list = document.getElementById('order-list'); list.innerHTML = "";
-                s.forEach(o => {
-                    const d = o.data();
-                    const date = d.time ? new Date(d.time.seconds * 1000).toLocaleString('en-IN') : 'New...';
-                    list.innerHTML += `
-                        <div class="glass-card p-6 relative">
-                            <button onclick="deleteOrder('${o.id}')" class="absolute top-4 right-4 text-white/20 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                            <div class="flex justify-between items-start mb-4">
-                                <div><h4 class="font-bold text-[#d4af37]">${d.item}</h4><p class="text-[10px] text-gray-500">${date}</p></div>
-                                <div class="text-right font-black">₹${d.price}</div>
-                            </div>
-                            <div class="text-[11px] grid grid-cols-2 gap-2 text-gray-400">
-                                <div>Name: <b class="text-white">${d.customer}</b></div>
-                                <div>City: <b class="text-white">${d.city || 'N/A'}</b></div>
-                                <div class="col-span-2">Phone: <b class="text-white">${d.phone}</b></div>
+                const g = document.getElementById('sec-feed'); g.innerHTML = "";
+                s.forEach(d => {
+                    const p = d.data();
+                    g.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.img}" class="w-full aspect-square object-cover">
+                            <div class="p-3">
+                                <span class="text-[8px] text-[#d4af37] uppercase font-bold">${p.cat || 'Elite'}</span>
+                                <h4 class="font-bold text-xs truncate">${p.name}</h4>
+                                <div class="flex justify-between items-center mt-3">
+                                    <span class="text-sm font-black">₹${p.price}</span>
+                                    <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.price}')" class="bg-white text-black text-[9px] px-3 py-1.5 rounded-lg font-bold">BUY</button>
+                                </div>
                             </div>
                         </div>`;
                 });
             });
+
+            // Sales Inbox (Orders I received)
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
+                const l = document.getElementById('order-list'); l.innerHTML = "";
+                s.forEach(d => {
+                    const o = d.data();
+                    l.innerHTML += `<div class="glass-card p-4 text-[11px] border-l-4 border-yellow-600">
+                        <div class="flex justify-between font-bold text-[#d4af37] mb-1"><span>${o.item}</span><span>₹${o.price}</span></div>
+                        <div>Buyer: ${o.customer} | ${o.phone}</div>
+                        <div class="text-gray-500 text-[9px] mt-1">${o.time?.toDate().toLocaleString() || 'Just now'}</div>
+                    </div>`;
+                });
+            });
+
+            // My Order History (Orders I placed)
+            onSnapshot(query(collection(db, "orders"), where("buyerId", "==", curU.uid), orderBy("time", "desc")), s => {
+                const l = document.getElementById('my-history'); l.innerHTML = "";
+                s.forEach(d => {
+                    const o = d.data();
+                    l.innerHTML += `<div class="glass-card p-4 text-[11px] border-l-4 border-blue-600">
+                        <div class="flex justify-between font-bold mb-1"><span>${o.item}</span><span>₹${o.price}</span></div>
+                        <div class="text-gray-500 text-[9px]">Ordered on: ${o.time?.toDate().toLocaleString() || 'Just now'}</div>
+                        <div class="text-green-500 uppercase text-[8px] mt-1">Confirmed</div>
+                    </div>`;
+                });
+            });
         }
 
-        window.showTab = (t) => {
-            ['feed','shop','orders'].forEach(s => {
-                document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s).classList.toggle('active', s === t);
-            });
-            if(t === 'shop') viewMyProfile(curU.uid);
+        window.uploadProduct = async () => {
+            const file = document.getElementById('p-file').files[0];
+            if(!file) return alert("Select an image!");
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const pData = {
+                    name: document.getElementById('p-name').value,
+                    cat: document.getElementById('p-cat').value,
+                    desc: document.getElementById('p-desc').value,
+                    price: document.getElementById('p-price').value,
+                    img: reader.result,
+                    creatorId: curU.uid,
+                    time: serverTimestamp()
+                };
+                await addDoc(collection(db, "products"), pData);
+                alert("Published!");
+                document.getElementById('add-prod-box').classList.add('hidden');
+            };
+        };
+
+        window.saveProfile = async () => {
+            const up = {
+                name: document.getElementById('in-name').value,
+                nCol: document.getElementById('in-name-color').value,
+                nSize: document.getElementById('in-name-size').value,
+                bio: document.getElementById('in-bio').value,
+                bCol: document.getElementById('in-bio-color').value,
+                bSize: document.getElementById('in-bio-size').value
+            };
+            await setDoc(doc(db, "users", curU.uid), up, {merge: true});
+            viewMyProfile(curU.uid);
+            alert("Profile Updated!");
         };
 
         window.viewMyProfile = async (uid) => {
@@ -204,63 +251,44 @@
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
-                document.getElementById('disp-name').innerText = d.name || "Saini Creator";
-                document.getElementById('disp-bio').innerText = d.bio || "Mhara Swagat hai!";
+                const nameEl = document.getElementById('disp-name');
+                const bioEl = document.getElementById('disp-bio');
+                
+                nameEl.innerText = d.name || "Saini Creator";
+                nameEl.style.color = d.nCol || "#d4af37";
+                nameEl.style.fontSize = (d.nSize || 24) + "px";
+                
+                bioEl.innerText = d.bio || "Mhara Swagat hai!";
+                bioEl.style.color = d.bCol || "#9ca3af";
+                bioEl.style.fontSize = (d.bSize || 14) + "px";
             }
-
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                let p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                renderGrid(p, 'my-shop-grid', isMe);
-            });
-        };
-
-        window.renderGrid = (data, cid, mine = false) => {
-            const g = document.getElementById(cid); g.innerHTML = "";
-            data.forEach(p => {
-                g.innerHTML += `
-                    <div class="product-card">
-                        <img src="${p.img}" class="w-full aspect-square object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                            <p class="desc-text">${p.desc || ''}</p>
-                            <div class="flex justify-between items-center mt-4">
-                                <span class="font-black">₹${p.price}</span>
-                                ${mine ? `<button onclick="deleteProd('${p.id}')" class="text-red-500 text-[10px] uppercase font-bold">Remove</button>` : 
-                                `<button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.price}')" class="bg-white text-black text-[9px] font-bold px-4 py-2 rounded-lg">Buy Now</button>`}
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        };
-
-        window.addProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, i = document.getElementById('p-img').value, l = document.getElementById('p-link').value;
-            if(!n || !p || !i) return alert("All fields are required!");
-            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, img: i, link: l, creatorId: curU.uid, time: serverTimestamp() });
-            alert("Product Published!"); document.getElementById('add-prod-box').classList.add('hidden');
-        };
-
-        window.saveProfile = async () => {
-            const n = document.getElementById('in-name').value, b = document.getElementById('in-bio').value;
-            await setDoc(doc(db, "users", curU.uid), { name: n, bio: b }, { merge: true });
-            alert("Profile Updated!"); document.getElementById('edit-box').classList.add('hidden');
         };
 
         window.triggerOrder = (n, cid, p) => { 
             window.targetOrder = { n, cid, p }; 
-            document.getElementById('modal-item-name').innerText = n;
             document.getElementById('order-modal').classList.remove('hidden'); 
         };
 
         window.confirmOrder = async () => {
-            const n = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value, ct = document.getElementById('o-city').value;
-            if(!n || ph.length < 10 || !ct) return alert("Enter complete details!");
-            await addDoc(collection(db, "orders"), { item: window.targetOrder.n, customer: n, phone: ph, city: ct, price: window.targetOrder.p, creatorId: window.targetOrder.cid, time: serverTimestamp() });
-            document.getElementById('order-modal').classList.add('hidden'); alert("Order Successful!");
+            const data = {
+                item: window.targetOrder.n,
+                price: window.targetOrder.p,
+                creatorId: window.targetOrder.cid,
+                buyerId: curU.uid,
+                customer: document.getElementById('o-name').value,
+                phone: document.getElementById('o-phone').value,
+                city: document.getElementById('o-city').value,
+                time: serverTimestamp()
+            };
+            await addDoc(collection(db, "orders"), data);
+            alert("Order Placed!");
+            document.getElementById('order-modal').classList.add('hidden');
         };
 
-        window.deleteOrder = async (id) => { if(confirm("Delete this order?")) await deleteDoc(doc(db, "orders", id)); };
-        window.deleteProd = async (id) => { if(confirm("Remove this product?")) await deleteDoc(doc(db, "products", id)); };
+        window.showTab = (t) => {
+            ['feed','shop'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', s !== t));
+            if(t === 'shop') viewMyProfile(curU.uid);
+        };
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
             signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
