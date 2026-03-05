@@ -1,294 +1,207 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Secure System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .raj-font { font-family: 'Cinzel', serif; }
-        .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
-        .hidden { display: none !important; }
-        
-        .banner-container { height: 250px; width: 100%; position: relative; background: #222; overflow: hidden; border-radius: 0 0 40px 40px; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-holder { position: absolute; bottom: -50px; left: 20px; z-index: 10; display: flex; align-items: flex-end; gap: 15px; }
-        .p-img { width: 120px; height: 120px; border-radius: 30px; border: 5px solid white; object-fit: cover; background: #eee; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        
-        /* Fixed RED description as requested */
-        .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 700; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .badge-msg { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; border: 2px solid white; }
-        
-        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.3s; }
-    </style>
-</head>
-<body class="pb-24">
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <div id="loading-screen" class="min-h-screen flex items-center justify-center bg-white fixed inset-0 z-[2000]">
-        <h2 class="raj-font text-2xl animate-pulse text-[#d4af37]">SAINIWALAA...</h2>
-    </div>
+    const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    <div id="auth-section" class="min-h-screen flex items-center justify-center bg-white hidden">
-        <div class="w-full max-w-sm p-8 text-center">
-            <h1 class="raj-font text-5xl text-[#d4af37] mb-10">SAINIWALAA</h1>
-            <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-4 border-b mb-4 outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-10 outline-none">
-            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-3xl font-bold shadow-2xl">ENTER THE HUB</button>
-        </div>
-    </div>
+    let curU = null; 
+    let viewId = null; 
+    let allProds = [];
 
-    <main id="main-app" class="hidden">
-        <nav class="sticky top-0 z-[100] bg-white/90 backdrop-blur-md flex justify-around border-b border-gray-100">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Trending</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Mhari Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-5 text-[11px] font-bold uppercase tracking-widest">Orders</button>
-            <button onclick="logout()" class="p-5 text-red-500"><i class="fa-solid fa-power-off"></i></button>
-        </nav>
+    // Force persistence so it doesn't logout on refresh
+    setPersistence(auth, browserLocalPersistence);
 
-        <section id="sec-shop" class="hidden">
-            <div class="banner-container">
-                <img id="banner-ui" src="" class="banner-img">
-                <div class="profile-holder">
-                    <div class="relative">
-                        <img id="profile-ui" src="" class="p-img">
-                        <label class="absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-xl cursor-pointer owner-only hidden"><i class="fa-solid fa-camera"></i><input type="file" onchange="uploadMedia('profile', this)" class="hidden"></label>
-                    </div>
-                    <div class="mb-4">
-                        <h2 id="disp-name" class="font-black text-white text-2xl drop-shadow-lg">Creator</h2>
-                        <div class="flex gap-2 mt-2">
-                            <button id="msg-btn" onclick="openMsg()" class="bg-[#d4af37] text-white text-[10px] px-6 py-2 rounded-full font-bold uppercase shadow-lg">Message</button>
-                            <div onclick="showTab('chats')" class="relative bg-white p-2 rounded-xl cursor-pointer owner-only hidden">
-                                <i class="fa-solid fa-envelope text-gray-700"></i>
-                                <span id="msg-count" class="badge-msg hidden">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <label class="absolute top-4 right-4 bg-black/30 p-3 rounded-xl cursor-pointer text-white owner-only hidden"><i class="fa-solid fa-image"></i><input type="file" onchange="uploadMedia('banner', this)" class="hidden"></label>
-            </div>
+    // 1. AUTH STATE CHECK
+    onAuthStateChanged(auth, u => {
+        const loader = document.getElementById('loading-screen');
+        const authSec = document.getElementById('auth-section');
+        const mainApp = document.getElementById('main-app');
 
-            <div class="mt-20 px-6 text-center">
-                <p id="disp-bio" class="inline-block p-4 rounded-2xl shadow-sm border border-gray-100 bg-white min-w-[280px]">Loading bio...</p>
-                <div class="mt-6 flex justify-center gap-3">
-                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-8 py-3 rounded-full font-bold owner-only hidden uppercase">Edit Profile</button>
-                </div>
-            </div>
+        if(u) {
+            curU = u;
+            authSec.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            loader.classList.add('hidden');
+            
+            loadCore();
 
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-6 mt-6 bg-white border rounded-[35px] shadow-xl space-y-4">
-                <input id="in-name" placeholder="Display Name" class="w-full p-3 border-b outline-none">
-                <input id="in-bio" placeholder="Bio text" class="w-full p-3 border-b outline-none">
-                <div class="flex gap-2">
-                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer">
-                    <input type="number" id="in-bio-size" placeholder="Size (e.g. 16)" class="w-full p-2 border-b outline-none">
-                </div>
-                <button onclick="saveProfile()" class="w-full bg-black text-white p-4 rounded-2xl font-bold">SAVE UPDATES</button>
-            </div>
+            // Restore last state
+            const lastTab = localStorage.getItem('activeTab') || 'feed';
+            const lastShopView = localStorage.getItem('viewingShopId');
 
-            <div class="max-w-4xl mx-auto p-6 mt-10 owner-only hidden">
-                <div class="bg-white border-2 border-dashed p-8 rounded-[40px] shadow-sm">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <input id="p-name" placeholder="Item Name" class="p-3 border-b outline-none">
-                        <input id="p-price" placeholder="Price ₹" class="p-3 border-b outline-none">
-                        <input id="p-cat" placeholder="Category" class="p-3 border-b outline-none">
-                        <input id="p-link" placeholder="Product Link" class="p-3 border-b outline-none">
-                    </div>
-                    <textarea id="p-desc" placeholder="Product description (Will show in red)" class="w-full p-3 border-b mb-6 outline-none h-20"></textarea>
-                    <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
-                    <label for="p-file" class="bg-gray-50 p-6 block rounded-2xl cursor-pointer font-bold text-gray-400 mb-6 text-center">CHOOSE PRODUCT IMAGE</label>
-                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-5 rounded-3xl font-bold uppercase">Publish Now</button>
-                </div>
-            </div>
-
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 max-w-7xl mx-auto mt-10"></div>
-        </section>
-
-        <section id="sec-feed" class="hidden p-6 max-w-7xl mx-auto">
-            <div class="flex gap-4 mb-10">
-                <input type="text" id="search-input" oninput="filterFeed()" placeholder="Search anything..." class="w-full p-5 bg-white border-b rounded-3xl shadow-sm outline-none">
-            </div>
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
-        </section>
-
-        <section id="sec-chats" class="hidden p-6 max-w-xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Messages</h2>
-            <div id="chat-list" class="space-y-4"></div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Order Management</h2>
-            <div id="order-list" class="space-y-4"></div>
-        </section>
-    </main>
-
-    <div id="order-modal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-10 text-center">
-            <h3 class="raj-font text-2xl mb-8">Confirm Order</h3>
-            <input id="o-name" placeholder="Full Name" class="w-full p-4 border-b mb-4 outline-none">
-            <input id="o-phone" placeholder="Phone Number" class="w-full p-4 border-b mb-8 outline-none">
-            <button onclick="confirmOrder()" class="w-full bg-black text-white py-5 rounded-3xl font-bold uppercase shadow-xl">Confirm & Open</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-6 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let curU = null; 
-        let viewId = null; 
-        let allProds = [];
-
-        // PERSISTENCE SET TO LOCAL
-        setPersistence(auth, browserLocalPersistence);
-
-        onAuthStateChanged(auth, u => {
-            document.getElementById('loading-screen').classList.add('hidden');
-            if(u) {
-                curU = u;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                loadCore();
-                
-                // RESTORE TAB AFTER REFRESH
-                const lastTab = sessionStorage.getItem('activeTab') || 'feed';
-                const lastShop = new URLSearchParams(window.location.search).get('shop');
-                
-                if(lastShop) viewProfile(lastShop);
-                else showTab(lastTab);
+            if (lastTab === 'shop' && lastShopView) {
+                viewProfile(lastShopView);
             } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
+                showTab(lastTab);
             }
+        } else {
+            authSec.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+            loader.classList.add('hidden');
+        }
+    });
+
+    // 2. SHOW TAB LOGIC (With Storage)
+    window.showTab = (t) => {
+        localStorage.setItem('activeTab', t);
+        if (t !== 'shop') localStorage.removeItem('viewingShopId');
+
+        ['feed','shop','chats','orders'].forEach(s => {
+            const section = document.getElementById('sec-'+s);
+            const btn = document.getElementById('tab-'+s);
+            if(section) section.classList.toggle('hidden', s !== t);
+            if(btn) btn.classList.toggle('active', s === t);
         });
 
-        function loadCore() {
-            onSnapshot(collection(db, "products"), s => {
-                allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
-                render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
-            });
+        if(t === 'shop' && !viewId) viewProfile(curU.uid);
+    };
 
-            onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid)), s => {
-                document.getElementById('msg-count').innerText = s.size;
-                document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
-                const l = document.getElementById('chat-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const c = d.data();
-                    l.innerHTML += `<div class="bg-white p-5 rounded-3xl border shadow-sm flex justify-between items-center">
-                        <p class="text-sm font-medium">"${c.msg}"</p>
-                        <button onclick="viewProfile('${c.from}')" class="text-xs font-bold text-[#d4af37] bg-gray-50 px-4 py-2 rounded-full">OPEN PROFILE</button>
-                    </div>`;
-                });
-            });
+    // 3. VIEW PROFILE LOGIC
+    window.viewProfile = async (uid) => {
+        viewId = uid;
+        localStorage.setItem('viewingShopId', uid);
+        localStorage.setItem('activeTab', 'shop');
 
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
-                const l = document.getElementById('order-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const o = d.data();
-                    const dt = o.time ? o.time.toDate().toLocaleString('en-IN') : 'Processing...';
-                    l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm">
-                        <div class="flex justify-between font-bold mb-2"><span>${o.item}</span><span class="text-green-500">₹${o.price || '0'}</span></div>
-                        <p class="text-xs text-gray-500">By: ${o.customer} (${o.phone})</p>
-                        <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">${dt}</p>
-                    </div>`;
-                });
-            });
+        const isMe = (curU.uid === uid);
+        document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
+        document.getElementById('msg-btn').classList.toggle('hidden', isMe);
+
+        const s = await getDoc(doc(db, "users", uid));
+        if(s.exists()){
+            const d = s.data();
+            document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
+            const b = document.getElementById('disp-bio');
+            b.innerText = d.bio || "Mhari Shop par swagat hai!";
+            b.style.color = d.bioColor || '#444';
+            b.style.fontSize = (d.bioSize || '14') + 'px';
+            document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
+            document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop";
         }
 
-        window.render = (data, cid, mine = false) => {
-            const g = document.getElementById(cid); g.innerHTML = "";
-            data.forEach(p => {
-                g.innerHTML += `<div class="product-card">
-                    <div class="aspect-square bg-gray-50 overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
-                    <div class="p-4">
-                        <button onclick="viewProfile('${p.creatorId}')" class="text-[10px] font-bold text-gray-400 mb-1 hover:text-[#d4af37]">BY @${p.creator.split(' ')[0]}</button>
-                        <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="desc-text">${p.desc || ''}</p>
-                        <div class="flex justify-between items-center mt-4">
-                            <span class="font-bold text-lg">₹${p.price}</span>
-                            <div class="flex gap-2">
-                                ${mine ? `<button onclick="delProd('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
-                                <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase">Order</button>
-                            </div>
-                        </div>
-                    </div>
+        onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
+            const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
+            render(p, 'my-shop-grid', isMe);
+        });
+        showTab('shop');
+    };
+
+    // 4. IMAGE PREVIEW FIX
+    window.previewProd = (input) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.tempImg = e.target.result;
+                const btn = document.getElementById('pub-btn');
+                btn.classList.remove('hidden');
+                btn.innerHTML = "Image Ready - Click to Publish";
+                alert("Photo select ho gayi!");
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    // 5. CORE LOADERS
+    function loadCore() {
+        onSnapshot(collection(db, "products"), s => {
+            allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
+            render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
+        });
+
+        onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid)), s => {
+            document.getElementById('msg-count').innerText = s.size;
+            document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
+            const l = document.getElementById('chat-list'); l.innerHTML = "";
+            s.forEach(d => {
+                const c = d.data();
+                l.innerHTML += `<div class="bg-white p-5 rounded-3xl border shadow-sm flex justify-between items-center">
+                    <p class="text-sm font-medium">"${c.msg}"</p>
+                    <button onclick="viewProfile('${c.from}')" class="text-xs font-bold text-[#d4af37]">OPEN</button>
                 </div>`;
             });
-        };
+        });
 
-        window.showTab = (t) => {
-            sessionStorage.setItem('activeTab', t);
-            ['feed','shop','chats','orders'].forEach(s => {
-                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
+        onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
+            const l = document.getElementById('order-list'); l.innerHTML = "";
+            s.forEach(d => {
+                const o = d.data();
+                const dt = o.time ? o.time.toDate().toLocaleString('en-IN') : 'Just now';
+                l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm mb-3">
+                    <div class="flex justify-between font-bold"><span>${o.item}</span><span class="text-green-500">₹${o.price}</span></div>
+                    <p class="text-xs text-gray-500">Customer: ${o.customer} (${o.phone})</p>
+                    <p class="text-[10px] text-gray-400 mt-2">${dt}</p>
+                </div>`;
             });
-            if(t === 'shop' && !viewId) viewProfile(curU.uid);
-        };
+        });
+    }
 
-        window.viewProfile = async (uid) => {
-            viewId = uid;
-            const isMe = (curU.uid === uid);
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
-            document.getElementById('msg-btn').classList.toggle('hidden', isMe);
+    // AUTH & ACTIONS
+    window.handleAuth = () => {
+        const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+        if(!e || !p) return alert("Email/Pass bhariye");
+        signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
+    };
 
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){
-                const d = s.data();
-                document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
-                const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Mhari Shop par swagat hai!";
-                b.style.color = d.bioColor || '#444';
-                b.style.fontSize = (d.bioSize || '14') + 'px';
-                document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop";
-            }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                render(p, 'my-shop-grid', isMe);
-            });
-            showTab('shop');
-        };
+    window.logout = () => {
+        if(confirm("Logout karein?")){
+            localStorage.clear();
+            signOut(auth).then(() => location.reload());
+        }
+    };
 
-        window.publish = async () => {
-            const name = document.getElementById('p-name').value;
-            if(!name || !window.tempImg) return alert("Photo select karein!");
-            await addDoc(collection(db, "products"), { 
-                name, price: document.getElementById('p-price').value, 
-                cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value,
-                link: document.getElementById('p-link').value, img: window.tempImg, 
-                creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() 
-            });
-            location.reload();
-        };
+    window.publish = async () => {
+        const name = document.getElementById('p-name').value;
+        if(!name || !window.tempImg) return alert("Photo aur Name zaruri hai!");
+        await addDoc(collection(db, "products"), { 
+            name, price: document.getElementById('p-price').value, 
+            cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value,
+            link: document.getElementById('p-link').value, img: window.tempImg, 
+            creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() 
+        });
+        alert("Product upload ho gaya!");
+        location.reload();
+    };
 
-        window.triggerOrder = (n, cid, l, p) => {
-            window.target = { n, cid, l, p };
-            document.getElementById('order-modal').classList.remove('hidden');
-        };
+    // Globalizing other functions
+    window.render = (data, cid, mine = false) => {
+        const g = document.getElementById(cid); g.innerHTML = "";
+        data.forEach(p => {
+            g.innerHTML += `<div class="product-card">
+                <div class="aspect-square bg-gray-50 overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
+                <div class="p-4">
+                    <button onclick="viewProfile('${p.creatorId}')" class="text-[10px] font-bold text-gray-400 mb-1">BY @${p.creator.split(' ')[0]}</button>
+                    <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                    <p class="desc-text">${p.desc || ''}</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="font-bold text-lg">₹${p.price}</span>
+                        <div class="flex gap-2">
+                            ${mine ? `<button onclick="delProd('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-5 py-2 rounded-full font-bold uppercase">Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    };
 
-        window.confirmOrder = async () => {
-            const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
-            if(!cn || !ph) return alert("Details bhariye!");
-            await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
-            document.getElementById('order-modal').classList.add('hidden');
-            if(window.target.l && window.target.l !== "undefined") window.open(window.target.l, '_blank');
-        };
-
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", curU.uid), { 
-                name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value,
-                bioColor: document.getElementById('in-bio-color').value, bioSize: document.getElementById('in-bio-size').value
-            }, { merge: true });
-            location.reload();
-        };
-
-        window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
-        window.previewProd = (i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload =
+    window.delProd = async (id) => { if(confirm("Delete Item?")) await deleteDoc(doc(db, "products", id)); };
+    window.saveProfile = async () => {
+        await setDoc(doc(db, "users", curU.uid), { 
+            name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value,
+            bioColor: document.getElementById('in-bio-color').value, bioSize: document.getElementById('in-bio-size').value
+        }, { merge: true });
+        location.reload();
+    };
+    window.triggerOrder = (n, cid, l, p) => { window.target = { n, cid, l, p }; document.getElementById('order-modal').classList.remove('hidden'); };
+    window.confirmOrder = async () => {
+        const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
+        if(!cn || !ph) return alert("Detail bhariye");
+        await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
+        document.getElementById('order-modal').classList.add('hidden');
+        if(window.target.l && window.target.l !== "undefined") window.open(window.target.l, '_blank');
+    };
+    window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
+</script>
