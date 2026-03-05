@@ -3,176 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Persistent Navigation</title>
+    <title>SAINIWALAA | Ultimate Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
-        
-        /* SAINIWALAA Header Animation */
         .saini-header {
             background: linear-gradient(to right, #d4af37 20%, #fff 40%, #fff 60%, #d4af37 80%);
-            background-size: 200% auto;
-            color: #000;
-            background-clip: text;
-            text-fill-color: transparent;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+            background-size: 200% auto; color: #000; background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; animation: shine 3s linear infinite;
         }
-
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
-        .banner-container { height: 260px; width: 100%; position: relative; background: #111; border-radius: 0 0 50px 50px; overflow: visible; }
+        @keyframes shine { to { background-position: 200% center; } }
+        .banner-container { height: 260px; width: 100%; position: relative; background: #111; border-radius: 0 0 50px 50px; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 50px 50px; }
-        .profile-holder { position: absolute; bottom: -90px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; }
-        .p-img { width: 135px; height: 135px; border-radius: 50%; border: 6px solid white; object-fit: cover; background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        .nav-btn { position: relative; transition: 0.3s; color: #999; }
-        .nav-btn.active { color: #d4af37; font-weight: 800; }
-        .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 3px; background: #d4af37; border-radius: 10px; }
+        .profile-holder { position: absolute; bottom: -90px; left: 50%; transform: translateX(-50%); z-index: 100; text-align: center; width: 100%; }
+        .p-img { width: 130px; height: 130px; border-radius: 50%; border: 6px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin: 0 auto; background: white; }
+        .nav-btn { position: relative; transition: 0.3s; color: #999; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-btn.active { color: #d4af37; }
+        .nav-btn.active::after { content: ''; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: #d4af37; border-radius: 10px; }
+        .product-card { background: white; border-radius: 25px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; }
+        .desc-text { color: #ff0000 !important; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
+        .chat-box { position: fixed; bottom: 20px; right: 20px; width: 320px; background: white; border-radius: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); z-index: 3000; display: none; overflow: hidden; border: 1px solid #eee; }
+        .chat-messages { height: 250px; overflow-y: auto; padding: 15px; background: #f9f9f9; font-size: 13px; }
         .hidden { display: none !important; }
-        .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
-        .badge-msg { position: absolute; top: -5px; right: -5px; background: #ff3b3b; color: white; border-radius: 50%; padding: 2px 7px; font-size: 10px; border: 2px solid white; font-weight: bold; }
-        .product-card { background: white; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        .inbox-card { background: white; padding: 20px; border-radius: 25px; border-left: 6px solid #d4af37; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
-    <div id="loading-screen" class="min-h-screen flex flex-col items-center justify-center bg-white fixed inset-0 z-[3000]">
-        <h1 class="raj-font text-4xl text-[#d4af37] tracking-widest animate-pulse">SAINIWALAA</h1>
+    <div id="loading-screen" class="min-h-screen flex items-center justify-center bg-white fixed inset-0 z-[4000]">
+        <h1 class="raj-font text-3xl text-[#d4af37] animate-pulse">SAINIWALAA</h1>
     </div>
 
     <div id="auth-section" class="min-h-screen flex items-center justify-center bg-white hidden">
-        <div class="w-full max-w-sm p-10 text-center">
-            <h1 class="raj-font text-6xl text-[#d4af37] mb-4">S</h1>
-            <p class="text-gray-400 text-[10px] tracking-[0.4em] mb-12 uppercase">Elite Marketplace</p>
-            <div class="space-y-4">
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-[#d4af37]/20 transition">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full p-5 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-[#d4af37]/20 transition">
-                <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-3xl font-bold shadow-2xl hover:bg-[#d4af37] transition-all duration-500">SIGN IN / JOIN</button>
-            </div>
+        <div class="w-full max-w-sm p-8 text-center">
+            <h1 class="raj-font text-5xl text-[#d4af37] mb-8">S</h1>
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl mb-4 outline-none">
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl mb-6 outline-none">
+            <button onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-2xl font-bold">LOGIN / JOIN</button>
         </div>
     </div>
 
     <main id="main-app" class="hidden">
-        <div class="bg-white pt-6 pb-2 text-center border-b border-gray-50">
-            <h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">SAINIWALAA</h1>
-            <p class="text-[8px] tracking-[0.5em] text-gray-400 uppercase mt-1">Influencer Blog</p>
+        <div class="bg-white py-6 text-center border-b">
+            <h1 class="raj-font text-2xl saini-header tracking-widest">SAINIWALAA</h1>
         </div>
 
-        <nav class="sticky top-0 z-[150] bg-white/80 backdrop-blur-xl flex justify-around border-b border-gray-100 px-4">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">Trending</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">Mhari Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">Orders</button>
+        <nav class="sticky top-0 z-[150] bg-white/90 backdrop-blur-md flex justify-around border-b">
+            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-5 active">Trending</button>
+            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-5">Mhari Shop</button>
+            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn py-5 owner-only hidden">Orders</button>
             <button onclick="logout()" class="py-5 text-red-400"><i class="fa-solid fa-power-off"></i></button>
         </nav>
 
         <section id="sec-shop" class="hidden">
             <div class="banner-container">
-                <img id="banner-ui" src="" class="banner-img">
+                <img id="banner-ui" src="https://images.unsplash.com/photo-1557683316-973673baf926?w=1000" class="banner-img">
                 <div class="profile-holder">
-                    <div class="relative">
-                        <img id="profile-ui" src="" class="p-img">
-                        <label class="absolute bottom-1 right-2 bg-[#d4af37] text-white w-10 h-10 flex items-center justify-center rounded-full cursor-pointer owner-only hidden border-4 border-white shadow-lg">
-                            <i class="fa-solid fa-camera-retro text-[14px]"></i>
-                            <input type="file" onchange="uploadMedia('profile', this)" class="hidden">
-                        </label>
+                    <img id="profile-ui" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" class="p-img">
+                    <h2 id="disp-name" class="raj-font font-bold text-xl mt-3">Creator</h2>
+                    <div id="visitor-controls" class="flex justify-center gap-3 mt-4">
+                        <button id="follow-btn" onclick="toggleFollow()" class="bg-[#d4af37] text-white text-[10px] px-6 py-2 rounded-full font-bold uppercase">Follow</button>
+                        <button onclick="openChat()" class="bg-black text-white text-[10px] px-6 py-2 rounded-full font-bold uppercase">Message</button>
                     </div>
-                    <div class="mt-4">
-                        <h2 id="disp-name" class="raj-font font-bold text-gray-800 text-2xl tracking-tight">Creator</h2>
-                        <div id="visitor-btns" class="flex justify-center items-center gap-4 mt-5 hidden">
-                            <button class="bg-[#d4af37] text-white text-[10px] px-8 py-3.5 rounded-full font-black uppercase shadow-lg tracking-widest"><i class="fa-solid fa-plus mr-2"></i>Follow</button>
-                            <div class="relative"><button onclick="openMsg()" class="bg-black text-white text-[10px] px-8 py-3.5 rounded-full font-black uppercase shadow-lg tracking-widest"><i class="fa-solid fa-paper-plane mr-2"></i>Message</button></div>
-                        </div>
+                    <div class="owner-only hidden mt-4">
+                        <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-4 py-2 rounded-lg">Edit Profile</button>
                     </div>
-                </div>
-                <label class="absolute top-6 right-6 bg-black/40 backdrop-blur-md p-4 rounded-full cursor-pointer text-white owner-only hidden border border-white/20">
-                    <i class="fa-solid fa-panorama"></i>
-                    <input type="file" onchange="uploadMedia('banner', this)" class="hidden">
-                </label>
-            </div>
-
-            <div class="mt-48 px-8 text-center">
-                <div class="inline-block relative">
-                    <p id="disp-bio" class="p-6 rounded-[30px] shadow-sm border border-gray-100 bg-white min-w-[320px] italic text-gray-600">Mhara Swagat hai!</p>
-                </div>
-                <div class="mt-8 flex justify-center gap-3 owner-only hidden">
-                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 text-gray-600 px-10 py-4 rounded-full font-black uppercase tracking-widest">Edit Profile</button>
-                    <button onclick="showTab('chats')" id="tab-chats-btn" class="text-[10px] bg-black text-white px-10 py-4 rounded-full font-black uppercase tracking-widest relative">
-                        Inbox <span id="msg-badge" class="badge-msg hidden">0</span>
-                    </button>
                 </div>
             </div>
 
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-8 mt-10 bg-white border rounded-[40px] shadow-2xl space-y-5">
-                <input id="in-name" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                <input id="in-bio" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
-                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer rounded-lg">
-                    <input type="number" id="in-bio-size" placeholder="Font Size" class="w-full bg-transparent outline-none font-bold">
-                </div>
-                <button onclick="saveProfile()" class="w-full bg-black text-white p-5 rounded-3xl font-bold hover:bg-[#d4af37] transition-all">SAVE UPDATES</button>
+            <div class="mt-32 px-6 text-center">
+                <p id="disp-bio" class="text-gray-500 italic text-sm">Welcome to my shop!</p>
             </div>
 
-            <div class="max-w-5xl mx-auto p-8 mt-12 owner-only hidden">
-                <div class="bg-white border-2 border-dashed border-gray-200 p-12 rounded-[50px] text-center group hover:border-[#d4af37] transition-all">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-left">
-                        <input id="p-name" placeholder="Item Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                        <input id="p-price" placeholder="Price (INR)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                        <input id="p-cat" placeholder="Category" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                        <input id="p-link" placeholder="Purchase Link" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
+            <div id="edit-box" class="hidden max-w-xs mx-auto mt-10 p-6 bg-white border rounded-3xl shadow-xl space-y-4">
+                <input id="in-name" placeholder="Name" class="w-full p-3 bg-gray-50 rounded-xl outline-none">
+                <input id="in-bio" placeholder="Bio" class="w-full p-3 bg-gray-50 rounded-xl outline-none">
+                <button onclick="saveProfile()" class="w-full bg-black text-white p-3 rounded-xl font-bold">Save</button>
+            </div>
+
+            <div class="owner-only hidden max-w-2xl mx-auto p-6 mt-10">
+                <div class="bg-white border-2 border-dashed p-6 rounded-3xl text-center">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input id="p-name" placeholder="Item Name" class="p-3 bg-gray-50 rounded-xl outline-none">
+                        <input id="p-price" placeholder="Price" class="p-3 bg-gray-50 rounded-xl outline-none">
+                        <input id="p-link" placeholder="Order Link" class="p-3 bg-gray-50 rounded-xl outline-none col-span-2">
                     </div>
-                    <textarea id="p-desc" placeholder="Product details (Appears in RED)..." class="w-full p-5 bg-gray-50 rounded-3xl mb-8 outline-none h-28"></textarea>
+                    <textarea id="p-desc" placeholder="Red Description..." class="w-full p-3 bg-gray-50 rounded-xl mb-4 h-20 outline-none"></textarea>
                     <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
-                    <label for="p-file" class="bg-gray-100 p-10 block rounded-[30px] cursor-pointer font-bold text-gray-400 mb-8 border border-transparent hover:bg-gray-200 transition">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl mb-3 block text-[#d4af37]"></i> SELECT PRODUCT IMAGE
-                    </label>
-                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-6 rounded-[30px] font-black uppercase tracking-[0.2em] shadow-2xl">Publish Product</button>
+                    <label for="p-file" class="block p-4 bg-gray-100 rounded-xl cursor-pointer mb-4 text-xs font-bold text-gray-400">SELECT IMAGE</label>
+                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-4 rounded-xl font-bold">PUBLISH PRODUCT</button>
                 </div>
             </div>
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto mt-10"></div>
+
+            <div id="my-shop-grid" class="grid grid-cols-2 gap-4 p-4 mt-10 max-w-5xl mx-auto"></div>
         </section>
 
-        <section id="sec-feed" class="hidden p-8 max-w-7xl mx-auto">
-            <div class="relative mb-12">
-                <input type="text" id="search-input" oninput="filterFeed()" placeholder="Search trending collections..." class="w-full p-6 pl-12 bg-white rounded-full shadow-sm border border-gray-100 outline-none focus:ring-2 ring-[#d4af37]/20 transition">
-                <i class="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-gray-300"></i>
-            </div>
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
+        <section id="sec-feed" class="p-4 max-w-5xl mx-auto">
+            <div id="public-grid" class="grid grid-cols-2 gap-4"></div>
         </section>
 
-        <section id="sec-chats" class="hidden p-8 max-w-2xl mx-auto">
-            <h2 class="raj-font text-3xl mb-8">Messages</h2>
-            <div id="chat-list" class="space-y-4"></div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-8 max-w-3xl mx-auto">
-            <h2 class="raj-font text-3xl mb-8">Order History</h2>
-            <div id="order-list" class="space-y-6"></div>
+        <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
+            <h2 class="raj-font text-2xl mb-6">Customer Orders</h2>
+            <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6">
-        <div class="bg-white w-full max-w-md rounded-[50px] p-12 text-center shadow-2xl">
-            <h3 class="raj-font text-2xl mb-2">Checkout</h3>
-            <p class="text-gray-400 text-[10px] mb-10 uppercase font-bold">Safe & Secure Transaction</p>
-            <input id="o-name" placeholder="Your Full Name" class="w-full p-5 bg-gray-50 rounded-2xl mb-4 outline-none">
-            <input id="o-phone" placeholder="WhatsApp Number" class="w-full p-5 bg-gray-50 rounded-2xl mb-10 outline-none">
-            <button onclick="confirmOrder()" class="w-full bg-black text-white py-6 rounded-[30px] font-black uppercase tracking-widest shadow-xl">PLACE ORDER</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-8 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
+    <div id="chatBox" class="chat-box">
+        <div class="bg-black text-white p-4 flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-widest">Secure Chat</span>
+            <button onclick="closeChat()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="chatMessages" class="chat-messages flex flex-col gap-2"></div>
+        <div class="p-3 border-t flex gap-2 bg-white">
+            <input id="chatInput" placeholder="Message..." class="flex-1 bg-gray-100 p-2 rounded-xl text-sm outline-none">
+            <button onclick="sendChat()" class="bg-[#d4af37] text-white px-4 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="order-modal" class="hidden fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center">
+            <h3 class="raj-font text-xl mb-4">Complete Order</h3>
+            <input id="o-name" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-xl mb-3 outline-none">
+            <input id="o-phone" placeholder="WhatsApp Number" class="w-full p-4 bg-gray-50 rounded-xl mb-6 outline-none">
+            <button onclick="confirmOrder()" class="w-full bg-black text-white py-4 rounded-xl font-bold mb-4">SUBMIT & GO TO LINK</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="text-gray-400 text-xs font-bold uppercase">Cancel</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
@@ -188,8 +151,6 @@
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 loadCore();
-                const lastTab = localStorage.getItem('activeTab') || 'feed';
-                showTab(lastTab);
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
             }
@@ -198,639 +159,24 @@
         function loadCore() {
             onSnapshot(collection(db, "products"), s => {
                 allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
-                render(allProds.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)), 'public-grid');
-            });
-
-            onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid), orderBy("time", "desc")), s => {
-                document.getElementById('msg-badge').innerText = s.size;
-                document.getElementById('msg-badge').classList.toggle('hidden', s.size === 0);
-                const l = document.getElementById('chat-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const c = d.data();
-                    l.innerHTML += `<div class="inbox-card">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-[9px] font-black text-[#d4af37] bg-[#d4af37]/5 px-3 py-1 rounded-full uppercase tracking-widest">Sender ID: ${c.from.slice(0,12)}</span>
-                            <button onclick="delMsg('${d.id}')" class="text-red-300"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                        <p class="text-gray-700 font-medium leading-relaxed">"${c.msg}"</p>
-                        <div class="mt-6 flex gap-3">
-                            <button onclick="replyMsg('${c.from}')" class="flex-1 bg-black text-white py-3 rounded-2xl text-[10px] font-bold uppercase">Quick Reply</button>
-                            <button onclick="viewProfile('${c.from}')" class="px-5 bg-gray-50 border rounded-2xl text-[10px] font-bold text-gray-400 uppercase">Profile</button>
-                        </div>
-                    </div>`;
-                });
+                render(allProds, 'public-grid');
             });
 
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const l = document.getElementById('order-list'); l.innerHTML = "";
-                let ords = []; s.forEach(d => ords.push({id: d.id, ...d.data()}));
-                ords.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)).forEach(o => {
-                    const dt = o.time ? o.time.toDate().toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : 'Processing...';
-                    l.innerHTML += `<div class="bg-white p-7 rounded-[40px] border border-gray-100 shadow-sm relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-5 text-[9px] font-black text-gray-200 uppercase">${dt}</div>
-                        <div class="flex justify-between items-center mb-6 pt-4">
-                            <h4 class="font-bold text-xl">${o.item}</h4>
-                            <span class="text-[#d4af37] font-black text-lg">₹${o.price}</span>
-                        </div>
-                        <div class="flex items-center gap-4 bg-gray-50 p-5 rounded-3xl">
-                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center"><i class="fa-solid fa-user-check text-[#d4af37]"></i></div>
-                            <div><p class="text-[11px] font-black uppercase text-gray-800">${o.customer}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">${o.phone}</p></div>
-                        </div>
+                s.forEach(d => {
+                    const o = d.data();
+                    l.innerHTML += `<div class="bg-white p-4 rounded-2xl border flex justify-between items-center">
+                        <div><p class="font-bold text-sm">${o.item}</p><p class="text-[10px] text-gray-400">${o.customer} | ${o.phone}</p></div>
+                        <span class="font-bold text-[#d4af37]">₹${o.price}</span>
                     </div>`;
                 });
             });
         }
 
         window.showTab = (t) => {
-            localStorage.setItem('activeTab', t);
-            ['feed','shop','chats','orders'].forEach(s => {
+            ['feed','shop','orders'].forEach(s => {
                 const sec = document.getElementById('sec-'+s);
-                const btn = document.getElementById('tab-'+s) || document.getElementById('tab-'+s+'-btn');
+                const btn = document.getElementById('tab-'+s);
                 if(sec) sec.classList.toggle('hidden', s !== t);
-                if(btn) btn.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && !viewId) viewProfile(curU.uid);
-            window.scrollTo(0,0);
-        };
-
-        window.viewProfile = async (uid) => {
-            viewId = uid;
-            const isMe = (curU.uid === uid);
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
-            document.getElementById('visitor-btns').classList.toggle('hidden', isMe);
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){
-                const d = s.data();
-                document.getElementById('disp-name').innerText = d.name || "Saini Creator";
-                const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Mhara Swagat hai!"; b.style.color = d.bioColor || '#666'; b.style.fontSize = (d.bioSize || '15') + 'px';
-                document.getElementById('profile-ui').src = d.profile || "https://api.dicebear.com/7.x/avataaars/svg?seed="+uid;
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
-            }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                render(p, 'my-shop-grid', isMe);
-            });
-            showTab('shop');
-        };
-
-        window.openMsg = () => { const m = prompt("Enter message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
-        window.replyMsg = (toId) => { const m = prompt("Write reply:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: toId, msg: m, time: serverTimestamp() }); };
-        window.delMsg = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "chats", id)); };
-
-        window.render = (data, cid, mine = false) => {
-            const g = document.getElementById(cid); g.innerHTML = "";
-            data.forEach(p => {
-                g.innerHTML += `<div class="product-card group">
-                    <div class="aspect-square relative overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
-                    <div class="p-6">
-                        <button onclick="viewProfile('${p.creatorId}')" class="text-[9px] font-black text-[#d4af37] mb-2 uppercase">@${p.creator || 'Creator'}</button>
-                        <h4 class="font-bold text-sm truncate text-gray-800">${p.name}</h4>
-                        <p class="desc-text">${p.desc || ''}</p>
-                        <div class="flex justify-between items-end mt-6">
-                            <div><span class="text-[10px] block text-gray-400 font-bold">Price</span><span class="font-black text-xl">₹${p.price}</span></div>
-                            <div class="flex gap-2">
-                                ${mine ? `<button onclick="delProd('${p.id}')" class="bg-red-50 text-red-400 p-3 rounded-2xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-                                <button onclick="triggerOrder('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase">Get It</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            });
-        };
-
-        window.handleAuth = () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return;
-            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
-        };
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", curU.uid), { name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value, bioColor: document.getElementById('in-bio-color').value, bioSize: document.getElementById('in-bio-size').value }, { merge: true });
-            location.reload();
-        };
-        window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
-        window.publish = async () => {
-            await addDoc(collection(db, "products"), { name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value, link: document.getElementById('p-link').value, img: window.tempImg, creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
-            location.reload();
-        };
-        window.previewProd = (input) => { const r = new FileReader(); r.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); }; r.readAsDataURL(input.files[0]); };
-        window.triggerOrder = (n, cid, l, p) => { window.target = { n, cid, l, p }; document.getElementById('order-modal').classList.remove('hidden'); };
-        window.confirmOrder = async () => {
-            const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
-            await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
-            document.getElementById('order-modal').classList.add('hidden');
-            if(window.target.l && window.target.l !== "undefined") window.open(window.target.l, '_blank');
-        };
-        window.logout = () => { if(confirm("Logout?")) { localStorage.clear(); signOut(auth).then(() => location.reload()); } };
-        window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.filterFeed = () => {
-            const v = document.getElementById('search-input').value.toLowerCase();
-            render(allProds.filter(p => p.name.toLowerCase().includes(v) || p.cat?.toLowerCase().includes(v)), 'public-grid');
-        };
-    </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>SAINIWALAA | Secure Elite</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<style>
-
-body{
-background:#fafafa;
-font-family:'Plus Jakarta Sans',sans-serif;
-margin:0;
-padding:0;
-overflow-x:hidden
-}
-
-.raj-font{
-font-family:'Cinzel',serif
-}
-
-.saini-header{
-
-background:linear-gradient(to right,#d4af37 20%,#fff 40%,#fff 60%,#d4af37 80%);
-background-size:200% auto;
-color:#000;
-background-clip:text;
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-animation:shine 3s linear infinite
-
-}
-
-@keyframes shine{
-to{background-position:200% center}
-}
-
-.banner-container{
-
-height:260px;
-width:100%;
-position:relative;
-background:#111;
-border-radius:0 0 50px 50px
-
-}
-
-.banner-img{
-width:100%;
-height:100%;
-object-fit:cover;
-border-radius:0 0 50px 50px
-}
-
-.profile-holder{
-
-position:absolute;
-bottom:-90px;
-left:50%;
-transform:translateX(-50%);
-z-index:100;
-display:flex;
-flex-direction:column;
-align-items:center;
-width:100%;
-text-align:center
-
-}
-
-.p-img{
-
-width:135px;
-height:135px;
-border-radius:50%;
-border:6px solid white;
-object-fit:cover;
-box-shadow:0 15px 35px rgba(0,0,0,0.15)
-
-}
-
-.nav-btn{
-position:relative;
-transition:0.3s;
-color:#999
-}
-
-.nav-btn.active{
-color:#d4af37;
-font-weight:800
-}
-
-.nav-btn.active::after{
-
-content:'';
-position:absolute;
-bottom:0;
-left:50%;
-transform:translateX(-50%);
-width:30px;
-height:3px;
-background:#d4af37;
-border-radius:10px
-
-}
-
-.hidden{
-display:none!important
-}
-
-.desc-text{
-
-color:#ff0000!important;
-font-size:11px;
-font-weight:800;
-text-transform:uppercase;
-margin-top:4px
-
-}
-
-.product-card{
-
-background:white;
-border-radius:30px;
-overflow:hidden;
-border:1px solid #f0f0f0
-
-}
-
-.chat-box{
-
-position:fixed;
-bottom:30px;
-right:30px;
-width:360px;
-background:white;
-border-radius:25px;
-box-shadow:0 10px 30px rgba(0,0,0,0.2);
-z-index:3000;
-display:none
-
-}
-
-.chat-messages{
-height:220px;
-overflow-y:auto
-}
-
-</style>
-</head>
-
-<body class="pb-24">
-
-<div id="loading-screen"
-class="min-h-screen flex flex-col items-center justify-center bg-white fixed inset-0 z-[3000]">
-
-<h1 class="raj-font text-4xl text-[#d4af37] tracking-widest animate-pulse">
-SAINIWALAA
-</h1>
-
-</div>
-
-
-<main id="main-app" class="hidden">
-
-<div class="bg-white pt-6 pb-2 text-center border-b">
-
-<h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">
-SAINIWALAA
-</h1>
-
-<p class="text-[8px] tracking-[0.5em] text-gray-400 uppercase">
-Influencer Blog
-</p>
-
-</div>
-
-
-<nav
-class="sticky top-0 z-[150] bg-white/80 backdrop-blur-xl flex justify-around border-b px-4">
-
-<button onclick="showTab('feed')" id="tab-feed"
-class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">
-Trending
-</button>
-
-<button onclick="showTab('shop')" id="tab-shop"
-class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">
-Mhari Shop
-</button>
-
-<button onclick="logout()"
-class="py-5 text-red-400">
-
-<i class="fa-solid fa-power-off"></i>
-
-</button>
-
-</nav>
-
-
-<section id="sec-shop" class="hidden">
-
-<div class="banner-container">
-
-<img id="banner-ui"
-src="https://images.unsplash.com/photo-1557683316-973673baf926?w=1000"
-class="banner-img">
-
-<div class="profile-holder">
-
-<img id="profile-ui"
-src="https://api.dicebear.com/7.x/avataaars/svg?seed=default"
-class="p-img">
-
-<h2 id="disp-name"
-class="raj-font font-bold text-gray-800 text-2xl mt-4">
-Creator
-</h2>
-
-<div class="flex gap-3 mt-4">
-
-<button id="follow-btn"
-onclick="toggleFollow()"
-class="bg-[#d4af37] text-white text-xs px-6 py-2 rounded-full">
-
-Follow
-
-</button>
-
-<button onclick="openChat()"
-class="bg-black text-white text-xs px-6 py-2 rounded-full">
-
-Message
-
-</button>
-
-<button onclick="toggleBlock()"
-class="text-red-500 text-xs">
-
-Block
-
-</button>
-
-</div>
-
-</div>
-</div>
-
-</section>
-
-</main>
-
-
-
-<div id="chatBox" class="chat-box p-4">
-
-<div class="flex justify-between mb-2">
-
-<b>Secure Chat</b>
-
-<button onclick="closeChat()">
-<i class="fa fa-xmark"></i>
-</button>
-
-</div>
-
-<div id="chatMessages" class="chat-messages text-sm mb-3"></div>
-
-<div class="flex gap-2">
-
-<input id="chatInput"
-class="flex-1 border p-2 rounded-lg text-sm"
-placeholder="Type message">
-
-<button onclick="sendChat()"
-class="bg-black text-white px-4 rounded-lg text-xs">
-
-Send
-
-</button>
-
-</div>
-
-</div>
-
-
-
-<script type="module">
-
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
-import {
-getAuth,
-signInWithEmailAndPassword,
-createUserWithEmailAndPassword,
-onAuthStateChanged
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-import {
-
-getFirestore,
-collection,
-addDoc,
-onSnapshot,
-query,
-orderBy,
-doc,
-updateDoc,
-arrayUnion,
-arrayRemove,
-getDoc,
-serverTimestamp
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-const firebaseConfig={
-
-apiKey:"AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk",
-authDomain:"social-blog-93d38.firebaseapp.com",
-projectId:"social-blog-93d38"
-
-};
-
-const app=initializeApp(firebaseConfig);
-
-const auth=getAuth(app);
-
-const db=getFirestore(app);
-
-
-let curU=null;
-
-let viewId=null;
-
-
-onAuthStateChanged(auth,u=>{
-
-document.getElementById('loading-screen').style.display="none";
-
-if(u){
-
-curU=u;
-
-document.getElementById('main-app').classList.remove("hidden");
-
-}
-
-});
-
-
-window.toggleFollow=async()=>{
-
-const ref=doc(db,"users",viewId);
-
-const snap=await getDoc(ref);
-
-const data=snap.data();
-
-const btn=document.getElementById("follow-btn");
-
-
-if(data.followers?.includes(curU.uid)){
-
-await updateDoc(ref,{followers:arrayRemove(curU.uid)});
-
-btn.innerText="Follow";
-btn.style.background="#d4af37";
-
-}else{
-
-await updateDoc(ref,{followers:arrayUnion(curU.uid)});
-
-btn.innerText="Following";
-btn.style.background="green";
-
-}
-
-};
-
-
-window.openChat=()=>{
-
-document.getElementById("chatBox").style.display="block";
-
-loadChat();
-
-};
-
-
-window.closeChat=()=>{
-
-document.getElementById("chatBox").style.display="none";
-
-};
-
-
-window.sendChat=async()=>{
-
-const msg=document.getElementById("chatInput").value;
-
-if(!msg)return;
-
-await addDoc(collection(db,"chats"),{
-
-from:curU.uid,
-to:viewId,
-msg:msg,
-time:serverTimestamp()
-
-});
-
-document.getElementById("chatInput").value="";
-
-};
-
-
-function loadChat(){
-
-const q=query(collection(db,"chats"),orderBy("time"));
-
-onSnapshot(q,s=>{
-
-const box=document.getElementById("chatMessages");
-
-box.innerHTML="";
-
-s.forEach(d=>{
-
-const c=d.data();
-
-if(
-
-(c.from===curU.uid&&c.to===viewId)
-||
-(c.from===viewId&&c.to===curU.uid)
-
-){
-
-box.innerHTML+=`
-
-<div>
-
-<b>${c.from}</b>
-
-<p>${c.msg}</p>
-
-</div>
-
-`;
-
-}
-
-});
-
-});
-
-}
-
-
-window.toggleBlock=async()=>{
-
-const ref=doc(db,"users",curU.uid);
-
-const snap=await getDoc(ref);
-
-const data=snap.data();
-
-
-if(data.blockedUsers?.includes(viewId)){
-
-await updateDoc(ref,{blockedUsers:arrayRemove(viewId)});
-
-alert("User Unblocked");
-
-}else{
-
-await updateDoc(ref,{blockedUsers:arrayUnion(viewId)});
-
-alert("User Blocked");
-
-}
-
-};
-
-</script>
-
-</body>
-</html>
+                if(btn) btn.classList.
