@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Elite Marketplace</title>
+    <title>SAINIWALAA | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; }
         .raj-font { font-family: 'Cinzel', serif; }
-        
-        /* 1. ATTRCTVE HEADER BACKGROUND */
         .saini-header {
             background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fcf6ba, #bf953f);
             background-size: 400% 400%;
@@ -20,245 +18,150 @@
             animation: gradient-flow 5s ease infinite;
             font-weight: 900;
         }
-
-        @keyframes gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .banner-container { height: 260px; width: 100%; position: relative; background: #111; border-radius: 0 0 50px 50px; }
-        .banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 50px 50px; }
-        .profile-holder { position: absolute; bottom: -90px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .p-img { width: 135px; height: 135px; border-radius: 50%; border: 6px solid white; object-fit: cover; background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        .nav-btn { position: relative; transition: 0.3s; color: #999; }
-        .nav-btn.active { color: #d4af37; font-weight: 800; }
-        .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 3px; background: #d4af37; border-radius: 10px; }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .nav-btn.active { color: #d4af37; font-weight: 800; border-bottom: 3px solid #d4af37; }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; }
         .hidden { display: none !important; }
-        .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
-        .badge-msg { position: absolute; top: -5px; right: -5px; background: #ff3b3b; color: white; border-radius: 50%; padding: 2px 7px; font-size: 10px; border: 2px solid white; font-weight: bold; }
-        .product-card { background: white; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.4s; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
-    <div id="loading-screen" class="min-h-screen flex flex-col items-center justify-center bg-white fixed inset-0 z-[3000]">
-        <h1 class="raj-font text-4xl text-[#d4af37] tracking-widest animate-pulse">SAINIWALAA</h1>
+    <div class="bg-white pt-6 pb-2 text-center border-b border-gray-50">
+        <h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">SAINIWALAA</h1>
+        <p class="text-[8px] tracking-[0.5em] text-gray-400 uppercase mt-1">Order Management</p>
     </div>
 
-    <div id="auth-section" class="min-h-screen flex items-center justify-center bg-white hidden">
-        <div class="w-full max-w-sm p-10 text-center">
-            <h1 class="raj-font text-6xl text-[#d4af37] mb-4">S</h1>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-5 bg-gray-50 rounded-2xl mb-4 outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-5 bg-gray-50 rounded-2xl mb-8 outline-none">
-            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-3xl font-bold">SIGN IN</button>
-        </div>
-    </div>
+    <nav class="sticky top-0 z-[150] bg-white/80 backdrop-blur-xl flex justify-around border-b border-gray-100 px-4">
+        <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-5 text-[10px] font-black uppercase">Market</button>
+        <button onclick="showTab('orders')" id="tab-orders" class="nav-btn py-5 text-[10px] font-black uppercase">Orders</button>
+        <button onclick="logout()" class="py-5 text-red-400"><i class="fa-solid fa-power-off"></i></button>
+    </nav>
 
-    <main id="main-app" class="hidden">
-        <div class="bg-white pt-6 pb-2 text-center border-b border-gray-50">
-            <h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">SAINIWALAA</h1>
-            <p class="text-[8px] tracking-[0.5em] text-gray-400 uppercase mt-1">Influencer Blog</p>
-        </div>
+    <section id="sec-feed" class="p-6 max-w-7xl mx-auto">
+        <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+    </section>
 
-        <nav class="sticky top-0 z-[150] bg-white/80 backdrop-blur-xl flex justify-around border-b border-gray-100 px-4">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-5 text-[10px] font-black uppercase">Trending</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-5 text-[10px] font-black uppercase">Mhari Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn py-5 text-[10px] font-black uppercase">Orders</button>
-            <button onclick="logout()" class="py-5 text-red-400"><i class="fa-solid fa-power-off"></i></button>
-        </nav>
+    <section id="sec-orders" class="hidden p-6 max-w-3xl mx-auto">
+        <h2 class="raj-font text-2xl mb-6">Recent Orders</h2>
+        <div id="order-list" class="space-y-4"></div>
+    </section>
 
-        <section id="sec-shop" class="hidden">
-            <div class="banner-container">
-                <img id="banner-ui" src="" class="banner-img">
-                <div class="profile-holder">
-                    <div class="relative">
-                        <img id="profile-ui" src="" class="p-img">
-                        <label class="absolute bottom-1 right-2 bg-[#d4af37] text-white w-10 h-10 flex items-center justify-center rounded-full cursor-pointer owner-only hidden border-4 border-white">
-                            <i class="fa-solid fa-camera"></i>
-                            <input type="file" onchange="uploadMedia('profile', this)" class="hidden">
-                        </label>
-                    </div>
-                    <div class="mt-4"><h2 id="disp-name" class="raj-font font-bold text-gray-800 text-2xl">Creator</h2></div>
-                </div>
-            </div>
-
-            <div class="mt-48 px-8 text-center">
-                <p id="disp-bio" class="p-6 rounded-[30px] shadow-sm border border-gray-100 bg-white inline-block min-w-[320px]">Mhara Swagat hai!</p>
-                <div class="mt-8 flex justify-center gap-3 owner-only hidden">
-                    <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-10 py-4 rounded-full font-black uppercase">Edit Profile</button>
-                </div>
-            </div>
-
-            <div id="edit-box" class="hidden max-w-sm mx-auto p-8 mt-10 bg-white border rounded-[40px] space-y-4">
-                <input id="in-name" placeholder="Name" class="w-full p-4 bg-gray-50 rounded-2xl">
-                <input id="in-bio" placeholder="Bio" class="w-full p-4 bg-gray-50 rounded-2xl">
-                <button onclick="saveProfile()" class="w-full bg-black text-white p-5 rounded-3xl font-bold">SAVE</button>
-            </div>
-
-            <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto mt-10"></div>
-        </section>
-
-        <section id="sec-feed" class="hidden p-8 max-w-7xl mx-auto">
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-8 max-w-3xl mx-auto">
-            <h2 class="raj-font text-3xl mb-8">Orders</h2>
-            <div id="order-list" class="space-y-6"></div>
-        </section>
-    </main>
-
-    <div id="order-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6">
-        <div class="bg-white w-full max-w-md rounded-[50px] p-10 text-center">
-            <h3 class="raj-font text-2xl mb-6">Confirm Order</h3>
-            
-            <input id="o-name" type="text" placeholder="Full Name (No numbers)" class="w-full p-5 bg-gray-50 rounded-2xl mb-4 outline-none">
-            <input id="o-phone" type="tel" placeholder="10 Digit Mobile No." class="w-full p-5 bg-gray-50 rounded-2xl mb-4 outline-none">
-            <input id="o-city" type="text" placeholder="Your City Name" class="w-full p-5 bg-gray-50 rounded-2xl mb-8 outline-none">
-            
-            <button onclick="confirmOrder()" class="w-full bg-[#d4af37] text-white py-6 rounded-[30px] font-black uppercase tracking-widest">ORDER NOW</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-6 text-gray-400 font-bold uppercase text-[10px]">Cancel</button>
+    <div id="order-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-6">
+        <div class="bg-white w-full max-w-md rounded-[40px] p-8 text-center">
+            <h3 class="raj-font text-xl mb-6">Order Details</h3>
+            <input id="o-name" type="text" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-xl mb-3 outline-none">
+            <input id="o-phone" type="tel" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-xl mb-3 outline-none">
+            <input id="o-city" type="text" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-xl mb-6 outline-none">
+            <button onclick="confirmOrder()" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase">Confirm Order</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs uppercase">Close</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let curU = null; let allProds = [];
+        let curU = null;
 
         onAuthStateChanged(auth, u => {
-            document.getElementById('loading-screen').classList.add('hidden');
-            if(u) {
-                curU = u;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                loadData();
-                showTab('feed');
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-            }
+            if(u) { curU = u; loadData(); showTab('feed'); }
+            else { window.location.href = "login.html"; } // Replace with your login page
         });
 
         function loadData() {
+            // Products Load
             onSnapshot(collection(db, "products"), s => {
-                allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
-                render(allProds, 'public-grid');
+                const g = document.getElementById('public-grid'); g.innerHTML = "";
+                s.forEach(d => {
+                    const p = d.data();
+                    g.innerHTML += `<div class="product-card">
+                        <img src="${p.img}" class="w-full aspect-square object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="font-bold">₹${p.price}</span>
+                                <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.price}')" class="bg-black text-white text-[10px] px-3 py-2 rounded-lg">Buy</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
             });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
+
+            // Orders Load WITH DELETE
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
                 const l = document.getElementById('order-list'); l.innerHTML = "";
                 s.forEach(o => {
                     const d = o.data();
-                    l.innerHTML += `<div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between font-bold"><span>${d.item}</span><span class="text-[#d4af37]">₹${d.price}</span></div>
-                        <div class="text-[12px] text-gray-400 mt-2">${d.customer} | ${d.phone} | City: ${d.city}</div>
+                    const orderId = o.id;
+                    const date = d.time ? new Date(d.time.seconds * 1000).toLocaleString('en-IN') : 'Just now';
+                    
+                    l.innerHTML += `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 relative">
+                        <button onclick="deleteOrder('${orderId}')" class="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <div class="text-[#d4af37] font-bold text-lg">₹${d.price || '0'}</div>
+                        <div class="font-bold text-gray-800">${d.item || 'Product'}</div>
+                        <div class="text-xs text-gray-500 mt-2 space-y-1">
+                            <p><i class="fa-solid fa-user mr-2"></i>${d.customer}</p>
+                            <p><i class="fa-solid fa-phone mr-2"></i>${d.phone}</p>
+                            <p><i class="fa-solid fa-location-dot mr-2"></i>${d.city || 'No City'}</p>
+                            <p class="text-[10px] pt-2 text-gray-400 border-t mt-2">${date}</p>
+                        </div>
                     </div>`;
                 });
             });
         }
 
-        window.showTab = (t) => {
-            ['feed','shop','orders'].forEach(s => {
-                const sec = document.getElementById('sec-'+s);
-                if(sec) sec.classList.toggle('hidden', s !== t);
-            });
-            if(t === 'shop') viewProfile(curU.uid);
-        };
-
-        window.viewProfile = async (uid) => {
-            const isMe = (curU.uid === uid);
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){
-                const d = s.data();
-                document.getElementById('disp-name').innerText = d.name || "Saini Creator";
-                document.getElementById('profile-ui').src = d.profile || "https://api.dicebear.com/7.x/avataaars/svg?seed="+uid;
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
-            }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                render(p, 'my-shop-grid', isMe);
-            });
-        };
-
-        window.render = (data, cid, mine = false) => {
-            const g = document.getElementById(cid); g.innerHTML = "";
-            data.forEach(p => {
-                g.innerHTML += `<div class="product-card">
-                    <img src="${p.img}" class="w-full aspect-square object-cover">
-                    <div class="p-4">
-                        <h4 class="font-bold truncate">${p.name}</h4>
-                        <p class="desc-text">${p.desc || ''}</p>
-                        <div class="flex justify-between items-center mt-4">
-                            <span class="font-black">₹${p.price}</span>
-                            <button onclick="triggerOrder('${p.name}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-4 py-2 rounded-xl">Get It</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-        };
-
-        window.triggerOrder = (n, cid, l, p) => { 
-            window.targetOrder = { n, cid, l, p }; 
+        window.triggerOrder = (n, cid, p) => { 
+            window.targetOrder = { n, cid, p }; 
             document.getElementById('order-modal').classList.remove('hidden'); 
         };
 
-        // 3. UPDATED VALIDATION LOGIC
         window.confirmOrder = async () => {
             const name = document.getElementById('o-name').value.trim();
             const phone = document.getElementById('o-phone').value.trim();
             const city = document.getElementById('o-city').value.trim();
             
-            // Name validation: Only letters and spaces allowed
-            const namePattern = /^[a-zA-Z\s]+$/;
-            // Phone validation: Exactly 10 digits
-            const phonePattern = /^[0-9]{10}$/;
+            if(!name || !phone || !city) { alert("Please fill all details!"); return; }
 
-            if (!namePattern.test(name)) {
-                alert("गलत नाम! नाम में नंबर या सिंबल नहीं डाल सकते।");
-                return;
-            }
-            if (!phonePattern.test(phone)) {
-                alert("गलत मोबाइल नंबर! कृपया 10 अंकों का नंबर लिखें।");
-                return;
-            }
-            if (city.length < 2) {
-                alert("कृपया अपने शहर का नाम सही से लिखें।");
-                return;
-            }
-
-            // If all good, save to Firebase
             await addDoc(collection(db, "orders"), {
                 item: window.targetOrder.n,
                 customer: name,
                 phone: phone,
                 city: city,
-                creatorId: window.targetOrder.cid,
+                creatorId: window.targetOrder.creatorId,
                 price: window.targetOrder.p,
                 time: serverTimestamp()
             });
 
             document.getElementById('order-modal').classList.add('hidden');
-            
-            // Link redirection
-            if(window.targetOrder.l && window.targetOrder.l !== "undefined") {
-                window.open(window.targetOrder.l, '_blank');
-            } else {
-                alert("Order Saved!");
+            alert("Order Placed!");
+        };
+
+        // --- NEW DELETE FUNCTION ---
+        window.deleteOrder = async (id) => {
+            if(confirm("क्या आप इस ऑर्डर को डिलीट करना चाहते हैं?")) {
+                try {
+                    await deleteDoc(doc(db, "orders", id));
+                } catch (err) {
+                    alert("Error deleting: " + err.message);
+                }
             }
         };
 
-        window.handleAuth = () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
+        window.showTab = (t) => {
+            ['feed','orders'].forEach(s => {
+                document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
+                document.getElementById('tab-'+s).classList.toggle('active', s === t);
+            });
         };
+
         window.logout = () => signOut(auth).then(() => location.reload());
     </script>
 </body>
