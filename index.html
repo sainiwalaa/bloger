@@ -18,7 +18,6 @@
     setPersistence(auth, browserLocalPersistence);
     let currentUser = null;
     let allProducts = [];
-    let viewingCreatorId = null;
 
     onAuthStateChanged(auth, u => {
         if(u) {
@@ -26,16 +25,12 @@
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             
-            // Share Link Checker
             const urlParams = new URLSearchParams(window.location.search);
             const shopId = urlParams.get('shop');
             
             if(shopId) {
-                viewingCreatorId = shopId;
-                showTab('shop');
-                loadProfile(shopId);
+                showTab('shop'); // Profile view mode
             } else {
-                viewingCreatorId = null;
                 showTab(localStorage.getItem('lastTab') || 'feed');
             }
             
@@ -50,19 +45,20 @@
     window.loadProfile = async (uid) => {
         const isOwner = (currentUser && currentUser.uid === uid);
         
-        // SECURITY: Sirf owner ko edit buttons dikhao
+        // SECURITY: Buttons hide/show logic
         document.querySelectorAll('.owner-only').forEach(el => {
-            if(isOwner) el.classList.remove('hidden');
-            else el.classList.add('hidden');
+            isOwner ? el.classList.remove('hidden') : el.classList.add('hidden');
         });
 
-        // Agar user share link se aaya hai toh "Back to Feed" dikhao
+        // SMART NAV: Share button ya Home button logic
         const shareBtn = document.getElementById('btn-share-shop');
         if(!isOwner) {
             shareBtn.innerHTML = `<i class="fa-solid fa-house mr-2"></i>WAPAS FEED PAR`;
-            shareBtn.onclick = () => { window.location.href = window.location.pathname; };
+            shareBtn.className = "text-[10px] bg-black text-white px-4 py-2 rounded-full font-bold shadow-lg";
+            shareBtn.onclick = () => { window.location.href = window.location.origin + window.location.pathname; };
         } else {
             shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes mr-2"></i>SHARE SHOP`;
+            shareBtn.className = "text-[10px] bg-gray-100 px-4 py-2 rounded-full font-bold text-gray-600 border border-gray-200";
             shareBtn.onclick = () => copyShopLink();
         }
 
@@ -94,22 +90,22 @@
 
     window.copyShopLink = () => {
         const link = window.location.origin + window.location.pathname + "?shop=" + currentUser.uid;
-        navigator.clipboard.writeText(link).then(() => alert("Aapki Shop Link Copy Ho Gayi!"));
+        navigator.clipboard.writeText(link).then(() => alert("Aapki Shahi Shop Link Copy Ho Gayi!"));
     };
 
-    // --- Baki Functions (Publish, Delete, Order) as it is rahenge bas niche wala dhyan dein ---
-
     window.showTab = (t) => {
-        // Agar koi dusre ki shop dekh raha hai aur feed pe click kare toh URL saaf ho jaye
+        // Agar feed dabaya aur URL mein shop hai, toh clean URL karke wapas jao
         if(t === 'feed' && window.location.search.includes('shop')) {
-            window.location.href = window.location.pathname;
+            window.location.href = window.location.origin + window.location.pathname;
             return;
         }
 
         localStorage.setItem('lastTab', t);
         ['feed','shop','orders'].forEach(s => {
-            if(document.getElementById('sec-'+s)) document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
-            if(document.getElementById('tab-'+s)) document.getElementById('tab-'+s).classList.toggle('active', s === t);
+            const sec = document.getElementById('sec-'+s);
+            const tab = document.getElementById('tab-'+s);
+            if(sec) sec.classList.toggle('hidden', s !== t);
+            if(tab) tab.classList.toggle('active', s === t);
         });
 
         if(t === 'shop') {
@@ -119,5 +115,134 @@
         }
     };
 
-    // ... (PublishProduct aur baki functions wahi purane wale add karle) ...
+    // --- PRODUCT & ORDER SYSTEM ---
+
+    window.publishProduct = async () => {
+        const n = document.getElementById('p-name').value, 
+              p = document.getElementById('p-price').value, 
+              d = document.getElementById('p-desc').value, 
+              l = document.getElementById('p-link').value, 
+              c = document.getElementById('p-cat').value;
+        if(!n || !p || !window.tempProdImg) return alert("Details bhariye!");
+        
+        await addDoc(collection(db, "products"), { 
+            name: n, price: p, desc: d, link: l, category: c, 
+            img: window.tempProdImg, creatorId: currentUser.uid, 
+            creator: document.getElementById('disp-name').innerText, 
+            time: serverTimestamp() 
+        });
+        location.reload(); 
+    };
+
+    window.deleteProduct = async (id) => {
+        if(confirm("Ye Product Mita Dein?")) {
+            await deleteDoc(doc(db, "products", id));
+        }
+    };
+
+    window.saveProfileData = async () => {
+        const data = {
+            name: document.getElementById('in-name').value,
+            nameColor: document.getElementById('in-name-color').value,
+            nameSize: document.getElementById('in-name-size').value,
+            bio: document.getElementById('in-bio').value,
+            bioSize: document.getElementById('in-bio-size').value,
+            wa: document.getElementById('in-wa').value,
+            insta: document.getElementById('in-insta').value,
+            yt: document.getElementById('in-yt').value
+        };
+        await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
+        location.reload();
+    };
+
+    // --- SYNC FUNCTIONS ---
+
+    function syncAll() {
+        onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
+            allProducts = [];
+            snap.forEach(ds => { allProducts.push({id: ds.id, ...ds.data()}); });
+            renderGrid(allProducts);
+        });
+        onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
+            const list = document.getElementById('order-list'); list.innerHTML = "";
+            snap.forEach(d => {
+                const o = d.data(); const t = o.time ? new Date(o.time.seconds*1000).toLocaleString() : 'Just now';
+                list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#d4af37] flex justify-between"><div><h4 class="font-bold text-sm">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
+            });
+        });
+    }
+
+    function syncMyShop(uid) {
+        onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
+            const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
+            const isOwner = (currentUser && currentUser.uid === uid);
+            snap.forEach(d => { 
+                const p = d.data(); 
+                grid.innerHTML += `<div class="shahi-card">
+                    ${isOwner ? `<button onclick="deleteProduct('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-[10px] z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    <div class="img-frame"><img src="${p.img}"></div>
+                    <div class="p-3">
+                        <p class="text-[11px] font-bold">${p.name}</p>
+                        <p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>
+                    </div>
+                </div>`; 
+            });
+        });
+    }
+
+    // Auth & Utilities
+    window.handleAuth = () => {
+        const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+        signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
+    };
+    window.logout = () => signOut(auth).then(() => { localStorage.clear(); location.href = window.location.origin + window.location.pathname; });
+    window.toggleAuthMode = () => {
+        const btn = document.getElementById('main-auth-btn');
+        btn.innerText = (btn.innerText === 'LOG IN') ? 'SIGN UP' : 'LOG IN';
+    };
+    window.orderNow = (item, cid, link = '') => { 
+        document.getElementById('order-item-name').value = item; 
+        document.getElementById('order-creator-id').value = cid; 
+        window.currentOrderLink = link;
+        document.getElementById('checkout-modal').classList.remove('hidden'); 
+    };
+    window.submitOrder = async () => {
+        const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
+        if(!n || !ph) return alert("Details bhariye");
+        await addDoc(collection(db, "orders"), { 
+            item: document.getElementById('order-item-name').value, 
+            customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, 
+            userId: currentUser.uid, time: serverTimestamp() 
+        });
+        if(window.currentOrderLink) window.open(window.currentOrderLink, '_blank');
+        alert("Order Done!"); document.getElementById('checkout-modal').classList.add('hidden');
+    };
+    window.viewCreator = (cid) => {
+        window.history.pushState({}, '', '?shop=' + cid);
+        showTab('shop');
+    };
+
+    const compressImg = (f) => new Promise(res => {
+        const r = new FileReader(); r.readAsDataURL(f);
+        r.onload = e => {
+            const img = new Image(); img.src = e.target.result;
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = 600; c.height = img.height * (600/img.width);
+                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                res(c.toDataURL('image/jpeg', 0.8));
+            };
+        };
+    });
+    window.uploadProfileMedia = async (type, input) => {
+        const comp = await compressImg(input.files[0]);
+        await setDoc(doc(db, "users", currentUser.uid), { [type]: comp }, { merge: true });
+        loadProfile(currentUser.uid);
+    };
+    window.previewProduct = async (input) => {
+        window.tempProdImg = await compressImg(input.files[0]);
+        document.getElementById('p-preview-box').classList.remove('hidden');
+        document.getElementById('p-preview-img').src = window.tempProdImg;
+        document.getElementById('pub-btn').classList.remove('hidden');
+    };
 </script>
