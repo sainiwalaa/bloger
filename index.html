@@ -109,7 +109,7 @@
                             <input id="pc" placeholder="Category" class="p-4 bg-gray-50 rounded-2xl outline-none border">
                             <input id="pl" placeholder="External Web Link" class="p-4 bg-gray-50 rounded-2xl outline-none border">
                         </div>
-                        <textarea id="pd" placeholder="Tell the story of this product..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
+                        <textarea id="pd" placeholder="Tell the story of this product (Description)..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
                         <div class="flex items-center gap-4">
                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
                             <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">CHOOSE PHOTO</label>
@@ -131,7 +131,6 @@
 
         <section id="sec-orders" class="hidden p-6">
             <h2 class="raj-font text-3xl mb-2">Sales History</h2>
-            <p class="text-[10px] text-gray-400 mb-8 uppercase tracking-widest">Personal Order Tracking & Inquiries</p>
             <div id="list-orders" class="space-y-4"></div>
         </section>
     </main>
@@ -139,38 +138,35 @@
     <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[50px] p-10 text-center">
             <h3 class="raj-font text-2xl mb-2">Finalize Order</h3>
-            <p class="text-[10px] text-gray-400 font-bold mb-8 tracking-widest uppercase">Creator direct connection</p>
             <input id="on" placeholder="Your Full Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
             <input id="op" placeholder="10-Digit Mobile" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
             <input id="oc" placeholder="Your City" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border">
-            
-            <div class="bg-gray-50 p-5 rounded-[30px] border mb-8 text-left">
-                <p class="text-[12px] font-extrabold leading-tight mb-3">क्या आप Business Collab करना चाहते हैं?</p>
+            <div class="bg-gray-50 p-5 rounded-[30px] border mb-8 text-left text-xs font-bold">
+                <p class="mb-3">क्या आप Business Collab करना चाहते हैं?</p>
                 <div class="flex gap-6">
-                    <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
-                        <input type="radio" name="biz" value="YES" class="w-4 h-4 accent-red-500"> YES
-                    </label>
-                    <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
-                        <input type="radio" name="biz" value="NO" checked class="w-4 h-4 accent-black"> NO
-                    </label>
+                    <label><input type="radio" name="biz" value="YES" class="accent-red-500"> YES</label>
+                    <label><input type="radio" name="biz" value="NO" checked class="accent-black"> NO</label>
                 </div>
             </div>
-            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER</button>
+            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl">PLACE ORDER</button>
             <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-[10px] font-bold">CANCEL</button>
         </div>
     </div>
 
     <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-8">
-            <h3 class="raj-font text-xl mb-6">Edit Identity</h3>
-            <input id="en" placeholder="Full Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="eb" placeholder="Bio Story" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <div class="flex items-center gap-4 mb-6">
-                <input type="color" id="ec" class="h-12 w-12 border-none">
-                <input type="number" id="es" placeholder="Font Size" class="flex-1 p-4 bg-gray-50 rounded-2xl outline-none border">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl">
+            <h3 class="raj-font text-xl mb-6 text-center">Update Identity</h3>
+            <div class="space-y-4">
+                <input id="en" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-gold">
+                <input id="eb" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-gold">
+                <div class="flex items-center gap-4">
+                    <label class="text-xs font-bold text-gray-400">Bio Color:</label>
+                    <input type="color" id="ec" class="h-10 w-10 border-none cursor-pointer">
+                    <input type="number" id="es" placeholder="Font Size" class="flex-1 p-4 bg-gray-50 rounded-2xl outline-none border">
+                </div>
+                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg hover:brightness-110 transition">SAVE CHANGES</button>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs font-bold py-2">DISCARD</button>
             </div>
-            <button onclick="saveProfile()" class="w-full bg-gold text-white py-4 rounded-2xl font-bold mb-2">UPDATE</button>
-            <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs font-bold py-2">CANCEL</button>
         </div>
     </div>
 
@@ -198,81 +194,82 @@
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed');
             });
-
-            // FIXED: Fetching orders without server-side orderBy to avoid Database Error
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = "";
-                // Client-side sorting for stability
                 const sorted = s.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
-
                 sorted.forEach(o => {
                     const isBiz = o.businessInquiry === "YES";
-                    list.innerHTML += `
-                        <div class="p-6 rounded-[30px] border shadow-sm flex flex-col gap-4 ${isBiz ? 'inquiry-card' : 'bg-white'}">
-                            <div class="flex justify-between items-start">
-                                <div><h4 class="font-extrabold text-lg leading-tight">${o.item}</h4><p class="text-[10px] opacity-70 uppercase font-bold">Buyer: ${o.customer}</p></div>
-                                <span class="font-black text-xl">₹${o.price}</span>
-                            </div>
-                            <div class="flex flex-wrap gap-3 text-[11px] font-bold">
-                                <span class="px-3 py-1 bg-black/10 rounded-full">📞 ${o.phone}</span>
-                                <span class="px-3 py-1 bg-black/10 rounded-full">📍 ${o.city}</span>
-                            </div>
-                            ${isBiz ? '<div class="mt-2 p-3 bg-white/20 rounded-2xl border border-white/30 text-center font-black text-[10px] uppercase">🔥 Business Collab Required</div>' : ''}
-                        </div>`;
+                    list.innerHTML += `<div class="p-6 rounded-[30px] border shadow-sm flex flex-col gap-4 ${isBiz ? 'inquiry-card' : 'bg-white'}">
+                        <div class="flex justify-between items-start">
+                            <div><h4 class="font-extrabold text-lg leading-tight">${o.item}</h4><p class="text-[10px] opacity-70 uppercase font-bold">Buyer: ${o.customer}</p></div>
+                            <span class="font-black text-xl">₹${o.price}</span>
+                        </div>
+                        <div class="flex gap-3 text-[11px] font-bold"><span>📞 ${o.phone}</span><span>📍 ${o.city}</span></div>
+                    </div>`;
                 });
             });
         }
-
-        window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value.trim(), p = document.getElementById('op').value.trim(), c = document.getElementById('oc').value.trim();
-            const biz = document.querySelector('input[name="biz"]:checked').value;
-            if(!n || !p || !c) return alert("Details bhariye!");
-            
-            document.getElementById('buy-btn').innerText = "PROCESSING...";
-            try {
-                await addDoc(collection(db, "orders"), {
-                    item: window.activeOrder.name, price: window.activeOrder.price,
-                    customer: n, phone: p, city: c, businessInquiry: biz,
-                    creatorId: window.activeOrder.creatorId, time: serverTimestamp()
-                });
-                alert("Order Saved!");
-                window.open(window.activeOrder.link, '_blank');
-                document.getElementById('order-modal').classList.add('hidden');
-            } catch(e) { alert("Database Error!"); }
-            document.getElementById('buy-btn').innerText = "PLACE ORDER";
-        };
-
-        window.viewProfile = async (uid) => {
-            viewUid = uid; const isMe = (uid === curU.uid);
-            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){
-                const d = s.data();
-                document.getElementById('u-name').innerText = d.name || "Creator";
-                document.getElementById('u-bio').innerText = d.bio || "Welcome!";
-                document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
-            }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
-            });
-        };
 
         window.renderGrid = (data, cid, mine = false) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
                 g.innerHTML += `
                     <div class="product-card">
-                        <img src="${p.img}" class="w-full aspect-square object-cover" onclick="viewProfile('${p.creatorId}')">
+                        <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
                         <div class="p-4">
+                            <p class="text-[9px] font-black text-gold uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                             <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                            <p class="text-[10px] text-red-600 font-semibold line-clamp-2 mt-1">${p.desc || ''}</p>
                             <div class="mt-4 flex justify-between items-center">
                                 <span class="font-black">₹${p.price}</span>
-                                <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
+                                <div class="flex gap-2">
+                                    ${mine ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                                    <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
+                                </div>
                             </div>
                         </div>
                     </div>`;
             });
+        };
+
+        window.viewProfile = async (uid) => {
+            viewUid = uid; const isMe = (uid === curU.uid);
+            nav('shop'); // Profile view ke liye shop section par switch karein
+            document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
+            const s = await getDoc(doc(db, "users", uid));
+            if(s.exists()){
+                const d = s.data();
+                document.getElementById('u-name').innerText = d.name || "Creator";
+                document.getElementById('u-bio').innerText = d.bio || "Welcome!";
+                document.getElementById('u-bio').style.color = d.bioColor || "#999";
+                document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
+                document.getElementById('b-img').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
+            }
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
+                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
+            });
+        };
+
+        window.pubProd = async () => {
+            const n = document.getElementById('pn').value, p = document.getElementById('pp').value, d = document.getElementById('pd').value;
+            if(!n || !p || !window.tempP) return alert("Fill data!");
+            await addDoc(collection(db, "products"), {
+                name: n, price: p, desc: d, link: document.getElementById('pl').value,
+                img: window.tempP, creatorId: curU.uid, creatorName: document.getElementById('u-name').innerText, time: serverTimestamp()
+            });
+            location.reload();
+        };
+
+        window.saveProfile = async () => {
+            const btn = event.target; btn.innerText = "SAVING...";
+            await setDoc(doc(db, "users", curU.uid), { 
+                name: document.getElementById('en').value, 
+                bio: document.getElementById('eb').value,
+                bioColor: document.getElementById('ec').value,
+                bioSize: document.getElementById('es').value
+            }, {merge:true});
+            location.reload();
         };
 
         window.nav = (t) => {
@@ -283,33 +280,25 @@
             if(t === 'shop' && !viewUid) viewProfile(curU.uid);
         };
 
-        window.pubProd = async () => {
-            await addDoc(collection(db, "products"), {
-                name: document.getElementById('pn').value, price: document.getElementById('pp').value,
-                link: document.getElementById('pl').value, img: window.tempP,
-                creatorId: curU.uid, time: serverTimestamp()
-            });
-            location.reload();
-        };
-
         window.preProd = (i) => {
             const r = new FileReader();
-            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; };
+            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO LOADED ✅"; };
             r.readAsDataURL(i.files[0]);
+        };
+
+        window.confirmPurchase = async () => {
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, c = document.getElementById('oc').value;
+            if(!n || !p) return alert("Fill Name/Phone!");
+            await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: c, creatorId: window.activeOrder.creatorId, time: serverTimestamp() });
+            window.open(window.activeOrder.link, '_blank');
+            document.getElementById('order-modal').classList.add('hidden');
         };
 
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", curU.uid), { name: document.getElementById('en').value, bio: document.getElementById('eb').value }, {merge:true});
-            location.reload();
-        };
-        window.upMedia = (t, i) => {
-            const r = new FileReader();
-            r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); };
-            r.readAsDataURL(i.files[0]);
-        };
+        window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
+        window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
         window.search = (v) => renderGrid(allProds.filter(p => p.name.toLowerCase().includes(v.toLowerCase())), 'grid-feed');
     </script>
 </body>
