@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Final System</title>
+    <title>SAINIWALAA | Persistent Navigation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -11,26 +11,34 @@
         body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         
-        /* BANNER & PROFILE RESTORED (As per ffff.JPG) */
+        /* SAINIWALAA Header Animation */
+        .saini-header {
+            background: linear-gradient(to right, #d4af37 20%, #fff 40%, #fff 60%, #d4af37 80%);
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
         .banner-container { height: 260px; width: 100%; position: relative; background: #111; border-radius: 0 0 50px 50px; overflow: visible; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 50px 50px; }
-        
         .profile-holder { position: absolute; bottom: -90px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; }
         .p-img { width: 135px; height: 135px; border-radius: 50%; border: 6px solid white; object-fit: cover; background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        
         .nav-btn { position: relative; transition: 0.3s; color: #999; }
         .nav-btn.active { color: #d4af37; font-weight: 800; }
         .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 3px; background: #d4af37; border-radius: 10px; }
-        
         .hidden { display: none !important; }
         .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
-        
-        /* INBOX BADGE */
         .badge-msg { position: absolute; top: -5px; right: -5px; background: #ff3b3b; color: white; border-radius: 50%; padding: 2px 7px; font-size: 10px; border: 2px solid white; font-weight: bold; }
-        
         .product-card { background: white; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        
         .inbox-card { background: white; padding: 20px; border-radius: 25px; border-left: 6px solid #d4af37; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
     </style>
 </head>
@@ -53,6 +61,11 @@
     </div>
 
     <main id="main-app" class="hidden">
+        <div class="bg-white pt-6 pb-2 text-center border-b border-gray-50">
+            <h1 class="raj-font text-3xl font-bold tracking-[0.3em] saini-header">SAINIWALAA</h1>
+            <p class="text-[8px] tracking-[0.5em] text-gray-400 uppercase mt-1">Influencer Blog</p>
+        </div>
+
         <nav class="sticky top-0 z-[150] bg-white/80 backdrop-blur-xl flex justify-around border-b border-gray-100 px-4">
             <button onclick="showTab('feed')" id="tab-feed" class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">Trending</button>
             <button onclick="showTab('shop')" id="tab-shop" class="nav-btn py-5 text-[10px] font-black uppercase tracking-[0.2em]">Mhari Shop</button>
@@ -73,12 +86,9 @@
                     </div>
                     <div class="mt-4">
                         <h2 id="disp-name" class="raj-font font-bold text-gray-800 text-2xl tracking-tight">Creator</h2>
-                        
                         <div id="visitor-btns" class="flex justify-center items-center gap-4 mt-5 hidden">
                             <button class="bg-[#d4af37] text-white text-[10px] px-8 py-3.5 rounded-full font-black uppercase shadow-lg tracking-widest"><i class="fa-solid fa-plus mr-2"></i>Follow</button>
-                            <div class="relative">
-                                <button onclick="openMsg()" class="bg-black text-white text-[10px] px-8 py-3.5 rounded-full font-black uppercase shadow-lg tracking-widest"><i class="fa-solid fa-paper-plane mr-2"></i>Message</button>
-                            </div>
+                            <div class="relative"><button onclick="openMsg()" class="bg-black text-white text-[10px] px-8 py-3.5 rounded-full font-black uppercase shadow-lg tracking-widest"><i class="fa-solid fa-paper-plane mr-2"></i>Message</button></div>
                         </div>
                     </div>
                 </div>
@@ -94,7 +104,7 @@
                 </div>
                 <div class="mt-8 flex justify-center gap-3 owner-only hidden">
                     <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 text-gray-600 px-10 py-4 rounded-full font-black uppercase tracking-widest">Edit Profile</button>
-                    <button onclick="showTab('chats')" class="text-[10px] bg-black text-white px-10 py-4 rounded-full font-black uppercase tracking-widest relative">
+                    <button onclick="showTab('chats')" id="tab-chats-btn" class="text-[10px] bg-black text-white px-10 py-4 rounded-full font-black uppercase tracking-widest relative">
                         Inbox <span id="msg-badge" class="badge-msg hidden">0</span>
                     </button>
                 </div>
@@ -105,7 +115,7 @@
                 <input id="in-bio" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                 <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
                     <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer rounded-lg">
-                    <input type="number" id="in-bio-size" placeholder="Font Size (e.g. 15)" class="w-full bg-transparent outline-none font-bold">
+                    <input type="number" id="in-bio-size" placeholder="Font Size" class="w-full bg-transparent outline-none font-bold">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-black text-white p-5 rounded-3xl font-bold hover:bg-[#d4af37] transition-all">SAVE UPDATES</button>
             </div>
@@ -116,19 +126,16 @@
                         <input id="p-name" placeholder="Item Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                         <input id="p-price" placeholder="Price (INR)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                         <input id="p-cat" placeholder="Category" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
-                        <input id="p-link" placeholder="Purchase Link (Optional)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
+                        <input id="p-link" placeholder="Purchase Link" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                     </div>
                     <textarea id="p-desc" placeholder="Product details (Appears in RED)..." class="w-full p-5 bg-gray-50 rounded-3xl mb-8 outline-none h-28"></textarea>
-                    
                     <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
                     <label for="p-file" class="bg-gray-100 p-10 block rounded-[30px] cursor-pointer font-bold text-gray-400 mb-8 border border-transparent hover:bg-gray-200 transition">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl mb-3 block text-[#d4af37]"></i>
-                        SELECT PRODUCT IMAGE
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl mb-3 block text-[#d4af37]"></i> SELECT PRODUCT IMAGE
                     </label>
                     <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-6 rounded-[30px] font-black uppercase tracking-[0.2em] shadow-2xl">Publish Product</button>
                 </div>
             </div>
-
             <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto mt-10"></div>
         </section>
 
@@ -181,28 +188,26 @@
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 loadCore();
-                showTab('feed');
+                const lastTab = localStorage.getItem('activeTab') || 'feed';
+                showTab(lastTab);
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
             }
         });
 
         function loadCore() {
-            // GLOBAL PRODUCTS
             onSnapshot(collection(db, "products"), s => {
                 allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
                 render(allProds.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)), 'public-grid');
             });
 
-            // INBOX STREAM
             onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid), orderBy("time", "desc")), s => {
                 document.getElementById('msg-badge').innerText = s.size;
                 document.getElementById('msg-badge').classList.toggle('hidden', s.size === 0);
                 const l = document.getElementById('chat-list'); l.innerHTML = "";
                 s.forEach(d => {
                     const c = d.data();
-                    l.innerHTML += `
-                    <div class="inbox-card">
+                    l.innerHTML += `<div class="inbox-card">
                         <div class="flex justify-between items-start mb-4">
                             <span class="text-[9px] font-black text-[#d4af37] bg-[#d4af37]/5 px-3 py-1 rounded-full uppercase tracking-widest">Sender ID: ${c.from.slice(0,12)}</span>
                             <button onclick="delMsg('${d.id}')" class="text-red-300"><i class="fa-solid fa-trash-can"></i></button>
@@ -216,7 +221,6 @@
                 });
             });
 
-            // ORDERS STREAM (Restored Date/Time Logic)
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const l = document.getElementById('order-list'); l.innerHTML = "";
                 let ords = []; s.forEach(d => ords.push({id: d.id, ...d.data()}));
@@ -230,10 +234,7 @@
                         </div>
                         <div class="flex items-center gap-4 bg-gray-50 p-5 rounded-3xl">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center"><i class="fa-solid fa-user-check text-[#d4af37]"></i></div>
-                            <div>
-                                <p class="text-[11px] font-black uppercase text-gray-800">${o.customer}</p>
-                                <p class="text-[10px] text-gray-400 font-bold tracking-widest">${o.phone}</p>
-                            </div>
+                            <div><p class="text-[11px] font-black uppercase text-gray-800">${o.customer}</p><p class="text-[10px] text-gray-400 font-bold tracking-widest">${o.phone}</p></div>
                         </div>
                     </div>`;
                 });
@@ -241,9 +242,10 @@
         }
 
         window.showTab = (t) => {
+            localStorage.setItem('activeTab', t);
             ['feed','shop','chats','orders'].forEach(s => {
                 const sec = document.getElementById('sec-'+s);
-                const btn = document.getElementById('tab-'+s);
+                const btn = document.getElementById('tab-'+s) || document.getElementById('tab-'+s+'-btn');
                 if(sec) sec.classList.toggle('hidden', s !== t);
                 if(btn) btn.classList.toggle('active', s === t);
             });
@@ -256,15 +258,12 @@
             const isMe = (curU.uid === uid);
             document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
             document.getElementById('visitor-btns').classList.toggle('hidden', isMe);
-
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
                 document.getElementById('disp-name').innerText = d.name || "Saini Creator";
                 const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Mhara Swagat hai!";
-                b.style.color = d.bioColor || '#666';
-                b.style.fontSize = (d.bioSize || '15') + 'px';
+                b.innerText = d.bio || "Mhara Swagat hai!"; b.style.color = d.bioColor || '#666'; b.style.fontSize = (d.bioSize || '15') + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://api.dicebear.com/7.x/avataaars/svg?seed="+uid;
                 document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
             }
@@ -275,9 +274,9 @@
             showTab('shop');
         };
 
-        window.openMsg = () => { const m = prompt("Enter message for " + document.getElementById('disp-name').innerText + ":"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
-        window.replyMsg = (toId) => { const m = prompt("Write your reply:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: toId, msg: m, time: serverTimestamp() }); };
-        window.delMsg = async (id) => { if(confirm("Permanently delete message?")) await deleteDoc(doc(db, "chats", id)); };
+        window.openMsg = () => { const m = prompt("Enter message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
+        window.replyMsg = (toId) => { const m = prompt("Write reply:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: toId, msg: m, time: serverTimestamp() }); };
+        window.delMsg = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "chats", id)); };
 
         window.render = (data, cid, mine = false) => {
             const g = document.getElementById(cid); g.innerHTML = "";
@@ -285,14 +284,14 @@
                 g.innerHTML += `<div class="product-card group">
                     <div class="aspect-square relative overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
                     <div class="p-6">
-                        <button onclick="viewProfile('${p.creatorId}')" class="text-[9px] font-black text-[#d4af37] mb-2 uppercase tracking-tighter">@${p.creator || 'Creator'}</button>
+                        <button onclick="viewProfile('${p.creatorId}')" class="text-[9px] font-black text-[#d4af37] mb-2 uppercase">@${p.creator || 'Creator'}</button>
                         <h4 class="font-bold text-sm truncate text-gray-800">${p.name}</h4>
                         <p class="desc-text">${p.desc || ''}</p>
                         <div class="flex justify-between items-end mt-6">
-                            <div><span class="text-[10px] block text-gray-400 font-bold uppercase">Price</span><span class="font-black text-xl">₹${p.price}</span></div>
+                            <div><span class="text-[10px] block text-gray-400 font-bold">Price</span><span class="font-black text-xl">₹${p.price}</span></div>
                             <div class="flex gap-2">
                                 ${mine ? `<button onclick="delProd('${p.id}')" class="bg-red-50 text-red-400 p-3 rounded-2xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-                                <button onclick="triggerOrder('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase tracking-widest shadow-lg">Get It</button>
+                                <button onclick="triggerOrder('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase">Get It</button>
                             </div>
                         </div>
                     </div>
@@ -311,8 +310,7 @@
         };
         window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
         window.publish = async () => {
-            const name = document.getElementById('p-name').value;
-            await addDoc(collection(db, "products"), { name, price: document.getElementById('p-price').value, cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value, link: document.getElementById('p-link').value, img: window.tempImg, creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
+            await addDoc(collection(db, "products"), { name: document.getElementById('p-name').value, price: document.getElementById('p-price').value, cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value, link: document.getElementById('p-link').value, img: window.tempImg, creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
             location.reload();
         };
         window.previewProd = (input) => { const r = new FileReader(); r.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); }; r.readAsDataURL(input.files[0]); };
@@ -323,8 +321,8 @@
             document.getElementById('order-modal').classList.add('hidden');
             if(window.target.l && window.target.l !== "undefined") window.open(window.target.l, '_blank');
         };
-        window.logout = () => { if(confirm("Logout?")) signOut(auth).then(() => location.reload()); };
-        window.delProd = async (id) => { if(confirm("Delete item?")) await deleteDoc(doc(db, "products", id)); };
+        window.logout = () => { if(confirm("Logout?")) { localStorage.clear(); signOut(auth).then(() => location.reload()); } };
+        window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
         window.filterFeed = () => {
             const v = document.getElementById('search-input').value.toLowerCase();
             render(allProds.filter(p => p.name.toLowerCase().includes(v) || p.cat?.toLowerCase().includes(v)), 'public-grid');
