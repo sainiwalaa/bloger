@@ -1,371 +1,123 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Creator Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { background: #fafafa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
-        .raj-font { font-family: 'Cinzel', serif; }
-        .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
-        .hidden { display: none !important; }
-        .shahi-header { background: #1a1a1a; color: #d4af37; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d4af37; }
-        .banner-box { height: 220px; background: #e5e5e5; background-position: center; background-size: cover; border-radius: 0 0 40px 40px; position: relative; box-shadow: inset 0 -50px 50px rgba(0,0,0,0.1); }
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #fff; position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); object-fit: cover; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; position: relative; }
-        .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
-        .img-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
-        input[type="file"] { display: none; }
-        .search-bar { background: #f1f1f1; border-radius: 15px; padding: 10px 20px; width: 100%; outline: none; border: 1px solid transparent; transition: 0.3s; }
-        .search-bar:focus { border-color: #d4af37; background: white; }
-    </style>
-</head>
-<body class="pb-24">
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <div id="auth-section" class="min-h-screen flex items-center justify-center p-6 bg-white">
-        <div class="w-full max-w-sm text-center">
-            <h1 class="raj-font text-4xl text-[#d4af37] mb-2">SAINIWALAA</h1>
-            <p id="toggle-text" class="text-[10px] text-gray-400 mb-10 tracking-widest uppercase font-bold text-center">Creator Darbar</p>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
-            <button id="main-auth-btn" onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl uppercase">Log In</button>
-            <p class="text-xs text-gray-500">Naya account? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button></p>
-        </div>
-    </div>
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", 
+        authDomain: "social-blog-93d38.firebaseapp.com", 
+        projectId: "social-blog-93d38", 
+        storageBucket: "social-blog-93d38.appspot.com", 
+        appId: "1:78643219054:web:dprl2lyih" 
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    <main id="main-app" class="hidden">
-        <header class="shahi-header">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-crown text-xl" onclick="location.href=window.location.origin+window.location.pathname" style="cursor:pointer"></i>
-                <div>
-                    <h1 class="raj-font text-sm font-bold tracking-tighter">SAINIWALAA</h1>
-                    <p class="text-[8px] uppercase tracking-widest text-white/70">Influencer Blog & Shop</p>
-                </div>
-            </div>
-            <div class="flex gap-4 text-xs"><span class="opacity-70"><i class="fa-solid fa-star mr-1"></i>PRO</span></div>
-        </header>
+    setPersistence(auth, browserLocalPersistence);
+    let currentUser = null;
+    let allProducts = [];
+    let viewingCreatorId = null;
 
-        <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-around border-b shadow-sm">
-            <button onclick="showTab('feed')" id="tab-feed" class="nav-btn active p-4 text-[10px] font-bold uppercase tracking-widest">Duniya ka Maal</button>
-            <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-4 text-[10px] font-bold uppercase tracking-widest">Mhari Shop</button>
-            <button onclick="showTab('orders')" id="tab-orders" class="nav-btn p-4 text-[10px] font-bold uppercase tracking-widest">Orders</button>
-            <button onclick="logout()" class="p-4 text-red-500"><i class="fa-solid fa-power-off"></i></button>
-        </nav>
-
-        <section id="sec-feed" class="p-4 max-w-6xl mx-auto">
-            <div class="mb-6">
-                <input type="text" id="search-input" oninput="filterFeed()" placeholder="Creator ya Product dhundein..." class="search-bar">
-            </div>
-            <h2 class="raj-font text-xl mb-6 text-gray-800 border-b-2 border-[#d4af37] inline-block">Trending Now</h2>
-            <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-        </section>
-
-        <section id="sec-shop" class="hidden">
-            <div id="banner-ui" class="banner-box">
-                <label class="absolute top-4 right-4 bg-black/40 p-3 rounded-full cursor-pointer text-white owner-only hidden">
-                    <i class="fa-solid fa-camera"></i><input type="file" onchange="uploadProfileMedia('banner', this)">
-                </label>
-                <div class="relative">
-                    <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
-                    <label class="absolute bottom-[-60px] left-[55%] bg-[#d4af37] text-white p-2.5 rounded-full border-4 border-white cursor-pointer owner-only hidden">
-                        <i class="fa-solid fa-pen text-[10px]"></i><input type="file" onchange="uploadProfileMedia('profile', this)">
-                    </label>
-                </div>
-            </div>
-
-            <div class="mt-20 text-center px-6">
-                <h2 id="disp-name" class="font-black">Shahi Creator</h2>
-                <div class="mt-4 relative inline-block px-8 py-4 rounded-2xl bg-[#d4af37]/10 border border-[#d4af37]/20">
-                    <p id="disp-bio" class="text-gray-700 italic font-medium">Bio update karein...</p>
-                </div>
-                
-                <div class="mt-4">
-                    <button id="btn-share-shop" onclick="copyShopLink()" class="text-[10px] bg-gray-100 px-4 py-2 rounded-full font-bold text-gray-600 border border-gray-200">
-                        <i class="fa-solid fa-share-nodes mr-2"></i>SHARE SHOP
-                    </button>
-                </div>
-
-                <div class="flex justify-center gap-3 mt-6">
-                    <a id="btn-wa" href="#" target="_blank" class="social-btn hidden" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
-                    <a id="btn-insta" href="#" target="_blank" class="social-btn hidden" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
-                    <a id="btn-yt" href="#" target="_blank" class="social-btn hidden" style="background:#ff0000"><i class="fa-brands fa-youtube"></i></a>
-                </div>
-                <button onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] bg-white shadow-sm owner-only hidden">Edit Shop Settings</button>
-            </div>
-
-            <div id="edit-profile-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-[30px] shadow-lg space-y-3">
-                <input id="in-name" placeholder="Shop Name" class="w-full p-2 border-b outline-none">
-                <div class="flex gap-2">
-                    <input id="in-name-color" type="color" title="Name Color" class="w-10 h-10">
-                    <input id="in-name-size" type="number" placeholder="Name Size" class="flex-1 p-2 border-b outline-none">
-                </div>
-                <input id="in-bio" placeholder="Bio..." class="w-full p-2 border-b outline-none">
-                <input id="in-bio-size" type="number" placeholder="Bio Size" class="w-full p-2 border-b outline-none">
-                <input id="in-wa" placeholder="WhatsApp Number" class="w-full p-2 border-b outline-none">
-                <input id="in-insta" placeholder="Instagram Link" class="w-full p-2 border-b outline-none">
-                <input id="in-yt" placeholder="YouTube Link" class="w-full p-2 border-b outline-none">
-                <button onclick="saveProfileData()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl font-bold">SAVE CHANGES</button>
-            </div>
-
-            <div class="max-w-4xl mx-auto p-4 mt-12 owner-only hidden">
-                <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center">
-                    <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none">
-                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none">
-                    <select id="p-cat" class="w-full p-3 border-b mb-2 outline-none bg-white text-gray-500">
-                        <option value="General">Select Category</option>
-                        <option value="Fashion">Fashion</option>
-                        <option value="Tech">Gadgets</option>
-                        <option value="Lifestyle">Lifestyle</option>
-                    </select>
-                    <input id="p-desc" placeholder="Short Description" class="w-full p-3 border-b mb-2 outline-none">
-                    <input id="p-link" placeholder="Order Link (Optional)" class="w-full p-3 border-b mb-4 outline-none">
-                    <div id="p-preview-box" class="hidden mb-4"><img id="p-preview-img" class="h-32 mx-auto rounded-xl"></div>
-                    <div class="flex gap-3">
-                        <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold">PHOTO <input type="file" onchange="previewProduct(this)"></label>
-                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-4 rounded-2xl text-[10px] font-bold">PUBLISH</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="max-w-4xl mx-auto p-4"><div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div></div>
-
-            <div id="user-order-history" class="max-w-4xl mx-auto p-4 mt-10">
-                <h3 class="raj-font text-lg mb-4 text-center">Mhare Orders</h3>
-                <div id="history-list" class="space-y-3"></div>
-            </div>
-        </section>
-
-        <section id="sec-orders" class="hidden p-6 max-w-xl mx-auto">
-            <h3 class="raj-font text-xl mb-6 text-center text-[#d4af37]">Incoming Orders (Admin)</h3>
-            <div id="order-list" class="space-y-4"></div>
-        </section>
-    </main>
-
-    <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[35px] p-8">
-             <h3 class="raj-font text-xl font-bold text-center mb-6 text-[#d4af37]">Complete Order</h3>
-             <input id="order-cust-name" placeholder="Your Name" class="w-full p-3 border-b mb-4 outline-none">
-             <input id="order-cust-phone" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
-             <input type="hidden" id="order-item-name"><input type="hidden" id="order-creator-id">
-             <div class="flex gap-3">
-                <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold uppercase">Back</button>
-                <button onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold">CONFIRM ORDER</button>
-             </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        setPersistence(auth, browserLocalPersistence);
-        let currentUser = null;
-        let allProducts = [];
-        let viewingCreatorId = null;
-
-        onAuthStateChanged(auth, u => {
-            if(u) {
-                currentUser = u;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                
-                // URL Se Profile Check Karein
-                const urlParams = new URLSearchParams(window.location.search);
-                const shopId = urlParams.get('shop');
-                
-                if(shopId) {
-                    showTab('shop');
-                    loadProfile(shopId);
-                } else {
-                    showTab(localStorage.getItem('lastTab') || 'feed');
-                }
-                
-                syncAll();
-                syncUserHistory(u.uid);
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-            }
-        });
-
-        window.loadProfile = async (uid) => {
-            viewingCreatorId = uid;
-            const isOwner = (currentUser && currentUser.uid === uid);
-            document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
+    onAuthStateChanged(auth, u => {
+        if(u) {
+            currentUser = u;
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
             
-            const snap = await getDoc(doc(db, "users", uid));
-            if (snap.exists()) {
-                const d = snap.data();
-                const nEl = document.getElementById('disp-name');
-                const bEl = document.getElementById('disp-bio');
-                nEl.innerText = d.name || "Shahi Creator";
-                nEl.style.color = d.nameColor || "#000000";
-                nEl.style.fontSize = (d.nameSize || 24) + "px";
-                bEl.innerText = d.bio || "Bio update karein...";
-                bEl.style.fontSize = (d.bioSize || 14) + "px";
-                document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
-                const sm = { 'btn-wa': d.wa ? `https://wa.me/${d.wa}` : null, 'btn-insta': d.insta, 'btn-yt': d.yt };
-                Object.keys(sm).forEach(id => { sm[id] ? (document.getElementById(id).href = sm[id], document.getElementById(id).classList.remove('hidden')) : document.getElementById(id).classList.add('hidden'); });
+            // Share Link Checker
+            const urlParams = new URLSearchParams(window.location.search);
+            const shopId = urlParams.get('shop');
+            
+            if(shopId) {
+                viewingCreatorId = shopId;
+                showTab('shop');
+                loadProfile(shopId);
+            } else {
+                viewingCreatorId = null;
+                showTab(localStorage.getItem('lastTab') || 'feed');
             }
-            syncMyShop(uid);
-        };
-
-        window.copyShopLink = () => {
-            const idToCopy = viewingCreatorId || currentUser.uid;
-            const link = window.location.origin + window.location.pathname + "?shop=" + idToCopy;
-            navigator.clipboard.writeText(link).then(() => alert("Profile Link Copy Ho Gayi!"));
-        };
-
-        window.saveProfileData = async () => {
-            const data = {
-                name: document.getElementById('in-name').value,
-                nameColor: document.getElementById('in-name-color').value,
-                nameSize: document.getElementById('in-name-size').value,
-                bio: document.getElementById('in-bio').value,
-                bioSize: document.getElementById('in-bio-size').value,
-                wa: document.getElementById('in-wa').value,
-                insta: document.getElementById('in-insta').value,
-                yt: document.getElementById('in-yt').value
-            };
-            await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
-            location.reload();
-        };
-
-        window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value, l = document.getElementById('p-link').value, c = document.getElementById('p-cat').value;
-            if(!n || !p || !window.tempProdImg) return alert("Details bhariye!");
-            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, link: l, category: c, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
-            location.reload();
-        };
-
-        window.deleteProduct = async (id) => {
-            if(confirm("Ye Product Delete Karein?")) {
-                await deleteDoc(doc(db, "products", id));
-            }
-        };
-
-        window.filterFeed = () => {
-            const term = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term) || p.creator.toLowerCase().includes(term) || (p.category && p.category.toLowerCase().includes(term)));
-            renderGrid(filtered);
-        };
-
-        function renderGrid(data) {
-            const grid = document.getElementById('public-grid'); grid.innerHTML = "";
-            data.forEach(p => {
-                grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-1 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-2"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link || ''}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full">ORDER</button></div></div></div>`;
-            });
+            
+            syncAll();
+            syncUserHistory(u.uid);
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
         }
+    });
 
-        function syncAll() {
-            onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-                allProducts = [];
-                snap.forEach(ds => { allProducts.push({id: ds.id, ...ds.data()}); });
-                renderGrid(allProducts);
-            });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
-                const list = document.getElementById('order-list'); list.innerHTML = "";
-                snap.forEach(d => {
-                    const o = d.data(); const t = o.time ? new Date(o.time.seconds*1000).toLocaleString() : 'Just now';
-                    list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#d4af37] flex justify-between"><div><h4 class="font-bold text-sm">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p><p class="text-[9px] text-gray-400">${t}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
-                });
-            });
-        }
-
-        function syncUserHistory(uid) {
-            onSnapshot(query(collection(db, "orders"), where("userId", "==", uid)), snap => {
-                const hist = document.getElementById('history-list'); hist.innerHTML = "";
-                snap.forEach(d => { const o = d.data(); hist.innerHTML += `<div class="bg-white p-3 rounded-lg text-xs flex justify-between shadow-sm border border-gray-100"><span>${o.item}</span><span class="text-green-600 font-bold">Ordered</span></div>`; });
-            });
-        }
-
-        function syncMyShop(uid) {
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
-                const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
-                const isOwner = (currentUser && currentUser.uid === uid);
-                snap.forEach(d => { 
-                    const p = d.data(); 
-                    grid.innerHTML += `<div class="shahi-card">
-                        ${isOwner ? `<button onclick="deleteProduct('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-[10px] z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        <div class="img-frame"><img src="${p.img}"></div>
-                        <div class="p-3">
-                            <p class="text-[11px] font-bold">${p.name}</p>
-                            <p class="text-gray-500 text-[9px] mb-1">${p.desc || ''}</p>
-                            <p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>
-                        </div>
-                    </div>`; 
-                });
-            });
-        }
-
-        window.showTab = (t) => {
-            localStorage.setItem('lastTab', t);
-            ['feed','shop','orders'].forEach(s => {
-                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && !viewingCreatorId) loadProfile(currentUser.uid);
-        };
-        window.handleAuth = () => {
-            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
-        };
-        window.logout = () => signOut(auth).then(() => { localStorage.clear(); location.href=window.location.origin+window.location.pathname; });
-        window.toggleAuthMode = () => {
-            const btn = document.getElementById('main-auth-btn');
-            btn.innerText = (btn.innerText === 'LOG IN') ? 'SIGN UP' : 'LOG IN';
-        };
-        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
-        window.orderNow = (item, cid, link = '') => { 
-            document.getElementById('order-item-name').value = item; 
-            document.getElementById('order-creator-id').value = cid; 
-            window.currentOrderLink = link;
-            document.getElementById('checkout-modal').classList.remove('hidden'); 
-        };
-        window.submitOrder = async () => {
-            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
-            if(!n || !ph) return alert("Details bhariye");
-            await addDoc(collection(db, "orders"), { item: document.getElementById('order-item-name').value, customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, userId: currentUser.uid, time: serverTimestamp() });
-            if(window.currentOrderLink) window.open(window.currentOrderLink, '_blank');
-            alert("Order Done!"); closeCheckout();
-        };
-        window.delOrder = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "orders", id)); };
-        window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); };
+    window.loadProfile = async (uid) => {
+        const isOwner = (currentUser && currentUser.uid === uid);
         
-        const compressImg = (f) => new Promise(res => {
-            const r = new FileReader(); r.readAsDataURL(f);
-            r.onload = e => {
-                const img = new Image(); img.src = e.target.result;
-                img.onload = () => {
-                    const c = document.createElement('canvas');
-                    c.width = 600; c.height = img.height * (600/img.width);
-                    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                    res(c.toDataURL('image/jpeg', 0.8));
-                };
-            };
+        // SECURITY: Sirf owner ko edit buttons dikhao
+        document.querySelectorAll('.owner-only').forEach(el => {
+            if(isOwner) el.classList.remove('hidden');
+            else el.classList.add('hidden');
         });
-        window.uploadProfileMedia = async (type, input) => {
-            const comp = await compressImg(input.files[0]);
-            await setDoc(doc(db, "users", currentUser.uid), { [type]: comp }, { merge: true });
-            loadProfile(currentUser.uid);
-        };
-        window.previewProduct = async (input) => {
-            window.tempProdImg = await compressImg(input.files[0]);
-            document.getElementById('p-preview-box').classList.remove('hidden');
-            document.getElementById('p-preview-img').src = window.tempProdImg;
-            document.getElementById('pub-btn').classList.remove('hidden');
-        };
-    </script>
-</body>
-</html> 
+
+        // Agar user share link se aaya hai toh "Back to Feed" dikhao
+        const shareBtn = document.getElementById('btn-share-shop');
+        if(!isOwner) {
+            shareBtn.innerHTML = `<i class="fa-solid fa-house mr-2"></i>WAPAS FEED PAR`;
+            shareBtn.onclick = () => { window.location.href = window.location.pathname; };
+        } else {
+            shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes mr-2"></i>SHARE SHOP`;
+            shareBtn.onclick = () => copyShopLink();
+        }
+
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) {
+            const d = snap.data();
+            const nEl = document.getElementById('disp-name');
+            const bEl = document.getElementById('disp-bio');
+            nEl.innerText = d.name || "Shahi Creator";
+            nEl.style.color = d.nameColor || "#000000";
+            nEl.style.fontSize = (d.nameSize || 24) + "px";
+            bEl.innerText = d.bio || "Bio update karein...";
+            bEl.style.fontSize = (d.bioSize || 14) + "px";
+            document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
+            document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
+            
+            const sm = { 'btn-wa': d.wa ? `https://wa.me/${d.wa}` : null, 'btn-insta': d.insta, 'btn-yt': d.yt };
+            Object.keys(sm).forEach(id => { 
+                if(sm[id]) {
+                    document.getElementById(id).href = sm[id];
+                    document.getElementById(id).classList.remove('hidden');
+                } else {
+                    document.getElementById(id).classList.add('hidden');
+                }
+            });
+        }
+        syncMyShop(uid);
+    };
+
+    window.copyShopLink = () => {
+        const link = window.location.origin + window.location.pathname + "?shop=" + currentUser.uid;
+        navigator.clipboard.writeText(link).then(() => alert("Aapki Shop Link Copy Ho Gayi!"));
+    };
+
+    // --- Baki Functions (Publish, Delete, Order) as it is rahenge bas niche wala dhyan dein ---
+
+    window.showTab = (t) => {
+        // Agar koi dusre ki shop dekh raha hai aur feed pe click kare toh URL saaf ho jaye
+        if(t === 'feed' && window.location.search.includes('shop')) {
+            window.location.href = window.location.pathname;
+            return;
+        }
+
+        localStorage.setItem('lastTab', t);
+        ['feed','shop','orders'].forEach(s => {
+            if(document.getElementById('sec-'+s)) document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
+            if(document.getElementById('tab-'+s)) document.getElementById('tab-'+s).classList.toggle('active', s === t);
+        });
+
+        if(t === 'shop') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shopId = urlParams.get('shop');
+            loadProfile(shopId || currentUser.uid);
+        }
+    };
+
+    // ... (PublishProduct aur baki functions wahi purane wale add karle) ...
+</script>
