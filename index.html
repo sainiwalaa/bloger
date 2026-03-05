@@ -386,6 +386,104 @@
         };
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-    </script>
+    </script
+<footer class="relative mt-20 bg-[#111] text-white overflow-hidden pt-16 pb-10">
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-right from-transparent via-[#d4af37] to-transparent"></div>
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#d4af37 0.5px, transparent 0.5px); background-size: 20px 20px;"></div>
+
+    <div class="max-w-6xl mx-auto px-6 relative z-10 text-center">
+        <h2 class="raj-font text-3xl md:text-5xl mb-4 tracking-tighter">BECOME A <span class="text-[#d4af37]">ROYAL CREATOR</span></h2>
+        <p class="text-gray-400 max-w-2xl mx-auto mb-10 text-sm md:text-base italic">
+            "साधारण मार्केटप्लेस की भीड़ छोड़िए। SAINIWALAA के साथ जुड़ें और अपनी डिजिटल विरासत को एक लग्जरी ब्रांड का रूप दें। यहाँ आपकी कला को सही कद्रदान और शाही पहचान मिलती है।"
+        </p>
+
+        <div class="flex justify-center gap-10 mb-16">
+            <div class="text-center border-r border-white/10 pr-10">
+                <p class="text-[#d4af37] text-2xl font-black">500+</p>
+                <p class="text-[10px] uppercase tracking-widest text-gray-500">Elite Creators</p>
+            </div>
+            <div class="text-center">
+                <p class="text-[#d4af37] text-2xl font-black">₹10M+</p>
+                <p class="text-[10px] uppercase tracking-widest text-gray-500">Economy Driven</p>
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <p class="text-[10px] uppercase tracking-[0.4em] text-[#d4af37] mb-6 font-bold">Our Exclusive Circle</p>
+            
+            <div class="relative flex overflow-x-hidden group py-4">
+                <div id="footer-creator-scroll" class="flex animate-marquee whitespace-nowrap gap-6">
+                    <div class="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-full">
+                        <div class="w-8 h-8 rounded-full bg-[#d4af37] animate-pulse"></div>
+                        <span class="text-sm font-bold tracking-tight">Syncing Creators...</span>
+                    </div>
+                </div>
+
+                <div id="footer-creator-scroll-2" class="flex animate-marquee whitespace-nowrap gap-6 ml-6">
+                    </div>
+            </div>
+        </div>
+
+        <hr class="border-white/5 mb-8">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-gray-500 font-bold tracking-widest">
+            <p>© 2026 SAINIWALAA | CRAFTED FOR THE LUXURY CREATORS</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-[#d4af37] transition">TERMS</a>
+                <a href="#" class="hover:text-[#d4af37] transition">PRIVACY</a>
+                <a href="#" class="hover:text-[#d4af37] transition">CONTACT</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+    .animate-marquee {
+        animation: marquee 30s linear infinite;
+    }
+    .group:hover .animate-marquee {
+        animation-play-state: paused;
+    }
+</style>
+
+<script type="module">
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    const db = getFirestore();
+
+    // Footer Creator List Sync
+    const updateFooterScroll = () => {
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            const scroll1 = document.getElementById('footer-creator-scroll');
+            const scroll2 = document.getElementById('footer-creator-scroll-2');
+            
+            let creatorHTML = "";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if(data.name) {
+                    creatorHTML += `
+                    <div class="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-full transition cursor-pointer">
+                        <img src="${data.profile || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+doc.id}" class="w-7 h-7 rounded-full border border-[#d4af37]/30 object-cover">
+                        <span class="text-xs font-extrabold tracking-tight text-white/90">${data.name.toUpperCase()}</span>
+                    </div>`;
+                }
+            });
+
+            if(creatorHTML === "") {
+                creatorHTML = `<div class="text-gray-600 text-[10px]">WAITING FOR ROYAL CREATORS...</div>`;
+            }
+
+            scroll1.innerHTML = creatorHTML;
+            scroll2.innerHTML = creatorHTML;
+        });
+    };
+
+    // Run when DOM is ready
+    setTimeout(updateFooterScroll, 2000);
+</script>
+        
 </body>
 </html>
