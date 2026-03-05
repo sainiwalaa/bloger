@@ -1,248 +1,253 @@
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahi Shop & Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #f8f9fa; }
+        .shahi-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; position: relative; }
+        .shahi-card:hover { transform: translateY(-5px); }
+        .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #eee; }
+        .img-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .active { color: #d4af37 !important; border-bottom: 3px solid #d4af37; }
+        .hidden { display: none; }
+        #banner-ui { height: 150px; background-size: cover; background-position: center; background-color: #ddd; }
+    </style>
+</head>
+<body>
 
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", 
-        authDomain: "social-blog-93d38.firebaseapp.com", 
-        projectId: "social-blog-93d38", 
-        storageBucket: "social-blog-93d38.appspot.com", 
-        appId: "1:78643219054:web:dprl2lyih" 
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    <div id="auth-section" class="min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
+            <h1 class="text-3xl font-extrabold mb-2">SHAHI <span class="text-[#d4af37]">SHOP</span></h1>
+            <p class="text-gray-500 mb-6 text-sm">Apni dukaan banayein aur bechna shuru karein</p>
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 mb-3 border rounded-xl bg-gray-50">
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 mb-6 border rounded-xl bg-gray-50">
+            <button onclick="handleAuth()" id="main-auth-btn" class="w-full bg-black text-white p-4 rounded-xl font-bold mb-4">LOG IN / SIGN UP</button>
+            <p class="text-xs text-gray-400">Naya account hai toh password daal kar login karein, khud ban jayega.</p>
+        </div>
+    </div>
 
-    setPersistence(auth, browserLocalPersistence);
-    let currentUser = null;
-    let allProducts = [];
-
-    onAuthStateChanged(auth, u => {
-        if(u) {
-            currentUser = u;
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const shopId = urlParams.get('shop');
-            
-            if(shopId) {
-                showTab('shop'); // Profile view mode
-            } else {
-                showTab(localStorage.getItem('lastTab') || 'feed');
-            }
-            
-            syncAll();
-            syncUserHistory(u.uid);
-        } else {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('main-app').classList.add('hidden');
-        }
-    });
-
-    window.loadProfile = async (uid) => {
-        const isOwner = (currentUser && currentUser.uid === uid);
+    <div id="main-app" class="hidden pb-24">
         
-        // SECURITY: Buttons hide/show logic
-        document.querySelectorAll('.owner-only').forEach(el => {
-            isOwner ? el.classList.remove('hidden') : el.classList.add('hidden');
-        });
+        <nav class="sticky top-0 bg-white/80 backdrop-blur-md z-50 px-6 py-4 flex justify-between items-center border-b">
+            <h2 class="font-extrabold text-xl tracking-tighter">SHAHI.</h2>
+            <button onclick="logout()" class="text-red-500 text-sm font-bold">LOGOUT</button>
+        </nav>
 
-        // SMART NAV: Share button ya Home button logic
-        const shareBtn = document.getElementById('btn-share-shop');
-        if(!isOwner) {
-            shareBtn.innerHTML = `<i class="fa-solid fa-house mr-2"></i>WAPAS FEED PAR`;
-            shareBtn.className = "text-[10px] bg-black text-white px-4 py-2 rounded-full font-bold shadow-lg";
-            shareBtn.onclick = () => { window.location.href = window.location.origin + window.location.pathname; };
-        } else {
-            shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes mr-2"></i>SHARE SHOP`;
-            shareBtn.className = "text-[10px] bg-gray-100 px-4 py-2 rounded-full font-bold text-gray-600 border border-gray-200";
-            shareBtn.onclick = () => copyShopLink();
-        }
-
-        const snap = await getDoc(doc(db, "users", uid));
-        if (snap.exists()) {
-            const d = snap.data();
-            const nEl = document.getElementById('disp-name');
-            const bEl = document.getElementById('disp-bio');
-            nEl.innerText = d.name || "Shahi Creator";
-            nEl.style.color = d.nameColor || "#000000";
-            nEl.style.fontSize = (d.nameSize || 24) + "px";
-            bEl.innerText = d.bio || "Bio update karein...";
-            bEl.style.fontSize = (d.bioSize || 14) + "px";
-            document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-            document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
+        <main class="max-w-md mx-auto p-4">
             
-            const sm = { 'btn-wa': d.wa ? `https://wa.me/${d.wa}` : null, 'btn-insta': d.insta, 'btn-yt': d.yt };
-            Object.keys(sm).forEach(id => { 
-                if(sm[id]) {
-                    document.getElementById(id).href = sm[id];
-                    document.getElementById(id).classList.remove('hidden');
-                } else {
-                    document.getElementById(id).classList.add('hidden');
-                }
-            });
-        }
-        syncMyShop(uid);
-    };
-
-    window.copyShopLink = () => {
-        const link = window.location.origin + window.location.pathname + "?shop=" + currentUser.uid;
-        navigator.clipboard.writeText(link).then(() => alert("Aapki Shahi Shop Link Copy Ho Gayi!"));
-    };
-
-    window.showTab = (t) => {
-        // Agar feed dabaya aur URL mein shop hai, toh clean URL karke wapas jao
-        if(t === 'feed' && window.location.search.includes('shop')) {
-            window.location.href = window.location.origin + window.location.pathname;
-            return;
-        }
-
-        localStorage.setItem('lastTab', t);
-        ['feed','shop','orders'].forEach(s => {
-            const sec = document.getElementById('sec-'+s);
-            const tab = document.getElementById('tab-'+s);
-            if(sec) sec.classList.toggle('hidden', s !== t);
-            if(tab) tab.classList.toggle('active', s === t);
-        });
-
-        if(t === 'shop') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shopId = urlParams.get('shop');
-            loadProfile(shopId || currentUser.uid);
-        }
-    };
-
-    // --- PRODUCT & ORDER SYSTEM ---
-
-    window.publishProduct = async () => {
-        const n = document.getElementById('p-name').value, 
-              p = document.getElementById('p-price').value, 
-              d = document.getElementById('p-desc').value, 
-              l = document.getElementById('p-link').value, 
-              c = document.getElementById('p-cat').value;
-        if(!n || !p || !window.tempProdImg) return alert("Details bhariye!");
-        
-        await addDoc(collection(db, "products"), { 
-            name: n, price: p, desc: d, link: l, category: c, 
-            img: window.tempProdImg, creatorId: currentUser.uid, 
-            creator: document.getElementById('disp-name').innerText, 
-            time: serverTimestamp() 
-        });
-        location.reload(); 
-    };
-
-    window.deleteProduct = async (id) => {
-        if(confirm("Ye Product Mita Dein?")) {
-            await deleteDoc(doc(db, "products", id));
-        }
-    };
-
-    window.saveProfileData = async () => {
-        const data = {
-            name: document.getElementById('in-name').value,
-            nameColor: document.getElementById('in-name-color').value,
-            nameSize: document.getElementById('in-name-size').value,
-            bio: document.getElementById('in-bio').value,
-            bioSize: document.getElementById('in-bio-size').value,
-            wa: document.getElementById('in-wa').value,
-            insta: document.getElementById('in-insta').value,
-            yt: document.getElementById('in-yt').value
-        };
-        await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
-        location.reload();
-    };
-
-    // --- SYNC FUNCTIONS ---
-
-    function syncAll() {
-        onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-            allProducts = [];
-            snap.forEach(ds => { allProducts.push({id: ds.id, ...ds.data()}); });
-            renderGrid(allProducts);
-        });
-        onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
-            const list = document.getElementById('order-list'); list.innerHTML = "";
-            snap.forEach(d => {
-                const o = d.data(); const t = o.time ? new Date(o.time.seconds*1000).toLocaleString() : 'Just now';
-                list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#d4af37] flex justify-between"><div><h4 class="font-bold text-sm">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
-            });
-        });
-    }
-
-    function syncMyShop(uid) {
-        onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
-            const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
-            const isOwner = (currentUser && currentUser.uid === uid);
-            snap.forEach(d => { 
-                const p = d.data(); 
-                grid.innerHTML += `<div class="shahi-card">
-                    ${isOwner ? `<button onclick="deleteProduct('${d.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-[10px] z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
-                    <div class="img-frame"><img src="${p.img}"></div>
-                    <div class="p-3">
-                        <p class="text-[11px] font-bold">${p.name}</p>
-                        <p class="text-[#d4af37] text-xs font-bold">₹${p.price}</p>
+            <section id="sec-feed">
+                <div id="main-feed-grid" class="grid grid-cols-2 gap-4">
                     </div>
-                </div>`; 
-            });
-        });
-    }
+            </section>
 
-    // Auth & Utilities
-    window.handleAuth = () => {
-        const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-        signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
-    };
-    window.logout = () => signOut(auth).then(() => { localStorage.clear(); location.href = window.location.origin + window.location.pathname; });
-    window.toggleAuthMode = () => {
-        const btn = document.getElementById('main-auth-btn');
-        btn.innerText = (btn.innerText === 'LOG IN') ? 'SIGN UP' : 'LOG IN';
-    };
-    window.orderNow = (item, cid, link = '') => { 
-        document.getElementById('order-item-name').value = item; 
-        document.getElementById('order-creator-id').value = cid; 
-        window.currentOrderLink = link;
-        document.getElementById('checkout-modal').classList.remove('hidden'); 
-    };
-    window.submitOrder = async () => {
-        const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
-        if(!n || !ph) return alert("Details bhariye");
-        await addDoc(collection(db, "orders"), { 
-            item: document.getElementById('order-item-name').value, 
-            customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, 
-            userId: currentUser.uid, time: serverTimestamp() 
-        });
-        if(window.currentOrderLink) window.open(window.currentOrderLink, '_blank');
-        alert("Order Done!"); document.getElementById('checkout-modal').classList.add('hidden');
-    };
-    window.viewCreator = (cid) => {
-        window.history.pushState({}, '', '?shop=' + cid);
-        showTab('shop');
-    };
+            <section id="sec-shop" class="hidden">
+                <div id="banner-ui" class="rounded-3xl mb-[-50px] relative">
+                    <input type="file" id="in-banner" class="hidden" onchange="uploadProfileMedia('banner', this)">
+                    <button onclick="document.getElementById('in-banner').click()" class="owner-only absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full text-xs"><i class="fa-solid fa-camera"></i></button>
+                </div>
+                
+                <div class="px-4 text-center">
+                    <div class="relative inline-block">
+                        <img id="profile-ui" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover bg-white">
+                        <input type="file" id="in-profile" class="hidden" onchange="uploadProfileMedia('profile', this)">
+                        <button onclick="document.getElementById('in-profile').click()" class="owner-only absolute bottom-0 right-0 bg-[#d4af37] text-white p-2 rounded-full text-xs border-2 border-white"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                    
+                    <h2 id="disp-name" class="font-bold mt-2">Creator Name</h2>
+                    <p id="disp-bio" class="text-gray-500 text-sm px-6">Aapka bio yahan dikhega...</p>
+                    
+                    <div class="flex justify-center gap-4 mt-4">
+                        <a id="btn-wa" class="hidden text-green-500 text-xl"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a id="btn-insta" class="hidden text-pink-500 text-xl"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
 
-    const compressImg = (f) => new Promise(res => {
-        const r = new FileReader(); r.readAsDataURL(f);
-        r.onload = e => {
-            const img = new Image(); img.src = e.target.result;
-            img.onload = () => {
-                const c = document.createElement('canvas');
-                c.width = 600; c.height = img.height * (600/img.width);
-                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                res(c.toDataURL('image/jpeg', 0.8));
-            };
+                    <button id="btn-share-shop" class="mt-4 px-6 py-2 rounded-full font-bold text-sm border"></button>
+                </div>
+
+                <div class="owner-only mt-8 bg-white p-6 rounded-3xl shadow-sm border">
+                    <h3 class="font-bold mb-4">Naya Maal Add Karein</h3>
+                    <input type="text" id="p-name" placeholder="Product Name" class="w-full p-3 mb-2 border rounded-xl">
+                    <input type="number" id="p-price" placeholder="Price (₹)" class="w-full p-3 mb-2 border rounded-xl">
+                    <input type="file" onchange="previewProduct(this)" class="mb-4 text-xs">
+                    <div id="p-preview-box" class="hidden mb-4"><img id="p-preview-img" class="w-20 h-20 rounded-lg object-cover"></div>
+                    <button id="pub-btn" onclick="publishProduct()" class="hidden w-full bg-[#d4af37] text-white p-3 rounded-xl font-bold">PUBLISH</button>
+                </div>
+
+                <div id="my-shop-grid" class="grid grid-cols-2 gap-4 mt-8"></div>
+            </section>
+
+            <section id="sec-orders" class="hidden">
+                <h2 class="font-bold text-xl mb-4">Aapke Orders</h2>
+                <div id="order-list" class="space-y-3"></div>
+            </section>
+
+        </main>
+
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t px-8 py-4 flex justify-between items-center z-50">
+            <button id="tab-feed" onclick="showTab('feed')" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-house"></i><span class="text-[10px]">Feed</span></button>
+            <button id="tab-shop" onclick="showTab('shop')" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-shop"></i><span class="text-[10px]">My Shop</span></button>
+            <button id="tab-orders" onclick="showTab('orders')" class="text-gray-400 flex flex-col items-center"><i class="fa-solid fa-box"></i><span class="text-[10px]">Orders</span></button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where, deleteDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", 
+            authDomain: "social-blog-93d38.firebaseapp.com", 
+            projectId: "social-blog-93d38", 
+            storageBucket: "social-blog-93d38.appspot.com", 
+            appId: "1:78643219054:web:dprl2lyih" 
         };
-    });
-    window.uploadProfileMedia = async (type, input) => {
-        const comp = await compressImg(input.files[0]);
-        await setDoc(doc(db, "users", currentUser.uid), { [type]: comp }, { merge: true });
-        loadProfile(currentUser.uid);
-    };
-    window.previewProduct = async (input) => {
-        window.tempProdImg = await compressImg(input.files[0]);
-        document.getElementById('p-preview-box').classList.remove('hidden');
-        document.getElementById('p-preview-img').src = window.tempProdImg;
-        document.getElementById('pub-btn').classList.remove('hidden');
-    };
-</script>
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        setPersistence(auth, browserLocalPersistence);
+        let currentUser = null;
+
+        onAuthStateChanged(auth, u => {
+            if(u) {
+                currentUser = u;
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                const urlParams = new URLSearchParams(window.location.search);
+                const shopId = urlParams.get('shop');
+                if(shopId) window.showTab('shop');
+                else window.showTab(localStorage.getItem('lastTab') || 'feed');
+                syncAll();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+        });
+
+        // GLOBAL FUNCTIONS
+        window.showTab = (t) => {
+            if(t === 'feed' && window.location.search.includes('shop')) {
+                window.location.href = window.location.origin + window.location.pathname;
+                return;
+            }
+            localStorage.setItem('lastTab', t);
+            ['feed','shop','orders'].forEach(s => {
+                const sec = document.getElementById('sec-'+s);
+                const tab = document.getElementById('tab-'+s);
+                if(sec) sec.classList.toggle('hidden', s !== t);
+                if(tab) tab.classList.toggle('active', s === t);
+            });
+            if(t === 'shop') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const shopId = urlParams.get('shop');
+                window.loadProfile(shopId || currentUser.uid);
+            }
+        };
+
+        window.loadProfile = async (uid) => {
+            const isOwner = (currentUser && currentUser.uid === uid);
+            document.querySelectorAll('.owner-only').forEach(el => isOwner ? el.classList.remove('hidden') : el.classList.add('hidden'));
+
+            const shareBtn = document.getElementById('btn-share-shop');
+            if(!isOwner) {
+                shareBtn.innerHTML = `WAPAS FEED PAR`;
+                shareBtn.onclick = () => window.showTab('feed');
+            } else {
+                shareBtn.innerHTML = `SHARE SHOP`;
+                shareBtn.onclick = () => {
+                    const link = window.location.origin + window.location.pathname + "?shop=" + currentUser.uid;
+                    navigator.clipboard.writeText(link).then(() => alert("Link Copy Ho Gyi!"));
+                }
+            }
+
+            const snap = await getDoc(doc(db, "users", uid));
+            if(snap.exists()){
+                const d = snap.data();
+                document.getElementById('disp-name').innerText = d.name || "Creator";
+                document.getElementById('disp-bio').innerText = d.bio || "No bio";
+                document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
+                document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "";
+            }
+            syncMyShop(uid);
+        };
+
+        function syncAll() {
+            onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
+                const grid = document.getElementById('main-feed-grid');
+                grid.innerHTML = "";
+                snap.forEach(ds => {
+                    const p = ds.data();
+                    grid.innerHTML += `<div class="shahi-card" onclick="viewCreator('${p.creatorId}')">
+                        <div class="img-frame"><img src="${p.img}"></div>
+                        <div class="p-3"><p class="text-xs font-bold">${p.name}</p><p class="text-[#d4af37] font-bold">₹${p.price}</p></div>
+                    </div>`;
+                });
+            });
+        }
+
+        function syncMyShop(uid) {
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
+                const grid = document.getElementById('my-shop-grid');
+                grid.innerHTML = "";
+                snap.forEach(d => {
+                    const p = d.data();
+                    grid.innerHTML += `<div class="shahi-card">
+                        <div class="img-frame"><img src="${p.img}"></div>
+                        <div class="p-3"><p class="text-xs font-bold">${p.name}</p></div>
+                    </div>`;
+                });
+            });
+        }
+
+        window.handleAuth = () => {
+            const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+
+        window.viewCreator = (cid) => {
+            window.history.pushState({}, '', '?shop=' + cid);
+            window.showTab('shop');
+        };
+
+        window.previewProduct = (input) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                window.tempProdImg = e.target.result;
+                document.getElementById('p-preview-box').classList.remove('hidden');
+                document.getElementById('p-preview-img').src = e.target.result;
+                document.getElementById('pub-btn').classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+
+        window.publishProduct = async () => {
+            await addDoc(collection(db, "products"), {
+                name: document.getElementById('p-name').value,
+                price: document.getElementById('p-price').value,
+                img: window.tempProdImg,
+                creatorId: currentUser.uid,
+                time: serverTimestamp()
+            });
+            alert("Product Live!"); location.reload();
+        };
+
+        window.uploadProfileMedia = async (type, input) => {
+            const reader = new FileReader();
+            reader.onload = async e => {
+                await setDoc(doc(db, "users", currentUser.uid), { [type]: e.target.result }, { merge: true });
+                location.reload();
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+    </script>
+</body>
+</html>
