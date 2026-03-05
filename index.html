@@ -13,7 +13,7 @@
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        /* --- Naya Shahi Header Style --- */
+        /* --- Shahi Header Style --- */
         .shahi-header {
             background: #1a1a1a;
             color: #d4af37;
@@ -24,54 +24,61 @@
             border-bottom: 2px solid #d4af37;
         }
 
-        /* Banner & Profile Look */
         .banner-box { 
             height: 220px; 
             background: #e5e5e5; 
             background-position: center; 
             background-size: cover; 
-            background-repeat: no-repeat;
             border-radius: 0 0 40px 40px; 
             position: relative;
             box-shadow: inset 0 -50px 50px rgba(0,0,0,0.1);
         }
         .profile-img { 
-            width: 120px; 
-            height: 120px; 
+            width: 120px; height: 120px; 
             border-radius: 50%; 
             border: 6px solid #fff; 
-            position: absolute; 
-            bottom: -60px; 
-            left: 50%; 
+            position: absolute; bottom: -60px; left: 50%; 
             transform: translateX(-50%); 
-            object-fit: cover; 
-            background: #fff; 
+            object-fit: cover; background: #fff; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
         }
 
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
         .img-frame { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #f9f9f9; }
         .img-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; transition: 0.2s; }
+        .social-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body class="pb-24">
 
     <div id="auth-section" class="min-h-screen flex items-center justify-center p-6 bg-white">
-        <div class="w-full max-sm text-center">
+        <div class="w-full max-w-sm text-center">
             <h1 class="raj-font text-4xl text-[#d4af37] mb-2">SAINIWALAA</h1>
             <p class="text-[10px] text-gray-400 mb-10 tracking-widest uppercase font-bold">Creator Darbar</p>
             <div id="auth-inputs">
                 <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 border-b mb-4 outline-none focus:border-[#d4af37]">
                 <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 border-b mb-8 outline-none focus:border-[#d4af37]">
                 <button id="main-auth-btn" onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-full font-bold mb-4 shadow-xl">LOG IN</button>
-                <p id="toggle-text" class="text-xs text-gray-500">Naya account chahiye? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button></p>
+                <p id="toggle-text" class="text-xs text-gray-500">Naya account? <button onclick="toggleAuthMode()" class="text-[#d4af37] font-bold underline">Register Karein</button></p>
             </div>
         </div>
     </div>
 
     <main id="main-app" class="hidden">
+        <header class="shahi-header">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-crown text-xl"></i>
+                <div>
+                    <h1 class="raj-font text-sm font-bold tracking-tighter">SAINIWALAA</h1>
+                    <p class="text-[8px] uppercase tracking-widest text-white/70">Influencer Blog & Shop</p>
+                </div>
+            </div>
+            <div class="flex gap-4 text-xs">
+                <span class="opacity-70"><i class="fa-solid fa-star mr-1"></i>PRO</span>
+            </div>
+        </header>
+
         <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex justify-around border-b shadow-sm">
             <button onclick="showTab('feed')" id="tab-feed" class="nav-btn active p-4 text-[10px] font-bold uppercase tracking-widest">Duniya ka Maal</button>
             <button onclick="showTab('shop')" id="tab-shop" class="nav-btn p-4 text-[10px] font-bold uppercase tracking-widest">Mhari Shop</button>
@@ -80,33 +87,19 @@
         </nav>
 
         <section id="sec-feed" class="p-4 max-w-6xl mx-auto">
-            <h2 class="raj-font text-xl mb-6 text-gray-800 border-b-2 border-gold inline-block">Trending Now</h2>
+            <h2 class="raj-font text-xl mb-6 text-gray-800 border-b-2 border-[#d4af37] inline-block">Trending Now</h2>
             <div id="public-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
         </section>
 
         <section id="sec-shop" class="hidden">
-            
-            <header class="shahi-header">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-crown text-xl"></i>
-                    <div>
-                        <h1 class="raj-font text-sm font-bold tracking-tighter">SAINIWALAA</h1>
-                        <p class="text-[8px] uppercase tracking-widest text-white/70">Influencer Blog & Shop</p>
-                    </div>
-                </div>
-                <div class="flex gap-4 text-xs">
-                    <span class="opacity-70"><i class="fa-solid fa-star mr-1"></i>PRO</span>
-                </div>
-            </header>
-
             <div id="banner-ui" class="banner-box">
-                <label class="absolute top-4 right-4 bg-black/40 p-3 rounded-full cursor-pointer text-white backdrop-blur-md hidden owner-only" id="banner-label">
+                <label class="absolute top-4 right-4 bg-black/40 p-3 rounded-full cursor-pointer text-white owner-only hidden" id="banner-label">
                     <i class="fa-solid fa-camera"></i>
                     <input type="file" onchange="uploadProfileMedia('banner', this)">
                 </label>
                 <div class="relative">
                     <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
-                    <label class="absolute bottom-[-60px] left-[55%] bg-[#d4af37] text-white p-2.5 rounded-full border-4 border-white cursor-pointer hidden owner-only" id="profile-label">
+                    <label class="absolute bottom-[-60px] left-[55%] bg-[#d4af37] text-white p-2.5 rounded-full border-4 border-white cursor-pointer owner-only hidden" id="profile-label">
                         <i class="fa-solid fa-pen text-[10px]"></i>
                         <input type="file" onchange="uploadProfileMedia('profile', this)">
                     </label>
@@ -114,77 +107,51 @@
             </div>
 
             <div class="mt-20 text-center px-6">
-                <h2 id="disp-name" class="font-black transition-all">Shahi Creator</h2>
-                
-                <div class="mt-4 px-2">
-                    <div id="bio-container" class="relative inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-[#d4af37]/10 to-[#f3e5ab]/20 border border-[#d4af37]/20">
-                        <i class="fa-solid fa-quote-left absolute top-2 left-2 text-[#d4af37]/30 text-[10px]"></i>
-                        <p id="disp-bio" class="text-gray-700 italic font-medium leading-relaxed">Bio update karein...</p>
-                        <i class="fa-solid fa-quote-right absolute bottom-2 right-2 text-[#d4af37]/30 text-[10px]"></i>
-                    </div>
-
-                    <div class="flex justify-center gap-4 mt-3 owner-only hidden">
-                        <button onclick="changeFontSize(-1)" class="text-[10px] bg-white border px-3 py-1 rounded-full shadow-sm">Bio A-</button>
-                        <button onclick="changeFontSize(1)" class="text-[10px] bg-white border px-3 py-1 rounded-full shadow-sm">Bio A+</button>
-                    </div>
+                <h2 id="disp-name" class="font-black">Shahi Creator</h2>
+                <div id="bio-container" class="mt-4 relative inline-block px-8 py-4 rounded-2xl bg-[#d4af37]/10 border border-[#d4af37]/20">
+                    <p id="disp-bio" class="text-gray-700 italic font-medium">Bio update karein...</p>
                 </div>
-
+                
                 <div class="flex justify-center gap-3 mt-6">
                     <a id="btn-wa" href="#" target="_blank" class="social-btn hidden" style="background:#25D366"><i class="fa-brands fa-whatsapp"></i></a>
                     <a id="btn-insta" href="#" target="_blank" class="social-btn hidden" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><i class="fa-brands fa-instagram"></i></a>
                     <a id="btn-yt" href="#" target="_blank" class="social-btn hidden" style="background:#ff0000"><i class="fa-brands fa-youtube"></i></a>
                 </div>
-                
-                <button onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] tracking-widest bg-white shadow-sm hidden owner-only">Sajawat aur Socials</button>
+
+                <button onclick="document.getElementById('edit-profile-box').classList.toggle('hidden')" class="mt-6 text-[9px] border px-6 py-2 rounded-full font-bold uppercase text-[#d4af37] bg-white shadow-sm owner-only hidden">Edit Profile</button>
             </div>
 
             <div id="edit-profile-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-[30px] shadow-lg">
-                <p class="text-[10px] font-bold mb-2 uppercase text-gray-400">Shop Ka Naam & Style</p>
-                <input id="in-name" placeholder="Shop Name" class="w-full p-3 border-b mb-2 outline-none font-bold">
-                <div class="flex gap-2 mb-4">
-                    <input type="color" id="in-name-color" class="w-10 h-10 border-0 cursor-pointer">
-                    <select id="in-name-size" class="flex-1 bg-gray-50 text-xs p-2 rounded">
-                        <option value="18px">Chhota</option>
-                        <option value="24px" selected>Normal</option>
-                        <option value="32px">Bada (Shahi)</option>
-                        <option value="40px">Bahut Bada</option>
-                    </select>
-                </div>
-                
-                <p class="text-[10px] font-bold mb-2 uppercase text-gray-400">Bio aur Links</p>
+                <input id="in-name" placeholder="Shop Name" class="w-full p-3 border-b mb-2 outline-none">
                 <input id="in-bio" placeholder="Bio..." class="w-full p-3 border-b mb-2 outline-none">
-                <input id="in-wa" placeholder="WhatsApp (91...)" class="w-full p-3 border-b mb-2 text-xs outline-none">
-                <input id="in-insta" placeholder="Instagram URL" class="w-full p-3 border-b mb-2 text-xs outline-none">
-                <input id="in-yt" placeholder="YouTube URL" class="w-full p-3 border-b mb-4 text-xs outline-none">
-                
-                <button onclick="saveProfileData()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl text-xs font-bold uppercase shadow-lg">Saja Do Shop!</button>
+                <input id="in-wa" placeholder="WhatsApp (91...)" class="w-full p-3 border-b mb-2 outline-none">
+                <input id="in-insta" placeholder="Instagram URL" class="w-full p-3 border-b mb-2 outline-none">
+                <input id="in-yt" placeholder="YouTube URL" class="w-full p-3 border-b mb-4 outline-none">
+                <button onclick="saveProfileData()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl text-xs font-bold uppercase">Save Shop</button>
             </div>
 
-            <div class="max-w-4xl mx-auto p-4 mt-12 hidden owner-only" id="add-maal-box">
-                <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center shadow-sm">
-                    <h3 class="font-bold text-[#d4af37] mb-6 text-xs uppercase tracking-widest">Naya Maal Jodhein</h3>
-                    <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none text-sm">
-                    <textarea id="p-desc" placeholder="Maal ki jankari (Description)..." class="w-full p-3 border-b mb-2 outline-none text-xs h-20 resize-none"></textarea>
-                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none text-sm font-bold">
-                    <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px]">
-                    <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl"></div>
+            <div class="max-w-4xl mx-auto p-4 mt-12 owner-only hidden" id="add-maal-box">
+                <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center">
+                    <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none">
+                    <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none">
+                    <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-4 outline-none">
+                    <div id="p-preview-box" class="hidden mb-4"><img id="p-preview-img" class="h-32 mx-auto rounded-xl"></div>
                     <div class="flex gap-3">
-                        <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold uppercase">
-                            <i class="fa-solid fa-image mr-2"></i>Photo
-                            <input type="file" onchange="previewProduct(this)">
+                        <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold">
+                            PHOTO <input type="file" onchange="previewProduct(this)">
                         </label>
-                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-4 rounded-2xl text-[10px] font-bold uppercase">Publish</button>
+                        <button id="pub-btn" onclick="publishProduct()" class="hidden flex-1 bg-[#d4af37] text-white p-4 rounded-2xl text-[10px] font-bold">PUBLISH</button>
                     </div>
                 </div>
             </div>
 
             <div class="max-w-4xl mx-auto p-4">
-                <h3 id="shop-title" class="raj-font text-lg mt-14 mb-6 text-gray-800 text-center">Aapka Maal</h3>
+                <h3 class="raj-font text-lg mt-14 mb-6 text-center">Aapka Maal</h3>
                 <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
 
             <div id="user-order-history" class="max-w-4xl mx-auto p-4 mt-10">
-                <h3 class="raj-font text-lg mb-4 text-gray-800 text-center">Mhare Orders</h3>
+                <h3 class="raj-font text-lg mb-4 text-center">Mhare Orders</h3>
                 <div id="history-list" class="space-y-3"></div>
             </div>
         </section>
@@ -196,14 +163,14 @@
     </main>
 
     <div id="checkout-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-sm rounded-[35px] overflow-hidden shadow-2xl p-8">
+        <div class="bg-white w-full max-w-sm rounded-[35px] p-8">
              <h3 class="raj-font text-xl font-bold text-center mb-6">Confirm Order</h3>
              <input id="order-cust-name" type="text" placeholder="Aapka Naam" class="w-full p-3 border-b mb-4 outline-none">
              <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
              <input type="hidden" id="order-item-name"><input type="hidden" id="order-creator-id">
              <div class="flex gap-3">
                 <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold">CANCEL</button>
-                <button id="order-confirm-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
+                <button onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold">CONFIRM</button>
              </div>
         </div>
     </div>
@@ -221,7 +188,6 @@
         setPersistence(auth, browserLocalPersistence);
 
         let currentUser = null;
-        let currentFontSize = 14;
 
         onAuthStateChanged(auth, u => {
             if(u) {
@@ -230,6 +196,7 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 showTab(localStorage.getItem('lastTab') || 'feed');
                 syncAll();
+                syncUserHistory(u.uid);
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('main-app').classList.add('hidden');
@@ -243,12 +210,8 @@
             const snap = await getDoc(doc(db, "users", uid));
             if (snap.exists()) {
                 const d = snap.data();
-                const nameEl = document.getElementById('disp-name');
-                nameEl.innerText = d.name || "Shahi Creator";
-                nameEl.style.color = d.nameColor || "#1f2937";
-                nameEl.style.fontSize = d.nameSize || "24px";
+                document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
                 document.getElementById('disp-bio').innerText = d.bio || "Bio update karein...";
-                document.getElementById('disp-bio').style.fontSize = (d.bioSize || 14) + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
                 
@@ -259,40 +222,85 @@
                 });
             }
             syncMyShop(uid);
-            syncUserHistory(uid);
         };
 
-        window.saveProfileData = async () => {
-            const data = {
-                name: document.getElementById('in-name').value,
-                nameColor: document.getElementById('in-name-color').value,
-                nameSize: document.getElementById('in-name-size').value,
-                bio: document.getElementById('in-bio').value,
-                wa: document.getElementById('in-wa').value,
-                insta: document.getElementById('in-insta').value,
-                yt: document.getElementById('in-yt').value
-            };
-            await setDoc(doc(db, "users", currentUser.uid), data, { merge: true });
-            document.getElementById('edit-profile-box').classList.add('hidden');
-            loadProfile(currentUser.uid);
+        window.publishProduct = async () => {
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, l = document.getElementById('p-link').value;
+            if(!n || !p || !window.tempProdImg) return alert("Details poori bhariye!");
+            await addDoc(collection(db, "products"), { name: n, price: p, link: l, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
+            location.reload();
         };
 
+        window.orderNow = (item, cid, link = '') => { 
+            document.getElementById('order-item-name').value = item; 
+            document.getElementById('order-creator-id').value = cid; 
+            window.currentOrderLink = link;
+            document.getElementById('checkout-modal').classList.remove('hidden'); 
+        };
+
+        window.submitOrder = async () => {
+            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
+            if(!n || !ph) return alert("Details bhariye");
+            try {
+                await addDoc(collection(db, "orders"), { item: document.getElementById('order-item-name').value, customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, userId: currentUser.uid, time: serverTimestamp() });
+                if(window.currentOrderLink) window.open(window.currentOrderLink, '_blank');
+                alert("Order Done!"); closeCheckout();
+            } catch (e) { alert("Error!"); }
+        };
+
+        function syncAll() {
+            onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
+                const grid = document.getElementById('public-grid'); grid.innerHTML = "";
+                snap.forEach(docSnap => {
+                    const p = docSnap.data();
+                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-2"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}', '${p.link || ''}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full">ORDER</button></div></div></div>`;
+                });
+            });
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
+                const list = document.getElementById('order-list'); list.innerHTML = "";
+                snap.forEach(d => {
+                    const o = d.data();
+                    list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#d4af37] flex justify-between"><div><h4 class="font-bold">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
+                });
+            });
+        }
+
+        function syncUserHistory(uid) {
+            onSnapshot(query(collection(db, "orders"), where("userId", "==", uid)), snap => {
+                const hist = document.getElementById('history-list'); hist.innerHTML = "";
+                snap.forEach(d => { const o = d.data(); hist.innerHTML += `<div class="bg-white p-3 rounded-lg text-xs flex justify-between shadow-sm border border-gray-100"><span>${o.item}</span><span class="text-green-600 font-bold">Ordered</span></div>`; });
+            });
+        }
+
+        function syncMyShop(uid) {
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
+                const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
+                snap.forEach(d => { const p = d.data(); grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold">${p.name}</p><p class="text-[#d4af37] text-xs">₹${p.price}</p></div></div>`; });
+            });
+        }
+
+        // Standard Utility Functions
+        window.showTab = (t) => {
+            localStorage.setItem('lastTab', t);
+            ['feed','shop','orders'].forEach(s => {
+                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
+                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
+            });
+            if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
+        };
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("Details bhariye!");
-            signInWithEmailAndPassword(auth, e, p).catch(() => {
-                createUserWithEmailAndPassword(auth, e, p).then(cred => {
-                    setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Shahi Creator" });
-                }).catch(err => alert(err.message));
-            });
+            signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
         };
-
         window.logout = () => signOut(auth).then(() => location.reload());
         window.toggleAuthMode = () => {
             const btn = document.getElementById('main-auth-btn');
             btn.innerText = (btn.innerText === 'LOG IN') ? 'SIGN UP' : 'LOG IN';
         };
-
+        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
+        window.delOrder = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "orders", id)); };
+        window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); };
+        
         const compressImg = (f) => new Promise(res => {
             const reader = new FileReader(); reader.readAsDataURL(f);
             reader.onload = e => {
@@ -305,88 +313,17 @@
                 };
             };
         });
-
         window.uploadProfileMedia = async (type, input) => {
-            const compressed = await compressImg(input.files[0]);
-            await setDoc(doc(db, "users", currentUser.uid), { [type]: compressed }, { merge: true });
+            const comp = await compressImg(input.files[0]);
+            await setDoc(doc(db, "users", currentUser.uid), { [type]: comp }, { merge: true });
             loadProfile(currentUser.uid);
         };
-
         window.previewProduct = async (input) => {
             window.tempProdImg = await compressImg(input.files[0]);
             document.getElementById('p-preview-box').classList.remove('hidden');
             document.getElementById('p-preview-img').src = window.tempProdImg;
             document.getElementById('pub-btn').classList.remove('hidden');
         };
-
-        window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value;
-            if(!n || !p || !window.tempProdImg) return alert("Maal ki jankari poori karein!");
-            await addDoc(collection(db, "products"), { name: n, desc: d, price: p, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
-            location.reload();
-        };
-
-        window.showTab = (t) => {
-            localStorage.setItem('lastTab', t);
-            ['feed','shop','orders'].forEach(s => {
-                document.getElementById('sec-'+s)?.classList.toggle('hidden', s !== t);
-                document.getElementById('tab-'+s)?.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && currentUser) loadProfile(currentUser.uid);
-        };
-
-        function syncAll() {
-            onSnapshot(query(collection(db, "products"), orderBy("time", "desc")), snap => {
-                const grid = document.getElementById('public-grid'); grid.innerHTML = "";
-                snap.forEach(docSnap => {
-                    const p = docSnap.data();
-                    grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><p class="text-[9px] text-gray-400 line-clamp-1 mb-2">${p.desc || ''}</p><div class="flex justify-between items-center mt-2"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full">ORDER</button></div></div></div>`;
-                });
-            });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
-                const list = document.getElementById('order-list'); list.innerHTML = "";
-                snap.forEach(d => {
-                    const o = d.data();
-                    list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#d4af37] flex justify-between"><div><h4 class="font-bold">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
-                });
-            });
-        }
-
-        function syncMyShop(uid) {
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), snap => {
-                const grid = document.getElementById('my-shop-grid'); grid.innerHTML = "";
-                snap.forEach(d => {
-                    const p = d.data();
-                    grid.innerHTML += `<div class="shahi-card relative"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><p class="text-[11px] font-bold">${p.name}</p><p class="text-[#d4af37] text-xs">₹${p.price}</p></div></div>`;
-                });
-            });
-        }
-        
-        window.delOrder = async (id) => { if(confirm("Order delete karein?")) await deleteDoc(doc(db, "orders", id)); };
-        window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); };
-        window.orderNow = (item, cid) => { 
-            document.getElementById('order-item-name').value = item; 
-            document.getElementById('order-creator-id').value = cid; 
-            document.getElementById('checkout-modal').classList.remove('hidden'); 
-        };
-        window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
-        window.submitOrder = async () => {
-            const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
-            if(!n || !ph) return alert("Details bhariye");
-            await addDoc(collection(db, "orders"), { item: document.getElementById('order-item-name').value, customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, userId: currentUser.uid, time: serverTimestamp() });
-            alert("Order Done!"); closeCheckout();
-        };
-        window.changeFontSize = async (step) => {
-            currentFontSize += step;
-            document.getElementById('disp-bio').style.fontSize = currentFontSize + 'px';
-            await setDoc(doc(db, "users", currentUser.uid), { bioSize: currentFontSize }, { merge: true });
-        };
-        function syncUserHistory(uid) {
-            onSnapshot(query(collection(db, "orders"), where("userId", "==", uid)), snap => {
-                const hist = document.getElementById('history-list'); hist.innerHTML = "";
-                snap.forEach(d => { const o = d.data(); hist.innerHTML += `<div class="bg-gray-50 p-3 rounded-lg text-xs flex justify-between"><span>${o.item}</span><span class="text-green-600 font-bold">Ordered</span></div>`; });
-            });
-        }
     </script>
 </body>
 </html>
