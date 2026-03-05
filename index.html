@@ -8,40 +8,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        /* UPDATED BANNER & PROFILE */
-        .banner-container { height: 220px; width: 100%; position: relative; background: #222; overflow: visible; border-radius: 0 0 40px 40px; }
+        .banner-container { height: 220px; width: 100%; position: relative; background: #222; border-radius: 0 0 40px 40px; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 40px 40px; }
         
-        .profile-holder { 
-            position: absolute; 
-            bottom: -60px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            z-index: 10; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            width: 100%;
-        }
-        
-        .p-img { 
-            width: 110px; 
-            height: 110px; 
-            border-radius: 50%; /* Perfect Circle */
-            border: 4px solid white; 
-            object-fit: cover; 
-            background: white; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-        }
+        .profile-holder { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .p-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid white; object-fit: cover; background: white; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         
         .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 700; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .badge-msg { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; border: 2px solid white; }
-        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.3s; }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; }
+        
+        /* New Inbox Styling */
+        .chat-card { background: #f8f9fa; border-left: 5px solid #d4af37; transition: 0.3s; }
+        .chat-card:hover { background: #fff; transform: translateX(5px); }
     </style>
 </head>
 <body class="pb-24">
@@ -70,7 +54,6 @@
         <section id="sec-shop" class="hidden">
             <div class="banner-container">
                 <img id="banner-ui" src="" class="banner-img">
-                
                 <div class="profile-holder">
                     <div class="relative">
                         <img id="profile-ui" src="" class="p-img">
@@ -79,12 +62,10 @@
                             <input type="file" onchange="uploadMedia('profile', this)" class="hidden">
                         </label>
                     </div>
-                    
                     <div class="text-center mt-2">
-                        <h2 id="disp-name" class="font-black text-gray-800 text-xl drop-shadow-sm">Creator</h2>
+                        <h2 id="disp-name" class="font-black text-gray-800 text-xl">Creator</h2>
                         <div class="flex justify-center items-center gap-3 mt-3">
                             <button id="msg-btn" onclick="openMsg()" class="bg-black text-white text-[11px] px-8 py-2.5 rounded-full font-bold uppercase shadow-lg">Message</button>
-                            
                             <div onclick="showTab('chats')" class="relative bg-white border border-gray-200 p-2.5 rounded-full cursor-pointer owner-only hidden shadow-sm">
                                 <i class="fa-solid fa-envelope text-gray-700"></i>
                                 <span id="msg-count" class="badge-msg hidden">0</span>
@@ -92,7 +73,6 @@
                         </div>
                     </div>
                 </div>
-
                 <label class="absolute top-4 right-4 bg-black/20 backdrop-blur-md p-3 rounded-full cursor-pointer text-white owner-only hidden">
                     <i class="fa-solid fa-image"></i>
                     <input type="file" onchange="uploadMedia('banner', this)" class="hidden">
@@ -101,7 +81,7 @@
 
             <div class="mt-28 px-6 text-center">
                 <p id="disp-bio" class="inline-block p-4 rounded-2xl shadow-sm border border-gray-100 bg-white min-w-[280px]">Loading bio...</p>
-                <div class="mt-6 flex justify-center gap-3">
+                <div class="mt-6">
                     <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-8 py-3 rounded-full font-bold owner-only hidden uppercase">Edit Profile</button>
                 </div>
             </div>
@@ -110,8 +90,8 @@
                 <input id="in-name" placeholder="Display Name" class="w-full p-3 border-b outline-none">
                 <input id="in-bio" placeholder="Bio text" class="w-full p-3 border-b outline-none">
                 <div class="flex gap-2">
-                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer">
-                    <input type="number" id="in-bio-size" placeholder="Size (e.g. 16)" class="w-full p-2 border-b outline-none">
+                    <input type="color" id="in-bio-color" title="Bio Color">
+                    <input type="number" id="in-bio-size" placeholder="Size (px)" class="w-full p-2 border-b outline-none">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-black text-white p-4 rounded-2xl font-bold">SAVE UPDATES</button>
             </div>
@@ -140,12 +120,12 @@
         </section>
 
         <section id="sec-chats" class="hidden p-6 max-w-xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Messages</h2>
+            <h2 class="raj-font text-2xl mb-6">Inbox</h2>
             <div id="chat-list" class="space-y-4"></div>
         </section>
 
         <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Order Management</h2>
+            <h2 class="raj-font text-2xl mb-6">Order History</h2>
             <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
@@ -182,9 +162,7 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 loadCore();
                 const lastTab = localStorage.getItem('activeTab') || 'feed';
-                const lastShop = localStorage.getItem('viewingShopId');
-                if(lastTab === 'shop' && lastShop) viewProfile(lastShop);
-                else showTab(lastTab);
+                showTab(lastTab);
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('main-app').classList.add('hidden');
@@ -197,30 +175,36 @@
                 render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
             });
 
-            onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid)), s => {
+            // Improved Inbox Logic
+            onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid), orderBy("time", "desc")), s => {
                 document.getElementById('msg-count').innerText = s.size;
                 document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
                 const l = document.getElementById('chat-list'); l.innerHTML = "";
                 s.forEach(d => {
                     const c = d.data();
-                    l.innerHTML += `<div class="bg-white p-5 rounded-3xl border shadow-sm flex justify-between items-center">
-                        <p class="text-sm">"${c.msg}"</p>
-                        <button onclick="viewProfile('${c.from}')" class="text-xs font-bold text-[#d4af37]">OPEN</button>
+                    const senderName = c.fromName || "Someone";
+                    l.innerHTML += `
+                    <div class="chat-card p-5 rounded-2xl border flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-[#d4af37] uppercase">From: ${senderName}</span>
+                            <span class="text-[9px] text-gray-400">${c.time ? c.time.toDate().toLocaleTimeString() : ''}</span>
+                        </div>
+                        <p class="text-sm font-medium text-gray-700 italic">"${c.msg}"</p>
+                        <div class="flex gap-3 mt-2">
+                            <button onclick="replyMsg('${c.from}', '${senderName}')" class="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold">REPLY</button>
+                            <button onclick="delMsg('${d.id}')" class="text-[10px] text-red-500 font-bold px-4 py-1.5">DELETE</button>
+                        </div>
                     </div>`;
                 });
             });
 
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const l = document.getElementById('order-list'); l.innerHTML = "";
-                let ordersArr = [];
-                s.forEach(d => ordersArr.push({id: d.id, ...d.data()}));
-                ordersArr.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0));
-                ordersArr.forEach(o => {
-                    const dt = o.time ? o.time.toDate().toLocaleString('en-IN') : '...';
+                let oArr = []; s.forEach(d => oArr.push({id: d.id, ...d.data()}));
+                oArr.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)).forEach(o => {
                     l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm mb-3">
                         <div class="flex justify-between font-bold"><span>${o.item}</span><span class="text-green-500">₹${o.price}</span></div>
-                        <p class="text-xs text-gray-500">By: ${o.customer} (${o.phone})</p>
-                        <p class="text-[10px] text-gray-400 mt-2">${dt}</p>
+                        <p class="text-xs text-gray-500">Cust: ${o.customer} (${o.phone})</p>
                     </div>`;
                 });
             });
@@ -239,8 +223,9 @@
 
         window.viewProfile = async (uid) => {
             viewId = uid;
-            localStorage.setItem('viewingShopId', uid);
             const isMe = (curU.uid === uid);
+            
+            // SECURITY: Hide owner options if viewing someone else
             document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
             document.getElementById('msg-btn').classList.toggle('hidden', isMe);
 
@@ -253,7 +238,7 @@
                 b.style.color = d.bioColor || '#444';
                 b.style.fontSize = (d.bioSize || '14') + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop";
+                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400";
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
                 const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
@@ -262,23 +247,43 @@
             showTab('shop');
         };
 
-        window.previewProd = (input) => {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    window.tempImg = e.target.result;
-                    document.getElementById('pub-btn').classList.remove('hidden');
-                    alert("Image Ready!");
-                };
-                reader.readAsDataURL(input.files[0]);
+        window.openMsg = () => {
+            const m = prompt("Enter your message:");
+            if(m) {
+                const myName = document.getElementById('disp-name').innerText;
+                addDoc(collection(db, "chats"), { 
+                    from: curU.uid, 
+                    fromName: myName, 
+                    to: viewId, 
+                    msg: m, 
+                    time: serverTimestamp() 
+                });
+                alert("Message sent!");
             }
         };
 
+        window.replyMsg = (toId, toName) => {
+            const m = prompt(`Reply to ${toName}:`);
+            if(m) {
+                addDoc(collection(db, "chats"), { 
+                    from: curU.uid, 
+                    fromName: "Reply", 
+                    to: toId, 
+                    msg: m, 
+                    time: serverTimestamp() 
+                });
+                alert("Reply sent!");
+            }
+        };
+
+        window.delMsg = async (id) => { if(confirm("Delete message?")) await deleteDoc(doc(db, "chats", id)); };
+
+        // Core Functions
         window.render = (data, cid, mine = false) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
                 g.innerHTML += `<div class="product-card">
-                    <div class="aspect-square overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
+                    <div class="aspect-square"><img src="${p.img}" class="w-full h-full object-cover"></div>
                     <div class="p-4">
                         <button onclick="viewProfile('${p.creatorId}')" class="text-[10px] font-bold text-gray-400 mb-1">BY @${p.creator ? p.creator.split(' ')[0] : 'User'}</button>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
@@ -322,7 +327,13 @@
             location.reload();
         };
         window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
-        window.openMsg = () => { const m = prompt("Message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
+        window.previewProd = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); alert("Image Ready!"); };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
         window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
         window.filterFeed = () => {
             const val = document.getElementById('search-input').value.toLowerCase();
