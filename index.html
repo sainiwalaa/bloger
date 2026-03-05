@@ -12,7 +12,6 @@
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         
-        /* Premium Header */
         .saini-header {
             background: linear-gradient(to right, #b8860b, #d4af37, #fff, #d4af37, #b8860b);
             background-size: 200% auto;
@@ -22,12 +21,10 @@
         }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* Profile & Banner */
         .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; }
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
         
-        /* Chat & Inbox */
         .chat-bubble { max-width: 80%; padding: 12px 18px; border-radius: 20px; margin-bottom: 10px; font-size: 14px; }
         .msg-sent { background: var(--gold); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg-received { background: #eee; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
@@ -107,7 +104,7 @@
                         <textarea id="pd" placeholder="Tell the story of this product..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 outline-none border"></textarea>
                         <div class="flex items-center gap-4">
                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
-                            <label for="pf" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">PHOTO</label>
+                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400 border hover:bg-gray-200">PHOTO</label>
                             <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
                         </div>
                     </div>
@@ -161,7 +158,7 @@
             <input id="on" placeholder="Your Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
             <input id="op" placeholder="Mobile Number" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
             <input id="oc" placeholder="City" class="w-full p-4 mb-8 bg-gray-50 rounded-2xl outline-none border">
-            <button onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER & REDIRECT</button>
+            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER & REDIRECT</button>
         </div>
     </div>
 
@@ -207,12 +204,10 @@
 
         function initApp() {
             nav('feed');
-            // Sync all products for feed
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed');
             });
-            // Sync my orders
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = "";
@@ -302,7 +297,7 @@
                         <div class="p-4">
                             <p class="text-[9px] font-black text-gold uppercase mb-1">@${p.creator}</p>
                             <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                            <p class="text-[10px] mt-1" style="color:${p.descColor || '#ff0000'}">${p.desc}</p>
+                            <p class="text-[10px] mt-1 text-gray-500">${p.desc}</p>
                             <div class="mt-4 flex justify-between items-center">
                                 <span class="font-black">₹${p.price}</span>
                                 <div class="flex gap-2">
@@ -322,20 +317,41 @@
             document.getElementById('order-modal').classList.remove('hidden');
         };
 
+        // --- UPDATED: Confirm Purchase WITH VALIDATION & DOUBLE-CLICK LOCK ---
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, c = document.getElementById('oc').value;
-            if(!n || !p) return alert("Details bhariye");
-            await addDoc(collection(db, "orders"), {
-                item: window.activeOrder.name,
-                price: window.activeOrder.price,
-                customer: n,
-                phone: p,
-                city: c,
-                creatorId: window.activeOrder.creatorId,
-                time: serverTimestamp()
-            });
-            document.getElementById('order-modal').classList.add('hidden');
-            window.open(window.activeOrder.link, '_blank');
+            const n = document.getElementById('on').value.trim();
+            const p = document.getElementById('op').value.trim();
+            const c = document.getElementById('oc').value.trim();
+            const btn = document.getElementById('buy-btn');
+
+            // Regex: Name only letters, Mobile only 10 digits
+            const nameCheck = /^[a-zA-Z\s]+$/;
+            const phoneCheck = /^[0-9]{10}$/;
+
+            if(!n || !p || !c) return alert("Pura form bhariye!");
+            if(!nameCheck.test(n)) return alert("Naam mein sirf akshar (letters) dalein!");
+            if(!phoneCheck.test(p)) return alert("Mobile number mein sirf 10 digits dalein!");
+
+            btn.disabled = true; 
+            btn.innerText = "WAIT...";
+
+            try {
+                await addDoc(collection(db, "orders"), {
+                    item: window.activeOrder.name,
+                    price: window.activeOrder.price,
+                    customer: n,
+                    phone: p,
+                    city: c,
+                    creatorId: window.activeOrder.creatorId,
+                    time: serverTimestamp()
+                });
+                document.getElementById('order-modal').classList.add('hidden');
+                window.open(window.activeOrder.link, '_blank');
+            } catch(e) {
+                alert("Error!");
+                btn.disabled = false;
+                btn.innerText = "PLACE ORDER & REDIRECT";
+            }
         };
 
         window.authAction = () => {
@@ -364,23 +380,48 @@
 
         window.preProd = (i) => {
             const r = new FileReader();
-            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); };
+            r.onload = e => { 
+                window.tempP = e.target.result; 
+                document.getElementById('pub-btn').classList.remove('hidden'); 
+                document.getElementById('pf-label').innerText = "PHOTO SELECTED ✅";
+            };
             r.readAsDataURL(i.files[0]);
         };
 
+        // --- UPDATED: Publish Product WITH FULL FIELD CHECK & DOUBLE-CLICK LOCK ---
         window.pubProd = async () => {
-            await addDoc(collection(db, "products"), {
-                name: document.getElementById('pn').value,
-                price: document.getElementById('pp').value,
-                cat: document.getElementById('pc').value,
-                link: document.getElementById('pl').value,
-                desc: document.getElementById('pd').value,
-                img: window.tempP,
-                creatorId: curU.uid,
-                creator: document.getElementById('u-name').innerText,
-                time: serverTimestamp()
-            });
-            location.reload();
+            const name = document.getElementById('pn').value.trim();
+            const price = document.getElementById('pp').value.trim();
+            const cat = document.getElementById('pc').value.trim();
+            const link = document.getElementById('pl').value.trim();
+            const desc = document.getElementById('pd').value.trim();
+            const btn = document.getElementById('pub-btn');
+
+            if(!name || !price || !cat || !link || !desc || !window.tempP) {
+                return alert("Saari jankari aur photo bharna jaruri hai!");
+            }
+
+            btn.disabled = true;
+            btn.innerText = "UPLOADING...";
+
+            try {
+                await addDoc(collection(db, "products"), {
+                    name: name,
+                    price: price,
+                    cat: cat,
+                    link: link,
+                    desc: desc,
+                    img: window.tempP,
+                    creatorId: curU.uid,
+                    creator: document.getElementById('u-name').innerText,
+                    time: serverTimestamp()
+                });
+                location.reload();
+            } catch(e) {
+                alert("Upload failed!");
+                btn.disabled = false;
+                btn.innerText = "PUBLISH";
+            }
         };
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
