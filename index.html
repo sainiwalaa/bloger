@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAINIWALAA | Secure System</title>
+    <title>SAINIWALAA | Original Restored</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; }
         .raj-font { font-family: 'Cinzel', serif; }
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        .banner-container { height: 220px; width: 100%; position: relative; background: #222; border-radius: 0 0 40px 40px; }
+        /* RESTORED YOUR ORIGINAL CSS */
+        .banner-container { height: 220px; width: 100%; position: relative; background: #222; overflow: visible; border-radius: 0 0 40px 40px; }
         .banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 40px 40px; }
-        
         .profile-holder { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .p-img { width: 110px; height: 110px; border-radius: 50%; border: 4px solid white; object-fit: cover; background: white; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        
         .desc-text { color: #ff0000 !important; font-size: 11px; font-weight: 700; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .badge-msg { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; border: 2px solid white; }
-        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; transition: 0.3s; }
         
-        /* New Inbox Styling */
-        .chat-card { background: #f8f9fa; border-left: 5px solid #d4af37; transition: 0.3s; }
-        .chat-card:hover { background: #fff; transform: translateX(5px); }
+        /* Inbox UI */
+        .inbox-card { background: white; padding: 15px; border-radius: 20px; border: 1px solid #eee; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="pb-24">
@@ -65,7 +63,9 @@
                     <div class="text-center mt-2">
                         <h2 id="disp-name" class="font-black text-gray-800 text-xl">Creator</h2>
                         <div class="flex justify-center items-center gap-3 mt-3">
-                            <button id="msg-btn" onclick="openMsg()" class="bg-black text-white text-[11px] px-8 py-2.5 rounded-full font-bold uppercase shadow-lg">Message</button>
+                            <button id="follow-btn" class="bg-[#d4af37] text-white text-[11px] px-6 py-2.5 rounded-full font-bold uppercase shadow-lg"><i class="fa-solid fa-plus mr-1"></i> Follow</button>
+                            <button id="msg-btn" onclick="openMsg()" class="bg-black text-white text-[11px] px-6 py-2.5 rounded-full font-bold uppercase shadow-lg"><i class="fa-solid fa-paper-plane mr-1"></i> Message</button>
+                            
                             <div onclick="showTab('chats')" class="relative bg-white border border-gray-200 p-2.5 rounded-full cursor-pointer owner-only hidden shadow-sm">
                                 <i class="fa-solid fa-envelope text-gray-700"></i>
                                 <span id="msg-count" class="badge-msg hidden">0</span>
@@ -81,7 +81,7 @@
 
             <div class="mt-28 px-6 text-center">
                 <p id="disp-bio" class="inline-block p-4 rounded-2xl shadow-sm border border-gray-100 bg-white min-w-[280px]">Loading bio...</p>
-                <div class="mt-6">
+                <div class="mt-6 flex justify-center gap-3">
                     <button onclick="document.getElementById('edit-box').classList.toggle('hidden')" class="text-[10px] bg-gray-100 px-8 py-3 rounded-full font-bold owner-only hidden uppercase">Edit Profile</button>
                 </div>
             </div>
@@ -90,8 +90,8 @@
                 <input id="in-name" placeholder="Display Name" class="w-full p-3 border-b outline-none">
                 <input id="in-bio" placeholder="Bio text" class="w-full p-3 border-b outline-none">
                 <div class="flex gap-2">
-                    <input type="color" id="in-bio-color" title="Bio Color">
-                    <input type="number" id="in-bio-size" placeholder="Size (px)" class="w-full p-2 border-b outline-none">
+                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer">
+                    <input type="number" id="in-bio-size" placeholder="Size (e.g. 16)" class="w-full p-2 border-b outline-none">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-black text-white p-4 rounded-2xl font-bold">SAVE UPDATES</button>
             </div>
@@ -120,12 +120,12 @@
         </section>
 
         <section id="sec-chats" class="hidden p-6 max-w-xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Inbox</h2>
+            <h2 class="raj-font text-2xl mb-6">Mhara Inbox</h2>
             <div id="chat-list" class="space-y-4"></div>
         </section>
 
         <section id="sec-orders" class="hidden p-6 max-w-2xl mx-auto">
-            <h2 class="raj-font text-2xl mb-6">Order History</h2>
+            <h2 class="raj-font text-2xl mb-6">Order Management</h2>
             <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
@@ -152,8 +152,6 @@
 
         let curU = null; let viewId = null; let allProds = [];
 
-        setPersistence(auth, browserLocalPersistence);
-
         onAuthStateChanged(auth, u => {
             document.getElementById('loading-screen').classList.add('hidden');
             if(u) {
@@ -161,11 +159,9 @@
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 loadCore();
-                const lastTab = localStorage.getItem('activeTab') || 'feed';
-                showTab(lastTab);
+                showTab('feed');
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
             }
         });
 
@@ -175,47 +171,48 @@
                 render(allProds.sort(() => Math.random() - 0.5), 'public-grid');
             });
 
-            // Improved Inbox Logic
+            // UPDATED INBOX: Show Sender ID and Reply Option
             onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid), orderBy("time", "desc")), s => {
                 document.getElementById('msg-count').innerText = s.size;
                 document.getElementById('msg-count').classList.toggle('hidden', s.size === 0);
                 const l = document.getElementById('chat-list'); l.innerHTML = "";
                 s.forEach(d => {
                     const c = d.data();
-                    const senderName = c.fromName || "Someone";
                     l.innerHTML += `
-                    <div class="chat-card p-5 rounded-2xl border flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-[#d4af37] uppercase">From: ${senderName}</span>
-                            <span class="text-[9px] text-gray-400">${c.time ? c.time.toDate().toLocaleTimeString() : ''}</span>
+                    <div class="inbox-card">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold text-[#d4af37]">SENDER: ${c.from.slice(0,10)}...</span>
+                            <button onclick="viewProfile('${c.from}')" class="text-[10px] text-blue-500 font-bold">VIEW PROFILE</button>
                         </div>
-                        <p class="text-sm font-medium text-gray-700 italic">"${c.msg}"</p>
-                        <div class="flex gap-3 mt-2">
-                            <button onclick="replyMsg('${c.from}', '${senderName}')" class="text-[10px] bg-black text-white px-4 py-1.5 rounded-full font-bold">REPLY</button>
-                            <button onclick="delMsg('${d.id}')" class="text-[10px] text-red-500 font-bold px-4 py-1.5">DELETE</button>
+                        <p class="text-sm italic">"${c.msg}"</p>
+                        <div class="mt-3 flex gap-2">
+                            <button onclick="replyMsg('${c.from}')" class="bg-black text-white text-[10px] px-4 py-1.5 rounded-full">REPLY</button>
+                            <button onclick="delMsg('${d.id}')" class="text-red-400 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>`;
                 });
             });
 
+            // RESTORED ORDER DATE/TIME
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const l = document.getElementById('order-list'); l.innerHTML = "";
-                let oArr = []; s.forEach(d => oArr.push({id: d.id, ...d.data()}));
-                oArr.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)).forEach(o => {
+                let ords = []; s.forEach(d => ords.push({id: d.id, ...d.data()}));
+                ords.sort((a, b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)).forEach(o => {
+                    const dt = o.time ? o.time.toDate().toLocaleString('en-IN') : '...';
                     l.innerHTML += `<div class="bg-white p-5 rounded-[30px] border shadow-sm mb-3">
                         <div class="flex justify-between font-bold"><span>${o.item}</span><span class="text-green-500">₹${o.price}</span></div>
-                        <p class="text-xs text-gray-500">Cust: ${o.customer} (${o.phone})</p>
+                        <p class="text-xs text-gray-500">By: ${o.customer} (${o.phone})</p>
+                        <p class="text-[10px] text-gray-400 mt-2">${dt}</p>
                     </div>`;
                 });
             });
         }
 
         window.showTab = (t) => {
-            localStorage.setItem('activeTab', t);
             ['feed','shop','chats','orders'].forEach(s => {
-                const section = document.getElementById('sec-'+s);
+                const sec = document.getElementById('sec-'+s);
                 const btn = document.getElementById('tab-'+s);
-                if(section) section.classList.toggle('hidden', s !== t);
+                if(sec) sec.classList.toggle('hidden', s !== t);
                 if(btn) btn.classList.toggle('active', s === t);
             });
             if(t === 'shop' && !viewId) viewProfile(curU.uid);
@@ -224,21 +221,21 @@
         window.viewProfile = async (uid) => {
             viewId = uid;
             const isMe = (curU.uid === uid);
-            
-            // SECURITY: Hide owner options if viewing someone else
+            // LOCK EDITING FOR OTHERS
             document.querySelectorAll('.owner-only').forEach(el => isMe ? el.classList.remove('hidden') : el.classList.add('hidden'));
             document.getElementById('msg-btn').classList.toggle('hidden', isMe);
+            document.getElementById('follow-btn').classList.toggle('hidden', isMe);
 
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
                 document.getElementById('disp-name').innerText = d.name || "Shahi Creator";
                 const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Welcome to my shop!";
+                b.innerText = d.bio || "Welcome!";
                 b.style.color = d.bioColor || '#444';
                 b.style.fontSize = (d.bioSize || '14') + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400";
+                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000";
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
                 const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
@@ -247,38 +244,11 @@
             showTab('shop');
         };
 
-        window.openMsg = () => {
-            const m = prompt("Enter your message:");
-            if(m) {
-                const myName = document.getElementById('disp-name').innerText;
-                addDoc(collection(db, "chats"), { 
-                    from: curU.uid, 
-                    fromName: myName, 
-                    to: viewId, 
-                    msg: m, 
-                    time: serverTimestamp() 
-                });
-                alert("Message sent!");
-            }
-        };
+        window.openMsg = () => { const m = prompt("Message:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: viewId, msg: m, time: serverTimestamp() }); };
+        window.replyMsg = (toId) => { const m = prompt("Reply:"); if(m) addDoc(collection(db, "chats"), { from: curU.uid, to: toId, msg: m, time: serverTimestamp() }); };
+        window.delMsg = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "chats", id)); };
 
-        window.replyMsg = (toId, toName) => {
-            const m = prompt(`Reply to ${toName}:`);
-            if(m) {
-                addDoc(collection(db, "chats"), { 
-                    from: curU.uid, 
-                    fromName: "Reply", 
-                    to: toId, 
-                    msg: m, 
-                    time: serverTimestamp() 
-                });
-                alert("Reply sent!");
-            }
-        };
-
-        window.delMsg = async (id) => { if(confirm("Delete message?")) await deleteDoc(doc(db, "chats", id)); };
-
-        // Core Functions
+        // RESTORED CORE FUNCTIONS
         window.render = (data, cid, mine = false) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
@@ -302,43 +272,32 @@
 
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("Fill details");
             signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
-        };
-
-        window.publish = async () => {
-            const name = document.getElementById('p-name').value;
-            if(!name || !window.tempImg) return alert("Photo + Name required");
-            await addDoc(collection(db, "products"), { name, price: document.getElementById('p-price').value, cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value, link: document.getElementById('p-link').value, img: window.tempImg, creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
-            location.reload();
-        };
-
-        window.logout = () => { if(confirm("Logout?")) { localStorage.clear(); signOut(auth).then(() => location.reload()); } };
-        window.triggerOrder = (n, cid, l, p) => { window.target = { n, cid, l, p }; document.getElementById('order-modal').classList.remove('hidden'); };
-        window.confirmOrder = async () => {
-            const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
-            if(!cn || !ph) return alert("Details?");
-            await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
-            document.getElementById('order-modal').classList.add('hidden');
-            if(window.target.l && window.target.l !== "undefined" && window.target.l !== "") window.open(window.target.l, '_blank');
         };
         window.saveProfile = async () => {
             await setDoc(doc(db, "users", curU.uid), { name: document.getElementById('in-name').value, bio: document.getElementById('in-bio').value, bioColor: document.getElementById('in-bio-color').value, bioSize: document.getElementById('in-bio-size').value }, { merge: true });
             location.reload();
         };
         window.uploadMedia = (t, i) => { const r = new FileReader(); r.readAsDataURL(i.files[0]); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, { merge: true }); location.reload(); } };
+        window.publish = async () => {
+            const name = document.getElementById('p-name').value;
+            await addDoc(collection(db, "products"), { name, price: document.getElementById('p-price').value, cat: document.getElementById('p-cat').value, desc: document.getElementById('p-desc').value, link: document.getElementById('p-link').value, img: window.tempImg, creatorId: curU.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
+            location.reload();
+        };
         window.previewProd = (input) => {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); alert("Image Ready!"); };
-                reader.readAsDataURL(input.files[0]);
-            }
+            const reader = new FileReader();
+            reader.onload = e => { window.tempImg = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); };
+            reader.readAsDataURL(input.files[0]);
         };
+        window.triggerOrder = (n, cid, l, p) => { window.target = { n, cid, l, p }; document.getElementById('order-modal').classList.remove('hidden'); };
+        window.confirmOrder = async () => {
+            const cn = document.getElementById('o-name').value, ph = document.getElementById('o-phone').value;
+            await addDoc(collection(db, "orders"), { item: window.target.n, customer: cn, phone: ph, creatorId: window.target.cid, price: window.target.p, time: serverTimestamp() });
+            document.getElementById('order-modal').classList.add('hidden');
+            if(window.target.l) window.open(window.target.l, '_blank');
+        };
+        window.logout = () => signOut(auth).then(() => location.reload());
         window.delProd = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.filterFeed = () => {
-            const val = document.getElementById('search-input').value.toLowerCase();
-            render(allProds.filter(p => p.name.toLowerCase().includes(val) || p.cat?.toLowerCase().includes(val)), 'public-grid');
-        };
     </script>
 </body>
 </html>
