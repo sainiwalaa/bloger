@@ -25,14 +25,17 @@
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
         
-        .chat-bubble { max-width: 80%; padding: 12px 18px; border-radius: 20px; margin-bottom: 10px; font-size: 14px; }
-        .msg-sent { background: var(--gold); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-received { background: #eee; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
-
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        
+        /* Inquiry Alert Pulse */
+        .inquiry-alert {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="pb-20">
@@ -76,17 +79,10 @@
                     <div class="mb-8">
                         <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
                         <div class="flex gap-2 mt-2">
-                            <button id="inbox-trigger" onclick="openChat()" class="bg-white text-black px-4 py-1.5 rounded-full text-[10px] font-bold shadow-lg hover:bg-gold hover:text-white transition">
-                                <i class="fa-solid fa-envelope mr-1"></i> INBOX
-                            </button>
-                            <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="bg-black/50 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-bold owner-only">EDIT</button>
+                            <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-only">EDIT PROFILE</button>
                         </div>
                     </div>
                 </div>
-                <label class="absolute top-4 right-4 bg-white/20 p-3 rounded-full text-white cursor-pointer owner-only">
-                    <i class="fa-solid fa-panorama"></i>
-                    <input type="file" class="hidden" onchange="upMedia('banner', this)">
-                </label>
             </div>
 
             <div class="mt-16 px-6 max-w-4xl mx-auto">
@@ -109,7 +105,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
             </div>
         </section>
@@ -128,37 +123,27 @@
         </section>
     </main>
 
-    <div id="chat-modal" class="hidden fixed inset-0 z-[1000] bg-black/60 flex items-end sm:items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-t-[40px] sm:rounded-[40px] overflow-hidden flex flex-col h-[80vh] shadow-2xl">
-            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-crown"></i></div>
-                    <div>
-                        <p class="font-bold text-sm" id="chat-with-name">Chat</p>
-                        <p class="text-[9px] text-green-500 font-bold uppercase">Online Now</p>
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="blockUser()" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-ban"></i></button>
-                    <button onclick="document.getElementById('chat-modal').classList.add('hidden')" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-            </div>
-            <div id="chat-msgs" class="flex-1 overflow-y-auto p-6 flex flex-col"></div>
-            <div class="p-4 border-t bg-white flex gap-2">
-                <input id="chat-input" placeholder="Type a message..." class="flex-1 p-4 bg-gray-50 rounded-2xl outline-none">
-                <button onclick="sendMsg()" class="bg-black text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
-
     <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-sm rounded-[50px] p-10 text-center">
             <h3 class="raj-font text-2xl mb-2">Finalize Purchase</h3>
             <p class="text-[10px] text-gray-400 font-bold mb-8 tracking-widest uppercase">Direct connection to creator</p>
             <input id="on" placeholder="Your Name" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
             <input id="op" placeholder="Mobile Number" class="w-full p-4 mb-3 bg-gray-50 rounded-2xl outline-none border">
-            <input id="oc" placeholder="City" class="w-full p-4 mb-8 bg-gray-50 rounded-2xl outline-none border">
-            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER & REDIRECT</button>
+            <input id="oc" placeholder="City" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border">
+            
+            <div class="bg-gray-50 p-4 rounded-3xl mb-8 border">
+                <p class="text-[11px] font-bold mb-2">Kya aap Influencer se business sampark karna chahte hain?</p>
+                <div class="flex gap-4 justify-center">
+                    <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                        <input type="radio" name="collab" value="YES" class="accent-gold"> YES
+                    </label>
+                    <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                        <input type="radio" name="collab" value="NO" checked class="accent-black"> NO
+                    </label>
+                </div>
+            </div>
+
+            <button id="buy-btn" onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-xl active:scale-95 transition">PLACE ORDER</button>
         </div>
     </div>
 
@@ -208,19 +193,31 @@
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed');
             });
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
+            
+            // SECURITY: Seller only sees orders for their creatorId
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid), orderBy("time", "desc")), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = "";
                 s.forEach(d => {
                     const o = d.data();
+                    const isInquiry = o.collab === "YES";
                     list.innerHTML += `
-                        <div class="bg-white p-6 rounded-3xl border shadow-sm flex justify-between items-center">
-                            <div>
-                                <p class="font-bold text-lg">${o.item}</p>
-                                <p class="text-xs text-gray-400">${o.customer} • ${o.city} • ${o.phone}</p>
-                                <p class="text-[9px] mt-2 text-gold font-black">${o.time?.toDate().toLocaleString() || 'Just now'}</p>
+                        <div class="p-6 rounded-3xl border shadow-sm flex flex-col gap-4 ${isInquiry ? 'inquiry-alert border-none text-white' : 'bg-white text-black'}">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-lg leading-tight">${o.item}</p>
+                                    <p class="text-xs ${isInquiry ? 'text-white/80' : 'text-gray-400'}">Customer: ${o.customer}</p>
+                                </div>
+                                <p class="font-black text-xl">₹${o.price}</p>
                             </div>
-                            <p class="font-black text-xl text-gold">₹${o.price}</p>
+                            <div class="flex justify-between items-end border-t ${isInquiry ? 'border-white/20' : 'border-gray-50'} pt-4">
+                                <div class="text-[10px] font-bold uppercase tracking-tighter">
+                                    <p><i class="fa-solid fa-phone mr-1"></i> ${o.phone}</p>
+                                    <p><i class="fa-solid fa-location-dot mr-1"></i> ${o.city}</p>
+                                </div>
+                                <p class="text-[9px] font-black">${o.time?.toDate().toLocaleString() || 'Process...'}</p>
+                            </div>
+                            ${isInquiry ? '<div class="bg-white/20 p-2 rounded-xl text-center text-[10px] font-black tracking-widest uppercase">⚠️ CUSTOMER WANTS BUSINESS CHAT - CONTACT NOW!</div>' : ''}
                         </div>
                     `;
                 });
@@ -249,42 +246,12 @@
                 document.getElementById('u-bio').style.fontSize = (d.bioSize || 15) + "px";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
                 document.getElementById('b-img').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
-                document.getElementById('chat-with-name').innerText = d.name || "Creator";
             }
 
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
                 const p = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(p, 'grid-shop', isMe);
             });
-            nav('shop');
-        };
-
-        window.openChat = () => {
-            document.getElementById('chat-modal').classList.remove('hidden');
-            const chatQ = query(collection(db, "chats"), where("roomId", "in", [curU.uid+"_"+viewUid, viewUid+"_"+curU.uid]), orderBy("time", "asc"));
-            onSnapshot(chatQ, s => {
-                const box = document.getElementById('chat-msgs');
-                box.innerHTML = "";
-                s.forEach(d => {
-                    const m = d.data();
-                    const isMe = m.from === curU.uid;
-                    box.innerHTML += `<div class="chat-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.msg}</div>`;
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        };
-
-        window.sendMsg = async () => {
-            const m = document.getElementById('chat-input').value;
-            if(!m) return;
-            await addDoc(collection(db, "chats"), {
-                roomId: curU.uid+"_"+viewUid,
-                from: curU.uid,
-                to: viewUid,
-                msg: m,
-                time: serverTimestamp()
-            });
-            document.getElementById('chat-input').value = "";
         };
 
         window.renderGrid = (data, cid, mine = false) => {
@@ -297,9 +264,8 @@
                         <div class="p-4">
                             <p class="text-[9px] font-black text-gold uppercase mb-1">@${p.creator}</p>
                             <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                            <p class="text-[10px] mt-1 text-gray-500">${p.desc}</p>
                             <div class="mt-4 flex justify-between items-center">
-                                <span class="font-black">₹${p.price}</span>
+                                <span class="font-black text-sm">₹${p.price}</span>
                                 <div class="flex gap-2">
                                     ${mine ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
                                     <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
@@ -317,22 +283,21 @@
             document.getElementById('order-modal').classList.remove('hidden');
         };
 
-        // --- UPDATED: Confirm Purchase WITH VALIDATION & DOUBLE-CLICK LOCK ---
         window.confirmPurchase = async () => {
             const n = document.getElementById('on').value.trim();
             const p = document.getElementById('op').value.trim();
             const c = document.getElementById('oc').value.trim();
+            const collab = document.querySelector('input[name="collab"]:checked').value;
             const btn = document.getElementById('buy-btn');
 
-            // Regex: Name only letters, Mobile only 10 digits
             const nameCheck = /^[a-zA-Z\s]+$/;
             const phoneCheck = /^[0-9]{10}$/;
 
             if(!n || !p || !c) return alert("Pura form bhariye!");
-            if(!nameCheck.test(n)) return alert("Naam mein sirf akshar (letters) dalein!");
-            if(!phoneCheck.test(p)) return alert("Mobile number mein sirf 10 digits dalein!");
+            if(!nameCheck.test(n)) return alert("Naam sahi likhiye!");
+            if(!phoneCheck.test(p)) return alert("Mobile No. me 10 digit daalein!");
 
-            btn.disabled = true; 
+            btn.disabled = true;
             btn.innerText = "WAIT...";
 
             try {
@@ -342,6 +307,7 @@
                     customer: n,
                     phone: p,
                     city: c,
+                    collab: collab,
                     creatorId: window.activeOrder.creatorId,
                     time: serverTimestamp()
                 });
@@ -350,13 +316,39 @@
             } catch(e) {
                 alert("Error!");
                 btn.disabled = false;
-                btn.innerText = "PLACE ORDER & REDIRECT";
             }
         };
 
         window.authAction = () => {
             const e = document.getElementById('email').value, p = document.getElementById('pass').value;
             signInWithEmailAndPassword(auth,e,p).catch(() => createUserWithEmailAndPassword(auth,e,p));
+        };
+
+        window.pubProd = async () => {
+            const name = document.getElementById('pn').value.trim();
+            const price = document.getElementById('pp').value.trim();
+            const cat = document.getElementById('pc').value.trim();
+            const link = document.getElementById('pl').value.trim();
+            const desc = document.getElementById('pd').value.trim();
+            const btn = document.getElementById('pub-btn');
+
+            if(!name || !price || !cat || !link || !desc || !window.tempP) return alert("All fields required!");
+            btn.disabled = true;
+
+            await addDoc(collection(db, "products"), {
+                name, price, cat, link, desc,
+                img: window.tempP,
+                creatorId: curU.uid,
+                creator: document.getElementById('u-name').innerText,
+                time: serverTimestamp()
+            });
+            location.reload();
+        };
+
+        window.preProd = (i) => {
+            const r = new FileReader();
+            r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO OK ✅"; };
+            r.readAsDataURL(i.files[0]);
         };
 
         window.saveProfile = async () => {
@@ -371,66 +363,16 @@
 
         window.upMedia = (t, i) => {
             const r = new FileReader();
-            r.onload = async e => {
-                await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true});
-                location.reload();
-            };
+            r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); };
             r.readAsDataURL(i.files[0]);
-        };
-
-        window.preProd = (i) => {
-            const r = new FileReader();
-            r.onload = e => { 
-                window.tempP = e.target.result; 
-                document.getElementById('pub-btn').classList.remove('hidden'); 
-                document.getElementById('pf-label').innerText = "PHOTO SELECTED ✅";
-            };
-            r.readAsDataURL(i.files[0]);
-        };
-
-        // --- UPDATED: Publish Product WITH FULL FIELD CHECK & DOUBLE-CLICK LOCK ---
-        window.pubProd = async () => {
-            const name = document.getElementById('pn').value.trim();
-            const price = document.getElementById('pp').value.trim();
-            const cat = document.getElementById('pc').value.trim();
-            const link = document.getElementById('pl').value.trim();
-            const desc = document.getElementById('pd').value.trim();
-            const btn = document.getElementById('pub-btn');
-
-            if(!name || !price || !cat || !link || !desc || !window.tempP) {
-                return alert("Saari jankari aur photo bharna jaruri hai!");
-            }
-
-            btn.disabled = true;
-            btn.innerText = "UPLOADING...";
-
-            try {
-                await addDoc(collection(db, "products"), {
-                    name: name,
-                    price: price,
-                    cat: cat,
-                    link: link,
-                    desc: desc,
-                    img: window.tempP,
-                    creatorId: curU.uid,
-                    creator: document.getElementById('u-name').innerText,
-                    time: serverTimestamp()
-                });
-                location.reload();
-            } catch(e) {
-                alert("Upload failed!");
-                btn.disabled = false;
-                btn.innerText = "PUBLISH";
-            }
         };
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
         window.logout = () => signOut(auth).then(() => location.reload());
         window.search = (v) => {
-            const filtered = allProds.filter(p => p.name.toLowerCase().includes(v.toLowerCase()) || p.cat.toLowerCase().includes(v.toLowerCase()));
-            renderGrid(filtered, 'grid-feed');
+            const f = allProds.filter(p => p.name.toLowerCase().includes(v.toLowerCase()));
+            renderGrid(f, 'grid-feed');
         };
-        window.blockUser = () => alert("User Blocked!");
     </script>
 </body>
 </html>
