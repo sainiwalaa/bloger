@@ -68,10 +68,10 @@
 
         <section id="sec-shop" class="hidden">
             <div class="banner-container">
-                <img id="banner-ui" src="" class="banner-img">
+                <img id="banner-ui" src="https://images.unsplash.com/photo-1557683316-973673baf926?w=1000" class="banner-img">
                 <div class="profile-holder">
                     <div class="relative">
-                        <img id="profile-ui" src="" class="p-img">
+                        <img id="profile-ui" src="https://api.dicebear.com/7.x/avataaars/svg?seed=default" class="p-img">
                         <label class="absolute bottom-1 right-2 bg-[#d4af37] text-white w-10 h-10 flex items-center justify-center rounded-full cursor-pointer owner-only hidden border-4 border-white shadow-lg">
                             <i class="fa-solid fa-camera-retro"></i>
                             <input type="file" onchange="uploadMedia('profile', this)" class="hidden">
@@ -102,8 +102,8 @@
                 <input id="in-name" placeholder="Full Name" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                 <input id="in-bio" placeholder="Bio Story" class="w-full p-4 bg-gray-50 rounded-2xl outline-none">
                 <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl">
-                    <input type="color" id="in-bio-color" class="w-10 h-10 border-none cursor-pointer">
-                    <input type="number" id="in-bio-size" placeholder="Size" class="w-full bg-transparent outline-none">
+                    <input type="color" id="in-bio-color" value="#666666" class="w-10 h-10 border-none cursor-pointer">
+                    <input type="number" id="in-bio-size" placeholder="Size (e.g. 15)" class="w-full bg-transparent outline-none">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-black text-white p-5 rounded-3xl font-bold">SAVE UPDATES</button>
             </div>
@@ -118,8 +118,8 @@
                     </div>
                     <textarea id="p-desc" placeholder="Product details..." class="w-full p-5 bg-gray-50 rounded-3xl mb-8 outline-none h-28"></textarea>
                     <input type="file" id="p-file" onchange="previewProd(this)" class="hidden">
-                    <label for="p-file" class="bg-gray-100 p-10 block rounded-[30px] cursor-pointer font-bold text-gray-400">SELECT PRODUCT IMAGE</label>
-                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-6 rounded-[30px] font-black uppercase">Publish Product</button>
+                    <label for="p-file" id="file-label" class="bg-gray-100 p-10 block rounded-[30px] cursor-pointer font-bold text-gray-400 uppercase">SELECT PRODUCT IMAGE</label>
+                    <button id="pub-btn" onclick="publish()" class="hidden w-full bg-[#d4af37] text-white p-6 rounded-[30px] font-black uppercase mt-4">Publish Product</button>
                 </div>
             </div>
             <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto mt-10"></div>
@@ -151,7 +151,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let curU = null; let viewId = null; let allProds = [];
+        let curU = null; let viewId = null; let allProds = []; let tempImg = "";
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading-screen').classList.add('hidden');
@@ -163,17 +163,33 @@
                 showTab(localStorage.getItem('activeTab') || 'feed');
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
             }
         });
 
+        // --- AUTH & CORE ---
+        window.handleAuth = async () => {
+            const e = document.getElementById('auth-email').value;
+            const p = document.getElementById('auth-pass').value;
+            if(!e || !p) return alert("Fill all fields");
+            try {
+                await signInWithEmailAndPassword(auth, e, p);
+            } catch(err) {
+                try {
+                    const res = await createUserWithEmailAndPassword(auth, e, p);
+                    await setDoc(doc(db, "users", res.user.uid), { name: "Saini User", followers: [], blockedUsers: [] });
+                } catch(e2) { alert(e2.message); }
+            }
+        };
+
+        window.logout = () => signOut(auth);
+
         function loadCore() {
-            // Products Listener
             onSnapshot(collection(db, "products"), s => {
                 allProds = []; s.forEach(d => allProds.push({id: d.id, ...d.data()}));
                 render(allProds.sort((a,b) => (b.time?.seconds || 0) - (a.time?.seconds || 0)), 'public-grid');
             });
 
-            // SECURE MESSAGING: Sirf wahi dikhe jisme user "to" ho aur jisne "deleteForMe" na kiya ho
             onSnapshot(query(collection(db, "chats"), where("to", "==", curU.uid), where("deletedBy", "!=", curU.uid), orderBy("time", "desc")), s => {
                 document.getElementById('msg-badge').innerText = s.size;
                 document.getElementById('msg-badge').classList.toggle('hidden', s.size === 0);
@@ -195,115 +211,43 @@
                         </div>`;
                 });
             });
-
-            // Orders Listener
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
-                const l = document.getElementById('order-list'); l.innerHTML = "";
-                s.forEach(d => {
-                    const o = d.data();
-                    l.innerHTML += `<div class="bg-white p-7 rounded-[40px] border relative">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-bold text-xl">${o.item}</h4>
-                            <span class="text-[#d4af37] font-black">₹${o.price}</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">${o.customer} | ${o.phone}</p>
-                    </div>`;
-                });
-            });
         }
 
-        // --- NEW FEATURES LOGIC ---
-
-        // 1. Follow System
-        window.toggleFollow = async () => {
-            const myRef = doc(db, "users", curU.uid);
-            const userRef = doc(db, "users", viewId);
-            const s = await getDoc(userRef);
-            const isFollowing = s.data().followers?.includes(curU.uid);
-
-            if(isFollowing) {
-                await updateDoc(userRef, { followers: arrayRemove(curU.uid) });
-                document.getElementById('follow-btn').innerText = "Follow";
-            } else {
-                await updateDoc(userRef, { followers: arrayUnion(curU.uid) });
-                document.getElementById('follow-btn').innerText = "Following";
-            }
+        // --- SHOP & PROFILE ---
+        window.saveProfile = async () => {
+            const n = document.getElementById('in-name').value;
+            const b = document.getElementById('in-bio').value;
+            const c = document.getElementById('in-bio-color').value;
+            const s = document.getElementById('in-bio-size').value;
+            await updateDoc(doc(db, "users", curU.uid), { name: n, bio: b, bioColor: c, bioSize: s });
+            document.getElementById('edit-box').classList.add('hidden');
+            viewProfile(curU.uid);
         };
 
-        // 2. Block System
-        window.toggleBlock = async () => {
-            if(!confirm("Block/Unblock this user?")) return;
-            const myRef = doc(db, "users", curU.uid);
-            const s = await getDoc(myRef);
-            const isBlocked = s.data().blockedUsers?.includes(viewId);
+        window.previewProd = (el) => {
+            const fr = new FileReader();
+            fr.onload = (e) => { 
+                tempImg = e.target.result; 
+                document.getElementById('pub-btn').classList.remove('hidden');
+                document.getElementById('file-label').innerText = "IMAGE READY ✅";
+            };
+            fr.readAsDataURL(el.files[0]);
+        };
 
-            await updateDoc(myRef, {
-                blockedUsers: isBlocked ? arrayRemove(viewId) : arrayUnion(viewId)
+        window.publish = async () => {
+            const n = document.getElementById('p-name').value;
+            const p = document.getElementById('p-price').value;
+            const l = document.getElementById('p-link').value;
+            const d = document.getElementById('p-desc').value;
+            if(!n || !p || !tempImg) return alert("Required: Name, Price, Image");
+            
+            const userData = (await getDoc(doc(db, "users", curU.uid))).data();
+            await addDoc(collection(db, "products"), {
+                name: n, price: p, link: l, desc: d, img: tempImg,
+                creatorId: curU.uid, creator: userData.name || "Saini", time: serverTimestamp()
             });
-            alert(isBlocked ? "Unblocked" : "Blocked");
-        };
-
-        // 3. One-to-One Secure Message with Reply
-        window.openMsg = async () => {
-            const m = prompt("Enter secure message:");
-            if(!m) return;
-
-            // Check if blocked
-            const targetDoc = await getDoc(doc(db, "users", viewId));
-            if(targetDoc.data().blockedUsers?.includes(curU.uid)) {
-                alert("You are blocked by this user.");
-                return;
-            }
-
-            const myDoc = await getDoc(doc(db, "users", curU.uid));
-            addDoc(collection(db, "chats"), {
-                from: curU.uid,
-                fromName: myDoc.data()?.name || "User",
-                to: viewId,
-                msg: m,
-                deletedBy: "", // Track individual deletion
-                time: serverTimestamp()
-            });
-            alert("Message Sent!");
-        };
-
-        window.replyMsg = async (toId, originalMsg) => {
-            const r = prompt(`Replying to "${originalMsg}":`);
-            if(!r) return;
-            const myDoc = await getDoc(doc(db, "users", curU.uid));
-            addDoc(collection(db, "chats"), {
-                from: curU.uid,
-                fromName: myDoc.data()?.name || "User",
-                to: toId,
-                msg: r,
-                replyTo: originalMsg,
-                deletedBy: "",
-                time: serverTimestamp()
-            });
-            alert("Reply Sent!");
-        };
-
-        // 4. Delete For Me Logic
-        window.delMsg = async (msgId) => {
-            if(confirm("Delete message for you?")) {
-                // Update doc to mark as deleted for THIS user only
-                await updateDoc(doc(db, "chats", msgId), {
-                    deletedBy: curU.uid
-                });
-            }
-        };
-
-        // Existing Functions (Unchanged but connected)
-        window.showTab = (t) => {
-            localStorage.setItem('activeTab', t);
-            ['feed','shop','chats','orders'].forEach(s => {
-                const sec = document.getElementById('sec-'+s);
-                const btn = document.getElementById('tab-'+s) || document.getElementById('tab-'+s+'-btn');
-                if(sec) sec.classList.toggle('hidden', s !== t);
-                if(btn) btn.classList.toggle('active', s === t);
-            });
-            if(t === 'shop' && !viewId) viewProfile(curU.uid);
-            window.scrollTo(0,0);
+            alert("Published!");
+            location.reload(); 
         };
 
         window.viewProfile = async (uid) => {
@@ -317,38 +261,82 @@
                 const d = s.data();
                 document.getElementById('disp-name').innerText = d.name || "Saini Creator";
                 const b = document.getElementById('disp-bio');
-                b.innerText = d.bio || "Mhara Swagat hai!"; b.style.color = d.bioColor || '#666'; b.style.fontSize = (d.bioSize || '15') + 'px';
+                b.innerText = d.bio || "Mhara Swagat hai!"; 
+                b.style.color = d.bioColor || '#666'; 
+                b.style.fontSize = (d.bioSize || '15') + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://api.dicebear.com/7.x/avataaars/svg?seed="+uid;
-                document.getElementById('banner-ui').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
+                if(d.banner) document.getElementById('banner-ui').src = d.banner;
                 
-                // Set Follow Button State
                 if(!isMe) {
                     document.getElementById('follow-btn').innerText = d.followers?.includes(curU.uid) ? "Following" : "Follow";
                 }
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                const p = []; s.forEach(d => p.push({id: d.id, ...d.data()}));
-                render(p, 'my-shop-grid', isMe);
+                const prods = []; s.forEach(d => prods.push({id: d.id, ...d.data()}));
+                render(prods, 'my-shop-grid', isMe);
             });
             showTab('shop');
         };
 
-        // All other standard functions (publish, render, logout) same as your original code...
+        // --- INTERACTION ---
+        window.delMsg = async (id) => { if(confirm("Delete for you?")) await updateDoc(doc(db, "chats", id), { deletedBy: curU.uid }); };
+        
+        window.openMsg = async () => {
+            const m = prompt("Enter message:");
+            if(!m) return;
+            const myDoc = await getDoc(doc(db, "users", curU.uid));
+            await addDoc(collection(db, "chats"), { from: curU.uid, fromName: myDoc.data()?.name || "User", to: viewId, msg: m, time: serverTimestamp(), deletedBy: "" });
+            alert("Sent!");
+        };
+
+        window.replyMsg = async (toId, orig) => {
+            const r = prompt(`Reply to: ${orig}`);
+            if(!r) return;
+            const myDoc = await getDoc(doc(db, "users", curU.uid));
+            await addDoc(collection(db, "chats"), { from: curU.uid, fromName: myDoc.data()?.name || "User", to: toId, msg: r, replyTo: orig, time: serverTimestamp(), deletedBy: "" });
+            alert("Replied!");
+        };
+
         window.render = (data, cid, mine = false) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                g.innerHTML += `<div class="product-card group">
+                g.innerHTML += `<div class="product-card">
                     <div class="aspect-square relative overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover"></div>
                     <div class="p-6">
-                        <button onclick="viewProfile('${p.creatorId}')" class="text-[9px] font-black text-[#d4af37] mb-2 uppercase">@${p.creator || 'Creator'}</button>
+                        <button onclick="viewProfile('${p.creatorId}')" class="text-[9px] font-black text-[#d4af37] mb-2 uppercase">@${p.creator}</button>
                         <h4 class="font-bold text-sm truncate text-gray-800">${p.name}</h4>
                         <p class="desc-text">${p.desc || ''}</p>
                         <div class="flex justify-between items-end mt-6">
                             <div><span class="text-[10px] block text-gray-400 font-bold">Price</span><span class="font-black text-xl">₹${p.price}</span></div>
                             <div class="flex gap-2">
                                 ${mine ? `<button onclick="delProd('${p.id}')" class="bg-red-50 text-red-400 p-3 rounded-2xl"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-                                <button onclick="triggerOrder('${p.name.replace(/'/g, "\\'")}', '${p.creatorId}', '${p.link}', '${p.price}')" class="bg-black text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase">Get It</button>
+                                <a href="${p.link}" target="_blank" class="bg-black text-white text-[10px] px-6 py-3 rounded-2xl font-black uppercase">Get It</a>
                             </div>
                         </div>
                     </div>
                 </div>`;
+            });
+        };
+
+        window.showTab = (t) => {
+            localStorage.setItem('activeTab', t);
+            ['feed','shop','chats','orders'].forEach(s => {
+                const sec = document.getElementById('sec-'+s);
+                const btn = document.getElementById('tab-'+s);
+                if(sec) sec.classList.toggle('hidden', s !== t);
+                if(btn) btn.classList.toggle('active', s === t);
+            });
+            if(t === 'shop' && !viewId) viewProfile(curU.uid);
+            window.scrollTo(0,0);
+        };
+        
+        window.filterFeed = () => {
+            const val = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allProds.filter(p => p.name.toLowerCase().includes(val) || p.creator.toLowerCase().includes(val));
+            render(filtered, 'public-grid');
+        };
+        
+        window.delProd = async (id) => { if(confirm("Delete product?")) await deleteDoc(doc(db, "products", id)); };
+    </script>
+</body>
+</html>
