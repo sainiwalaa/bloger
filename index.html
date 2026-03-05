@@ -13,29 +13,40 @@
         .nav-btn.active { color: #d4af37; border-bottom: 4px solid #d4af37; font-weight: 800; }
         .hidden { display: none !important; }
         
-        /* Banner & Profile Optimized Look */
+        /* Banner & Square Profile Optimized */
         .banner-box { 
-            height: 220px; 
-            background: #e5e5e5; 
+            height: 250px; 
+            background: #222; 
             background-position: center; 
-            background-size: cover; /* Banner frame me fit hoga */
+            background-size: cover; 
             background-repeat: no-repeat;
             border-radius: 0 0 40px 40px; 
             position: relative;
-            box-shadow: inset 0 -50px 50px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
         }
+
+        /* Animated Title on Banner */
+        .banner-text-hub { text-align: center; z-index: 5; }
+        .banner-text-hub h1 { color: white; font-size: 2.5rem; letter-spacing: 4px; text-shadow: 2px 4px 10px rgba(0,0,0,0.4); margin-bottom: 5px; }
+        .sub-text-anim { color: #d4af37; font-size: 10px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; transition: 0.5s; }
+
+        /* Chokor Profile Frame */
         .profile-img { 
-            width: 120px; 
-            height: 120px; 
-            border-radius: 50%; 
-            border: 6px solid #fff; 
+            width: 110px; 
+            height: 110px; 
+            border-radius: 20px; /* Chokor look */
+            border: 5px solid #fff; 
             position: absolute; 
-            bottom: -60px; 
-            left: 50%; 
-            transform: translateX(-50%); 
+            bottom: -40px; 
+            left: 20px; 
             object-fit: cover; 
             background: #fff; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15); 
+            z-index: 20;
         }
 
         .shahi-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
@@ -75,13 +86,21 @@
 
         <section id="sec-shop" class="hidden">
             <div id="banner-ui" class="banner-box">
+                <div class="banner-text-hub">
+                    <h1 class="raj-font">SAINIWALAA</h1>
+                    <div class="bg-black/40 backdrop-blur-md px-5 py-1.5 rounded-full border border-white/20">
+                        <span id="anim-text" class="sub-text-anim">Influencer</span>
+                    </div>
+                </div>
+
                 <label class="absolute top-4 right-4 bg-black/40 p-3 rounded-full cursor-pointer text-white backdrop-blur-md hidden owner-only" id="banner-label">
                     <i class="fa-solid fa-camera"></i>
                     <input type="file" onchange="uploadProfileMedia('banner', this)">
                 </label>
+
                 <div class="relative">
                     <img id="profile-ui" src="https://via.placeholder.com/150" class="profile-img">
-                    <label class="absolute bottom-[-60px] left-[55%] bg-[#d4af37] text-white p-2.5 rounded-full border-4 border-white cursor-pointer hidden owner-only" id="profile-label">
+                    <label class="absolute bottom-[-45px] left-[100px] bg-[#d4af37] text-white p-2 rounded-lg border-2 border-white cursor-pointer hidden owner-only" id="profile-label">
                         <i class="fa-solid fa-pen text-[10px]"></i>
                         <input type="file" onchange="uploadProfileMedia('profile', this)">
                     </label>
@@ -90,14 +109,12 @@
 
             <div class="mt-20 text-center px-6">
                 <h2 id="disp-name" class="font-black transition-all">Shahi Creator</h2>
-                
                 <div class="mt-4 px-2">
                     <div id="bio-container" class="relative inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-[#d4af37]/10 to-[#f3e5ab]/20 border border-[#d4af37]/20">
                         <i class="fa-solid fa-quote-left absolute top-2 left-2 text-[#d4af37]/30 text-[10px]"></i>
                         <p id="disp-bio" class="text-gray-700 italic font-medium leading-relaxed">Bio update karein...</p>
                         <i class="fa-solid fa-quote-right absolute bottom-2 right-2 text-[#d4af37]/30 text-[10px]"></i>
                     </div>
-
                     <div class="flex justify-center gap-4 mt-3 owner-only hidden">
                         <button onclick="changeFontSize(-1)" class="text-[10px] bg-white border px-3 py-1 rounded-full shadow-sm">Bio A-</button>
                         <button onclick="changeFontSize(1)" class="text-[10px] bg-white border px-3 py-1 rounded-full shadow-sm">Bio A+</button>
@@ -114,7 +131,6 @@
             </div>
 
             <div id="edit-profile-box" class="hidden max-w-sm mx-auto p-6 mt-4 bg-white border rounded-[30px] shadow-lg">
-                <p class="text-[10px] font-bold mb-2 uppercase text-gray-400">Shop Ka Naam & Style</p>
                 <input id="in-name" placeholder="Shop Name" class="w-full p-3 border-b mb-2 outline-none font-bold">
                 <div class="flex gap-2 mb-4">
                     <input type="color" id="in-name-color" class="w-10 h-10 border-0 cursor-pointer">
@@ -122,16 +138,12 @@
                         <option value="18px">Chhota</option>
                         <option value="24px" selected>Normal</option>
                         <option value="32px">Bada (Shahi)</option>
-                        <option value="40px">Bahut Bada</option>
                     </select>
                 </div>
-                
-                <p class="text-[10px] font-bold mb-2 uppercase text-gray-400">Bio aur Links</p>
                 <input id="in-bio" placeholder="Bio..." class="w-full p-3 border-b mb-2 outline-none">
                 <input id="in-wa" placeholder="WhatsApp (91...)" class="w-full p-3 border-b mb-2 text-xs outline-none">
                 <input id="in-insta" placeholder="Instagram URL" class="w-full p-3 border-b mb-2 text-xs outline-none">
                 <input id="in-yt" placeholder="YouTube URL" class="w-full p-3 border-b mb-4 text-xs outline-none">
-                
                 <button onclick="saveProfileData()" class="w-full bg-[#d4af37] text-white p-4 rounded-2xl text-xs font-bold uppercase shadow-lg">Saja Do Shop!</button>
             </div>
 
@@ -139,9 +151,8 @@
                 <div class="bg-white border-2 border-dashed border-[#d4af37]/30 p-8 rounded-[40px] text-center shadow-sm">
                     <h3 class="font-bold text-[#d4af37] mb-6 text-xs uppercase tracking-widest">Naya Maal Jodhein</h3>
                     <input id="p-name" placeholder="Item Name" class="w-full p-3 border-b mb-2 outline-none text-sm">
-                    <textarea id="p-desc" placeholder="Maal ki jankari (Description)..." class="w-full p-3 border-b mb-2 outline-none text-xs h-20 resize-none"></textarea>
+                    <textarea id="p-desc" placeholder="Maal ki jankari..." class="w-full p-3 border-b mb-2 outline-none text-xs h-20 resize-none"></textarea>
                     <input id="p-price" placeholder="Price ₹" class="w-full p-3 border-b mb-2 outline-none text-sm font-bold">
-                    <input id="p-link" placeholder="External Link (Optional)" class="w-full p-3 border-b mb-6 outline-none text-[10px]">
                     <div id="p-preview-box" class="hidden mb-6"><img id="p-preview-img" class="h-32 mx-auto rounded-2xl"></div>
                     <div class="flex gap-3">
                         <label class="flex-1 border-2 border-black p-4 rounded-2xl cursor-pointer text-[10px] font-bold uppercase">
@@ -157,15 +168,10 @@
                 <h3 id="shop-title" class="raj-font text-lg mt-14 mb-6 text-gray-800 text-center">Aapka Maal</h3>
                 <div id="my-shop-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
-
-            <div id="user-order-history" class="max-w-4xl mx-auto p-4 mt-10">
-                <h3 class="raj-font text-lg mb-4 text-gray-800 text-center">Mhare Orders</h3>
-                <div id="history-list" class="space-y-3"></div>
-            </div>
         </section>
 
         <section id="sec-orders" class="hidden p-6 max-w-xl mx-auto">
-            <h3 class="raj-font text-xl mb-6 text-center">Creator Orders (Admin)</h3>
+            <h3 class="raj-font text-xl mb-6 text-center">Orders (Admin)</h3>
             <div id="order-list" class="space-y-4"></div>
         </section>
     </main>
@@ -175,7 +181,7 @@
              <h3 class="raj-font text-xl font-bold text-center mb-6">Confirm Order</h3>
              <input id="order-cust-name" type="text" placeholder="Aapka Naam" class="w-full p-3 border-b mb-4 outline-none">
              <input id="order-cust-phone" type="number" placeholder="WhatsApp Number" class="w-full p-3 border-b mb-8 outline-none">
-             <input type="hidden" id="order-item-name"><input type="hidden" id="order-creator-id"><input type="hidden" id="order-item-link">
+             <input type="hidden" id="order-item-name"><input type="hidden" id="order-creator-id">
              <div class="flex gap-3">
                 <button onclick="closeCheckout()" class="flex-1 text-gray-400 font-bold">CANCEL</button>
                 <button id="order-confirm-btn" onclick="submitOrder()" class="flex-[2] bg-black text-white py-4 rounded-2xl font-bold text-xs">CONFIRM</button>
@@ -197,6 +203,21 @@
 
         let currentUser = null;
         let currentFontSize = 14;
+
+        // Banner Text Animation Logic
+        const words = ["Influencer", "Blog Shop", "Creator Hub"];
+        let wordIdx = 0;
+        setInterval(() => {
+            const el = document.getElementById('anim-text');
+            if(el) {
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    wordIdx = (wordIdx + 1) % words.length;
+                    el.innerText = words[wordIdx];
+                    el.style.opacity = '1';
+                }, 500);
+            }
+        }, 3000);
 
         onAuthStateChanged(auth, u => {
             if(u) {
@@ -222,13 +243,10 @@
                 nameEl.innerText = d.name || "Shahi Creator";
                 nameEl.style.color = d.nameColor || "#1f2937";
                 nameEl.style.fontSize = d.nameSize || "24px";
-
                 document.getElementById('disp-bio').innerText = d.bio || "Bio update karein...";
-                document.getElementById('disp-bio').style.fontSize = (d.bioSize || 14) + 'px';
                 document.getElementById('profile-ui').src = d.profile || "https://via.placeholder.com/150";
                 document.getElementById('banner-ui').style.backgroundImage = d.banner ? `url(${d.banner})` : "none";
                 
-                // Update Social Links
                 const socialMapping = { 'btn-wa': d.wa ? `https://wa.me/${d.wa}` : null, 'btn-insta': d.insta, 'btn-yt': d.yt };
                 Object.keys(socialMapping).forEach(id => {
                     const el = document.getElementById(id);
@@ -236,7 +254,6 @@
                 });
             }
             syncMyShop(uid);
-            syncUserHistory(uid);
         };
 
         window.saveProfileData = async () => {
@@ -254,13 +271,8 @@
             loadProfile(currentUser.uid);
         };
 
-        // All other core functions (publishProduct, orderNow, etc.) remain the same
-        // [Existing functions from your code: syncAll, syncMyShop, syncUserHistory, delP, delOrder, submitOrder, handleAuth, logout, toggleAuthMode, compressImg, uploadProfileMedia, previewProduct, showTab, viewCreator, closeCheckout]
-        
-        // --- ADDED THE MISSING CORE FUNCTIONS BACK TO KEEP IT WORKING ---
         window.handleAuth = () => {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-            if(!e || !p) return alert("Details bhariye!");
             signInWithEmailAndPassword(auth, e, p).catch(() => {
                 createUserWithEmailAndPassword(auth, e, p).then(cred => {
                     setDoc(doc(db, "users", cred.user.uid), { name: e.split('@')[0], bio: "Shahi Creator" });
@@ -301,9 +313,8 @@
         };
 
         window.publishProduct = async () => {
-            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, d = document.getElementById('p-desc').value;
-            if(!n || !p || !window.tempProdImg) return alert("Maal ki jankari poori karein!");
-            await addDoc(collection(db, "products"), { name: n, desc: d, price: p, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
+            const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value;
+            await addDoc(collection(db, "products"), { name: n, price: p, img: window.tempProdImg, creatorId: currentUser.uid, creator: document.getElementById('disp-name').innerText, time: serverTimestamp() });
             location.reload();
         };
 
@@ -324,12 +335,11 @@
                     grid.innerHTML += `<div class="shahi-card"><div class="img-frame"><img src="${p.img}"></div><div class="p-3"><button onclick="viewCreator('${p.creatorId}')" class="text-[8px] font-black text-[#d4af37] uppercase">@${p.creator}</button><h4 class="font-bold text-[11px] truncate">${p.name}</h4><div class="flex justify-between items-center mt-2"><span class="font-bold text-xs">₹${p.price}</span><button onclick="orderNow('${p.name}', '${p.creatorId}')" class="bg-black text-white text-[9px] px-3 py-1.5 rounded-full">ORDER</button></div></div></div>`;
                 });
             });
-            // Admin orders logic (keeping it safe as per original)
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", currentUser.uid)), snap => {
                 const list = document.getElementById('order-list'); list.innerHTML = "";
                 snap.forEach(d => {
                     const o = d.data();
-                    list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-gold flex justify-between"><div><h4 class="font-bold">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
+                    list.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 flex justify-between"><div><h4 class="font-bold">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} - ${o.phone}</p></div><button onclick="delOrder('${d.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`;
                 });
             });
         }
@@ -344,7 +354,7 @@
             });
         }
         
-        window.delOrder = async (id) => { if(confirm("Order delete karein?")) await deleteDoc(doc(db, "orders", id)); };
+        window.delOrder = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "orders", id)); };
         window.viewCreator = (cid) => { showTab('shop'); loadProfile(cid); };
         window.orderNow = (item, cid) => { 
             document.getElementById('order-item-name').value = item; 
@@ -354,8 +364,7 @@
         window.closeCheckout = () => document.getElementById('checkout-modal').classList.add('hidden');
         window.submitOrder = async () => {
             const n = document.getElementById('order-cust-name').value, ph = document.getElementById('order-cust-phone').value;
-            if(!n || !ph) return alert("Details bhariye");
-            await addDoc(collection(db, "orders"), { item: document.getElementById('order-item-name').value, customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, userId: currentUser.uid, time: serverTimestamp() });
+            await addDoc(collection(db, "orders"), { item: document.getElementById('order-item-name').value, customer: n, phone: ph, creatorId: document.getElementById('order-creator-id').value, time: serverTimestamp() });
             alert("Order Done!"); closeCheckout();
         };
         window.changeFontSize = async (step) => {
@@ -363,7 +372,6 @@
             document.getElementById('disp-bio').style.fontSize = currentFontSize + 'px';
             await setDoc(doc(db, "users", currentUser.uid), { bioSize: currentFontSize }, { merge: true });
         };
-        function syncUserHistory(uid) { /* implementation remains same */ }
     </script>
 </body>
 </html>
