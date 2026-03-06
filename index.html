@@ -79,6 +79,44 @@
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
+
+        /* FOOTER ANIMATION */
+        @keyframes scrollCreators {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+            display: flex;
+            width: max-content;
+            animation: scrollCreators 40s linear infinite;
+        }
+        .footer-creator-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            transition: 0.3s;
+        }
+        .footer-creator-card:hover {
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+        .footer-creator-card img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1.5px solid #d4af37;
+            object-fit: cover;
+        }
+        .footer-creator-card span {
+            font-size: 11px;
+            font-weight: 700;
+            color: #ddd;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -171,36 +209,22 @@
             <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
         </section>
 
-        <footer class="bg-black text-white pt-12 pb-6 mt-20">
-            <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10">
-                <div>
-                    <h2 class="raj-font text-2xl text-[#d4af37]">SAINIWALAA</h2>
-                    <p class="text-gray-400 text-sm mt-3">
-                        India's Premium Creator Marketplace where influencers showcase and sell their creations.
-                    </p>
-                </div>
-
-                <div>
-                    <h3 class="font-bold mb-3 text-[#d4af37]">Quick Links</h3>
-                    <ul class="text-gray-400 text-sm space-y-2">
-                        <li><a href="#" onclick="nav('feed')" class="hover:text-white">Trending</a></li>
-                        <li><a href="#" onclick="viewProfile(curU.uid)" class="hover:text-white">My Studio</a></li>
-                        <li><a href="#" onclick="nav('orders')" class="hover:text-white">Orders</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="font-bold mb-3 text-[#d4af37]">Follow Us</h3>
-                    <div class="flex gap-4 mt-4">
-                        <a href="#" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
-                        <a href="#" class="social-btn"><i class="fa-brands fa-facebook"></i></a>
-                        <a href="#" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>
-                    </div>
-                </div>
+        <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
+            <div class="text-center max-w-4xl mx-auto px-6">
+                <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
+                <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
+                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
+                    <br><span class="text-[#d4af37] font-bold mt-2 inline-block">JOIN • CREATE • SELL • GROW</span>
+                </p>
             </div>
-            <div class="text-center text-gray-500 text-xs mt-10 border-t border-gray-800 pt-4">
-                © 2026 SAINIWALAA • Luxury Creator Economy Platform
+
+            <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
+                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
+                    </div>
+            </div>
+
+            <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
+                © 2026 SAINIWALAA ROYAL STUDIOS • BUILT FOR THE CREATOR ECONOMY
             </div>
         </footer>
     </main>
@@ -274,6 +298,24 @@
 
         function initApp() {
             nav('feed');
+            
+            // Creators Scroll Logic for Footer
+            const cBox = document.getElementById("creator-scroll");
+            onSnapshot(collection(db, "users"), snap => {
+                let html = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const name = d.name || "Creator";
+                    const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                    html += `
+                    <div class="footer-creator-card">
+                        <img src="${img}">
+                        <span>@${name.toUpperCase()}</span>
+                    </div>`;
+                });
+                cBox.innerHTML = html + html; 
+            });
+
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
