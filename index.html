@@ -63,7 +63,6 @@
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
         
-        /* Footer Animation */
         .creator-scroll{ white-space:nowrap; animation:creatorMove 35s linear infinite; display: flex; gap: 40px; }
         @keyframes creatorMove{ 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
         .creator-card{ display:flex; align-items:center; gap:10px; }
@@ -82,7 +81,8 @@
             <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-10 uppercase font-bold">The Royal Marketplace</p>
             <input type="email" id="email" placeholder="Email" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
             <input type="password" id="pass" placeholder="Password" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
-            <button onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-lg active:scale-95 transition">GET ACCESS</button>
+            <button id="auth-btn" onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-lg active:scale-95 transition">GET ACCESS</button>
+            <p class="mt-4 text-[10px] text-gray-400">New? Enter details and click Get Access to create account.</p>
         </div>
     </section>
 
@@ -181,8 +181,6 @@
                 <input id="eb" placeholder="Bio Message" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <div class="grid grid-cols-2 gap-3">
                     <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <input id="e-yt" placeholder="YouTube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <input id="e-fb" placeholder="FB Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                     <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
                 <hr class="my-4">
@@ -193,10 +191,9 @@
                 <div id="banner-text-edit-fields" class="space-y-4 hidden">
                     <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
-                        <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
+                        <input type="color" id="eb-bg" value="#111111" class="w-full h-10 cursor-pointer">
+                        <input type="color" id="eb-color" value="#d4af37" class="w-full h-10 cursor-pointer">
                     </div>
-                    <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg">SAVE ALL CHANGES</button>
                 <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs py-2">CANCEL</button>
@@ -210,7 +207,6 @@
             <div class="space-y-3 mb-6">
                 <input id="on" placeholder="Your Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="op" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <input id="oc" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
                     <input type="checkbox" id="collab-check" class="w-5 h-5 accent-red-600">
                     <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Collaboration contact with influencer?</label>
@@ -231,19 +227,51 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.curU = null; let allProds = []; window.tempP = null;
+        window.curU = null; window.allProds = []; window.tempP = null;
 
-        onAuthStateChanged(auth, u => {
+        onAuthStateChanged(auth, async u => {
             document.getElementById('loading').classList.add('hidden');
-            if(u) { curU = u; document.getElementById('app').classList.remove('hidden'); document.getElementById('auth-box').classList.add('hidden'); initApp(); }
-            else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+            if(u) { 
+                curU = u; 
+                document.getElementById('app').classList.remove('hidden'); 
+                document.getElementById('auth-box').classList.add('hidden'); 
+                initApp(); 
+            } else { 
+                document.getElementById('auth-box').classList.remove('hidden'); 
+                document.getElementById('app').classList.add('hidden'); 
+            }
         });
+
+        // Registration + Login Logic
+        window.authAction = async () => {
+            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
+            const btn = document.getElementById('auth-btn');
+            if(!e || !p) return alert("Email/Pass likho!");
+            
+            btn.innerText = "VERIFYING...";
+            try {
+                // Try Login
+                await signInWithEmailAndPassword(auth, e, p);
+            } catch (err) {
+                if (err.code === 'auth/user-not-found') {
+                    // Create New Account if not exists
+                    try {
+                        const res = await createUserWithEmailAndPassword(auth, e, p);
+                        // Initialize user document in Firestore
+                        await setDoc(doc(db, "users", res.user.uid), {
+                            name: "New Creator", bio: "Welcome to my studio", bannerMode: "img"
+                        });
+                    } catch (regErr) { alert(regErr.message); }
+                } else { alert(err.message); }
+            }
+            btn.innerText = "GET ACCESS";
+        };
 
         function initApp() {
             nav('feed');
             onSnapshot(collection(db, "products"), s => {
-                allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
-                renderGrid(allProds, 'grid-feed', false);
+                window.allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
+                renderGrid(window.allProds, 'grid-feed', false);
             });
 
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
@@ -274,7 +302,7 @@
                 snap.forEach(doc=>{
                     const d = doc.data();
                     const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                    creatorBox.innerHTML += `<div class="creator-card"><img src="${img}"><span>@${d.name || "Creator"}</span></div>`;
+                    creatorBox.innerHTML += `<div class="creator-card" onclick="viewProfile('${doc.id}')" style="cursor:pointer"><img src="${img}"><span>@${d.name || "Creator"}</span></div>`;
                 });
             });
         }
@@ -302,27 +330,21 @@
         window.pubProd = async () => {
             const btn = document.getElementById('pub-btn');
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value, d = document.getElementById('pd').value;
-            if(!n || !p || !window.tempP) return alert("Fill data!");
+            if(!n || !p || !window.tempP) return alert("Photo + Info mandatory!");
 
-            // Double click prevention & Fast UI
-            btn.disabled = true;
-            btn.innerText = "PUBLISHING...";
-            btn.style.opacity = "0.5";
-
+            btn.disabled = true; btn.innerText = "PUBLISHING...";
             const u = (await getDoc(doc(db, "users", curU.uid))).data();
             await addDoc(collection(db, "products"), { 
                 name: n, price: p, desc: d, img: window.tempP, link: l, 
                 creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() 
             });
 
-            // Fast Reset instead of location.reload()
             document.getElementById('pn').value = ""; document.getElementById('pp').value = ""; 
             document.getElementById('pl').value = ""; document.getElementById('pd').value = "";
             document.getElementById('pf-label').innerText = "CHOOSE PHOTO";
             window.tempP = null;
-            btn.disabled = false; btn.innerText = "PUBLISH"; btn.style.opacity = "1";
-            btn.classList.add('hidden');
-            alert("Published Successfully!");
+            btn.disabled = false; btn.innerText = "PUBLISH"; btn.classList.add('hidden');
+            alert("Added!");
         };
 
         window.viewProfile = async (uid) => {
@@ -359,10 +381,10 @@
         };
 
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
-            if(!n || !p) return alert("Fill data!");
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, collab = document.getElementById('collab-check').checked;
+            if(!n || !p) return alert("Details bharo!");
             await addDoc(collection(db, "orders"), { 
-                item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab,
+                item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, collab: collab,
                 date: new Date().toLocaleDateString('en-GB'), creatorId: window.activeOrder.creatorId, time: serverTimestamp() 
             });
             window.open(window.activeOrder.link, '_blank');
@@ -372,18 +394,16 @@
         window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
         window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
         window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; }; r.readAsDataURL(i.files[0]); };
-        window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-        window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
+        window.orderForm = (pid) => { window.activeOrder = window.allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
         window.toggleBannerEdit = () => { document.getElementById('banner-text-edit-fields').classList.toggle('hidden', document.getElementById('eb-mode').value !== 'text'); };
         window.saveProfile = async () => {
             await setDoc(doc(db, "users", curU.uid), { 
                 name: document.getElementById('en').value, bio: document.getElementById('eb').value,
                 insta: document.getElementById('e-insta').value, wa: document.getElementById('e-wa').value,
                 bannerMode: document.getElementById('eb-mode').value, bannerText: document.getElementById('eb-text').value,
-                bannerBg: document.getElementById('eb-bg').value, bannerColor: document.getElementById('eb-color').value,
-                bannerSize: document.getElementById('eb-size').value
+                bannerBg: document.getElementById('eb-bg').value, bannerColor: document.getElementById('eb-color').value
             }, {merge:true});
             location.reload();
         };
