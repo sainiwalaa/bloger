@@ -387,7 +387,7 @@
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
     </script
- <!-- SAINIWALAA LIVE CREATOR FOOTER -->
+<!-- SAINIWALAA LIVE CREATOR FOOTER -->
 
 <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
 
@@ -410,7 +410,7 @@ Live Creators Joined : <span id="creator-count">0</span>
 </div>
 
 
-<!-- CREATOR SCROLL BAR -->
+<!-- CREATOR SCROLL -->
 
 <div class="mt-10 overflow-hidden w-full">
 
@@ -441,44 +441,36 @@ animation:creatorMove 35s linear infinite;
 }
 
 .creator-card{
-
 display:flex;
 align-items:center;
 gap:10px;
-
-background:#111;
-padding:6px 12px;
-border-radius:30px;
-
 }
 
 .creator-card img{
-
-width:34px;
-height:34px;
+width:36px;
+height:36px;
 border-radius:50%;
 border:2px solid #d4af37;
 object-fit:cover;
-
 }
 
 .creator-card span{
-
 font-size:12px;
 font-weight:700;
-
+color:white;
 }
 
 </style>
 
 
-<script>
+<script type="module">
+
+import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const creatorBox = document.getElementById("creator-scroll");
 const creatorCount = document.getElementById("creator-count");
 
-
-onSnapshot(collection(db,"users"), (snap)=>{
+onSnapshot(collection(db,"users"), snap => {
 
 creatorBox.innerHTML="";
 
@@ -497,6 +489,7 @@ creatorBox.innerHTML += `
 <div class="creator-card">
 
 <img src="${img}">
+
 <span>@${name}</span>
 
 </div>
