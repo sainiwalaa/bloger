@@ -387,119 +387,92 @@
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
     </script
-<!-- SAINIWALAA LIVE CREATOR FOOTER -->
+footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden relative">
+    <div class="text-center max-w-4xl mx-auto px-6 mb-8">
+        <h2 class="raj-font text-2xl text-[#d4af37] mb-2">SAINIWALAA Creator Network</h2>
+        <p class="text-[#d4af37] text-[10px] font-bold tracking-wider uppercase opacity-80">
+            Live Creators Joined : <span id="creator-count">0</span>
+        </p>
+    </div>
 
-        <footer class="bg-[#0a0a0a] text-white pt-16 pb-10 mt-20 border-t border-[#d4af37]/30">
-            <div class="max-w-6xl mx-auto px-6 text-center">
-                <h2 class="raj-font text-4xl text-[#d4af37] mb-4 tracking-[0.2em] uppercase">SAINIWALAA Creator Network</h2>
-                <p class="max-w-2xl mx-auto text-gray-400 text-sm leading-relaxed mb-8">
-                    SAINIWALAA एक <span class="text-[#d4af37] font-bold">Live Creator Marketplace</span> है जहाँ Influencers अपना खुद का Store बनाकर सीधे Products बेच सकते हैं।
-                </p>
-
-                <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-[#d4af37]/20 mb-12">
-                    <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    </span>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-300">
-                        Live Creators Joined: <span id="live-count" class="text-[#d4af37] text-lg ml-1">0</span>
-                    </span>
-                </div>
-
-                <div class="relative w-full overflow-hidden bg-black/40 py-8 border-y border-white/5 group">
-                    <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
-                </div>
-
-                <div class="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-[10px] text-gray-600 uppercase tracking-[0.4em]">© 2026 SAINIWALAA | Luxury Creator Economy</p>
-                    <div class="flex gap-6 text-gray-500 text-xs">
-                        <a href="#" class="hover:text-[#d4af37]">Privacy</a>
-                        <a href="#" class="hover:text-[#d4af37]">Terms</a>
-                        <a href="#" class="hover:text-[#d4af37]">Support</a>
-                    </div>
-                </div>
+    <div class="relative flex overflow-x-hidden border-y border-white/5 py-4 bg-white/5">
+        <div id="creator-scroll" class="flex whitespace-nowrap animate-marquee items-center">
             </div>
-        </footer>
-    </main>
+        <div id="creator-scroll-dup" class="flex whitespace-nowrap animate-marquee items-center">
+            </div>
+    </div>
 
-    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6"><div class="bg-white w-full max-w-md rounded-[40px] p-8">...Edit Form...</div></div>
+    <div class="text-center mt-8 text-[10px] text-gray-500 uppercase tracking-widest">
+        © 2026 SAINIWALAA • Creator Commerce Platform
+    </div>
+</footer>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<style>
+    /* स्मूथ चलने वाला एनिमेशन */
+    @keyframes marquee {
+        0% { transform: translateX(0%); }
+        100% { transform: translateX(-100%); }
+    }
+    .animate-marquee {
+        animation: marquee 25s linear infinite;
+    }
+    .creator-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 20px;
+        padding: 5px 12px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .creator-card img {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #d4af37;
+    }
+    .creator-card span {
+        font-size: 11px;
+        font-weight: 600;
+        color: #eee;
+        letter-spacing: 0.5px;
+    }
+</style>
 
-        const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+<script type="module">
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    // ध्यान दें: 'db' वही होना चाहिए जो आपके मेन स्क्रिप्ट में डिफाइन है
+    const db = getFirestore(); 
+    const creatorBox = document.getElementById("creator-scroll");
+    const creatorBoxDup = document.getElementById("creator-scroll-dup");
+    const creatorCount = document.getElementById("creator-count");
 
-        window.curU = null; let allProds = [];
+    // Real-time listener: यह चेक करेगा कि यूजर मौजूद है या नहीं
+    onSnapshot(collection(db, "users"), (snap) => {
+        let htmlContent = "";
+        let count = 0;
 
-        onAuthStateChanged(auth, u => {
-            document.getElementById('loading').classList.add('hidden');
-            if(u) { curU = u; document.getElementById('app').classList.remove('hidden'); document.getElementById('auth-box').classList.add('hidden'); initApp(); }
-            else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+        snap.forEach((doc) => {
+            const d = doc.data();
+            // अगर यूजर का नाम है तभी दिखाएगा (डिलीटेड यूजर यहाँ नहीं आएंगे)
+            if (d.name) {
+                const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                htmlContent += `
+                    <div class="creator-card">
+                        <img src="${img}" alt="${d.name}">
+                        <span>@${d.name.toLowerCase().replace(/\s/g, '')}</span>
+                    </div>
+                `;
+                count++;
+            }
         });
 
-        async function initApp() {
-            nav('feed');
-            
-            // Sync Products
-            onSnapshot(collection(db, "products"), async s => {
-                const uSnap = await getDocs(collection(db, "users"));
-                const activeIds = uSnap.docs.map(d => d.id);
-                allProds = s.docs.map(d => ({id:d.id, ...d.data()})).filter(p => activeIds.includes(p.creatorId));
-                renderGrid(allProds, 'grid-feed', false);
-            });
-
-            // Footer Creator Scroll & Live Count
-            onSnapshot(collection(db, "users"), snap => {
-                const cBox = document.getElementById("creator-scroll");
-                const countBox = document.getElementById("live-count");
-                let html = ""; 
-                let count = 0;
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    if(d.name) {
-                        count++;
-                        const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                        html += `<div class="footer-creator-card" onclick="viewProfile('${doc.id}')" style="cursor:pointer"><img src="${img}"><span>@${d.name.toUpperCase()}</span></div>`;
-                    }
-                });
-                cBox.innerHTML = html + html; 
-                countBox.innerText = count;
-            });
-
-            // Orders Listener
-            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
-                const list = document.getElementById('list-orders');
-                list.innerHTML = s.docs.map(d => {
-                    const o = d.data();
-                    return `<div class="p-4 bg-white rounded-3xl border border-gray-100 mb-2">
-                        <h4 class="font-bold">${o.item}</h4>
-                        <p class="text-xs text-gray-500">Buyer: ${o.customer} | ₹${o.price}</p>
-                    </div>`;
-                }).join('');
-            });
-        }
-
-        // Window functions for Navigation and Auth
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => {
-            document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
-            if(document.getElementById('n-'+s)) document.getElementById('n-'+s).classList.toggle('nav-active', s === t);
-        });};
-        window.viewProfile = async (uid) => { /* Profile logic as before */ 
-            nav('shop'); const isMe = (uid === curU.uid);
-            document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
-            const s = await getDoc(doc(db, "users", uid));
-            if(s.exists()){ const d = s.data(); document.getElementById('u-name').innerText = d.name || "Creator"; document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`; }
-        };
-        window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
-        window.logout = () => signOut(auth).then(() => location.reload());
-        window.renderGrid = (data, cid, isOwnerView) => { 
-            const g = document.getElementById(cid); g.innerHTML = data.map(p => `<div class="product-card"><img src="${p.img}" class="w-full aspect-square object-cover p-2 rounded-[30px]"><div class="p-4"><h4 class="font-bold">${p.name}</h4><p class="text-gold font-black">₹${p.price}</p></div></div>`).join('');
-        };
-    </script>
-</body>
-</html>
+        // UI अपडेट करें
+        creatorBox.innerHTML = htmlContent;
+        creatorBoxDup.innerHTML = htmlContent; // लूप को पूरा करने के लिए
+        creatorCount.innerText = count;
+    });
+</script>
