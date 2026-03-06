@@ -29,13 +29,12 @@
         
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
-        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
+        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
 
-        /* New Footer Scrolling Styles */
         @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-scroll { display: flex; width: max-content; animation: scrollCreators 40s linear infinite; }
         .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); transition: 0.3s; }
@@ -137,7 +136,7 @@
         <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
-                <p class="text-gray-400 text-sm">  Join the elite network
+                <p class="text-gray-400 text-sm"> Join the elite network
                      SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं।  • <span class="text-[#d4af37]">SAINIWALAA</span></p>
             </div>
             <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6">
@@ -195,7 +194,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
@@ -222,13 +221,11 @@
         function initApp() {
             nav('feed');
             
-            // Sync Public Products Feed
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
             });
 
-            // Footer Creator Scroll Logic
             const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
                 let html = "";
@@ -240,11 +237,9 @@
                                 <span>@${(d.name || "Creator").toUpperCase()}</span>
                              </div>`;
                 });
-                // Duplicate html for seamless infinite loop
                 cBox.innerHTML = html + html; 
             });
 
-            // Sync Orders for logged in creator
             if(curU) {
                 onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                     const list = document.getElementById('list-orders');
@@ -272,7 +267,12 @@
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                g.innerHTML += `<div class="product-card">
+                g.innerHTML += `<div class="product-card relative">
+                    ${isOwnerView ? `
+                    <button onclick="deleteProd('${p.id}')" class="absolute top-2 right-2 z-20 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg hover:bg-red-700 transition flex items-center justify-center">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>` : ''}
+                    
                     <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
@@ -284,6 +284,18 @@
                     </div>
                 </div>`;
             });
+        };
+
+        window.deleteProd = async (pid) => {
+            if(confirm("क्या आप इस प्रोडक्ट को हटाना चाहते हैं?")) {
+                try {
+                    await deleteDoc(doc(db, "products", pid));
+                    alert("प्रोडक्ट डिलीट हो गया!");
+                } catch (e) {
+                    console.error("Error deleting document: ", e);
+                    alert("डिलीट करने में समस्या आई।");
+                }
+            }
         };
 
         window.viewProfile = async (uid) => {
