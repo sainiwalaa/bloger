@@ -75,10 +75,31 @@
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
-        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
+        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
+
+        /* Delete Button Style */
+        .del-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+        }
+        .del-btn:hover { background: red; transform: scale(1.1); }
 
         @keyframes scrollCreators {
             0% { transform: translateX(0); }
@@ -279,7 +300,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
@@ -338,7 +359,12 @@
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
+                // Delete button logic
+                const delIcon = (isOwnerView && p.creatorId === curU.uid) ? 
+                    `<div onclick="deleteProduct('${p.id}')" class="del-btn"><i class="fa-solid fa-trash-can"></i></div>` : '';
+
                 g.innerHTML += `<div class="product-card">
+                    ${delIcon}
                     <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
@@ -351,6 +377,18 @@
                     </div>
                 </div>`;
             });
+        };
+
+        // NEW DELETE FUNCTION
+        window.deleteProduct = async (pid) => {
+            if(confirm("Kya aap is product ko hatana chahte hain?")) {
+                try {
+                    await deleteDoc(doc(db, "products", pid));
+                    alert("Product Successfully Removed!");
+                } catch (e) {
+                    alert("Error deleting product!");
+                }
+            }
         };
 
         window.viewProfile = async (uid) => {
@@ -394,6 +432,7 @@
             });
         };
 
+        // Navigation and Auth functions remain same
         window.toggleBannerEdit = () => {
             const mode = document.getElementById('eb-mode').value;
             document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text');
@@ -461,7 +500,7 @@
                 const productLink = window.activeOrder.link;
                 if (productLink) {
                     const targetUrl = productLink.startsWith('http') ? productLink : `https://${productLink}`;
-                    window.open(targetUrl, '_blank'); // Opens in New Tab
+                    window.open(targetUrl, '_blank');
                 }
             } catch (error) {
                 alert("Something went wrong!");
