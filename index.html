@@ -8,18 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --gold: #d4af37; --dark: #111; }
-        body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        :root { --gold: #d4af37; --dark: #111; --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f2d06b 50%, #b8860b 100%); }
+        body { background: #fdfdfd; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; color: #333; }
         .raj-font { font-family: 'Cinzel', serif; }
         
+        /* Smooth Scrolling */
+        html { scroll-behavior: smooth; }
+
         .saini-header-container {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
         .header-bg-animate {
@@ -28,31 +31,31 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
-            animation: pulse-bg 8s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: pulse-bg 10s ease-in-out infinite;
             z-index: -1;
         }
 
         @keyframes pulse-bg {
             0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .saini-header {
-            background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37);
+            background: linear-gradient(to right, #b8860b, #d4af37, #f2d06b, #b8860b);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
+            animation: shine 4s linear infinite;
         }
 
         @keyframes shine { to { background-position: 200% center; } }
 
         .tagline-anim {
-            letter-spacing: 0.3em;
+            letter-spacing: 0.4em;
             font-weight: 800;
-            font-size: 9px;
-            color: #888;
+            font-size: 8px;
+            color: #999;
             position: relative;
             display: inline-block;
         }
@@ -60,221 +63,234 @@
         .tagline-anim::after {
             content: '';
             position: absolute;
-            bottom: -2px;
-            left: 0;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 0;
-            height: 1px;
+            height: 1.5px;
             background: var(--gold);
-            animation: line-grow 2s ease-out forwards;
+            animation: line-grow 1.5s ease-out forwards;
         }
 
-        @keyframes line-grow { to { width: 100%; } }
+        @keyframes line-grow { to { width: 60%; } }
 
-        .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
-        .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
-        .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
-        .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
-        .hidden { display: none !important; }
-        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
-        .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
+        .banner-box { height: 320px; position: relative; border-bottom: 6px solid var(--gold); border-radius: 0 0 50px 50px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .profile-side { position: absolute; bottom: -50px; left: 40px; display: flex; align-items: flex-end; gap: 25px; z-index: 50; }
+        .p-img-main { width: 160px; height: 160px; border-radius: 40px; border: 6px solid white; box-shadow: 0 15px 45px rgba(0,0,0,0.15); object-fit: cover; background: #fff; transition: 0.5s ease; }
+        .p-img-main:hover { transform: scale(1.02); }
+
+        .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; transform: translateY(-2px); }
+        
+        .product-card { 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 1px solid #f0f0f0; 
+            border-radius: 30px; 
+            background: #fff; 
+            overflow: hidden; 
+        }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.3); }
+        
+        .social-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border-radius: 12px; color: white; font-size: 16px; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+        .social-btn:hover { background: var(--gold); transform: translateY(-5px) rotate(8deg); border-color: transparent; }
 
         /* FOOTER ANIMATION */
-        @keyframes scrollCreators {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-scroll {
-            display: flex;
-            width: max-content;
-            animation: scrollCreators 40s linear infinite;
-        }
-        .footer-creator-card {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 50px;
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            transition: 0.3s;
-        }
-        .footer-creator-card:hover {
-            border-color: #d4af37;
-            background: rgba(212, 175, 55, 0.05);
-        }
-        .footer-creator-card img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1.5px solid #d4af37;
-            object-fit: cover;
-        }
-        .footer-creator-card span {
-            font-size: 11px;
-            font-weight: 700;
-            color: #ddd;
-            letter-spacing: 0.5px;
-        }
+        @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-scroll { display: flex; width: max-content; animation: scrollCreators 45s linear infinite; }
+        .footer-creator-card { display: flex; align-items: center; gap: 12px; padding: 8px 20px; background: rgba(255,255,255,0.05); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.1); transition: 0.3s; }
+        .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.1); transform: scale(1.05); }
+
+        .btn-premium { background: var(--gold-gradient); color: black; font-weight: 800; transition: 0.3s; }
+        .btn-premium:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        
+        .glass-input { background: rgba(243, 244, 246, 0.6) !important; backdrop-filter: blur(4px); transition: 0.3s; }
+        .glass-input:focus { background: white !important; border-color: var(--gold) !important; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="pb-20">
 
-    <div id="loading" class="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
-        <h1 class="raj-font text-4xl animate-bounce text-[#d4af37]">SAINIWALAA</h1>
+    <div id="loading" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
+        <h1 class="raj-font text-5xl animate-pulse text-[#d4af37]">SAINIWALAA</h1>
+        <div class="w-12 h-1 bg-gray-100 mt-4 overflow-hidden rounded-full">
+            <div class="w-full h-full bg-[#d4af37] origin-left animate-[line-grow_2s_infinite]"></div>
+        </div>
     </div>
 
     <section id="auth-box" class="min-h-screen flex items-center justify-center p-6 hidden">
-        <div class="w-full max-md bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100 text-center">
-            <h2 class="raj-font text-5xl text-[#d4af37] mb-2">S</h2>
-            <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-10 uppercase font-bold">The Royal Marketplace</p>
-            <input type="email" id="email" placeholder="Email" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
-            <input type="password" id="pass" placeholder="Password" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
-            <button onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-lg active:scale-95 transition">GET ACCESS</button>
+        <div class="w-full max-w-md bg-white p-12 rounded-[50px] shadow-[0_30px_100px_rgba(0,0,0,0.1)] border border-gray-50 text-center">
+            <div class="w-20 h-20 bg-black rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl rotate-3">
+                 <h2 class="raj-font text-5xl text-[#d4af37]">S</h2>
+            </div>
+            <p class="text-[11px] tracking-[0.4em] text-gray-400 mb-10 uppercase font-black">Royal Marketplace Access</p>
+            <input type="email" id="email" placeholder="Email Address" class="w-full p-5 mb-4 glass-input rounded-2xl outline-none border border-transparent">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-5 mb-8 glass-input rounded-2xl outline-none border border-transparent">
+            <button onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-xl active:scale-95 transition-all">ENTER STUDIO</button>
+            <p class="mt-6 text-[10px] text-gray-400">Join the elite creator economy</p>
         </div>
     </section>
 
     <main id="app" class="hidden">
-        <header class="saini-header-container py-6 text-center">
+        <header class="saini-header-container py-8 text-center">
             <div class="header-bg-animate"></div>
-            <h1 class="raj-font text-4xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
-            <p class="tagline-anim uppercase">Premium Influencer Marketplace</p>
+            <h1 class="raj-font text-5xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
+            <p class="tagline-anim uppercase mt-1">Premium Influencer Marketplace</p>
             
-            <div class="flex justify-center gap-8 mt-6 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
-                <button onclick="nav('feed')" id="n-feed" class="pb-1 transition">Trending</button>
-                <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-1 transition">My Studio</button>
-                <button onclick="nav('orders')" id="n-orders" class="pb-1 transition">Orders</button>
-                <button onclick="logout()" class="text-red-400"><i class="fa-solid fa-power-off"></i></button>
+            <div class="flex justify-center gap-10 mt-8 text-[12px] font-extrabold uppercase tracking-tight text-gray-400">
+                <button onclick="nav('feed')" id="n-feed" class="pb-2 transition hover:text-black">Trending</button>
+                <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-2 transition hover:text-black">My Studio</button>
+                <button onclick="nav('orders')" id="n-orders" class="pb-2 transition hover:text-black">Orders</button>
+                <button onclick="logout()" class="text-red-400 hover:scale-125 transition-transform"><i class="fa-solid fa-power-off"></i></button>
             </div>
         </header>
 
         <section id="sec-shop" class="hidden">
-            <div id="banner-container" class="banner-box bg-gray-200">
+            <div id="banner-container" class="banner-box bg-gray-100">
                 <img id="b-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
                 <div id="b-text-container" class="relative z-10 px-10 hidden">
-                    <h2 id="b-text-display" class="raj-font font-bold leading-tight"></h2>
+                    <h2 id="b-text-display" class="raj-font font-bold leading-tight drop-shadow-xl"></h2>
                 </div>
 
                 <div class="profile-side">
                     <div class="relative group">
                         <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
-                        <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden">
-                            <i class="fa-solid fa-camera"></i>
+                        <label class="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-[40px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden transition-all">
+                            <i class="fa-solid fa-camera text-2xl"></i>
                             <input type="file" class="hidden" onchange="upMedia('profile', this)">
                         </label>
                     </div>
-                    <div class="mb-8 text-left">
-                        <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
-                        <div id="u-socials" class="flex gap-2 mt-1"></div>
-                        <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
+                    <div class="mb-10 text-left">
+                        <h2 id="u-name" class="raj-font text-3xl font-bold text-white drop-shadow-lg">Creator Name</h2>
+                        <div id="u-socials" class="flex gap-3 mt-2"></div>
+                        <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-4 bg-white/20 backdrop-blur-xl border border-white/30 text-white px-8 py-2.5 rounded-full text-[11px] font-black hover:bg-white hover:text-black transition-all owner-btn hidden uppercase tracking-wider">Edit Studio</button>
                     </div>
                 </div>
 
-                <label class="absolute top-4 right-4 bg-black/20 p-3 rounded-full text-white cursor-pointer owner-btn hidden">
+                <label class="absolute top-6 right-6 bg-black/30 backdrop-blur-md p-4 rounded-full text-white cursor-pointer owner-btn hidden hover:bg-[#d4af37] transition-all">
                     <i class="fa-solid fa-panorama"></i>
                     <input type="file" class="hidden" onchange="upMedia('banner', this)">
                 </label>
             </div>
 
-            <div class="mt-16 px-6 max-w-4xl mx-auto">
-                <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
+            <div class="mt-20 px-6 max-w-5xl mx-auto">
+                <div id="u-bio" class="text-center p-8 bg-white rounded-[40px] border border-gray-100 shadow-sm italic text-gray-500 text-lg">Mhara Swagat hai!</div>
                 
-                <div id="add-prod-box" class="mt-10 hidden">
-                    <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
-                        <h3 class="raj-font text-lg mb-6">List New Creation</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <input id="pn" placeholder="Item Name" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                            <input id="pp" placeholder="Price (₹)" type="number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                            <input id="pl" placeholder="Link (Website/WhatsApp)" class="p-4 bg-gray-50 rounded-2xl border outline-none col-span-2">
+                <div id="add-prod-box" class="mt-12 hidden">
+                    <div class="bg-white p-10 rounded-[50px] border-2 border-dashed border-gray-200 hover:border-[#d4af37]/50 transition-colors">
+                        <h3 class="raj-font text-xl mb-8 flex items-center gap-3">
+                            <span class="w-8 h-8 bg-black text-[#d4af37] flex items-center justify-center rounded-lg text-sm">N</span>
+                            List New Creation
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <input id="pn" placeholder="Item Name" class="p-5 glass-input rounded-3xl border border-transparent outline-none">
+                            <input id="pp" placeholder="Price (₹)" type="number" class="p-5 glass-input rounded-3xl border border-transparent outline-none">
+                            <input id="pl" placeholder="External Link (Optional)" class="p-5 glass-input rounded-3xl border border-transparent outline-none md:col-span-2">
                         </div>
-                        <textarea id="pd" placeholder="Product Story..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 border outline-none"></textarea>
-                        <div class="flex items-center gap-4">
+                        <textarea id="pd" placeholder="Describe your masterpiece..." class="w-full p-6 glass-input rounded-3xl h-32 mb-6 border border-transparent outline-none"></textarea>
+                        <div class="flex flex-col md:flex-row items-center gap-5">
                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
-                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400">CHOOSE PHOTO</label>
-                            <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
+                            <label for="pf" id="pf-label" class="w-full md:flex-1 bg-gray-100 p-5 rounded-3xl text-center cursor-pointer font-black text-gray-400 hover:bg-gray-200 transition-all uppercase text-xs tracking-widest">Select Product Photo</label>
+                            <button onclick="pubProd()" id="pub-btn" class="hidden w-full md:flex-1 btn-premium text-black p-5 rounded-3xl font-black shadow-lg uppercase text-xs tracking-widest">Publish to Shop</button>
                         </div>
                     </div>
                 </div>
-                <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
+                <div id="grid-shop" class="grid grid-cols-2 md:grid-cols-3 gap-8 mt-16 mb-24"></div>
             </div>
         </section>
 
-        <section id="sec-feed" class="hidden px-6 pt-6">
-            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        <section id="sec-feed" class="hidden px-6 pt-10 max-w-7xl mx-auto">
+            <div class="mb-10 flex justify-between items-end">
+                <div>
+                    <h2 class="raj-font text-3xl">Trending Now</h2>
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Handpicked Royal Collections</p>
+                </div>
+                <div class="h-1 w-20 bg-[#d4af37] rounded-full"></div>
+            </div>
+            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-8"></div>
         </section>
 
-        <section id="sec-orders" class="hidden p-6">
-            <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
-            <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
+        <section id="sec-orders" class="hidden p-8 max-w-5xl mx-auto">
+            <div class="flex items-center gap-4 mb-10">
+                <h2 class="raj-font text-4xl">Studio Analytics</h2>
+                <span class="px-4 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black uppercase">Live Updates</span>
+            </div>
+            <div id="list-orders" class="grid gap-6 md:grid-cols-2"></div>
         </section>
 
-        <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
+        <footer class="bg-black text-white pt-20 pb-10 mt-20 overflow-hidden border-t-2 border-[#d4af37]/20">
             <div class="text-center max-w-4xl mx-auto px-6">
-                <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
-                <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
-                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
-                    <br><span class="text-[#d4af37] font-bold mt-2 inline-block">JOIN • CREATE • SELL • GROW</span>
+                <h2 class="raj-font text-4xl text-[#d4af37] mb-6 uppercase tracking-[0.3em]">Creator Network</h2>
+                <p class="text-gray-400 text-sm leading-loose max-w-2xl mx-auto font-medium">
+                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
+                    <br>
+                    <span class="inline-flex items-center gap-4 mt-6">
+                        <span class="h-[1px] w-8 bg-[#d4af37]"></span>
+                        <span class="text-[#d4af37] font-black tracking-[0.5em] text-xs">JOIN • CREATE • SELL • GROW</span>
+                        <span class="h-[1px] w-8 bg-[#d4af37]"></span>
+                    </span>
                 </p>
             </div>
 
-            <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
-                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
+            <div class="mt-16 relative w-full overflow-hidden bg-[#050505] py-10 border-y border-white/5">
+                <div id="creator-scroll" class="flex gap-10 items-center whitespace-nowrap animate-scroll">
                     </div>
             </div>
 
-            <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
-                © 2026 SAINIWALAA ROYAL STUDIOS • BUILT FOR THE CREATOR ECONOMY
+            <div class="text-center mt-12 opacity-40">
+                <p class="text-[10px] uppercase tracking-[0.4em] font-bold">© 2026 SAINIWALAA ROYAL STUDIOS • BUILT FOR THE FUTURE</p>
             </div>
         </footer>
     </main>
 
-    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6 overflow-y-auto">
-        <div class="bg-white w-full max-w-md rounded-[40px] p-8 my-10">
-            <h3 class="raj-font text-xl mb-6 text-center">Edit Identity & Socials</h3>
-            <div class="space-y-4 text-sm">
-                <input id="en" placeholder="Display Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <input id="eb" placeholder="Bio Message" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <div class="grid grid-cols-2 gap-3">
-                    <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <input id="e-yt" placeholder="YouTube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <input id="e-fb" placeholder="FB Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-[50px] p-10 my-10 shadow-2xl">
+            <h3 class="raj-font text-2xl mb-8 text-center text-black">Edit Identity</h3>
+            <div class="space-y-5 text-sm">
+                <input id="en" placeholder="Display Name" class="w-full p-5 glass-input rounded-2xl border border-transparent outline-none">
+                <input id="eb" placeholder="Bio Message" class="w-full p-5 glass-input rounded-2xl border border-transparent outline-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="e-insta" placeholder="Insta User" class="p-5 glass-input rounded-2xl border border-transparent outline-none">
+                    <input id="e-yt" placeholder="YouTube Link" class="p-5 glass-input rounded-2xl border border-transparent outline-none">
+                    <input id="e-fb" placeholder="FB Link" class="p-5 glass-input rounded-2xl border border-transparent outline-none">
+                    <input id="e-wa" placeholder="WhatsApp" class="p-5 glass-input rounded-2xl border border-transparent outline-none">
                 </div>
-                <hr class="my-4">
-                <p class="font-bold text-xs uppercase text-[#d4af37]">Banner Settings</p>
-                <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <option value="img">Mode: Show Image</option>
-                    <option value="text">Mode: Show Text</option>
+                <hr class="my-6 opacity-10">
+                <p class="font-black text-[10px] uppercase text-[#d4af37] tracking-widest">Banner Customization</p>
+                <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-5 glass-input rounded-2xl border border-transparent outline-none font-bold">
+                    <option value="img">Mode: Premium Image</option>
+                    <option value="text">Mode: Luxury Text</option>
                 </select>
-                <div id="banner-text-edit-fields" class="space-y-4 hidden">
-                    <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
-                        <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
+                <div id="banner-text-edit-fields" class="space-y-4 hidden animate-fadeIn">
+                    <input id="eb-text" placeholder="Banner Text" class="w-full p-5 glass-input rounded-2xl border border-transparent outline-none">
+                    <div class="grid grid-cols-2 gap-4 items-center">
+                        <label class="text-[10px] font-bold text-gray-400">BG Color</label>
+                        <label class="text-[10px] font-bold text-gray-400">Text Color</label>
+                        <input type="color" id="eb-bg" class="w-full h-12 cursor-pointer rounded-xl overflow-hidden border-none">
+                        <input type="color" id="eb-color" class="w-full h-12 cursor-pointer rounded-xl overflow-hidden border-none">
                     </div>
-                    <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-5 glass-input rounded-2xl border border-transparent outline-none">
                 </div>
-                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg">SAVE ALL CHANGES</button>
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs py-2">CANCEL</button>
+                <button onclick="saveProfile()" class="w-full btn-premium py-5 rounded-2xl font-black shadow-2xl mt-4">APPLY CHANGES</button>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-[10px] font-black tracking-widest py-2 uppercase">Discard</button>
             </div>
         </div>
     </div>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 flex items-center justify-center p-6">
-        <div class="bg-white w-full max-w-sm rounded-[50px] p-8 text-center shadow-2xl">
-            <h3 class="raj-font text-2xl mb-6 text-[#d4af37]">Finalize Order</h3>
-            <div class="space-y-3 mb-6">
-                <input id="on" placeholder="Your Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <input id="op" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <input id="oc" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
-                    <input type="checkbox" id="collab-check" class="w-5 h-5 accent-red-600">
-                    <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Collaboration contact with influencer?</label>
+    <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/95 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[60px] p-10 text-center shadow-[0_50px_100px_rgba(0,0,0,0.3)]">
+            <div class="w-16 h-1 w-full bg-[#d4af37] mb-8 rounded-full opacity-20"></div>
+            <h3 class="raj-font text-3xl mb-8 text-black">Acquire Piece</h3>
+            <div class="space-y-4 mb-8">
+                <input id="on" placeholder="Full Name" class="w-full p-5 glass-input rounded-3xl border border-transparent outline-none text-center font-bold">
+                <input id="op" placeholder="Phone Number" class="w-full p-5 glass-input rounded-3xl border border-transparent outline-none text-center font-bold">
+                <input id="oc" placeholder="Shipping City" class="w-full p-5 glass-input rounded-3xl border border-transparent outline-none text-center font-bold">
+                <div class="flex items-center gap-4 p-5 bg-black text-white rounded-3xl border border-white/10">
+                    <input type="checkbox" id="collab-check" class="w-5 h-5 accent-[#d4af37]">
+                    <label for="collab-check" class="text-[10px] text-left font-black tracking-tighter leading-tight uppercase">Request direct collaboration/business contact?</label>
                 </div>
             </div>
-            <button onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-lg">PLACE ORDER</button>
-            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs font-bold uppercase">CLOSE</button>
+            <button onclick="confirmPurchase()" class="w-full btn-premium py-6 rounded-[30px] font-black shadow-2xl uppercase tracking-widest text-xs">Confirm Purchase</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-6 text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">Cancel</button>
         </div>
     </div>
 
@@ -283,6 +299,7 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Your existing Firebase Config
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -291,15 +308,16 @@
         window.curU = null; let allProds = [];
 
         onAuthStateChanged(auth, u => {
-            document.getElementById('loading').classList.add('hidden');
-            if(u) { curU = u; document.getElementById('app').classList.remove('hidden'); document.getElementById('auth-box').classList.add('hidden'); initApp(); }
-            else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                if(u) { curU = u; document.getElementById('app').classList.remove('hidden'); document.getElementById('auth-box').classList.add('hidden'); initApp(); }
+                else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+            }, 1000);
         });
 
         function initApp() {
             nav('feed');
             
-            // Creators Scroll Logic for Footer
             const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
                 let html = "";
@@ -309,8 +327,8 @@
                     const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
                     html += `
                     <div class="footer-creator-card">
-                        <img src="${img}">
-                        <span>@${name.toUpperCase()}</span>
+                        <img src="${img}" class="w-10 h-10 rounded-full border-2 border-[#d4af37] object-cover">
+                        <span class="font-black text-[11px] tracking-widest text-gray-300">@${name.toUpperCase()}</span>
                     </div>`;
                 });
                 cBox.innerHTML = html + html; 
@@ -325,19 +343,19 @@
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
                     const o = d.data();
-                    const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse mb-3 inline-block">🚨 COLLAB REQUIRED</div>` : '';
+                    const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full animate-pulse mb-4 inline-block tracking-widest">COLLAB REQUESTED</div>` : '';
                     return `
-                    <div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
+                    <div class="p-8 bg-white rounded-[40px] border border-gray-100 shadow-sm relative overflow-hidden ${o.collab ? 'ring-2 ring-red-100' : ''}">
                         ${collabTag}
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-extrabold text-lg">${o.item}</h4>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''} | ${o.time_str || ''}</span>
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="font-black text-xl">${o.item}</h4>
+                            <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest">${o.date || ''}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <p class="text-gray-500">Buyer: <span class="text-black font-bold">${o.customer}</span></p>
-                            <p class="text-gray-500">Phone: <span class="text-black font-bold">${o.phone}</span></p>
-                            <p class="text-gray-500">City: <span class="text-black font-bold">${o.city || 'N/A'}</span></p>
-                            <p class="text-[#d4af37] font-black">₹${o.price}</p>
+                        <div class="grid grid-cols-2 gap-4 text-[11px]">
+                            <p class="text-gray-400 font-bold uppercase tracking-tighter">Buyer<br><span class="text-black text-sm font-black">${o.customer}</span></p>
+                            <p class="text-gray-400 font-bold uppercase tracking-tighter">Contact<br><span class="text-black text-sm font-black">${o.phone}</span></p>
+                            <p class="text-gray-400 font-bold uppercase tracking-tighter">City<br><span class="text-black text-sm font-black">${o.city || 'N/A'}</span></p>
+                            <p class="text-[#d4af37] font-bold uppercase tracking-tighter">Amount<br><span class="text-black text-xl font-black">₹${o.price}</span></p>
                         </div>
                     </div>`;
                 }).join('');
@@ -347,17 +365,22 @@
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                g.innerHTML += `<div class="product-card">
-                    <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
-                    <div class="p-4">
-                        <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
-                        <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="text-[10px] text-red-600 font-semibold mt-1">${p.desc || ''}</p>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="font-black">₹${p.price}</span>
+                g.innerHTML += `<div class="product-card group">
+                    <div class="relative overflow-hidden aspect-square">
+                        <img src="${p.img}" class="w-full h-full object-cover cursor-pointer transition-transform duration-700 group-hover:scale-110" onclick="viewProfile('${p.creatorId}')">
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-lg">
+                             <p class="text-[8px] font-black text-[#d4af37] uppercase tracking-widest">Official Creation</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer tracking-widest hover:underline" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
+                        <h4 class="font-black text-md truncate text-gray-800">${p.name}</h4>
+                        <p class="text-[10px] text-gray-400 font-bold mt-2 h-8 overflow-hidden line-clamp-2 uppercase tracking-tighter">${p.desc || ''}</p>
+                        <div class="mt-6 flex justify-between items-center">
+                            <span class="font-black text-lg">₹${p.price}</span>
                             <div class="flex gap-2">
-                                ${isOwnerView ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
-                                <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
+                                ${isOwnerView ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2 hover:scale-110 transition"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                                <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[10px] px-6 py-2.5 rounded-2xl font-black uppercase tracking-widest hover:bg-[#d4af37] transition-all shadow-lg">Get It</button>
                             </div>
                         </div>
                     </div>
@@ -375,7 +398,7 @@
             if(s.exists()){
                 const d = s.data();
                 document.getElementById('u-name').innerText = d.name || "Creator";
-                document.getElementById('u-bio').innerText = d.bio || "Welcome!";
+                document.getElementById('u-bio').innerText = d.bio || "Welcome to my Royal Studio!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
 
                 const socDiv = document.getElementById('u-socials');
@@ -398,7 +421,7 @@
                     bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
                 } else {
                     bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
-                    bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
+                    bImg.src = d.banner || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200";
                 }
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
@@ -428,25 +451,27 @@
             location.reload();
         };
 
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); window.scrollTo(0,0); };
         window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
-        window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; }; r.readAsDataURL(i.files[0]); };
+        window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "IMAGE READY!"; document.getElementById('pf-label').classList.add('text-green-500'); }; r.readAsDataURL(i.files[0]); };
         
         window.pubProd = async () => {
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value;
-            if(!n || !p || !window.tempP) return alert("Fill data!");
+            if(!n || !p || !window.tempP) return alert("All fields are required!");
             const u = (await getDoc(doc(db, "users", curU.uid))).data();
             await addDoc(collection(db, "products"), { name: n, price: p, desc: document.getElementById('pd').value, img: window.tempP, link: document.getElementById('pl').value, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
             location.reload();
         };
 
+        window.delP = async (id) => { if(confirm("Discard this creation?")) await deleteDoc(doc(db, "products", id)); };
+
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
         window.confirmPurchase = async () => {
             const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
-            if(!n || !p || !city) return alert("Please fill all fields!");
+            if(!n || !p || !city) return alert("Royal orders require full details!");
             const now = new Date();
             await addDoc(collection(db, "orders"), { 
                 item: window.activeOrder.name, 
@@ -459,7 +484,7 @@
                 date: now.toLocaleDateString(),
                 time_str: now.toLocaleTimeString()
             });
-            alert("Order Sent Successfully!");
+            alert("Order Dispatched Successfully!");
             document.getElementById('order-modal').classList.add('hidden');
         };
     </script>
