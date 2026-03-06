@@ -387,15 +387,22 @@
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
     </script
-footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden relative">
+<footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden relative border-t border-white/10">
     <div class="text-center max-w-4xl mx-auto px-6 mb-8">
-        <h2 class="raj-font text-2xl text-[#d4af37] mb-2">SAINIWALAA Creator Network</h2>
+        <h2 class="raj-font text-3xl saini-footer-logo mb-4 tracking-widest uppercase">
+            SAINIWALAA Creator Network
+        </h2>
+        
+        <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto mb-4">
+            SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers, YouTubers और Digital Sellers अपना खुद का Store बनाकर सीधे Audience को Products बेच सकते हैं।
+        </p>
+
         <p class="text-[#d4af37] text-[10px] font-bold tracking-wider uppercase opacity-80">
             Live Creators Joined : <span id="creator-count">0</span>
         </p>
     </div>
 
-    <div class="relative flex overflow-x-hidden border-y border-white/5 py-4 bg-white/5">
+    <div class="relative flex overflow-x-hidden border-y border-white/5 py-5 bg-[#050505]">
         <div id="creator-scroll" class="flex whitespace-nowrap animate-marquee items-center">
             </div>
         <div id="creator-scroll-dup" class="flex whitespace-nowrap animate-marquee items-center">
@@ -408,71 +415,99 @@ footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden relative">
 </footer>
 
 <style>
-    /* स्मूथ चलने वाला एनिमेशन */
+    /* Heading Shine Animation */
+    .saini-footer-logo {
+        background: linear-gradient(to right, #888 20%, #d4af37 40%, #d4af37 60%, #888 80%);
+        background-size: 200% auto;
+        color: #000;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shine-text 4s linear infinite;
+        font-weight: 900;
+    }
+
+    @keyframes shine-text {
+        to { background-position: 200% center; }
+    }
+
+    /* Infinite Marquee Animation */
     @keyframes marquee {
         0% { transform: translateX(0%); }
         100% { transform: translateX(-100%); }
     }
+    
     .animate-marquee {
-        animation: marquee 25s linear infinite;
+        animation: marquee 30s linear infinite;
     }
+
     .creator-card {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        margin: 0 20px;
-        padding: 5px 12px;
-        background: rgba(255,255,255,0.05);
+        margin: 0 15px;
+        padding: 6px 14px;
+        background: rgba(255,255,255,0.03);
         border-radius: 50px;
-        border: 1px solid rgba(212, 175, 55, 0.2);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        transition: 0.3s;
     }
+
+    .creator-card:hover {
+        border-color: #d4af37;
+        background: rgba(212, 175, 55, 0.05);
+    }
+
     .creator-card img {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1px solid #d4af37;
+        border: 1.5px solid #d4af37;
     }
+
     .creator-card span {
         font-size: 11px;
-        font-weight: 600;
-        color: #eee;
-        letter-spacing: 0.5px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.3px;
     }
 </style>
 
 <script type="module">
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
-    // ध्यान दें: 'db' वही होना चाहिए जो आपके मेन स्क्रिप्ट में डिफाइन है
+    // ध्यान दें: 'db' आपकी मुख्य स्क्रिप्ट से आना चाहिए
     const db = getFirestore(); 
     const creatorBox = document.getElementById("creator-scroll");
     const creatorBoxDup = document.getElementById("creator-scroll-dup");
     const creatorCount = document.getElementById("creator-count");
 
-    // Real-time listener: यह चेक करेगा कि यूजर मौजूद है या नहीं
+    // Firebase Real-time Sync Logic
     onSnapshot(collection(db, "users"), (snap) => {
         let htmlContent = "";
         let count = 0;
 
         snap.forEach((doc) => {
             const d = doc.data();
-            // अगर यूजर का नाम है तभी दिखाएगा (डिलीटेड यूजर यहाँ नहीं आएंगे)
+            // सिर्फ़ उन्हीं को दिखाएगा जिनका डेटा Firebase में मौजूद है
             if (d.name) {
                 const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                const cleanName = d.name.toLowerCase().replace(/\s/g, '');
+                
                 htmlContent += `
-                    <div class="creator-card">
+                    <div class="creator-card cursor-pointer" onclick="viewProfile('${doc.id}')">
                         <img src="${img}" alt="${d.name}">
-                        <span>@${d.name.toLowerCase().replace(/\s/g, '')}</span>
+                        <span>@${cleanName}</span>
                     </div>
                 `;
                 count++;
             }
         });
 
-        // UI अपडेट करें
+        // UI को अपडेट करना
         creatorBox.innerHTML = htmlContent;
-        creatorBoxDup.innerHTML = htmlContent; // लूप को पूरा करने के लिए
+        creatorBoxDup.innerHTML = htmlContent;
         creatorCount.innerText = count;
     });
 </script>
