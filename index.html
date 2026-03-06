@@ -12,110 +12,43 @@
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         
-        .saini-header-container {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            overflow: hidden;
-        }
-
-        .header-bg-animate {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
-            animation: pulse-bg 8s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes pulse-bg {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-        }
-
-        .saini-header {
-            background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-
+        /* Header & Animations */
+        .saini-header-container { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.2); overflow: hidden; }
+        .header-bg-animate { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%); animation: pulse-bg 8s ease-in-out infinite; z-index: -1; }
+        @keyframes pulse-bg { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
+        .saini-header { background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
-
-        .tagline-anim {
-            letter-spacing: 0.3em;
-            font-weight: 800;
-            font-size: 9px;
-            color: #888;
-            position: relative;
-            display: inline-block;
-        }
-
-        .tagline-anim::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: var(--gold);
-            animation: line-grow 2s ease-out forwards;
-        }
-
+        .tagline-anim { letter-spacing: 0.3em; font-weight: 800; font-size: 9px; color: #888; position: relative; display: inline-block; }
+        .tagline-anim::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: var(--gold); animation: line-grow 2s ease-out forwards; }
         @keyframes line-grow { to { width: 100%; } }
 
+        /* UI Components */
         .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
+        
+        /* Product Cards */
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .prod-desc { font-style: italic; color: #b8860b; font-size: 11px; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* Social Buttons */
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
 
-        @keyframes scrollCreators {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-scroll {
-            display: flex;
-            width: max-content;
-            animation: scrollCreators 40s linear infinite;
-        }
-        .footer-creator-card {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 50px;
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            transition: 0.3s;
-        }
-        .footer-creator-card:hover {
-            border-color: #d4af37;
-            background: rgba(212, 175, 55, 0.05);
-        }
-        .footer-creator-card img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1.5px solid #d4af37;
-            object-fit: cover;
-        }
-        .footer-creator-card span {
-            font-size: 11px;
-            font-weight: 700;
-            color: #ddd;
-            letter-spacing: 0.5px;
-        }
+        /* Footer Animation */
+        @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-scroll { display: flex; width: max-content; animation: scrollCreators 40s linear infinite; }
+        .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); transition: 0.3s; }
+        .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
+        .footer-creator-card img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #d4af37; object-fit: cover; }
+        .footer-creator-card span { font-size: 11px; font-weight: 700; color: #ddd; letter-spacing: 0.5px; }
+
+        /* Order Highlighting */
+        .order-highlight { border: 2px solid #ef4444 !important; background: linear-gradient(to bottom right, #fff, #fef2f2) !important; animation: border-pulse 2s infinite; }
+        @keyframes border-pulse { 0%, 100% { border-color: #ef4444; } 50% { border-color: #fca5a5; } }
     </style>
 </head>
 <body class="pb-20">
@@ -154,7 +87,6 @@
                 <div id="b-text-container" class="relative z-10 px-10 hidden">
                     <h2 id="b-text-display" class="raj-font font-bold leading-tight"></h2>
                 </div>
-
                 <div class="profile-side">
                     <div class="relative group">
                         <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
@@ -169,7 +101,6 @@
                         <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
                     </div>
                 </div>
-
                 <label class="absolute top-4 right-4 bg-black/20 p-3 rounded-full text-white cursor-pointer owner-btn hidden">
                     <i class="fa-solid fa-panorama"></i>
                     <input type="file" class="hidden" onchange="upMedia('banner', this)">
@@ -211,18 +142,9 @@
         <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
-                <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
-                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers अपना खुद का रॉयल स्टोर बनाकर सीधे बेच सकते हैं। 
-                    <br><span class="text-[#d4af37] font-bold mt-2 inline-block">JOIN • CREATE • SELL • GROW</span>
-                </p>
-            </div>
-
-            <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
-                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
-            </div>
-
-            <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
-                © 2026 SAINIWALAA ROYAL STUDIOS
+                <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
+                    <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
+                </div>
             </div>
         </footer>
     </main>
@@ -296,16 +218,10 @@
 
         async function initApp() {
             nav('feed');
-
-            // ऑटो-फिल्टर: केवल एक्टिव यूजर्स के प्रोडक्ट्स दिखाएं
             onSnapshot(collection(db, "products"), async s => {
                 const uSnap = await getDocs(collection(db, "users"));
                 const activeIds = uSnap.docs.map(d => d.id);
-                
-                allProds = s.docs
-                    .map(d => ({id:d.id, ...d.data()}))
-                    .filter(p => activeIds.includes(p.creatorId));
-
+                allProds = s.docs.map(d => ({id:d.id, ...d.data()})).filter(p => activeIds.includes(p.creatorId));
                 renderGrid(allProds, 'grid-feed', false);
             });
 
@@ -313,26 +229,23 @@
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
                     const o = d.data();
-                    const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse mb-3 inline-block">🚨 COLLAB REQUIRED</div>` : '';
-                    return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
-                        ${collabTag}
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-extrabold text-lg">${o.item}</h4>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''}</span>
-                        </div>
+                    const isCollab = o.collab === true;
+                    return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${isCollab ? 'order-highlight' : 'border-gray-100'}">
+                        ${isCollab ? '<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full mb-3 inline-block animate-pulse">🚨 COLLAB CONTACT</div>' : ''}
+                        <div class="flex justify-between items-start mb-2"><h4 class="font-extrabold text-lg">${o.item}</h4><span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''}</span></div>
                         <div class="grid grid-cols-2 gap-2 text-xs">
                             <p class="text-gray-500">Buyer: <span class="text-black font-bold">${o.customer}</span></p>
                             <p class="text-gray-500">Phone: <span class="text-black font-bold">${o.phone}</span></p>
+                            <p class="text-gray-500">City: <span class="text-black font-bold">${o.city || 'N/A'}</span></p>
                             <p class="text-[#d4af37] font-black">₹${o.price}</p>
                         </div>
                     </div>`;
                 }).join('');
             });
 
-            const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
-                let html = "";
-                snap.forEach(doc => {
+                const cBox = document.getElementById("creator-scroll");
+                let html = ""; snap.forEach(doc => {
                     const d = doc.data();
                     if(d.name) {
                         const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
@@ -353,65 +266,42 @@
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="font-black">₹${p.price}</span>
-                            <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
-                        </div>
+                        <p class="prod-desc">${p.desc || ''}</p>
+                        <div class="mt-4 flex justify-between items-center"><span class="font-black">₹${p.price}</span><button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button></div>
                     </div>
                 </div>`;
             });
         };
 
-        window.deleteProduct = async (pid) => {
-            if(confirm("Are you sure you want to remove this listing?")) {
-                await deleteDoc(doc(db, "products", pid));
-            }
-        };
+        window.deleteProduct = async (pid) => { if(confirm("Are you sure?")) await deleteDoc(doc(db, "products", pid)); };
 
         window.viewProfile = async (uid) => {
             nav('shop');
             const isMe = (uid === curU.uid);
             document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
             document.getElementById('add-prod-box').classList.toggle('hidden', !isMe);
-
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
                 document.getElementById('u-name').innerText = d.name || "Creator";
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
-
-                const socDiv = document.getElementById('u-socials');
-                socDiv.innerHTML = "";
+                const socDiv = document.getElementById('u-socials'); socDiv.innerHTML = "";
                 if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
                 if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
-
-                const bCont = document.getElementById('banner-container');
-                const bImg = document.getElementById('b-img');
-                const bTextCont = document.getElementById('b-text-container');
-                const bTextDisp = document.getElementById('b-text-display');
-
+                const bCont = document.getElementById('banner-container'); const bImg = document.getElementById('b-img');
+                const bTextCont = document.getElementById('b-text-container'); const bTextDisp = document.getElementById('b-text-display');
                 if(d.bannerMode === 'text') {
                     bImg.classList.add('hidden'); bTextCont.classList.remove('hidden');
-                    bCont.style.background = d.bannerBg || '#111';
-                    bTextDisp.innerText = d.bannerText || "Royal Studio";
-                    bTextDisp.style.color = d.bannerColor || '#d4af37';
-                    bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
-                } else {
-                    bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
-                    bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
-                }
+                    bCont.style.background = d.bannerBg || '#111'; bTextDisp.innerText = d.bannerText || "Royal Studio";
+                    bTextDisp.style.color = d.bannerColor || '#d4af37'; bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
+                } else { bTextCont.classList.add('hidden'); bImg.classList.remove('hidden'); bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000"; }
             }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
-            });
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => { renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe); });
         };
 
-        window.toggleBannerEdit = () => {
-            const mode = document.getElementById('eb-mode').value;
-            document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text');
-        };
-
+        window.toggleBannerEdit = () => { const mode = document.getElementById('eb-mode').value; document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text'); };
+        
         window.saveProfile = async () => {
             await setDoc(doc(db, "users", curU.uid), { 
                 name: document.getElementById('en').value, bio: document.getElementById('eb').value,
@@ -420,85 +310,59 @@
                 bannerMode: document.getElementById('eb-mode').value, bannerText: document.getElementById('eb-text').value,
                 bannerBg: document.getElementById('eb-bg').value, bannerColor: document.getElementById('eb-color').value,
                 bannerSize: document.getElementById('eb-size').value
-            }, {merge:true});
-            location.reload();
+            }, {merge:true}); location.reload();
         };
 
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { 
-            const el = document.getElementById('sec-'+s);
-            if(el) el.classList.toggle('hidden', s !== t); 
-            const btn = document.getElementById('n-'+s);
-            if(btn) btn.classList.toggle('nav-active', s === t); 
-        }); };
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { const el = document.getElementById('sec-'+s); if(el) el.classList.toggle('hidden', s !== t); const btn = document.getElementById('n-'+s); if(btn) btn.classList.toggle('nav-active', s === t); }); };
         
         window.upMedia = (t, i) => { 
-            const r = new FileReader(); 
-            r.onload = async e => {
-                const img = new Image();
-                img.src = e.target.result;
+            const r = new FileReader(); r.onload = async e => {
+                const img = new Image(); img.src = e.target.result;
                 img.onload = async () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width; canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const comp = canvas.toDataURL('image/jpeg', 0.7);
-                    await setDoc(doc(db, "users", curU.uid), { [t]: comp }, {merge:true}); 
-                    location.reload(); 
+                    await setDoc(doc(db, "users", curU.uid), { [t]: comp }, {merge:true}); location.reload(); 
                 };
-            }; 
-            r.readAsDataURL(i.files[0]); 
+            }; r.readAsDataURL(i.files[0]); 
         };
 
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
         
         window.preProd = (i) => { 
-            const r = new FileReader(); 
-            r.onload = e => { 
-                const img = new Image();
-                img.src = e.target.result;
+            const r = new FileReader(); r.onload = e => { 
+                const img = new Image(); img.src = e.target.result;
                 img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 600; canvas.height = 600;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, 600, 600);
+                    const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 600;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 600, 600);
                     window.tempP = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('pub-btn').classList.remove('hidden'); 
-                    document.getElementById('pf-label').innerText = "PHOTO READY!"; 
+                    document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "PHOTO READY!"; 
                 };
-            }; 
-            if(i.files[0]) r.readAsDataURL(i.files[0]); 
+            }; if(i.files[0]) r.readAsDataURL(i.files[0]); 
         };
         
         window.pubProd = async () => {
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value;
             if(!n || !p || !window.tempP) return alert("Fill all!");
-            const uDoc = await getDoc(doc(db, "users", curU.uid));
-            const u = uDoc.data();
-            await addDoc(collection(db, "products"), { 
-                name: n, price: p, desc: document.getElementById('pd').value, 
-                img: window.tempP, link: document.getElementById('pl').value, 
-                creatorId: curU.uid, creatorName: u?.name || 'Creator', 
-                time: serverTimestamp() 
-            });
+            const uDoc = await getDoc(doc(db, "users", curU.uid)); const u = uDoc.data();
+            await addDoc(collection(db, "products"), { name: n, price: p, desc: document.getElementById('pd').value, img: window.tempP, link: document.getElementById('pl').value, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
             location.reload();
         };
 
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value;
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
             if(!n || !p || !city) return alert("Fill all!");
-            await addDoc(collection(db, "orders"), { 
-                item: window.activeOrder.name, price: window.activeOrder.price,
-                customer: n, phone: p, city: city, creatorId: window.activeOrder.creatorId,
-                date: new Date().toLocaleDateString()
-            });
-            alert("Order Sent!");
-            document.getElementById('order-modal').classList.add('hidden');
+            await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab, creatorId: window.activeOrder.creatorId, date: new Date().toLocaleDateString() });
+            alert("Order Sent!"); document.getElementById('order-modal').classList.add('hidden');
+            if(window.activeOrder.link) {
+                let url = window.activeOrder.link;
+                if(!url.startsWith('http')) url = 'https://' + url;
+                window.open(url, '_blank');
+            }
         };
     </script>
 </body>
