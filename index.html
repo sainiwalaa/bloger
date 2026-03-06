@@ -12,21 +12,37 @@
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
         
-        /* Animations */
+        /* Header & Animations */
         .saini-header-container { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        .header-bg-animate { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%); animation: pulse-bg 8s ease-in-out infinite; z-index: -1; }
+        @keyframes pulse-bg { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
         .saini-header { background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
+        .tagline-anim { letter-spacing: 0.3em; font-weight: 800; font-size: 9px; color: #888; position: relative; display: inline-block; }
         
+        /* UI Components */
+        .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
+        .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
+        .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
+        .hidden { display: none !important; }
+        
+        /* Product Cards */
+        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; position: relative; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .prod-desc { font-style: italic; color: #b8860b; font-size: 11px; line-height: 1.2; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* Social Buttons */
+        .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
+        .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
+
+        /* Footer Animation */
         @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-scroll { display: flex; width: max-content; animation: scrollCreators 40s linear infinite; }
         .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); transition: 0.3s; }
+        .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
         .footer-creator-card img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #d4af37; object-fit: cover; }
-
-        /* UI Helpers */
-        .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
-        .hidden { display: none !important; }
-        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .footer-creator-card span { font-size: 11px; font-weight: 700; color: #ddd; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -47,7 +63,9 @@
 
     <main id="app" class="hidden">
         <header class="saini-header-container py-6 text-center">
+            <div class="header-bg-animate"></div>
             <h1 class="raj-font text-4xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
+            <p class="tagline-anim uppercase">Premium Influencer Marketplace</p>
             <div class="flex justify-center gap-8 mt-6 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
                 <button onclick="nav('feed')" id="n-feed" class="pb-1 transition">Trending</button>
                 <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-1 transition">My Studio</button>
@@ -57,16 +75,53 @@
         </header>
 
         <div class="min-h-screen">
-            <section id="sec-feed" class="hidden px-6 pt-6">
-                <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+            <section id="sec-feed" class="hidden px-6 pt-6"><div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div></section>
+            
+            <section id="sec-shop" class="hidden">
+                <div id="banner-container" class="banner-box bg-gray-200">
+                    <img id="b-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                    <div id="b-text-container" class="relative z-10 px-10 hidden"><h2 id="b-text-display" class="raj-font font-bold"></h2></div>
+                    <div class="profile-side">
+                        <div class="relative group">
+                            <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
+                            <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden">
+                                <i class="fa-solid fa-camera"></i><input type="file" class="hidden" onchange="upMedia('profile', this)">
+                            </label>
+                        </div>
+                        <div class="mb-8 text-left">
+                            <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
+                            <div id="u-socials" class="flex gap-2 mt-1"></div>
+                            <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-16 px-6 max-w-4xl mx-auto">
+                    <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
+                    <div id="add-prod-box" class="mt-10 hidden">
+                        <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
+                             <input id="pn" placeholder="Item Name" class="w-full p-4 mb-2 bg-gray-50 rounded-xl border">
+                             <input id="pp" placeholder="Price (₹)" type="number" class="w-full p-4 mb-2 bg-gray-50 rounded-xl border">
+                             <textarea id="pd" placeholder="Product Story..." class="w-full p-4 bg-gray-50 rounded-xl h-24 mb-4 border"></textarea>
+                             <input type="file" id="pf" onchange="preProd(this)" class="hidden">
+                             <label for="pf" id="pf-label" class="block bg-gray-100 p-4 rounded-xl text-center cursor-pointer font-bold">CHOOSE PHOTO</label>
+                             <button onclick="pubProd()" id="pub-btn" class="hidden w-full mt-4 bg-black text-white p-4 rounded-xl font-bold">PUBLISH</button>
+                        </div>
+                    </div>
+                    <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
+                </div>
             </section>
-            </div>
+
+            <section id="sec-orders" class="hidden p-6">
+                <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
+                <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
+            </section>
+        </div>
 
         <footer class="bg-[#0a0a0a] text-white pt-16 pb-10 mt-20 border-t border-[#d4af37]/30">
             <div class="max-w-6xl mx-auto px-6 text-center">
                 <h2 class="raj-font text-4xl text-[#d4af37] mb-4 tracking-[0.2em] uppercase">SAINIWALAA Creator Network</h2>
                 <p class="max-w-2xl mx-auto text-gray-400 text-sm leading-relaxed mb-8">
-                    SAINIWALAA एक <span class="text-[#d4af37] font-bold">Live Creator Marketplace</span> है जहाँ Influencers, YouTubers और Digital Sellers अपना खुद का Store बनाकर सीधे Audience को Products बेच सकते हैं।
+                    SAINIWALAA एक <span class="text-[#d4af37] font-bold">Live Creator Marketplace</span> है जहाँ Influencers अपना खुद का Store बनाकर सीधे Products बेच सकते हैं।
                 </p>
 
                 <div class="inline-flex items-center gap-3 bg-white/5 px-6 py-2 rounded-full border border-[#d4af37]/20 mb-12">
@@ -80,21 +135,22 @@
                 </div>
 
                 <div class="relative w-full overflow-hidden bg-black/40 py-8 border-y border-white/5 group">
-                    <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
-                        </div>
+                    <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
                 </div>
 
                 <div class="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p class="text-[10px] text-gray-600 uppercase tracking-[0.4em]">© 2026 SAINIWALAA | Luxury Creator Economy</p>
                     <div class="flex gap-6 text-gray-500 text-xs">
-                        <a href="#" class="hover:text-[#d4af37] transition">Privacy</a>
-                        <a href="#" class="hover:text-[#d4af37] transition">Terms</a>
-                        <a href="#" class="hover:text-[#d4af37] transition">Support</a>
+                        <a href="#" class="hover:text-[#d4af37]">Privacy</a>
+                        <a href="#" class="hover:text-[#d4af37]">Terms</a>
+                        <a href="#" class="hover:text-[#d4af37]">Support</a>
                     </div>
                 </div>
             </div>
         </footer>
     </main>
+
+    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6"><div class="bg-white w-full max-w-md rounded-[40px] p-8">...Edit Form...</div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -106,7 +162,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.curU = null;
+        window.curU = null; let allProds = [];
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
@@ -117,37 +173,61 @@
         async function initApp() {
             nav('feed');
             
-            // Real-time Users & Live Count Update
+            // Sync Products
+            onSnapshot(collection(db, "products"), async s => {
+                const uSnap = await getDocs(collection(db, "users"));
+                const activeIds = uSnap.docs.map(d => d.id);
+                allProds = s.docs.map(d => ({id:d.id, ...d.data()})).filter(p => activeIds.includes(p.creatorId));
+                renderGrid(allProds, 'grid-feed', false);
+            });
+
+            // Footer Creator Scroll & Live Count
             onSnapshot(collection(db, "users"), snap => {
                 const cBox = document.getElementById("creator-scroll");
-                const countDisplay = document.getElementById("live-count");
-                
-                // अपडेट लाइव काउंट
-                countDisplay.innerText = snap.size;
-
+                const countBox = document.getElementById("live-count");
                 let html = ""; 
+                let count = 0;
                 snap.forEach(doc => {
                     const d = doc.data();
                     if(d.name) {
+                        count++;
                         const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                        html += `
-                            <div class="footer-creator-card group-hover:pause-scroll" onclick="viewProfile('${doc.id}')" style="cursor:pointer">
-                                <img src="${img}" alt="${d.name}">
-                                <span>@${d.name.toUpperCase()}</span>
-                            </div>`;
+                        html += `<div class="footer-creator-card" onclick="viewProfile('${doc.id}')" style="cursor:pointer"><img src="${img}"><span>@${d.name.toUpperCase()}</span></div>`;
                     }
                 });
-                // स्मूथ स्क्रॉलिंग के लिए डबल कंटेंट
                 cBox.innerHTML = html + html; 
+                countBox.innerText = count;
             });
 
-            // Products list logic...
+            // Orders Listener
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
+                const list = document.getElementById('list-orders');
+                list.innerHTML = s.docs.map(d => {
+                    const o = d.data();
+                    return `<div class="p-4 bg-white rounded-3xl border border-gray-100 mb-2">
+                        <h4 class="font-bold">${o.item}</h4>
+                        <p class="text-xs text-gray-500">Buyer: ${o.customer} | ₹${o.price}</p>
+                    </div>`;
+                }).join('');
+            });
         }
 
-        // Add other window functions (nav, authAction, logout, viewProfile, etc.) here...
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { const el = document.getElementById('sec-'+s); if(el) el.classList.toggle('hidden', s !== t); const btn = document.getElementById('n-'+s); if(btn) btn.classList.toggle('nav-active', s === t); }); };
+        // Window functions for Navigation and Auth
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => {
+            document.getElementById('sec-'+s).classList.toggle('hidden', s !== t);
+            if(document.getElementById('n-'+s)) document.getElementById('n-'+s).classList.toggle('nav-active', s === t);
+        });};
+        window.viewProfile = async (uid) => { /* Profile logic as before */ 
+            nav('shop'); const isMe = (uid === curU.uid);
+            document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
+            const s = await getDoc(doc(db, "users", uid));
+            if(s.exists()){ const d = s.data(); document.getElementById('u-name').innerText = d.name || "Creator"; document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`; }
+        };
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
+        window.renderGrid = (data, cid, isOwnerView) => { 
+            const g = document.getElementById(cid); g.innerHTML = data.map(p => `<div class="product-card"><img src="${p.img}" class="w-full aspect-square object-cover p-2 rounded-[30px]"><div class="p-4"><h4 class="font-bold">${p.name}</h4><p class="text-gold font-black">₹${p.price}</p></div></div>`).join('');
+        };
     </script>
 </body>
 </html>
