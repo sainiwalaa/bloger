@@ -11,48 +11,29 @@
         :root { --gold: #d4af37; --dark: #111; }
         body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
-        
         .saini-header-container { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.2); overflow: hidden; }
         .header-bg-animate { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%); animation: pulse-bg 8s ease-in-out infinite; z-index: -1; }
         @keyframes pulse-bg { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
-        
         .saini-header { background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
-
         .tagline-anim { letter-spacing: 0.3em; font-weight: 800; font-size: 9px; color: #888; position: relative; display: inline-block; }
         .tagline-anim::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: var(--gold); animation: line-grow 2s ease-out forwards; }
         @keyframes line-grow { to { width: 100%; } }
-
         .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
         .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
         .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
-        
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
         .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; position: relative; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
-
         @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-scroll { display: flex; width: max-content; animation: scrollCreators 40s linear infinite; }
         .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); transition: 0.3s; }
         .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
         .footer-creator-card img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #d4af37; object-fit: cover; }
         .footer-creator-card span { font-size: 11px; font-weight: 700; color: #ddd; letter-spacing: 0.5px; }
-
-        /* Description Styling */
-        .prod-desc {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            font-size: 11px;
-            color: #666;
-            line-height: 1.4;
-            margin-top: 4px;
-        }
     </style>
 </head>
 <body class="pb-20">
@@ -148,12 +129,10 @@
         <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
-                <p class="text-gray-400 text-sm"> Join the elite network
-                     SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं।  • <span class="text-[#d4af37]">SAINIWALAA</span></p>
+                <p class="text-gray-400 text-sm">Join the elite network... • <span class="text-[#d4af37]">SAINIWALAA</span></p>
             </div>
             <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6">
-                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
-                    </div>
+                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
             </div>
             <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">© 2026 SAINIWALAA ROYAL STUDIOS</div>
         </footer>
@@ -168,6 +147,8 @@
                 <div class="grid grid-cols-2 gap-3">
                     <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                     <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-yt" placeholder="Youtube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-fb" placeholder="Facebook Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
                 <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <option value="img">Mode: Show Image</option>
@@ -218,36 +199,24 @@
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
-            if(u) {
-                curU = u;
-                document.getElementById('logout-btn').classList.remove('hidden');
-                document.getElementById('login-nav-btn').classList.add('hidden');
-            } else {
-                curU = null;
-                document.getElementById('logout-btn').classList.add('hidden');
-                document.getElementById('login-nav-btn').classList.remove('hidden');
-            }
+            if(u) { curU = u; document.getElementById('logout-btn').classList.remove('hidden'); document.getElementById('login-nav-btn').classList.add('hidden'); }
+            else { curU = null; document.getElementById('logout-btn').classList.add('hidden'); document.getElementById('login-nav-btn').classList.remove('hidden'); }
             initApp();
         });
 
         function initApp() {
             nav('feed');
-            
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
             });
-
             const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
                 let html = "";
                 snap.forEach(doc => {
                     const d = doc.data();
                     const pImg = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                    html += `<div class="footer-creator-card cursor-pointer" onclick="viewProfile('${doc.id}')">
-                                <img src="${pImg}">
-                                <span>@${(d.name || "Creator").toUpperCase()}</span>
-                             </div>`;
+                    html += `<div class="footer-creator-card cursor-pointer" onclick="viewProfile('${doc.id}')"><img src="${pImg}"><span>@${(d.name || "Creator").toUpperCase()}</span></div>`;
                 });
                 cBox.innerHTML = html + html; 
             });
@@ -260,6 +229,7 @@
                         return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm mb-2">
                                     <h4 class="font-extrabold">${o.item}</h4>
                                     <p class="text-xs text-gray-500">${o.customer} | ${o.phone} | ${o.city}</p>
+                                    <p class="text-[9px] text-gray-400 mt-2">ORDERED ON: ${o.date || '--'} AT ${o.time_str || '--'}</p>
                                     ${o.collab ? '<span class="text-[10px] text-red-500 font-bold">COLLAB INQUIRY</span>' : ''}
                                 </div>`;
                     }).join('');
@@ -268,49 +238,27 @@
         }
 
         window.checkAuthAndNav = (page) => {
-            if(!curU) {
-                document.getElementById('auth-box').classList.remove('hidden');
-            } else {
-                if(page === 'shop') viewProfile(curU.uid);
-                else nav(page);
-            }
+            if(!curU) document.getElementById('auth-box').classList.remove('hidden');
+            else { if(page === 'shop') viewProfile(curU.uid); else nav(page); }
         };
 
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                // Modified Card Rendering to show Description
                 g.innerHTML += `<div class="product-card relative">
-                    ${isOwnerView ? `
-                    <button onclick="deleteProd('${p.id}')" class="absolute top-2 right-2 z-20 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg hover:bg-red-700 transition flex items-center justify-center">
-                        <i class="fa-solid fa-trash-can text-xs"></i>
-                    </button>` : ''}
-                    
+                    ${isOwnerView ? `<button onclick="deleteProd('${p.id}')" class="absolute top-2 right-2 z-20 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg hover:bg-red-700 transition flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
                     <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="prod-desc">${p.desc || 'No description available.'}</p>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="font-black">₹${p.price}</span>
-                            <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold uppercase">Get It</button>
-                        </div>
+                        <p class="text-[11px] text-gray-500 italic mt-1 line-clamp-2">${p.desc || ''}</p>
+                        <div class="mt-4 flex justify-between items-center"><span class="font-black">₹${p.price}</span><button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold uppercase">Get It</button></div>
                     </div>
                 </div>`;
             });
         };
 
-        window.deleteProd = async (pid) => {
-            if(confirm("क्या आप इस प्रोडक्ट को हटाना चाहते हैं?")) {
-                try {
-                    await deleteDoc(doc(db, "products", pid));
-                    alert("प्रोडक्ट डिलीट हो गया!");
-                } catch (e) {
-                    console.error("Error deleting document: ", e);
-                    alert("डिलीट करने में समस्या आई।");
-                }
-            }
-        };
+        window.deleteProd = async (pid) => { if(confirm("क्या आप इस प्रोडक्ट को हटाना चाहते हैं?")) { await deleteDoc(doc(db, "products", pid)); alert("डिलीट हो गया!"); } };
 
         window.viewProfile = async (uid) => {
             nav('shop');
@@ -318,7 +266,7 @@
             document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
             document.getElementById('add-prod-box').classList.toggle('hidden', !isMe);
 
-            const s = await getDoc(doc(db, "users", uid));
+            const s = await getDoc(doc(doc(db, "users", uid)));
             if(s.exists()){
                 const d = s.data();
                 document.getElementById('u-name').innerText = d.name || "Creator";
@@ -328,79 +276,52 @@
                 const socDiv = document.getElementById('u-socials'); socDiv.innerHTML = "";
                 if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
                 if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
+                if(d.yt) socDiv.innerHTML += `<a href="${d.yt}" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i></a>`;
+                if(d.fb) socDiv.innerHTML += `<a href="${d.fb}" target="_blank" class="social-btn"><i class="fa-brands fa-facebook"></i></a>`;
                 
                 const bCont = document.getElementById('banner-container');
                 const bImg = document.getElementById('b-img');
                 const bTextDisp = document.getElementById('b-text-display');
                 const bTextCont = document.getElementById('b-text-container');
-
-                if(d.bannerMode === 'text') {
-                    bImg.classList.add('hidden'); bTextCont.classList.remove('hidden');
-                    bCont.style.background = d.bannerBg || '#111';
-                    bTextDisp.innerText = d.bannerText || "Royal Studio";
-                    bTextDisp.style.color = d.bannerColor || '#d4af37';
-                } else {
-                    bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
-                    bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
-                }
+                if(d.bannerMode === 'text') { bImg.classList.add('hidden'); bTextCont.classList.remove('hidden'); bCont.style.background = d.bannerBg || '#111'; bTextDisp.innerText = d.bannerText || "Royal Studio"; bTextDisp.style.color = d.bannerColor || '#d4af37'; }
+                else { bTextCont.classList.add('hidden'); bImg.classList.remove('hidden'); bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000"; }
             }
-            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
-            });
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => { renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe); });
         };
 
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { 
-            const el = document.getElementById('sec-'+s);
-            if(el) el.classList.toggle('hidden', s !== t); 
-            const nEl = document.getElementById('n-'+s);
-            if(nEl) nEl.classList.toggle('nav-active', s === t); 
-        }); };
-
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { const el = document.getElementById('sec-'+s); if(el) el.classList.toggle('hidden', s !== t); const nEl = document.getElementById('n-'+s); if(nEl) nEl.classList.toggle('nav-active', s === t); }); };
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).then(()=>location.reload()).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).then(()=>location.reload())); };
         window.logout = () => signOut(auth).then(() => location.reload());
         
         window.saveProfile = async () => { 
             await setDoc(doc(db, "users", curU.uid), { 
-                name: document.getElementById('en').value, 
-                bio: document.getElementById('eb').value, 
-                insta: document.getElementById('e-insta').value, 
-                wa: document.getElementById('e-wa').value, 
-                bannerMode: document.getElementById('eb-mode').value, 
-                bannerText: document.getElementById('eb-text').value, 
-                bannerBg: document.getElementById('eb-bg').value, 
-                bannerColor: document.getElementById('eb-color').value 
+                name: document.getElementById('en').value, bio: document.getElementById('eb').value, 
+                insta: document.getElementById('e-insta').value, wa: document.getElementById('e-wa').value, 
+                yt: document.getElementById('e-yt').value, fb: document.getElementById('e-fb').value, 
+                bannerMode: document.getElementById('eb-mode').value, bannerText: document.getElementById('eb-text').value, 
+                bannerBg: document.getElementById('eb-bg').value, bannerColor: document.getElementById('eb-color').value 
             }, {merge:true}); 
             location.reload(); 
         };
 
         window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
         window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; }; r.readAsDataURL(i.files[0]); };
-        
         window.pubProd = async () => {
-            const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value;
-            if(!n || !p || !window.tempP) return alert("Fill all details!");
+            const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value, d = document.getElementById('pd').value;
+            if(!n || !p || !window.tempP) return alert("Fill details!");
             const u = (await getDoc(doc(db, "users", curU.uid))).data();
-            await addDoc(collection(db, "products"), { 
-                name: n, 
-                price: p, 
-                desc: document.getElementById('pd').value, // Saving Description
-                img: window.tempP, 
-                link: l, 
-                creatorId: curU.uid, 
-                creatorName: u?.name || 'Creator', 
-                time: serverTimestamp() 
-            });
+            await addDoc(collection(db, "products"), { name: n, price: p, desc: d, img: window.tempP, link: l, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
             location.reload();
         };
 
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
         window.confirmPurchase = async () => {
             const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
-            if(!n || !p || !city) return alert("Fill all fields!");
+            if(!n || !p || !city) return alert("Fill fields!");
             const now = new Date();
             await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab, creatorId: window.activeOrder.creatorId, date: now.toLocaleDateString(), time_str: now.toLocaleTimeString() });
             if(window.activeOrder.link) window.open(window.activeOrder.link, '_blank');
-            else alert("Order Recorded Successfully!");
+            else alert("Order Recorded!");
             document.getElementById('order-modal').classList.add('hidden');
         };
         window.toggleBannerEdit = () => { document.getElementById('banner-text-edit-fields').classList.toggle('hidden', document.getElementById('eb-mode').value !== 'text'); };
