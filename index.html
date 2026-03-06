@@ -51,7 +51,7 @@
         @keyframes border-pulse { 0%, 100% { border-color: #ef4444; } 50% { border-color: #fca5a5; } }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
     <div id="loading" class="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
         <h1 class="raj-font text-4xl animate-bounce text-[#d4af37]">SAINIWALAA</h1>
@@ -81,70 +81,72 @@
             </div>
         </header>
 
-        <section id="sec-shop" class="hidden">
-            <div id="banner-container" class="banner-box bg-gray-200">
-                <img id="b-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                <div id="b-text-container" class="relative z-10 px-10 hidden">
-                    <h2 id="b-text-display" class="raj-font font-bold leading-tight"></h2>
-                </div>
-                <div class="profile-side">
-                    <div class="relative group">
-                        <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
-                        <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden">
-                            <i class="fa-solid fa-camera"></i>
-                            <input type="file" class="hidden" onchange="upMedia('profile', this)">
-                        </label>
+        <div class="min-h-screen">
+            <section id="sec-shop" class="hidden">
+                <div id="banner-container" class="banner-box bg-gray-200">
+                    <img id="b-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                    <div id="b-text-container" class="relative z-10 px-10 hidden">
+                        <h2 id="b-text-display" class="raj-font font-bold leading-tight"></h2>
                     </div>
-                    <div class="mb-8 text-left">
-                        <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
-                        <div id="u-socials" class="flex gap-2 mt-1"></div>
-                        <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
-                    </div>
-                </div>
-                <label class="absolute top-4 right-4 bg-black/20 p-3 rounded-full text-white cursor-pointer owner-btn hidden">
-                    <i class="fa-solid fa-panorama"></i>
-                    <input type="file" class="hidden" onchange="upMedia('banner', this)">
-                </label>
-            </div>
-
-            <div class="mt-16 px-6 max-w-4xl mx-auto">
-                <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
-                
-                <div id="add-prod-box" class="mt-10 hidden">
-                    <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
-                        <h3 class="raj-font text-lg mb-6">List New Creation</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <input id="pn" placeholder="Item Name" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                            <input id="pp" placeholder="Price (₹)" type="number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
-                            <input id="pl" placeholder="Link (Website/WhatsApp)" class="p-4 bg-gray-50 rounded-2xl border outline-none col-span-2">
+                    <div class="profile-side">
+                        <div class="relative group">
+                            <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
+                            <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" class="hidden" onchange="upMedia('profile', this)">
+                            </label>
                         </div>
-                        <textarea id="pd" placeholder="Product Story..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 border outline-none"></textarea>
-                        <div class="flex items-center gap-4">
-                            <input type="file" id="pf" onchange="preProd(this)" class="hidden">
-                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400">CHOOSE PHOTO</label>
-                            <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
+                        <div class="mb-8 text-left">
+                            <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
+                            <div id="u-socials" class="flex gap-2 mt-1"></div>
+                            <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
                         </div>
                     </div>
+                    <label class="absolute top-4 right-4 bg-black/20 p-3 rounded-full text-white cursor-pointer owner-btn hidden">
+                        <i class="fa-solid fa-panorama"></i>
+                        <input type="file" class="hidden" onchange="upMedia('banner', this)">
+                    </label>
                 </div>
-                <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
-            </div>
-        </section>
 
-        <section id="sec-feed" class="hidden px-6 pt-6">
-            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
-        </section>
+                <div class="mt-16 px-6 max-w-4xl mx-auto">
+                    <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
+                    <div id="add-prod-box" class="mt-10 hidden">
+                        <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
+                            <h3 class="raj-font text-lg mb-6">List New Creation</h3>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <input id="pn" placeholder="Item Name" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                                <input id="pp" placeholder="Price (₹)" type="number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                                <input id="pl" placeholder="Link (Website/WhatsApp)" class="p-4 bg-gray-50 rounded-2xl border outline-none col-span-2">
+                            </div>
+                            <textarea id="pd" placeholder="Product Story..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 border outline-none"></textarea>
+                            <div class="flex items-center gap-4">
+                                <input type="file" id="pf" onchange="preProd(this)" class="hidden">
+                                <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400">CHOOSE PHOTO</label>
+                                <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
+                </div>
+            </section>
 
-        <section id="sec-orders" class="hidden p-6">
-            <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
-            <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
-        </section>
+            <section id="sec-feed" class="hidden px-6 pt-6">
+                <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+            </section>
 
-        <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden border-t border-[#d4af37]/30">
+            <section id="sec-orders" class="hidden p-6">
+                <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
+                <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
+            </section>
+        </div>
+
+        <footer class="bg-black text-white pt-10 pb-10 mt-20 overflow-hidden border-t border-[#d4af37]/30">
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
                 <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
                     <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
                 </div>
+                <p class="mt-8 text-[10px] text-gray-600 uppercase tracking-widest">© 2026 SAINIWALAA | Luxury Creator Economy</p>
             </div>
         </footer>
     </main>
