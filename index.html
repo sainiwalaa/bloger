@@ -35,9 +35,13 @@
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
 
+        /* New Footer Scrolling Styles */
         @keyframes scrollCreators { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-scroll { display: flex; width: max-content; animation: scrollCreators 40s linear infinite; }
-        .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); }
+        .footer-creator-card { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: rgba(255,255,255,0.03); border-radius: 50px; border: 1px solid rgba(212, 175, 55, 0.15); transition: 0.3s; }
+        .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
+        .footer-creator-card img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #d4af37; object-fit: cover; }
+        .footer-creator-card span { font-size: 11px; font-weight: 700; color: #ddd; letter-spacing: 0.5px; }
     </style>
 </head>
 <body class="pb-20">
@@ -136,7 +140,8 @@
                 <p class="text-gray-400 text-sm">Join the elite network • <span class="text-[#d4af37]">SAINIWALAA</span></p>
             </div>
             <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6">
-                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
+                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
+                    </div>
             </div>
             <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">© 2026 SAINIWALAA ROYAL STUDIOS</div>
         </footer>
@@ -160,7 +165,7 @@
                     <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <div class="grid grid-cols-2 gap-4">
                         <input type="color" id="eb-bg" class="w-full h-10">
-                        <input type="color" id="eb-color" class="w-full h-10">
+                        <input type="color" id="eb-color" class="w-full h-10" value="#d4af37">
                     </div>
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold">SAVE ALL</button>
@@ -199,7 +204,6 @@
         window.curU = null; 
         let allProds = [];
 
-        // Auth Logic - Always loads App, but checks User
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
             if(u) {
@@ -216,28 +220,40 @@
 
         function initApp() {
             nav('feed');
-            // Public Feed Sync
+            
+            // Sync Public Products Feed
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
             });
-            // Public Creator Scroll
+
+            // Footer Creator Scroll Logic
             const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
                 let html = "";
                 snap.forEach(doc => {
                     const d = doc.data();
-                    html += `<div class="footer-creator-card"><img src="${d.profile || 'https://api.dicebear.com/7.x/avataaars/svg?seed='+doc.id}"><span>@${(d.name || "Creator").toUpperCase()}</span></div>`;
+                    const pImg = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                    html += `<div class="footer-creator-card cursor-pointer" onclick="viewProfile('${doc.id}')">
+                                <img src="${pImg}">
+                                <span>@${(d.name || "Creator").toUpperCase()}</span>
+                             </div>`;
                 });
+                // Duplicate html for seamless infinite loop
                 cBox.innerHTML = html + html; 
             });
-            // Private Orders Sync (only if logged in)
+
+            // Sync Orders for logged in creator
             if(curU) {
                 onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                     const list = document.getElementById('list-orders');
                     list.innerHTML = s.docs.map(d => {
                         const o = d.data();
-                        return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm mb-2"><h4 class="font-extrabold">${o.item}</h4><p class="text-xs text-gray-500">${o.customer} | ${o.phone}</p></div>`;
+                        return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm mb-2">
+                                    <h4 class="font-extrabold">${o.item}</h4>
+                                    <p class="text-xs text-gray-500">${o.customer} | ${o.phone} | ${o.city}</p>
+                                    ${o.collab ? '<span class="text-[10px] text-red-500 font-bold">COLLAB INQUIRY</span>' : ''}
+                                </div>`;
                     }).join('');
                 });
             }
@@ -296,7 +312,6 @@
                     bCont.style.background = d.bannerBg || '#111';
                     bTextDisp.innerText = d.bannerText || "Royal Studio";
                     bTextDisp.style.color = d.bannerColor || '#d4af37';
-                    bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
                 } else {
                     bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
                     bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
@@ -336,7 +351,7 @@
         
         window.pubProd = async () => {
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value;
-            if(!n || !p || !window.tempP) return alert("Fill data!");
+            if(!n || !p || !window.tempP) return alert("Fill all details!");
             const u = (await getDoc(doc(db, "users", curU.uid))).data();
             await addDoc(collection(db, "products"), { name: n, price: p, desc: document.getElementById('pd').value, img: window.tempP, link: l, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
             location.reload();
@@ -345,11 +360,11 @@
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
         window.confirmPurchase = async () => {
             const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
-            if(!n || !p || !city) return alert("Fill fields!");
+            if(!n || !p || !city) return alert("Fill all fields!");
             const now = new Date();
             await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab, creatorId: window.activeOrder.creatorId, date: now.toLocaleDateString(), time_str: now.toLocaleTimeString() });
             if(window.activeOrder.link) window.open(window.activeOrder.link, '_blank');
-            else alert("Order Recorded!");
+            else alert("Order Recorded Successfully!");
             document.getElementById('order-modal').classList.add('hidden');
         };
         window.toggleBannerEdit = () => { document.getElementById('banner-text-edit-fields').classList.toggle('hidden', document.getElementById('eb-mode').value !== 'text'); };
