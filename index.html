@@ -212,7 +212,7 @@
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
                 <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
-                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
+                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers अपना खुद का रॉयल स्टोर बनाकर सीधे बेच सकते हैं। 
                     <br><span class="text-[#d4af37] font-bold mt-2 inline-block">JOIN • CREATE • SELL • GROW</span>
                 </p>
             </div>
@@ -222,7 +222,7 @@
             </div>
 
             <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
-                © 2026 SAINIWALAA ROYAL STUDIOS • BUILT FOR THE CREATOR ECONOMY
+                © 2026 SAINIWALAA ROYAL STUDIOS
             </div>
         </footer>
     </main>
@@ -279,7 +279,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyCyof00QTv4HOu1B_xR72adrpB2a9GLmuk", authDomain: "social-blog-93d38.firebaseapp.com", projectId: "social-blog-93d38", storageBucket: "social-blog-93d38.appspot.com", appId: "1:78643219054:web:dprl2lyih" };
         const app = initializeApp(firebaseConfig);
@@ -294,10 +294,18 @@
             else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
         });
 
-        function initApp() {
+        async function initApp() {
             nav('feed');
-            onSnapshot(collection(db, "products"), s => {
-                allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
+
+            // ऑटो-फिल्टर: केवल एक्टिव यूजर्स के प्रोडक्ट्स दिखाएं
+            onSnapshot(collection(db, "products"), async s => {
+                const uSnap = await getDocs(collection(db, "users"));
+                const activeIds = uSnap.docs.map(d => d.id);
+                
+                allProds = s.docs
+                    .map(d => ({id:d.id, ...d.data()}))
+                    .filter(p => activeIds.includes(p.creatorId));
+
                 renderGrid(allProds, 'grid-feed', false);
             });
 
@@ -310,12 +318,11 @@
                         ${collabTag}
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-extrabold text-lg">${o.item}</h4>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''} | ${o.time_str || ''}</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-xs">
                             <p class="text-gray-500">Buyer: <span class="text-black font-bold">${o.customer}</span></p>
                             <p class="text-gray-500">Phone: <span class="text-black font-bold">${o.phone}</span></p>
-                            <p class="text-gray-500">City: <span class="text-black font-bold">${o.city || 'N/A'}</span></p>
                             <p class="text-[#d4af37] font-black">₹${o.price}</p>
                         </div>
                     </div>`;
@@ -327,9 +334,10 @@
                 let html = "";
                 snap.forEach(doc => {
                     const d = doc.data();
-                    const name = d.name || "Creator";
-                    const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                    html += `<div class="footer-creator-card"><img src="${img}"><span>@${name.toUpperCase()}</span></div>`;
+                    if(d.name) {
+                        const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                        html += `<div class="footer-creator-card" onclick="viewProfile('${doc.id}')" style="cursor:pointer"><img src="${img}"><span>@${d.name.toUpperCase()}</span></div>`;
+                    }
                 });
                 cBox.innerHTML = html + html; 
             });
@@ -345,7 +353,6 @@
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="text-[10px] text-red-600 font-semibold mt-1">${p.desc || ''}</p>
                         <div class="mt-4 flex justify-between items-center">
                             <span class="font-black">₹${p.price}</span>
                             <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
@@ -377,8 +384,6 @@
                 const socDiv = document.getElementById('u-socials');
                 socDiv.innerHTML = "";
                 if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
-                if(d.yt) socDiv.innerHTML += `<a href="${d.yt}" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i></a>`;
-                if(d.fb) socDiv.innerHTML += `<a href="${d.fb}" target="_blank" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>`;
                 if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
 
                 const bCont = document.getElementById('banner-container');
@@ -419,9 +424,13 @@
             location.reload();
         };
 
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { 
+            const el = document.getElementById('sec-'+s);
+            if(el) el.classList.toggle('hidden', s !== t); 
+            const btn = document.getElementById('n-'+s);
+            if(btn) btn.classList.toggle('nav-active', s === t); 
+        }); };
         
-        // --- प्रोफाइल और बैनर अपलोड के लिए भी कंप्रेशन (ताकि वहां भी एरर न आए) ---
         window.upMedia = (t, i) => { 
             const r = new FileReader(); 
             r.onload = async e => {
@@ -435,8 +444,8 @@
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const compressedData = canvas.toDataURL('image/jpeg', 0.7);
-                    await setDoc(doc(db, "users", curU.uid), { [t]: compressedData }, {merge:true}); 
+                    const comp = canvas.toDataURL('image/jpeg', 0.7);
+                    await setDoc(doc(db, "users", curU.uid), { [t]: comp }, {merge:true}); 
                     location.reload(); 
                 };
             }; 
@@ -446,7 +455,6 @@
         window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
         
-        // --- प्रोडक्ट पब्लिश के लिए इमेज कंप्रेशन ---
         window.preProd = (i) => { 
             const r = new FileReader(); 
             r.onload = e => { 
@@ -454,17 +462,12 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
+                    canvas.width = 600; canvas.height = 600;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    window.tempP = canvas.toDataURL('image/jpeg', 0.6); // 60% क्वालिटी ताकि साइज कम रहे
+                    ctx.drawImage(img, 0, 0, 600, 600);
+                    window.tempP = canvas.toDataURL('image/jpeg', 0.6);
                     document.getElementById('pub-btn').classList.remove('hidden'); 
-                    document.getElementById('pf-label').innerText = "READY!"; 
-                    document.getElementById('pf-label').classList.add('text-green-500');
+                    document.getElementById('pf-label').innerText = "PHOTO READY!"; 
                 };
             }; 
             if(i.files[0]) r.readAsDataURL(i.files[0]); 
@@ -472,54 +475,30 @@
         
         window.pubProd = async () => {
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value;
-            if(!n || !p || !window.tempP) return alert("सारी जानकारी भरें!");
-            
-            document.getElementById('pub-btn').innerText = "PUBLISHING...";
-            document.getElementById('pub-btn').disabled = true;
-
-            try {
-                const uDoc = await getDoc(doc(db, "users", curU.uid));
-                const u = uDoc.data();
-                await addDoc(collection(db, "products"), { 
-                    name: n, price: p, 
-                    desc: document.getElementById('pd').value, 
-                    img: window.tempP, 
-                    link: document.getElementById('pl').value, 
-                    creatorId: curU.uid, 
-                    creatorName: u?.name || 'Creator', 
-                    time: serverTimestamp() 
-                });
-                alert("Product Published!");
-                location.reload();
-            } catch(e) { 
-                console.error(e); 
-                alert("Publish Failed! शायद फोटो बहुत बड़ी है।"); 
-                document.getElementById('pub-btn').innerText = "PUBLISH";
-                document.getElementById('pub-btn').disabled = false;
-            }
+            if(!n || !p || !window.tempP) return alert("Fill all!");
+            const uDoc = await getDoc(doc(db, "users", curU.uid));
+            const u = uDoc.data();
+            await addDoc(collection(db, "products"), { 
+                name: n, price: p, desc: document.getElementById('pd').value, 
+                img: window.tempP, link: document.getElementById('pl').value, 
+                creatorId: curU.uid, creatorName: u?.name || 'Creator', 
+                time: serverTimestamp() 
+            });
+            location.reload();
         };
 
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
-            if(!n || !p || !city) return alert("Please fill all fields!");
-            const now = new Date();
-            try {
-                await addDoc(collection(db, "orders"), { 
-                    item: window.activeOrder.name, price: window.activeOrder.price,
-                    customer: n, phone: p, city: city, collab: collab,
-                    creatorId: window.activeOrder.creatorId,
-                    date: now.toLocaleDateString(), time_str: now.toLocaleTimeString()
-                });
-                alert("Order Sent Successfully!");
-                document.getElementById('order-modal').classList.add('hidden');
-                const pLink = window.activeOrder.link;
-                if (pLink && pLink.trim() !== "" && pLink !== "undefined") {
-                    const targetUrl = pLink.startsWith('http') ? pLink : 'https://' + pLink;
-                    window.open(targetUrl, '_blank');
-                }
-            } catch (error) { alert("Order failed."); }
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value;
+            if(!n || !p || !city) return alert("Fill all!");
+            await addDoc(collection(db, "orders"), { 
+                item: window.activeOrder.name, price: window.activeOrder.price,
+                customer: n, phone: p, city: city, creatorId: window.activeOrder.creatorId,
+                date: new Date().toLocaleDateString()
+            });
+            alert("Order Sent!");
+            document.getElementById('order-modal').classList.add('hidden');
         };
     </script>
 </body>
