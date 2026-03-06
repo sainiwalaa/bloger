@@ -80,7 +80,6 @@
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
 
-        /* Delete Button Style */
         .del-btn {
             position: absolute;
             top: 10px;
@@ -146,7 +145,7 @@
     </div>
 
     <section id="auth-box" class="min-h-screen flex items-center justify-center p-6 hidden">
-        <div class="w-full max-md bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100 text-center">
+        <div class="w-full max-w-md bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100 text-center">
             <h2 class="raj-font text-5xl text-[#d4af37] mb-2">S</h2>
             <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-10 uppercase font-bold">The Royal Marketplace</p>
             <input type="email" id="email" placeholder="Email" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
@@ -220,8 +219,9 @@
             </div>
         </section>
 
-        <section id="sec-feed" class="hidden px-6 pt-6">
-            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        <section id="sec-feed" class="hidden px-6 pt-10">
+            <h2 class="raj-font text-2xl text-center mb-10 text-gray-800">🔥 Trending Collections</h2>
+            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto"></div>
         </section>
 
         <section id="sec-orders" class="hidden p-6">
@@ -233,15 +233,13 @@
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-4 uppercase tracking-widest">Creator Network</h2>
                 <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
-                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers और Digital Sellers अपना खुद का रॉयल स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
+                    SAINIWALAA एक प्रीमियम Creator Marketplace है जहाँ Influencers अपना स्टोर बनाकर सीधे अपनी ऑडियंस को प्रोडक्ट्स बेच सकते हैं। 
                     <br><span class="text-[#d4af37] font-bold mt-2 inline-block">JOIN • CREATE • SELL • GROW</span>
                 </p>
             </div>
-
             <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
                 <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
             </div>
-
             <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
                 © 2026 SAINIWALAA ROYAL STUDIOS • BUILT FOR THE CREATOR ECONOMY
             </div>
@@ -261,7 +259,6 @@
                     <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
                 <hr class="my-4">
-                <p class="font-bold text-xs uppercase text-[#d4af37]">Banner Settings</p>
                 <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <option value="img">Mode: Show Image</option>
                     <option value="text">Mode: Show Text</option>
@@ -269,10 +266,9 @@
                 <div id="banner-text-edit-fields" class="space-y-4 hidden">
                     <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
-                        <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
+                        <input type="color" id="eb-bg" class="w-full h-10">
+                        <input type="color" id="eb-color" class="w-full h-10">
                     </div>
-                    <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg">SAVE ALL CHANGES</button>
                 <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs py-2">CANCEL</button>
@@ -287,10 +283,6 @@
                 <input id="on" placeholder="Your Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="op" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
                 <input id="oc" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
-                <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
-                    <input type="checkbox" id="collab-check" class="w-5 h-5 accent-red-600">
-                    <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Collaboration contact with influencer?</label>
-                </div>
             </div>
             <button onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-lg">PLACE ORDER</button>
             <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs font-bold uppercase">CLOSE</button>
@@ -326,17 +318,14 @@
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
                     const o = d.data();
-                    const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse mb-3 inline-block">🚨 COLLAB REQUIRED</div>` : '';
-                    return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
-                        ${collabTag}
+                    return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden border-gray-100">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-extrabold text-lg">${o.item}</h4>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''} | ${o.time_str || ''}</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-xs">
                             <p class="text-gray-500">Buyer: <span class="text-black font-bold">${o.customer}</span></p>
                             <p class="text-gray-500">Phone: <span class="text-black font-bold">${o.phone}</span></p>
-                            <p class="text-gray-500">City: <span class="text-black font-bold">${o.city || 'N/A'}</span></p>
                             <p class="text-[#d4af37] font-black">₹${o.price}</p>
                         </div>
                     </div>`;
@@ -359,7 +348,6 @@
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                // Delete button logic
                 const delIcon = (isOwnerView && p.creatorId === curU.uid) ? 
                     `<div onclick="deleteProduct('${p.id}')" class="del-btn"><i class="fa-solid fa-trash-can"></i></div>` : '';
 
@@ -369,7 +357,6 @@
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <p class="text-[10px] text-red-600 font-semibold mt-1">${p.desc || ''}</p>
                         <div class="mt-4 flex justify-between items-center">
                             <span class="font-black">₹${p.price}</span>
                             <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
@@ -379,15 +366,10 @@
             });
         };
 
-        // NEW DELETE FUNCTION
         window.deleteProduct = async (pid) => {
-            if(confirm("Kya aap is product ko hatana chahte hain?")) {
-                try {
-                    await deleteDoc(doc(db, "products", pid));
-                    alert("Product Successfully Removed!");
-                } catch (e) {
-                    alert("Error deleting product!");
-                }
+            if(confirm("Product hatayein?")) {
+                await deleteDoc(doc(db, "products", pid));
+                alert("Removed!");
             }
         };
 
@@ -403,12 +385,10 @@
                 document.getElementById('u-name').innerText = d.name || "Creator";
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
-
+                
                 const socDiv = document.getElementById('u-socials');
                 socDiv.innerHTML = "";
                 if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
-                if(d.yt) socDiv.innerHTML += `<a href="${d.yt}" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i></a>`;
-                if(d.fb) socDiv.innerHTML += `<a href="${d.fb}" target="_blank" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>`;
                 if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
 
                 const bCont = document.getElementById('banner-container');
@@ -421,7 +401,6 @@
                     bCont.style.background = d.bannerBg || '#111';
                     bTextDisp.innerText = d.bannerText || "Royal Studio";
                     bTextDisp.style.color = d.bannerColor || '#d4af37';
-                    bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
                 } else {
                     bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
                     bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
@@ -430,29 +409,6 @@
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
                 renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
             });
-        };
-
-        // Navigation and Auth functions remain same
-        window.toggleBannerEdit = () => {
-            const mode = document.getElementById('eb-mode').value;
-            document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text');
-        };
-
-        window.saveProfile = async () => {
-            await setDoc(doc(db, "users", curU.uid), { 
-                name: document.getElementById('en').value, 
-                bio: document.getElementById('eb').value,
-                insta: document.getElementById('e-insta').value,
-                yt: document.getElementById('e-yt').value,
-                fb: document.getElementById('e-fb').value,
-                wa: document.getElementById('e-wa').value,
-                bannerMode: document.getElementById('eb-mode').value,
-                bannerText: document.getElementById('eb-text').value,
-                bannerBg: document.getElementById('eb-bg').value,
-                bannerColor: document.getElementById('eb-color').value,
-                bannerSize: document.getElementById('eb-size').value
-            }, {merge:true});
-            location.reload();
         };
 
         window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
@@ -472,39 +428,33 @@
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, 
-                  p = document.getElementById('op').value, 
-                  city = document.getElementById('oc').value, 
-                  collab = document.getElementById('collab-check').checked;
-                  
-            if(!n || !p || !city) return alert("Please fill all fields!");
-            
-            const now = new Date();
-            
-            try {
-                await addDoc(collection(db, "orders"), { 
-                    item: window.activeOrder.name, 
-                    price: window.activeOrder.price,
-                    customer: n,
-                    phone: p,
-                    city: city,
-                    collab: collab,
-                    creatorId: window.activeOrder.creatorId,
-                    date: now.toLocaleDateString(),
-                    time_str: now.toLocaleTimeString()
-                });
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value;
+            if(!n || !p || !city) return alert("Fill all fields!");
+            await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, creatorId: window.activeOrder.creatorId, date: new Date().toLocaleDateString() });
+            alert("Order Placed!");
+            document.getElementById('order-modal').classList.add('hidden');
+            if (window.activeOrder.link) window.open(window.activeOrder.link.startsWith('http') ? window.activeOrder.link : `https://${window.activeOrder.link}`, '_blank');
+        };
+        
+        window.toggleBannerEdit = () => {
+            const mode = document.getElementById('eb-mode').value;
+            document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text');
+        };
 
-                alert("Order Sent Successfully! Redirecting...");
-                document.getElementById('order-modal').classList.add('hidden');
-
-                const productLink = window.activeOrder.link;
-                if (productLink) {
-                    const targetUrl = productLink.startsWith('http') ? productLink : `https://${productLink}`;
-                    window.open(targetUrl, '_blank');
-                }
-            } catch (error) {
-                alert("Something went wrong!");
-            }
+        window.saveProfile = async () => {
+            await setDoc(doc(db, "users", curU.uid), { 
+                name: document.getElementById('en').value, 
+                bio: document.getElementById('eb').value,
+                insta: document.getElementById('e-insta').value,
+                yt: document.getElementById('e-yt').value,
+                fb: document.getElementById('e-fb').value,
+                wa: document.getElementById('e-wa').value,
+                bannerMode: document.getElementById('eb-mode').value,
+                bannerText: document.getElementById('eb-text').value,
+                bannerBg: document.getElementById('eb-bg').value,
+                bannerColor: document.getElementById('eb-color').value
+            }, {merge:true});
+            location.reload();
         };
     </script>
 </body>
