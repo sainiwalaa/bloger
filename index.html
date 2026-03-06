@@ -387,127 +387,140 @@
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
     </script
-<footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden relative border-t border-white/10">
-    <div class="text-center max-w-4xl mx-auto px-6 mb-8">
-        <h2 class="raj-font text-3xl saini-footer-logo mb-4 tracking-widest uppercase">
+<footer class="bg-black text-white pt-16 pb-8 mt-20 overflow-hidden relative border-t border-[#d4af37]/30">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-right from-transparent via-[#d4af37] to-transparent opacity-50"></div>
+
+    <div class="text-center max-w-4xl mx-auto px-6 mb-10 relative z-10">
+        <h2 class="raj-font text-4xl saini-footer-logo mb-4 tracking-[0.2em] uppercase font-black">
             SAINIWALAA Creator Network
         </h2>
         
-        <p class="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto mb-4">
-            SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers, YouTubers और Digital Sellers अपना खुद का Store बनाकर सीधे Audience को Products बेच सकते हैं।
+        <p class="text-gray-300 text-sm md:text-base leading-relaxed max-w-2xl mx-auto mb-6 font-medium opacity-90">
+            SAINIWALAA एक <span class="text-[#d4af37]">Live Creator Marketplace</span> है जहाँ Influencers, YouTubers और Digital Sellers अपना खुद का Store बनाकर सीधे Audience को Products बेच सकते हैं।
         </p>
 
-        <p class="text-[#d4af37] text-[10px] font-bold tracking-wider uppercase opacity-80">
-            Live Creators Joined : <span id="creator-count">0</span>
-        </p>
+        <div class="inline-block px-4 py-1.5 rounded-full border border-[#d4af37]/40 bg-[#d4af37]/5">
+            <p class="text-[#d4af37] text-[11px] font-bold tracking-widest uppercase">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></span>
+                Verified Creators: <span id="creator-count" class="text-white ml-1">0</span>
+            </p>
+        </div>
     </div>
 
-    <div class="relative flex overflow-x-hidden border-y border-white/5 py-5 bg-[#050505]">
+    <div class="relative flex overflow-x-hidden border-y border-white/10 py-6 bg-[#000]">
         <div id="creator-scroll" class="flex whitespace-nowrap animate-marquee items-center">
             </div>
         <div id="creator-scroll-dup" class="flex whitespace-nowrap animate-marquee items-center">
             </div>
     </div>
 
-    <div class="text-center mt-8 text-[10px] text-gray-500 uppercase tracking-widest">
-        © 2026 SAINIWALAA • Creator Commerce Platform
+    <div class="text-center mt-10 text-[10px] text-gray-600 uppercase tracking-[0.4em] font-bold">
+        © 2026 <span class="text-gray-400">SAINIWALAA</span> • LUXURY CREATOR ECONOMY
     </div>
 </footer>
 
 <style>
-    /* Heading Shine Animation */
+    /* Heading Gold Shine Animation */
     .saini-footer-logo {
-        background: linear-gradient(to right, #888 20%, #d4af37 40%, #d4af37 60%, #888 80%);
+        background: linear-gradient(90deg, #555 0%, #d4af37 25%, #fff 50%, #d4af37 75%, #555 100%);
         background-size: 200% auto;
-        color: #000;
-        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: shine-text 4s linear infinite;
-        font-weight: 900;
+        animation: shine-gold 5s linear infinite;
     }
 
-    @keyframes shine-text {
+    @keyframes shine-gold {
         to { background-position: 200% center; }
     }
 
-    /* Infinite Marquee Animation */
-    @keyframes marquee {
+    /* Smooth Infinite Marquee */
+    @keyframes marquee-infinite {
         0% { transform: translateX(0%); }
         100% { transform: translateX(-100%); }
     }
     
     .animate-marquee {
-        animation: marquee 30s linear infinite;
+        animation: marquee-infinite 40s linear infinite;
     }
 
+    /* Luxury Creator Card */
     .creator-card {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         margin: 0 15px;
-        padding: 6px 14px;
-        background: rgba(255,255,255,0.03);
+        padding: 8px 18px;
+        background: #0a0a0a; /* Deep Black Card */
         border-radius: 50px;
-        border: 1px solid rgba(212, 175, 55, 0.15);
-        transition: 0.3s;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        transition: all 0.4s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
     .creator-card:hover {
         border-color: #d4af37;
-        background: rgba(212, 175, 55, 0.05);
+        background: #111;
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
     }
 
     .creator-card img {
-        width: 26px;
-        height: 26px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         object-fit: cover;
-        border: 1.5px solid #d4af37;
+        border: 2px solid #d4af37;
+        padding: 1px;
+        background: black;
     }
 
     .creator-card span {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
-        color: #fff;
-        letter-spacing: 0.3px;
+        color: #efefef;
+        letter-spacing: 0.5px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
 </style>
 
 <script type="module">
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
-    // ध्यान दें: 'db' आपकी मुख्य स्क्रिप्ट से आना चाहिए
     const db = getFirestore(); 
     const creatorBox = document.getElementById("creator-scroll");
     const creatorBoxDup = document.getElementById("creator-scroll-dup");
     const creatorCount = document.getElementById("creator-count");
 
-    // Firebase Real-time Sync Logic
+    // Firebase Logic: सिर्फ वही यूजर आएंगे जिनका 'name' फील्ड खाली नहीं है
     onSnapshot(collection(db, "users"), (snap) => {
         let htmlContent = "";
         let count = 0;
 
         snap.forEach((doc) => {
             const d = doc.data();
-            // सिर्फ़ उन्हीं को दिखाएगा जिनका डेटा Firebase में मौजूद है
-            if (d.name) {
+            
+            // Logic: सुनिश्चित करें कि यूजर का नाम मौजूद है (यानी वो रजिस्टर्ड है)
+            if (d.name && d.name.trim() !== "") {
                 const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                const cleanName = d.name.toLowerCase().replace(/\s/g, '');
-                
+                const userName = d.name.toLowerCase().replace(/\s/g, '');
+
                 htmlContent += `
                     <div class="creator-card cursor-pointer" onclick="viewProfile('${doc.id}')">
                         <img src="${img}" alt="${d.name}">
-                        <span>@${cleanName}</span>
+                        <span>@${userName}</span>
                     </div>
                 `;
                 count++;
             }
         });
 
-        // UI को अपडेट करना
-        creatorBox.innerHTML = htmlContent;
-        creatorBoxDup.innerHTML = htmlContent;
-        creatorCount.innerText = count;
+        // UI Update with Animation Safe Loop
+        if (count > 0) {
+            creatorBox.innerHTML = htmlContent;
+            creatorBoxDup.innerHTML = htmlContent; // Duplicate for seamless loop
+            creatorCount.innerText = count;
+        } else {
+            creatorBox.innerHTML = "<p class='text-gray-600 text-[10px] tracking-widest'>WAITING FOR NETWORK CREATORS...</p>";
+        }
     });
 </script>
