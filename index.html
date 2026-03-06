@@ -80,7 +80,6 @@
         .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
         .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
 
-        /* Footer Specific Animation */
         @keyframes scrollCreators {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
@@ -219,8 +218,7 @@
             </div>
 
             <div class="mt-12 relative w-full overflow-hidden bg-[#0a0a0a] py-6 border-y border-white/5">
-                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll">
-                    </div>
+                <div id="creator-scroll" class="flex gap-8 items-center whitespace-nowrap animate-scroll"></div>
             </div>
 
             <div class="text-center mt-8 text-[10px] text-gray-600 uppercase tracking-[0.2em]">
@@ -298,21 +296,17 @@
 
         function initApp() {
             nav('feed');
-            
-            // Sync Global Products
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
             });
 
-            // Sync Orders
             onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
                 const list = document.getElementById('list-orders');
                 list.innerHTML = s.docs.map(d => {
                     const o = d.data();
                     const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse mb-3 inline-block">🚨 COLLAB REQUIRED</div>` : '';
-                    return `
-                    <div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
+                    return `<div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
                         ${collabTag}
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-extrabold text-lg">${o.item}</h4>
@@ -328,7 +322,6 @@
                 }).join('');
             });
 
-            // Footer Creator Scroll Logic
             const cBox = document.getElementById("creator-scroll");
             onSnapshot(collection(db, "users"), snap => {
                 let html = "";
@@ -336,17 +329,12 @@
                     const d = doc.data();
                     const name = d.name || "Creator";
                     const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                    html += `
-                    <div class="footer-creator-card">
-                        <img src="${img}">
-                        <span>@${name.toUpperCase()}</span>
-                    </div>`;
+                    html += `<div class="footer-creator-card"><img src="${img}"><span>@${name.toUpperCase()}</span></div>`;
                 });
                 cBox.innerHTML = html + html; 
             });
         }
 
-        // Window Globals
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
@@ -358,9 +346,7 @@
                         <p class="text-[10px] text-red-600 font-semibold mt-1">${p.desc || ''}</p>
                         <div class="mt-4 flex justify-between items-center">
                             <span class="font-black">₹${p.price}</span>
-                            <div class="flex gap-2">
-                                <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
-                            </div>
+                            <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
                         </div>
                     </div>
                 </div>`;
@@ -446,23 +432,46 @@
 
         window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
 
+        // UPDATED confirmPurchase Function
         window.confirmPurchase = async () => {
-            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
+            const n = document.getElementById('on').value, 
+                  p = document.getElementById('op').value, 
+                  city = document.getElementById('oc').value, 
+                  collab = document.getElementById('collab-check').checked;
+                  
             if(!n || !p || !city) return alert("Please fill all fields!");
+            
             const now = new Date();
-            await addDoc(collection(db, "orders"), { 
-                item: window.activeOrder.name, 
-                price: window.activeOrder.price,
-                customer: n,
-                phone: p,
-                city: city,
-                collab: collab,
-                creatorId: window.activeOrder.creatorId,
-                date: now.toLocaleDateString(),
-                time_str: now.toLocaleTimeString()
-            });
-            alert("Order Sent Successfully!");
-            document.getElementById('order-modal').classList.add('hidden');
+            
+            try {
+                // 1. ऑर्डर डेटाबेस में सेव करें
+                await addDoc(collection(db, "orders"), { 
+                    item: window.activeOrder.name, 
+                    price: window.activeOrder.price,
+                    customer: n,
+                    phone: p,
+                    city: city,
+                    collab: collab,
+                    creatorId: window.activeOrder.creatorId,
+                    date: now.toLocaleDateString(),
+                    time_str: now.toLocaleTimeString()
+                });
+
+                alert("Order Sent Successfully! Redirecting...");
+                document.getElementById('order-modal').classList.add('hidden');
+
+                // 2. प्रोडक्ट लिंक पर भेजें
+                const productLink = window.activeOrder.link;
+                if (productLink) {
+                    const targetUrl = productLink.startsWith('http') ? productLink : `https://${productLink}`;
+                    window.location.href = targetUrl;
+                } else {
+                    console.log("No link provided for this product.");
+                }
+            } catch (error) {
+                console.error("Error adding order: ", error);
+                alert("Something went wrong!");
+            }
         };
     </script>
 </body>
