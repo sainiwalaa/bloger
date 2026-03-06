@@ -386,120 +386,65 @@
         };
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
-    </script
+    </script</script>
+
 <!-- SAINIWALAA LIVE CREATOR FOOTER -->
 
 <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
+    
+<div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10">
 
-<div class="text-center max-w-4xl mx-auto px-6">
-
-<h2 class="raj-font text-3xl text-[#d4af37] mb-2">
-SAINIWALAA Creator Network
-</h2>
-
-<p class="text-gray-300 text-sm leading-relaxed">
-SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers,
-YouTubers और Digital Sellers अपना खुद का Store बनाकर
-सीधे Audience को Products बेच सकते हैं।
+<div>
+<h2 class="raj-font text-2xl text-[#d4af37]">SAINIWALAA</h2>
+<p class="text-gray-400 text-sm mt-2">
+India's Premium Creator Marketplace where influencers sell products,
+digital items and collaborations.
 </p>
+</div>
 
-<p class="text-[#d4af37] text-xs mt-3 font-bold tracking-wider uppercase">
-Live Creators Joined : <span id="creator-count">0</span>
-</p>
+<div>
+<h3 class="font-bold mb-3 text-[#d4af37]">Quick Links</h3>
+<ul class="text-gray-400 text-sm space-y-2">
+<li><a href="#" onclick="nav('feed')" class="hover:text-white">Trending</a></li>
+<li><a href="#" onclick="viewProfile(curU.uid)" class="hover:text-white">My Studio</a></li>
+<li><a href="#" onclick="nav('orders')" class="hover:text-white">Orders</a></li>
+</ul>
+</div>
+
+<div>
+<h3 class="font-bold mb-3 text-[#d4af37]">Follow</h3>
+
+<div class="flex gap-4 mt-3">
+
+<a href="#" class="social-btn">
+<i class="fa-brands fa-instagram"></i>
+</a>
+
+<a href="#" class="social-btn">
+<i class="fa-brands fa-youtube"></i>
+</a>
+
+<a href="#" class="social-btn">
+<i class="fa-brands fa-facebook"></i>
+</a>
+
+<a href="#" class="social-btn">
+<i class="fa-brands fa-whatsapp"></i>
+</a>
 
 </div>
 
-
-<!-- CREATOR SCROLL -->
-
-<div class="mt-10 overflow-hidden w-full">
-
-<div id="creator-scroll" class="creator-scroll flex gap-10 items-center"></div>
+</div>
 
 </div>
 
-
-<div class="text-center mt-8 text-xs text-gray-500">
-© 2026 SAINIWALAA • Creator Commerce Platform
+<div class="text-center text-gray-500 text-xs mt-8 border-t border-gray-800 pt-4">
+© 2026 SAINIWALAA • Creator Economy Platform
 </div>
 
 </footer>
 
-
-<style>
-
-.creator-scroll{
-white-space:nowrap;
-animation:creatorMove 35s linear infinite;
-}
-
-@keyframes creatorMove{
-
-0%{transform:translateX(100%)}
-100%{transform:translateX(-100%)}
-
-}
-
-.creator-card{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.creator-card img{
-width:36px;
-height:36px;
-border-radius:50%;
-border:2px solid #d4af37;
-object-fit:cover;
-}
-
-.creator-card span{
-font-size:12px;
-font-weight:700;
-color:white;
-}
-
-</style>
-
-
-<script type="module">
-
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const creatorBox = document.getElementById("creator-scroll");
-const creatorCount = document.getElementById("creator-count");
-
-onSnapshot(collection(db,"users"), snap => {
-
-creatorBox.innerHTML="";
-
-creatorCount.innerText = snap.size;
-
-snap.forEach(doc=>{
-
-const d = doc.data();
-
-const name = d.name || "Creator";
-
-const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-
-creatorBox.innerHTML += `
-
-<div class="creator-card">
-
-<img src="${img}">
-
-<span>@${name}</span>
-
-</div>
-
-`;
-
-});
-
-});
-
-</script>       
+</body>
+</html>       
 </body>
 </html>
