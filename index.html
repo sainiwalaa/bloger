@@ -2,107 +2,224 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta name="robots" content="index, follow">
-    <meta name="description" id="meta-desc" content="SAINIWALAA - World's First Luxury Creator Marketplace. Buy exclusive digital products from your favorite Instagram & YouTube stars.">
-    <meta name="keywords" id="meta-keys" content="Sainiwal, Creator Economy, Instagram Shop, YouTube Marketplace, Digital Products India">
-    <meta property="og:title" id="og-title" content="SAINIWALAA | Luxury Creator Economy">
-    <meta property="og:description" id="og-desc" content="Join the elite network of creators.">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAINIWALAA | Luxury Creator Economy</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <style>
         :root { --gold: #d4af37; --dark: #111; }
-        body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; width: 100%; }
+        body { background: #f8f9fa; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .raj-font { font-family: 'Cinzel', serif; }
-        html { scroll-behavior: smooth; }
-        .saini-header-container { position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
-        .banner-box { height: 250px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 30px 30px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
-        @media (min-width: 768px) { .banner-box { height: 400px; border-radius: 0 0 50px 50px; } }
-        .profile-side { position: absolute; bottom: -30px; left: 20px; display: flex; align-items: flex-end; gap: 15px; z-index: 50; }
-        @media (min-width: 768px) { .profile-side { left: 50px; gap: 25px; } }
-        .p-img-main { width: 100px; height: 100px; border-radius: 25px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
-        @media (min-width: 768px) { .p-img-main { width: 160px; height: 160px; border-radius: 40px; } }
+        
+        .saini-header-container {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            overflow: hidden;
+        }
+
+        .header-bg-animate {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: pulse-bg 8s ease-in-out infinite; z-index: -1;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .saini-header {
+            background: linear-gradient(to right, #b8860b, #d4af37, #b8860b, #d4af37);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .tagline-anim {
+            letter-spacing: 0.3em; font-weight: 800; font-size: 9px;
+            color: #888; position: relative; display: inline-block;
+        }
+
+        .tagline-anim::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px;
+            background: var(--gold); animation: line-grow 2s ease-out forwards;
+        }
+
+        @keyframes line-grow { to { width: 100%; } }
+
+        .banner-box { height: 280px; position: relative; border-bottom: 5px solid var(--gold); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .profile-side { position: absolute; bottom: -40px; left: 30px; display: flex; align-items: flex-end; gap: 20px; z-index: 50; }
+        .p-img-main { width: 140px; height: 140px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover; background: #fff; }
         .nav-active { border-bottom: 3px solid var(--gold); color: var(--gold) !important; font-weight: 800; }
         .hidden { display: none !important; }
-        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 20px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+        .product-card { transition: 0.3s; border: 1px solid #eee; border-radius: 24px; background: #fff; overflow: hidden; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .truncate-text { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .creator-scroll { white-space:nowrap; animation:creatorMove 40s linear infinite; display: flex; gap: 30px; }
-        @keyframes creatorMove { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        #loading { backdrop-filter: blur(20px); }
+        .social-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; color: white; font-size: 14px; transition: 0.3s; }
+        .social-btn:hover { background: var(--gold); transform: translateY(-3px); }
+        
+        /* Footer Animation */
+        .creator-scroll{ white-space:nowrap; animation:creatorMove 35s linear infinite; display: flex; gap: 40px; }
+        @keyframes creatorMove{ 0%{transform:translateX(100%)} 100%{transform:translateX(-100%)} }
+        .creator-card{ display:flex; align-items:center; gap:10px; }
+        .creator-card img{ width:36px; height:36px; border-radius:50%; border:2px solid #d4af37; object-fit:cover; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-20">
 
-    <div id="seo-engine" style="display:none;"></div>
-
-    <div id="loading" class="fixed inset-0 bg-white/80 z-[9999] flex flex-col items-center justify-center">
-        <h1 class="raj-font text-5xl animate-pulse text-[#d4af37]">S</h1>
-        <p class="text-[10px] tracking-[0.5em] mt-4 text-gray-400">LOADING LUXURY</p>
+    <div id="loading" class="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+        <h1 class="raj-font text-4xl animate-bounce text-[#d4af37]">SAINIWALAA</h1>
     </div>
 
-    <section id="auth-box" class="min-h-screen flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-md bg-white p-8 md:p-12 rounded-[40px] shadow-2xl border border-gray-100 text-center">
-            <h2 class="raj-font text-6xl text-[#d4af37] mb-2">S</h2>
-            <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-8 uppercase font-bold">The Royal Marketplace</p>
-            <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37] transition-all">
-                <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37] transition-all">
-                <button onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">GET ACCESS</button>
-            </div>
+    <section id="auth-box" class="min-h-screen flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-md bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100 text-center">
+            <h2 class="raj-font text-5xl text-[#d4af37] mb-2">S</h2>
+            <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-10 uppercase font-bold">The Royal Marketplace</p>
+            <input type="email" id="email" placeholder="Email" class="w-full p-4 mb-4 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 mb-6 bg-gray-50 rounded-2xl outline-none border focus:border-[#d4af37]">
+            <button onclick="authAction()" class="w-full bg-black text-white p-5 rounded-2xl font-bold shadow-lg active:scale-95 transition">GET ACCESS</button>
         </div>
     </section>
 
     <main id="app" class="hidden">
-        <header class="saini-header-container pt-8 pb-4 text-center">
-            <h1 class="raj-font text-3xl md:text-5xl font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
-            <nav class="flex justify-center gap-6 md:gap-12 mt-8 px-4 text-[10px] md:text-[12px] font-bold uppercase tracking-widest text-gray-400">
-                <button onclick="nav('feed')" id="n-feed" class="pb-2">Trending</button>
-                <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-2">My Studio</button>
-                <button onclick="nav('orders')" id="n-orders" class="pb-2">Orders</button>
-                <button onclick="logout()" class="text-red-400 pb-2"><i class="fa-solid fa-power-off"></i></button>
-            </nav>
+        <header class="saini-header-container py-6 text-center">
+            <div class="header-bg-animate"></div>
+            <h1 class="raj-font text-4xl saini-header font-black tracking-widest cursor-pointer" onclick="location.reload()">SAINIWALAA</h1>
+            <p class="tagline-anim uppercase">Premium Influencer Marketplace</p>
+            
+            <div class="flex justify-center gap-8 mt-6 text-[11px] font-bold uppercase tracking-tighter text-gray-400">
+                <button onclick="nav('feed')" id="n-feed" class="pb-1 transition">Trending</button>
+                <button onclick="viewProfile(curU.uid)" id="n-shop" class="pb-1 transition">My Studio</button>
+                <button onclick="nav('orders')" id="n-orders" class="pb-1 transition">Orders</button>
+                <button onclick="logout()" class="text-red-400"><i class="fa-solid fa-power-off"></i></button>
+            </div>
         </header>
 
-        <section id="sec-feed" class="hidden max-w-7xl mx-auto px-4 pt-8">
-            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8"></div>
-        </section>
-
         <section id="sec-shop" class="hidden">
-            <div id="banner-container" class="banner-box bg-gray-100">
+            <div id="banner-container" class="banner-box bg-gray-200">
                 <img id="b-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                <div id="b-text-container" class="relative z-10 px-10 hidden">
+                    <h2 id="b-text-display" class="raj-font font-bold leading-tight"></h2>
+                </div>
+
                 <div class="profile-side">
-                    <img id="p-img" src="" class="p-img-main">
-                    <div class="mb-6 text-left">
-                        <h2 id="u-name" class="raj-font text-lg md:text-3xl font-bold text-white drop-shadow-lg">Creator</h2>
-                        <div id="u-socials" class="flex gap-2 mt-2"></div>
+                    <div class="relative group">
+                        <img id="p-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" class="p-img-main">
+                        <label class="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-[30px] opacity-0 group-hover:opacity-100 cursor-pointer owner-btn hidden">
+                            <i class="fa-solid fa-camera"></i>
+                            <input type="file" class="hidden" onchange="upMedia('profile', this)">
+                        </label>
+                    </div>
+                    <div class="mb-8 text-left">
+                        <h2 id="u-name" class="raj-font text-2xl font-bold text-white drop-shadow-md">Creator Name</h2>
+                        <div id="u-socials" class="flex gap-2 mt-1"></div>
+                        <button onclick="document.getElementById('edit-modal').classList.remove('hidden')" class="mt-2 bg-black/50 backdrop-blur-md text-white px-6 py-2 rounded-full text-[10px] font-bold owner-btn hidden">EDIT PROFILE</button>
                     </div>
                 </div>
+
+                <label class="absolute top-4 right-4 bg-black/20 p-3 rounded-full text-white cursor-pointer owner-btn hidden">
+                    <i class="fa-solid fa-panorama"></i>
+                    <input type="file" class="hidden" onchange="upMedia('banner', this)">
+                </label>
             </div>
-            <div class="mt-20 px-4 max-w-5xl mx-auto text-center">
-                <div id="u-bio" class="p-6 bg-white rounded-3xl border italic text-gray-500">Welcome to my studio!</div>
-                <div id="grid-shop" class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-12 mb-20"></div>
+
+            <div class="mt-16 px-6 max-w-4xl mx-auto">
+                <div id="u-bio" class="text-center p-6 bg-white rounded-[30px] border shadow-sm italic text-gray-500">Mhara Swagat hai!</div>
+                
+                <div id="add-prod-box" class="mt-10 hidden">
+                    <div class="bg-white p-8 rounded-[40px] border-2 border-dashed border-gray-200">
+                        <h3 class="raj-font text-lg mb-6">List New Creation</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <input id="pn" placeholder="Item Name" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                            <input id="pp" placeholder="Price (₹)" type="number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                            <input id="pl" placeholder="Link (Website/WhatsApp)" class="p-4 bg-gray-50 rounded-2xl border outline-none col-span-2">
+                        </div>
+                        <textarea id="pd" placeholder="Product Story..." class="w-full p-4 bg-gray-50 rounded-2xl h-24 mb-4 border outline-none"></textarea>
+                        <div class="flex items-center gap-4">
+                            <input type="file" id="pf" onchange="preProd(this)" class="hidden">
+                            <label for="pf" id="pf-label" class="flex-1 bg-gray-100 p-4 rounded-2xl text-center cursor-pointer font-bold text-gray-400">CHOOSE PHOTO</label>
+                            <button onclick="pubProd()" id="pub-btn" class="hidden flex-1 bg-black text-white p-4 rounded-2xl font-bold">PUBLISH</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="grid-shop" class="grid grid-cols-2 gap-4 mt-10 mb-20"></div>
             </div>
         </section>
 
-        <section id="sec-orders" class="hidden max-w-4xl mx-auto p-4 md:p-10">
-            <h2 class="raj-font text-3xl mb-8">Sales Panel</h2>
-            <div id="list-orders" class="grid gap-6"></div>
+        <section id="sec-feed" class="hidden px-6 pt-6">
+            <div id="grid-feed" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
         </section>
 
-        <footer class="bg-black text-white pt-16 pb-10 mt-20">
-            <div class="text-center px-6">
-                <p class="text-[#d4af37] text-[10px] font-bold uppercase">Active Creators: <span id="creator-count">0</span></p>
-                <div id="creator-scroll" class="creator-scroll mt-8"></div>
+        <section id="sec-orders" class="hidden p-6">
+            <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
+            <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
+        </section>
+
+        <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
+            <div class="text-center max-w-4xl mx-auto px-6">
+                <h2 class="raj-font text-3xl text-[#d4af37] mb-2">SAINIWALAA Creator Network</h2>
+                <p class="text-gray-300 text-sm leading-relaxed">SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers अपना Store बनाकर सीधे Audience को बेच सकते हैं।</p>
+                <p class="text-[#d4af37] text-xs mt-3 font-bold tracking-wider uppercase">Live Creators Joined : <span id="creator-count">0</span></p>
             </div>
+            <div class="mt-10 overflow-hidden w-full">
+                <div id="creator-scroll" class="creator-scroll"></div>
+            </div>
+            <div class="text-center mt-8 text-xs text-gray-500">© 2026 SAINIWALAA • Creator Commerce Platform</div>
         </footer>
     </main>
+
+    <div id="edit-modal" class="hidden fixed inset-0 z-[1200] bg-black/80 flex items-center justify-center p-6 overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-[40px] p-8 my-10">
+            <h3 class="raj-font text-xl mb-6 text-center">Edit Identity</h3>
+            <div class="space-y-4 text-sm">
+                <input id="en" placeholder="Display Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                <input id="eb" placeholder="Bio Message" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <input id="e-insta" placeholder="Insta Username" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-yt" placeholder="YouTube Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-fb" placeholder="FB Link" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <input id="e-wa" placeholder="WA Number" class="p-4 bg-gray-50 rounded-2xl border outline-none">
+                </div>
+                <hr class="my-4">
+                <select id="eb-mode" onchange="toggleBannerEdit()" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <option value="img">Mode: Show Image</option>
+                    <option value="text">Mode: Show Text</option>
+                </select>
+                <div id="banner-text-edit-fields" class="space-y-4 hidden">
+                    <input id="eb-text" placeholder="Banner Text" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="color" id="eb-bg" class="w-full h-10 cursor-pointer">
+                        <input type="color" id="eb-color" class="w-full h-10 cursor-pointer">
+                    </div>
+                    <input id="eb-size" type="number" placeholder="Font Size (px)" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                </div>
+                <button onclick="saveProfile()" class="w-full bg-[#d4af37] text-white py-5 rounded-2xl font-bold shadow-lg">SAVE ALL CHANGES</button>
+                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="w-full text-gray-400 text-xs py-2">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-modal" class="hidden fixed inset-0 z-[1100] bg-black/90 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[50px] p-8 text-center shadow-2xl">
+            <h3 class="raj-font text-2xl mb-6 text-[#d4af37]">Finalize Order</h3>
+            <div class="space-y-3 mb-6">
+                <input id="on" placeholder="Your Name" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                <input id="op" placeholder="Mobile Number" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                <input id="oc" placeholder="Your City" class="w-full p-4 bg-gray-50 rounded-2xl border outline-none">
+                <div class="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100">
+                    <input type="checkbox" id="collab-check" class="w-5 h-5 accent-red-600">
+                    <label for="collab-check" class="text-[11px] text-left font-bold text-gray-700 leading-tight">Collaboration contact with influencer?</label>
+                </div>
+            </div>
+            <button onclick="confirmPurchase()" class="w-full bg-black text-white py-5 rounded-3xl font-black shadow-lg">PLACE ORDER</button>
+            <button onclick="document.getElementById('order-modal').classList.add('hidden')" class="mt-4 text-gray-400 text-xs font-bold uppercase">CLOSE</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -114,7 +231,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.curU = null; let allProds = [];
+        window.curU = null; let allProds = []; window.tempP = null;
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
@@ -122,63 +239,154 @@
             else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
         });
 
-        const updateSEO = (d, uid) => {
-            const name = d.name || "Elite Creator";
-            document.title = `${name} | SAINIWALAA`;
-            document.getElementById('meta-desc').content = `${name} Official Marketplace on SAINIWALAA.`;
-            document.getElementById('seo-engine').innerHTML = `<a href="?creator=${uid}">${name}</a><p>${d.insta || ''}</p>`;
-        };
-
         function initApp() {
             nav('feed');
             onSnapshot(collection(db, "products"), s => {
                 allProds = s.docs.map(d => ({id:d.id, ...d.data()}));
                 renderGrid(allProds, 'grid-feed', false);
             });
-            onSnapshot(collection(db, "users"), s => {
-                document.getElementById('creator-count').innerText = s.size;
-                document.getElementById('creator-scroll').innerHTML = s.docs.map(d => `<span class="px-4 font-bold">@${d.data().name || 'Creator'}</span>`).join('');
+
+            onSnapshot(query(collection(db, "orders"), where("creatorId", "==", curU.uid)), s => {
+                const list = document.getElementById('list-orders');
+                list.innerHTML = s.docs.map(d => {
+                    const o = d.data();
+                    const collabTag = o.collab ? `<div class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse mb-3 inline-block">🚨 COLLAB REQUIRED</div>` : '';
+                    return `
+                    <div class="p-6 bg-white rounded-[35px] border-2 shadow-sm relative overflow-hidden ${o.collab ? 'border-red-200 bg-red-50/20' : 'border-gray-100'}">
+                        ${collabTag}
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-extrabold text-lg">${o.item}</h4>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${o.date || ''}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <p class="text-gray-500">Buyer: <span class="text-black font-bold">${o.customer}</span></p>
+                            <p class="text-gray-500">Phone: <span class="text-black font-bold">${o.phone}</span></p>
+                            <p class="text-[#d4af37] font-black">₹${o.price}</p>
+                        </div>
+                    </div>`;
+                }).join('');
+            });
+
+            const creatorBox = document.getElementById("creator-scroll");
+            onSnapshot(collection(db,"users"), snap => {
+                document.getElementById("creator-count").innerText = snap.size;
+                creatorBox.innerHTML="";
+                snap.forEach(doc=>{
+                    const d = doc.data();
+                    const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+                    creatorBox.innerHTML += `<div class="creator-card"><img src="${img}"><span>@${d.name || "Creator"}</span></div>`;
+                });
             });
         }
 
-        window.renderGrid = (data, cid, isMe) => {
+        window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
-                g.innerHTML += `
-                    <div class="product-card">
-                        <img src="${p.img}" class="w-full aspect-square object-cover" onclick="viewProfile('${p.creatorId}')">
-                        <div class="p-4">
-                            <h4 class="font-bold text-sm truncate-text">${p.name}</h4>
-                            <div class="flex justify-between items-center mt-4">
-                                <span class="font-bold">₹${p.price}</span>
-                                <button onclick="window.open('${p.link}')" class="bg-black text-white px-3 py-1 rounded-lg text-xs">GET</button>
+                g.innerHTML += `<div class="product-card">
+                    <img src="${p.img}" class="w-full aspect-square object-cover cursor-pointer" onclick="viewProfile('${p.creatorId}')">
+                    <div class="p-4">
+                        <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
+                        <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="font-black">₹${p.price}</span>
+                            <div class="flex gap-2">
+                                ${isOwnerView ? `<button onclick="delP('${p.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+                                <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold">GET IT</button>
                             </div>
                         </div>
-                    </div>`;
+                    </div>
+                </div>`;
             });
+        };
+
+        window.pubProd = async () => {
+            const btn = document.getElementById('pub-btn');
+            const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value, d = document.getElementById('pd').value;
+            if(!n || !p || !window.tempP) return alert("Fill data!");
+
+            // Double click prevention & Fast UI
+            btn.disabled = true;
+            btn.innerText = "PUBLISHING...";
+            btn.style.opacity = "0.5";
+
+            const u = (await getDoc(doc(db, "users", curU.uid))).data();
+            await addDoc(collection(db, "products"), { 
+                name: n, price: p, desc: d, img: window.tempP, link: l, 
+                creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() 
+            });
+
+            // Fast Reset instead of location.reload()
+            document.getElementById('pn').value = ""; document.getElementById('pp').value = ""; 
+            document.getElementById('pl').value = ""; document.getElementById('pd').value = "";
+            document.getElementById('pf-label').innerText = "CHOOSE PHOTO";
+            window.tempP = null;
+            btn.disabled = false; btn.innerText = "PUBLISH"; btn.style.opacity = "1";
+            btn.classList.add('hidden');
+            alert("Published Successfully!");
         };
 
         window.viewProfile = async (uid) => {
             nav('shop');
+            const isMe = (uid === curU.uid);
+            document.querySelectorAll('.owner-btn').forEach(el => el.classList.toggle('hidden', !isMe));
+            document.getElementById('add-prod-box').classList.toggle('hidden', !isMe);
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
-                updateSEO(d, uid);
                 document.getElementById('u-name').innerText = d.name || "Creator";
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
+                const socDiv = document.getElementById('u-socials'); socDiv.innerHTML = "";
+                if(d.insta) socDiv.innerHTML += `<a href="https://instagram.com/${d.insta}" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>`;
+                if(d.wa) socDiv.innerHTML += `<a href="https://wa.me/${d.wa}" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp"></i></a>`;
+                
+                const bCont = document.getElementById('banner-container');
+                if(d.bannerMode === 'text') {
+                    document.getElementById('b-img').classList.add('hidden');
+                    document.getElementById('b-text-container').classList.remove('hidden');
+                    bCont.style.background = d.bannerBg || '#111';
+                    document.getElementById('b-text-display').innerText = d.bannerText || "Royal Studio";
+                    document.getElementById('b-text-display').style.color = d.bannerColor || '#d4af37';
+                } else {
+                    document.getElementById('b-text-container').classList.add('hidden');
+                    document.getElementById('b-img').classList.remove('hidden');
+                    document.getElementById('b-img').src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
+                }
             }
             onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
-                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', uid === curU.uid);
+                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
             });
         };
 
-        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
-        window.authAction = () => {
-            const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
+        window.confirmPurchase = async () => {
+            const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked;
+            if(!n || !p) return alert("Fill data!");
+            await addDoc(collection(db, "orders"), { 
+                item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab,
+                date: new Date().toLocaleDateString('en-GB'), creatorId: window.activeOrder.creatorId, time: serverTimestamp() 
+            });
+            window.open(window.activeOrder.link, '_blank');
+            document.getElementById('order-modal').classList.add('hidden');
         };
+
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
+        window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
+        window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; }; r.readAsDataURL(i.files[0]); };
+        window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
         window.logout = () => signOut(auth).then(() => location.reload());
+        window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
+        window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
+        window.toggleBannerEdit = () => { document.getElementById('banner-text-edit-fields').classList.toggle('hidden', document.getElementById('eb-mode').value !== 'text'); };
+        window.saveProfile = async () => {
+            await setDoc(doc(db, "users", curU.uid), { 
+                name: document.getElementById('en').value, bio: document.getElementById('eb').value,
+                insta: document.getElementById('e-insta').value, wa: document.getElementById('e-wa').value,
+                bannerMode: document.getElementById('eb-mode').value, bannerText: document.getElementById('eb-text').value,
+                bannerBg: document.getElementById('eb-bg').value, bannerColor: document.getElementById('eb-color').value,
+                bannerSize: document.getElementById('eb-size').value
+            }, {merge:true});
+            location.reload();
+        };
     </script>
 </body>
 </html>
