@@ -41,6 +41,18 @@
         .footer-creator-card:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
         .footer-creator-card img { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #d4af37; object-fit: cover; }
         .footer-creator-card span { font-size: 11px; font-weight: 700; color: #ddd; letter-spacing: 0.5px; }
+
+        /* Description Styling */
+        .prod-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -267,6 +279,7 @@
         window.renderGrid = (data, cid, isOwnerView) => {
             const g = document.getElementById(cid); g.innerHTML = "";
             data.forEach(p => {
+                // Modified Card Rendering to show Description
                 g.innerHTML += `<div class="product-card relative">
                     ${isOwnerView ? `
                     <button onclick="deleteProd('${p.id}')" class="absolute top-2 right-2 z-20 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg hover:bg-red-700 transition flex items-center justify-center">
@@ -277,6 +290,7 @@
                     <div class="p-4">
                         <p class="text-[9px] font-black text-[#d4af37] uppercase mb-1 cursor-pointer" onclick="viewProfile('${p.creatorId}')">@${p.creatorName || 'Creator'}</p>
                         <h4 class="font-bold text-sm truncate">${p.name}</h4>
+                        <p class="prod-desc">${p.desc || 'No description available.'}</p>
                         <div class="mt-4 flex justify-between items-center">
                             <span class="font-black">₹${p.price}</span>
                             <button onclick="orderForm('${p.id}')" class="bg-black text-white text-[9px] px-4 py-2 rounded-xl font-bold uppercase">Get It</button>
@@ -366,7 +380,16 @@
             const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value;
             if(!n || !p || !window.tempP) return alert("Fill all details!");
             const u = (await getDoc(doc(db, "users", curU.uid))).data();
-            await addDoc(collection(db, "products"), { name: n, price: p, desc: document.getElementById('pd').value, img: window.tempP, link: l, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
+            await addDoc(collection(db, "products"), { 
+                name: n, 
+                price: p, 
+                desc: document.getElementById('pd').value, // Saving Description
+                img: window.tempP, 
+                link: l, 
+                creatorId: curU.uid, 
+                creatorName: u?.name || 'Creator', 
+                time: serverTimestamp() 
+            });
             location.reload();
         };
 
