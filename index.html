@@ -386,4 +386,87 @@
                     bTextDisp.style.fontSize = (d.bannerSize || '32') + 'px';
                 } else {
                     bTextCont.classList.add('hidden'); bImg.classList.remove('hidden');
-                    bImg.src = d.banner || "https
+                    bImg.src = d.banner || "https://images.unsplash.com/photo-1557683316-973673baf926?w=1000";
+                }
+            }
+            onSnapshot(query(collection(db, "products"), where("creatorId", "==", uid)), s => {
+                renderGrid(s.docs.map(d => ({id:d.id, ...d.data()})), 'grid-shop', isMe);
+            });
+        };
+
+        window.toggleBannerEdit = () => {
+            const mode = document.getElementById('eb-mode').value;
+            document.getElementById('banner-text-edit-fields').classList.toggle('hidden', mode !== 'text');
+        };
+
+        window.saveProfile = async () => {
+            await setDoc(doc(db, "users", curU.uid), { 
+                name: document.getElementById('en').value, 
+                bio: document.getElementById('eb').value,
+                insta: document.getElementById('e-insta').value,
+                yt: document.getElementById('e-yt').value,
+                fb: document.getElementById('e-fb').value,
+                wa: document.getElementById('e-wa').value,
+                bannerMode: document.getElementById('eb-mode').value,
+                bannerText: document.getElementById('eb-text').value,
+                bannerBg: document.getElementById('eb-bg').value,
+                bannerColor: document.getElementById('eb-color').value,
+                bannerSize: document.getElementById('eb-size').value
+            }, {merge:true});
+            location.reload();
+        };
+
+        window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
+        window.upMedia = (t, i) => { const r = new FileReader(); r.onload = async e => { await setDoc(doc(db, "users", curU.uid), { [t]: e.target.result }, {merge:true}); location.reload(); }; r.readAsDataURL(i.files[0]); };
+        window.authAction = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(() => createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)); };
+        window.logout = () => signOut(auth).then(() => location.reload());
+        window.preProd = (i) => { const r = new FileReader(); r.onload = e => { window.tempP = e.target.result; document.getElementById('pub-btn').classList.remove('hidden'); document.getElementById('pf-label').innerText = "READY!"; }; r.readAsDataURL(i.files[0]); };
+        
+        window.pubProd = async () => {
+            const n = document.getElementById('pn').value, p = document.getElementById('pp').value;
+            if(!n || !p || !window.tempP) return alert("Fill data!");
+            const u = (await getDoc(doc(db, "users", curU.uid))).data();
+            await addDoc(collection(db, "products"), { name: n, price: p, desc: document.getElementById('pd').value, img: window.tempP, link: document.getElementById('pl').value, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() });
+            location.reload();
+        };
+
+        window.orderForm = (pid) => { window.activeOrder = allProds.find(i => i.id === pid); document.getElementById('order-modal').classList.remove('hidden'); };
+
+        window.confirmPurchase = async () => {
+            const n = document.getElementById('on').value, 
+                  p = document.getElementById('op').value, 
+                  city = document.getElementById('oc').value, 
+                  collab = document.getElementById('collab-check').checked;
+                  
+            if(!n || !p || !city) return alert("Please fill all fields!");
+            
+            const now = new Date();
+            
+            try {
+                await addDoc(collection(db, "orders"), { 
+                    item: window.activeOrder.name, 
+                    price: window.activeOrder.price,
+                    customer: n,
+                    phone: p,
+                    city: city,
+                    collab: collab,
+                    creatorId: window.activeOrder.creatorId,
+                    date: now.toLocaleDateString(),
+                    time_str: now.toLocaleTimeString()
+                });
+
+                alert("Order Sent Successfully! Redirecting...");
+                document.getElementById('order-modal').classList.add('hidden');
+
+                const productLink = window.activeOrder.link;
+                if (productLink) {
+                    const targetUrl = productLink.startsWith('http') ? productLink : `https://${productLink}`;
+                    window.open(targetUrl, '_blank'); // Opens in New Tab
+                }
+            } catch (error) {
+                alert("Something went wrong!");
+            }
+        };
+    </script>
+</body>
+</html>
