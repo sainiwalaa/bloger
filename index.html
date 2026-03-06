@@ -387,101 +387,126 @@
 
         window.delP = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
     </script
-  <!-- SAINIWALAA CREATOR FOOTER -->
+ <!-- SAINIWALAA LIVE CREATOR FOOTER -->
+
 <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
-    
-    <div class="text-center max-w-4xl mx-auto px-6">
-        <h2 class="raj-font text-3xl text-[#d4af37] mb-4">SAINIWALAA Creator Network</h2>
-        
-        <p class="text-gray-300 text-sm leading-relaxed">
-        SAINIWALAA एक नया Creator Marketplace है जहाँ Influencers, Creators और Digital Sellers 
-        अपना खुद का Store बनाकर सीधे Audience को Products और Services बेच सकते हैं।
-        <br><br>
-        यहाँ हर Creator का अपना Studio, Profile और Product Showcase होता है।
-        अगर आप भी Instagram, YouTube या Social Media Creator हैं तो अभी जुड़ें 
-        और अपनी Audience को अपना Store दिखाएँ। start march 2026 
-        </p>
 
-        <p class="text-[#d4af37] text-xs mt-4 font-bold tracking-wider uppercase">
-        Join • Create • Sell • Grow
-        </p>
-    </div>
+<div class="text-center max-w-4xl mx-auto px-6">
 
-    <!-- CREATOR SCROLL -->
-    <div class="mt-10 relative w-full overflow-hidden">
-        <div id="creator-scroll" class="flex gap-10 animate-scroll items-center"></div>
-    </div>
+<h2 class="raj-font text-3xl text-[#d4af37] mb-2">
+SAINIWALAA Creator Network
+</h2>
 
-    <div class="text-center mt-8 text-xs text-gray-500">
-        © 2026 SAINIWALAA • Built for the Creator Economy
-    </div>
+<p class="text-gray-300 text-sm leading-relaxed">
+SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers,
+YouTubers और Digital Sellers अपना खुद का Store बनाकर
+सीधे Audience को Products बेच सकते हैं।
+</p>
+
+<p class="text-[#d4af37] text-xs mt-3 font-bold tracking-wider uppercase">
+Live Creators Joined : <span id="creator-count">0</span>
+</p>
+
+</div>
+
+
+<!-- CREATOR SCROLL BAR -->
+
+<div class="mt-10 overflow-hidden w-full">
+
+<div id="creator-scroll" class="creator-scroll flex gap-10 items-center"></div>
+
+</div>
+
+
+<div class="text-center mt-8 text-xs text-gray-500">
+© 2026 SAINIWALAA • Creator Commerce Platform
+</div>
 
 </footer>
 
+
 <style>
 
-@keyframes scrollCreators{
-0%{transform:translateX(100%)}
-100%{transform:translateX(-100%)}
+.creator-scroll{
+white-space:nowrap;
+animation:creatorMove 35s linear infinite;
 }
 
-.animate-scroll{
-animation:scrollCreators 40s linear infinite;
-white-space:nowrap;
+@keyframes creatorMove{
+
+0%{transform:translateX(100%)}
+100%{transform:translateX(-100%)}
+
 }
 
 .creator-card{
+
 display:flex;
 align-items:center;
 gap:10px;
+
+background:#111;
+padding:6px 12px;
+border-radius:30px;
+
 }
 
 .creator-card img{
-width:36px;
-height:36px;
+
+width:34px;
+height:34px;
 border-radius:50%;
 border:2px solid #d4af37;
 object-fit:cover;
+
 }
 
 .creator-card span{
+
 font-size:12px;
 font-weight:700;
+
 }
 
 </style>
 
+
 <script>
 
-import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
 const creatorBox = document.getElementById("creator-scroll");
+const creatorCount = document.getElementById("creator-count");
 
-onSnapshot(collection(db,"users"), snap => {
+
+onSnapshot(collection(db,"users"), (snap)=>{
 
 creatorBox.innerHTML="";
 
+creatorCount.innerText = snap.size;
+
 snap.forEach(doc=>{
 
-const d=doc.data();
+const d = doc.data();
 
-const name=d.name || "Creator";
+const name = d.name || "Creator";
 
-const img=d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
+const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
 
-creatorBox.innerHTML+=`
+creatorBox.innerHTML += `
+
 <div class="creator-card">
+
 <img src="${img}">
 <span>@${name}</span>
+
 </div>
+
 `;
 
 });
 
 });
 
-</script>      
-
-        
+</script>       
 </body>
 </html>
