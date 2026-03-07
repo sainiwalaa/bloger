@@ -78,5 +78,40 @@
             window.location.href = BLOGGER_PAGE + "?" + params.toString();
         }
     </script>
+<script>
+    const BLOGGER_PAGE = "https://sainiwalaa.blogspot.com/p/sainiwalaa-luxury-creator-economy-root.html"; 
+
+    function saveUser() {
+        const n = document.getElementById('user-name').value;
+        if(n) { 
+            localStorage.setItem('saini_name', n); 
+            location.reload(); 
+        } else {
+            alert("Bhai, naam toh likho!");
+        }
+    }
+
+    const savedName = localStorage.getItem('saini_name');
+    if(savedName) {
+        document.getElementById('reg-area').style.display = 'none';
+        document.getElementById('post-area').style.display = 'block';
+        document.getElementById('welcome-msg').innerText = "Logged in: " + savedName;
+    }
+
+    function publish() {
+        const vidInput = document.getElementById('v-id').value;
+        const match = vidInput.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
+        if(!match) { alert("Sahi YouTube link daalein!"); return; }
+        const params = new URLSearchParams({
+            user: localStorage.getItem('saini_name'),
+            vid: match[1],
+            buy: document.getElementById('v-buy').value || '',
+            title: document.getElementById('v-title').value || 'New Post',
+            desc: document.getElementById('v-desc').value || ''
+        });
+        window.location.href = BLOGGER_PAGE + "?" + params.toString();
+    }
+</script>
+    
 </body>
 </html>
