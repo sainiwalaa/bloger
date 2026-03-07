@@ -2,28 +2,75 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Admin Studio</title>
+    <title>SAINIWALAA | Creator Profile</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    <style>
+        .glass { background: rgba(17, 17, 17, 0.8); backdrop-filter: blur(10px); }
+        .tab-active { border-bottom: 2px solid #ff0000; color: #ff0000; }
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
 </head>
-<body class="bg-[#050505] text-white p-4">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-[#ff0000] text-2xl font-black text-center mb-6 italic uppercase tracking-tighter">Creator Studio</h1>
+<body class="bg-black text-white font-sans">
+
+    <div id="auth-screen" class="fixed inset-0 z-[200] bg-black flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-sm space-y-4">
+            <h1 class="text-4xl font-black text-red-600 italic text-center mb-8">SAINIWALAA</h1>
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
+            <div class="flex gap-2">
+                <button onclick="handleAuth('login')" class="flex-1 bg-white text-black font-bold p-4 rounded-2xl">LOGIN</button>
+                <button onclick="handleAuth('signup')" class="flex-1 bg-red-600 text-white font-bold p-4 rounded-2xl">REGISTER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content" class="max-w-md mx-auto min-h-screen pb-20">
         
-        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] space-y-4 mb-8 shadow-xl">
-            <h2 class="text-xs font-bold text-gray-500 uppercase border-b border-[#222] pb-2 mb-2">Upload New Video</h2>
-            <input type="text" id="v-id" placeholder="Paste Video Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
-            <input type="text" id="v-title" placeholder="Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
-            <button id="pub-btn" onclick="publishNow()" class="w-full bg-red-600 text-white font-black p-4 rounded-2xl active:scale-95 transition-all">PUBLISH NOW</button>
-            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase font-bold pt-2 tracking-widest">System Ready</div>
+        <div class="relative">
+            <div class="h-32 w-full bg-gradient-to-r from-red-900 to-black overflow-hidden">
+                <img id="user-banner" src="https://wallpaperaccess.com/full/1155013.jpg" class="w-full h-full object-cover opacity-50"/>
+            </div>
+            <div class="absolute -bottom-10 left-6 flex items-end gap-4">
+                <div class="h-24 w-24 rounded-3xl border-4 border-black overflow-hidden bg-[#111]">
+                    <img id="user-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-cover"/>
+                </div>
+                <div class="mb-2">
+                    <h2 id="display-name" class="text-xl font-black italic uppercase">Loading...</h2>
+                    <p id="user-handle" class="text-xs text-red-500 font-bold">@creator</p>
+                </div>
+            </div>
+            <button id="logout-btn" onclick="firebase.auth().signOut()" class="absolute top-4 right-4 bg-black/50 p-2 rounded-full text-xs">LOGOUT</button>
         </div>
 
-        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] shadow-xl">
-            <h2 class="text-xs font-bold text-red-500 uppercase border-b border-[#222] pb-2 mb-4">Manage Live Feed</h2>
-            <div id="video-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                <p class="text-center text-xs text-gray-600 uppercase">Fetching videos...</p>
+        <div class="mt-14 px-6">
+            <p id="user-bio" class="text-sm text-gray-400 leading-relaxed">Official SainiwalAA Creator Profile. Welcome to my world.</p>
+            <div class="flex gap-4 mt-4 text-xl">
+                <a href="#" id="link-ig" class="text-pink-500"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" id="link-tw" class="text-blue-400"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" id="link-yt" class="text-red-600"><i class="fa-brands fa-youtube"></i></a>
             </div>
+        </div>
+
+        <div id="owner-tools" class="px-6 mt-8 hidden">
+            <div class="bg-[#111] p-4 rounded-[25px] border border-[#222]">
+                <p class="text-[10px] font-bold text-gray-500 mb-3 uppercase tracking-widest">Post New Content</p>
+                <input type="text" id="v-id" placeholder="Video Link" class="w-full mb-2 p-3 bg-black border border-[#222] rounded-xl text-sm outline-none focus:border-red-600"/>
+                <input type="text" id="v-title" placeholder="Short Title" class="w-full mb-3 p-3 bg-black border border-[#222] rounded-xl text-sm outline-none focus:border-red-600"/>
+                <button onclick="publishNow()" class="w-full bg-red-600 p-3 rounded-xl font-black text-sm">PUBLISH VIDEO</button>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <div class="flex px-6 border-b border-[#111] gap-6 text-sm font-bold">
+                <div class="pb-2 tab-active">VIDEOS</div>
+                <div class="pb-2 text-gray-600">ABOUT</div>
+            </div>
+            <div id="video-list" class="p-6 space-y-6">
+                </div>
         </div>
     </div>
 
@@ -31,63 +78,115 @@
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
+            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
             projectId: "sainiwalaainfulencer",
-            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/", 
             storageBucket: "sainiwalaainfulencer.firebasestorage.app",
             messagingSenderId: "116125275008",
             appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth();
 
-        // --- UPLOAD LOGIC ---
-        function publishNow() {
-            const link = document.getElementById('v-id').value.trim();
-            const title = document.getElementById('v-title').value.trim();
-            const btn = document.getElementById('pub-btn');
-            if(!link) return alert("Link missing!");
+        // 1. AUTH STATE CHECK
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('owner-tools').classList.remove('hidden');
+                loadProfile(user.uid);
+                loadVideos(user.uid);
+            } else {
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('owner-tools').classList.add('hidden');
+            }
+        });
 
-            btn.innerText = "PUBLISHING...";
-            btn.disabled = true;
+        function handleAuth(type) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+            else auth.createUserWithEmailAndPassword(email, pass).then(u => {
+                // Initial Profile Save
+                db.ref('users/' + u.user.uid).set({
+                    username: email.split('@')[0],
+                    bio: "New Creator on SainiwalAA",
+                    banner: "https://wallpaperaccess.com/full/1155013.jpg"
+                });
+            }).catch(e => alert(e.message));
+        }
 
-            const postRef = db.ref('videos').push();
-            postRef.set({
-                videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
-                title: title || "New Release",
-                timestamp: Date.now()
-            }).then(() => {
-                location.reload();
+        function loadProfile(uid) {
+            db.ref('users/' + uid).on('value', snap => {
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('display-name').innerText = data.username;
+                    document.getElementById('user-handle').innerText = "@" + data.username;
+                    document.getElementById('user-bio').innerText = data.bio;
+                }
             });
         }
 
-        // --- MANAGE & DELETE LOGIC ---
-        db.ref('videos').orderByChild('timestamp').on('value', (snapshot) => {
-            const list = document.getElementById('video-list');
-            const data = snapshot.val();
-            if(!data) { list.innerHTML = "<p class='text-center text-[10px] text-gray-700 uppercase'>No Videos Online</p>"; return; }
+        // 2. VIDEO LOGIC
+        function publishNow() {
+            const user = auth.currentUser;
+            const link = document.getElementById('v-id').value;
+            const title = document.getElementById('v-title').value;
+            if(!link) return;
 
-            list.innerHTML = "";
-            Object.keys(data).reverse().forEach(key => {
-                const v = data[key];
-                const item = document.createElement('div');
-                item.className = "flex items-center justify-between bg-black p-3 rounded-xl border border-[#222]";
-                item.innerHTML = `
-                    <div class="truncate mr-4">
-                        <p class="text-[11px] font-bold text-gray-300 truncate">${v.title}</p>
-                        <p class="text-[9px] text-gray-600 truncate italic">${v.videoId}</p>
-                    </div>
-                    <button onclick="deleteVideo('${key}')" class="bg-red-900/30 text-red-500 border border-red-900 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all">DELETE</button>
-                `;
-                list.appendChild(item);
+            db.ref('videos').push({
+                uid: user.uid,
+                username: document.getElementById('display-name').innerText,
+                videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
+                title: title,
+                likes: 0,
+                comments: 0,
+                timestamp: Date.now()
+            }).then(() => {
+                document.getElementById('v-id').value = "";
+                document.getElementById('v-title').value = "";
             });
-        });
+        }
+
+        function loadVideos(ownerUid) {
+            db.ref('videos').on('value', snap => {
+                const list = document.getElementById('video-list');
+                const data = snap.val();
+                list.innerHTML = "";
+                if(!data) return;
+
+                Object.keys(data).reverse().forEach(key => {
+                    const v = data[key];
+                    // Show delete only if logged in user is the owner
+                    const isOwner = auth.currentUser && auth.currentUser.uid === v.uid;
+
+                    const item = `
+                        <div class="bg-[#0a0a0a] rounded-3xl overflow-hidden border border-[#1a1a1a]">
+                            <div class="p-4 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-6 w-6 rounded-full bg-red-600"></div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">${v.username}</span>
+                                </div>
+                                ${isOwner ? `<button onclick="deleteVideo('${key}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>` : ''}
+                            </div>
+                            <div class="aspect-video bg-black relative">
+                                <p class="absolute inset-0 flex items-center justify-center text-[10px] text-gray-700 uppercase">Video Preview Locked</p>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-sm font-bold mb-3">${v.title}</p>
+                                <div class="flex gap-6 text-gray-500 text-xs font-bold">
+                                    <span><i class="fa-regular fa-heart mr-1"></i> ${v.likes || 0}</span>
+                                    <span><i class="fa-regular fa-comment mr-1"></i> ${v.comments || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    list.innerHTML += item;
+                });
+            });
+        }
 
         function deleteVideo(key) {
-            if(confirm("Bhai, kya aap sach mein ye video hatana chahte ho?")) {
-                db.ref('videos/' + key).remove()
-                .then(() => alert("Video Removed!"))
-                .catch((e) => alert("Error: " + e.message));
-            }
+            if(confirm("Hatayein?")) db.ref('videos/' + key).remove();
         }
     </script>
 </body>
