@@ -1,90 +1,22 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Creator Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
-</head>
-<body class="bg-[#050505] text-white p-6 font-sans">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 tracking-tighter uppercase">Creator Studio</h1>
-        
-        <div id="reg-area" class="space-y-4">
-            <div class="bg-[#111] p-6 rounded-3xl border border-[#222]">
-                <input type="text" id="user-name" placeholder="Brand Name" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37] mb-4 text-center"/>
-                <button onclick="saveUser()" class="w-full bg-[#d4af37] text-black font-black p-4 rounded-2xl">ENTER STUDIO</button>
-            </div>
-        </div>
+function publish() {
+    const vidInput = document.getElementById('v-id').value;
+    const match = vidInput.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
+    
+    if(!match) { alert("YouTube Link sahi nahi hai!"); return; }
 
-        <div id="post-area" class="hidden space-y-4">
-            <div id="status-msg" class="hidden bg-green-900/20 text-green-500 p-3 rounded-xl text-center border border-green-500/20 mb-4 text-sm">Post successful! Form reset.</div>
-            
-            <div class="space-y-3">
-                <input type="text" id="v-id" placeholder="YouTube Link" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-[#d4af37]"/>
-                <input type="text" id="v-buy" placeholder="Product Buy Link" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
-                <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
-                <textarea id="v-desc" placeholder="Description" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl h-24 outline-none"></textarea>
-                
-                <button id="pub-btn" onclick="publish()" class="w-full bg-white text-black font-black p-5 rounded-3xl active:scale-95 transition-all mt-4">
-                    PUBLISH POST <i class="fa-solid fa-paper-plane ml-2"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    const title = document.getElementById('v-title').value;
+    const buy = document.getElementById('v-buy').value;
+    const desc = document.getElementById('v-desc').value;
 
-    <script>
-        const BLOGGER_PAGE = "https://sainiwalaa.blogspot.com/p/sainiwalaa-luxury-creator-economy-root.html"; 
-
-        function saveUser() {
-            const n = document.getElementById('user-name').value;
-            if(n) { localStorage.setItem('saini_name', n); location.reload(); }
-        }
-
-        const savedName = localStorage.getItem('saini_name');
-        if(savedName) {
-            document.getElementById('reg-area').classList.add('hidden');
-            document.getElementById('post-area').classList.remove('hidden');
-        }
-
-        function publish() {
-            const vidInput = document.getElementById('v-id').value;
-            const match = vidInput.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
-            if(!match) { alert("YouTube Link sahi nahi hai!"); return; }
-
-            const btn = document.getElementById('pub-btn');
-            btn.disabled = true;
-            btn.innerText = "PUBLISHING...";
-            btn.style.opacity = "0.5";
-
-            const params = new URLSearchParams({
-                user: savedName,
-                vid: match[1],
-                buy: document.getElementById('v-buy').value,
-                title: document.getElementById('v-title').value,
-                desc: document.getElementById('v-desc').value
-            });
-
-            // Invisible frame to post without leaving page
-            const img = new Image();
-            img.src = BLOGGER_PAGE + "?" + params.toString();
-
-            setTimeout(() => {
-                // Reset Form
-                document.getElementById('v-id').value = "";
-                document.getElementById('v-buy').value = "";
-                document.getElementById('v-title').value = "";
-                document.getElementById('v-desc').value = "";
-                
-                // Show Status
-                document.getElementById('status-msg').classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "PUBLISH POST";
-                btn.style.opacity = "1";
-                
-                setTimeout(() => document.getElementById('status-msg').classList.add('hidden'), 3000);
-            }, 1500);
-        }
-    </script>
-</body>
-</html>
+    // Blogger Post Content Format
+    // Hum Title aur Body ko aise bhejenge ki Blogger use Post ki tarah save kare
+    // Note: Direct image-src method sirf analytics ke liye hota hai. 
+    // Post karne ke liye aapko "Blogger API" ya "Email-to-Post" chahiye hoga.
+    
+    const finalData = `vid=${match[1]}&buy=${buy}&desc=${desc}`;
+    
+    alert("Data Ready to Post: " + finalData);
+    
+    // Yahan aap Blogger ki API use karke real post kar sakte hain.
+    // Filhaal ye sirf setup ready hai.
+}
