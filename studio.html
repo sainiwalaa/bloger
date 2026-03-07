@@ -2,51 +2,28 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Universal Studio</title>
+    <title>SAINIWALAA | Admin Studio</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-[#050505] text-white p-4">
     <div class="max-w-md mx-auto">
-        <h1 class="text-[#ff0000] text-3xl font-black text-center mb-8 italic uppercase tracking-tighter">
-            Creator Studio <span class="text-xs block text-gray-500 font-normal mt-1">Universal Link Support</span>
-        </h1>
+        <h1 class="text-[#ff0000] text-2xl font-black text-center mb-6 italic uppercase tracking-tighter">Creator Studio</h1>
         
-        <div class="bg-[#111] p-6 rounded-[35px] border border-[#222] shadow-2xl space-y-4">
-            <div class="space-y-1">
-                <label class="text-[10px] text-red-500 font-bold ml-2 uppercase">Video Link (YT, Insta, GitHub, etc.)</label>
-                <input type="text" id="v-id" placeholder="Paste Link Here..." class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 transition-all text-sm"/>
-            </div>
-
-            <div class="space-y-1">
-                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Video Title</label>
-                <input type="text" id="v-title" placeholder="Enter Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
-            </div>
-
-            <div class="space-y-1">
-                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Short Description</label>
-                <input type="text" id="v-desc" placeholder="Enter Description" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
-            </div>
-
-            <div class="space-y-1">
-                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Shop/Buy Link (Optional)</label>
-                <input type="text" id="v-buy" placeholder="https://..." class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
-            </div>
-
-            <button id="pub-btn" onclick="publishNow()" class="w-full bg-red-600 text-white font-black p-5 rounded-3xl active:scale-95 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)]">
-                PUBLISH TO FEED
-            </button>
-            
-            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase tracking-widest font-bold pt-2">System Online</div>
+        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] space-y-4 mb-8 shadow-xl">
+            <h2 class="text-xs font-bold text-gray-500 uppercase border-b border-[#222] pb-2 mb-2">Upload New Video</h2>
+            <input type="text" id="v-id" placeholder="Paste Video Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
+            <input type="text" id="v-title" placeholder="Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
+            <button id="pub-btn" onclick="publishNow()" class="w-full bg-red-600 text-white font-black p-4 rounded-2xl active:scale-95 transition-all">PUBLISH NOW</button>
+            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase font-bold pt-2 tracking-widest">System Ready</div>
         </div>
 
-        <div class="mt-6 p-4 bg-[#0a0a0a] rounded-2xl border border-dashed border-[#333]">
-            <p class="text-[9px] text-gray-400 leading-relaxed uppercase">
-                <span class="text-red-500 font-bold">Supported:</span> YouTube Shorts, Instagram Reels, Pinterest Video, GitHub MP4, Direct MP4 Links. <br/>
-                <span class="text-red-500 font-bold">GitHub Tip:</span> Link mein 'blob' ko 'raw' se replace karein.
-            </p>
+        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] shadow-xl">
+            <h2 class="text-xs font-bold text-red-500 uppercase border-b border-[#222] pb-2 mb-4">Manage Live Feed</h2>
+            <div id="video-list" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                <p class="text-center text-xs text-gray-600 uppercase">Fetching videos...</p>
+            </div>
         </div>
     </div>
 
@@ -63,53 +40,54 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // --- UPLOAD LOGIC ---
         function publishNow() {
             const link = document.getElementById('v-id').value.trim();
             const title = document.getElementById('v-title').value.trim();
-            const desc = document.getElementById('v-desc').value.trim();
-            const buyLink = document.getElementById('v-buy').value.trim();
             const btn = document.getElementById('pub-btn');
-            const debug = document.getElementById('debug-msg');
+            if(!link) return alert("Link missing!");
 
-            if(!link) { alert("Please paste a link!"); return; }
-
-            btn.innerText = "VALIDATING...";
+            btn.innerText = "PUBLISHING...";
             btn.disabled = true;
-
-            // --- UNIVERSAL LINK HANDLING ---
-            let finalLink = link;
-
-            // GitHub Fixer
-            if(link.includes("github.com") && link.includes("/blob/")) {
-                finalLink = link.replace("/blob/", "/raw/");
-            }
-
-            // Simple check for non-YT links (like Insta/Hipi/Pinterest)
-            // Hum pura link bhej rahe hain, main page ka logic isse handle kar lega
-            
-            debug.innerText = "Connecting to Sainiwalas Cloud...";
 
             const postRef = db.ref('videos').push();
             postRef.set({
-                videoId: finalLink, // Ab ID ki jagah pura link save hoga (Universal support)
-                title: title || "SAINIWALAA EXCLUSIVE",
-                desc: desc || "",
-                buyLink: buyLink || "",
+                videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
+                title: title || "New Release",
                 timestamp: Date.now()
-            }, (error) => {
-                if (error) {
-                    btn.innerText = "FAILED";
-                    btn.disabled = false;
-                    debug.innerText = "Error: " + error.message;
-                    debug.classList.add('text-red-500');
-                } else {
-                    btn.innerText = "PUBLISHED!";
-                    debug.innerText = "Content is now Live on Feed!";
-                    debug.classList.remove('text-gray-500');
-                    debug.classList.add('text-green-500');
-                    setTimeout(() => location.reload(), 1500);
-                }
+            }).then(() => {
+                location.reload();
             });
+        }
+
+        // --- MANAGE & DELETE LOGIC ---
+        db.ref('videos').orderByChild('timestamp').on('value', (snapshot) => {
+            const list = document.getElementById('video-list');
+            const data = snapshot.val();
+            if(!data) { list.innerHTML = "<p class='text-center text-[10px] text-gray-700 uppercase'>No Videos Online</p>"; return; }
+
+            list.innerHTML = "";
+            Object.keys(data).reverse().forEach(key => {
+                const v = data[key];
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between bg-black p-3 rounded-xl border border-[#222]";
+                item.innerHTML = `
+                    <div class="truncate mr-4">
+                        <p class="text-[11px] font-bold text-gray-300 truncate">${v.title}</p>
+                        <p class="text-[9px] text-gray-600 truncate italic">${v.videoId}</p>
+                    </div>
+                    <button onclick="deleteVideo('${key}')" class="bg-red-900/30 text-red-500 border border-red-900 px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-red-600 hover:text-white transition-all">DELETE</button>
+                `;
+                list.appendChild(item);
+            });
+        });
+
+        function deleteVideo(key) {
+            if(confirm("Bhai, kya aap sach mein ye video hatana chahte ho?")) {
+                db.ref('videos/' + key).remove()
+                .then(() => alert("Video Removed!"))
+                .catch((e) => alert("Error: " + e.message));
+            }
         }
     </script>
 </body>
