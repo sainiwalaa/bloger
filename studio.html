@@ -6,21 +6,18 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-[#050505] text-white p-6">
     <div class="max-w-md mx-auto">
-        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 uppercase italic">Creator Studio</h1>
+        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 italic uppercase">Creator Studio</h1>
         
-        <div class="bg-[#111] p-6 rounded-[40px] border border-[#222] space-y-4 shadow-2xl">
-            <input type="text" id="v-id" placeholder="YouTube Video Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
-            <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none"/>
-            <input type="text" id="v-buy" placeholder="Buy Link (Optional)" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none"/>
-            <textarea id="v-desc" placeholder="Description" class="w-full p-4 bg-black border border-[#333] rounded-2xl h-24 outline-none"></textarea>
-            
-            <button id="pub-btn" onclick="publishToFirebase()" class="w-full bg-[#d4af37] text-black font-black p-5 rounded-3xl active:scale-95 transition-all">
-                PUBLISH TO FEED <i class="fa-solid fa-bolt ml-2"></i>
+        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] space-y-4">
+            <input type="text" id="v-id" placeholder="Paste YouTube Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
+            <input type="text" id="v-title" placeholder="Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
+            <button id="pub-btn" onclick="publishNow()" class="w-full bg-[#d4af37] text-black font-black p-5 rounded-3xl active:scale-95 transition-all">
+                PUBLISH NOW
             </button>
+            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase">System Ready</div>
         </div>
     </div>
 
@@ -29,33 +26,48 @@
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
             projectId: "sainiwalaainfulencer",
-            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/", // Check your firebase console for this
+            // DHAYAN DEIN: Agar ye URL kaam na kare toh console se naya nikaalein
+            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/", 
             storageBucket: "sainiwalaainfulencer.firebasestorage.app",
             messagingSenderId: "116125275008",
             appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
         };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        function publishToFirebase() {
-            const vidLink = document.getElementById('v-id').value;
-            const match = vidLink.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
-            
-            if(!match) return alert("Sahi YouTube link daalein!");
-
+        function publishNow() {
+            const link = document.getElementById('v-id').value;
+            const title = document.getElementById('v-title').value;
             const btn = document.getElementById('pub-btn');
-            btn.innerText = "SENDING...";
+            const debug = document.getElementById('debug-msg');
+
+            const match = link.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
             
-            const newPostRef = database.ref('videos').push();
-            newPostRef.set({
+            if(!match) { alert("Invalid YouTube Link!"); return; }
+
+            btn.innerText = "SENDING...";
+            btn.disabled = true;
+            debug.innerText = "Connecting to Firebase...";
+
+            // Instant Set Mode
+            const postRef = db.ref('videos').push();
+            postRef.set({
                 videoId: match[1],
-                title: document.getElementById('v-title').value,
-                buyLink: document.getElementById('v-buy').value,
-                desc: document.getElementById('v-desc').value,
+                title: title || "New Video",
                 timestamp: Date.now()
-            }).then(() => {
-                alert("Video Published Successfully!");
-                location.reload();
+            }, (error) => {
+                if (error) {
+                    btn.innerText = "FAILED";
+                    btn.disabled = false;
+                    debug.innerText = "Error: " + error.message;
+                    debug.classList.add('text-red-500');
+                    console.log(error);
+                } else {
+                    btn.innerText = "PUBLISHED!";
+                    debug.innerText = "Video is Live!";
+                    debug.classList.add('text-green-500');
+                    setTimeout(() => location.reload(), 1000);
+                }
             });
         }
     </script>
