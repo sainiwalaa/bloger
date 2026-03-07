@@ -1,82 +1,53 @@
-// Blogger Script Section Updated Logic
-//<![CDATA[
-    let feedData = JSON.parse(localStorage.getItem('publicFeed')) || [];
-    let players = {};
-
-    window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"/><title>SAINIWALAA | Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: #050505; color: white; font-family: sans-serif; }</style>
+</head>
+<body class="p-6">
+    <div class="max-w-md mx-auto">
+        <h2 class="text-[#d4af37] text-2xl font-bold mb-6 text-center">CREATOR STUDIO</h2>
         
-        // Logic 1: Profile Filter (Grid View)
-        if(params.has('view_profile')) {
-            renderUserGrid(params.get('view_profile'));
-        } 
-        // Logic 2: Saving New Post
-        else if(params.has('user')) {
-            savePost(params);
+        <div id="reg-form" class="space-y-4">
+            <input type="text" id="user-name" placeholder="Apna Naam Likhein" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl outline-none focus:border-[#d4af37]"/>
+            <button onclick="saveUser()" class="w-full bg-[#d4af37] text-black font-bold p-4 rounded-xl">OPEN MY STUDIO</button>
+        </div>
+
+        <div id="post-form" class="hidden space-y-4">
+            <p id="welcome" class="text-center text-gray-400 mb-4"></p>
+            <input type="text" id="v-id" placeholder="YouTube Video Link" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
+            <input type="text" id="v-buy" placeholder="Product Buy Link (Optional)" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
+            <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
+            <textarea id="v-desc" placeholder="Hashtags & Description" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl h-24"></textarea>
+            <button onclick="sendToBlogger()" class="w-full bg-white text-black font-bold p-4 rounded-xl">PUBLISH POST</button>
+            <button onclick="localStorage.clear(); location.reload();" class="w-full text-red-500 text-xs mt-4">LOGOUT / RESET</button>
+        </div>
+    </div>
+
+    <script>
+        const savedName = localStorage.getItem('saini_name');
+        if(savedName) {
+            document.getElementById('reg-form').classList.add('hidden');
+            document.getElementById('post-form').classList.remove('hidden');
+            document.getElementById('welcome').innerText = "Welcome, " + savedName;
         }
-        // Logic 3: Normal Feed
-        else {
-            renderFeed(feedData);
+
+        function saveUser() {
+            const name = document.getElementById('user-name').value;
+            if(name) { localStorage.setItem('saini_name', name); location.reload(); }
         }
-    };
 
-    function savePost(params) {
-        const newPost = {
-            id: 'post_' + Date.now(),
-            userName: params.get('user'),
-            ytId: params.get('vid'),
-            buyLink: params.get('buy'),
-            title: params.get('title'),
-            desc: params.get('desc'),
-            likes: 0
-        };
-        feedData.unshift(newPost);
-        localStorage.setItem('publicFeed', JSON.stringify(feedData));
-        window.location.href = window.location.pathname; // Clear URL
-    }
-
-    // Grid View Function (Sirf Us User ki Posts)
-    function renderUserGrid(username) {
-        const container = document.getElementById('public-feed');
-        const userPosts = feedData.filter(p => p.userName === username);
-        
-        container.innerHTML = `
-            <div class="flex items-center gap-4 mb-6">
-                <button onclick="window.location.href=window.location.pathname" class="bg-[#d4af37] text-black px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-solid fa-arrow-left"></i> BACK</button>
-                <h2 class="raj-font text-[#d4af37]">${username}'s Gallery</h2>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                ${userPosts.map(p => `
-                    <div class="aspect-square bg-[#111] rounded-xl overflow-hidden border border-[#222]" onclick="showSingle('${p.id}')">
-                        <img src="https://img.youtube.com/vi/${p.ytId}/hqdefault.jpg" class="w-full h-full object-cover opacity-70 hover:opacity-100 transition"/>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    function renderFeed(data) {
-        const container = document.getElementById('public-feed');
-        container.innerHTML = data.map(post => `
-            <div class="post-card">
-                <div class="user-profile" onclick="window.location.href='?view_profile=${post.userName}'" style="cursor:pointer">
-                    <div class="profile-img bg-gradient-to-tr from-[#d4af37] to-white p-[1px]"><img src="https://ui-avatars.com/api/?name=${post.userName}&background=0D0D0D&color=d4af37" class="rounded-full w-full h-full"/></div>
-                    <div><p class="text-sm font-bold text-white hover:text-[#d4af37] transition">${post.userName}</p></div>
-                </div>
-                <div class="player-wrapper"><div id="player-${post.id}"></div></div>
-                ${post.buyLink ? `<div class="p-4"><a href="${post.buyLink}" class="bg-[#d4af37] text-black w-full block text-center p-3 rounded-xl font-black text-xs">BUY PRODUCT</a></div>` : ''}
-                <div class="post-info">
-                    <h3 class="post-title">${post.title}</h3>
-                    <p class="post-desc">${post.desc}</p>
-                </div>
-            </div>
-        `).join('');
-        
-        // Initialize YT Players
-        data.forEach(p => {
-            setTimeout(() => {
-                players[p.id] = new YT.Player(`player-${p.id}`, { videoId: p.ytId, playerVars: { 'controls': 0 } });
-            }, 500);
-        });
-    }
-//]]>
+        function sendToBlogger() {
+            const vid = document.getElementById('v-id').value;
+            // Extracting ID
+            const vidId = vid.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/)[1];
+            
+            const blogger = "https://your-site.blogspot.com/"; // APNI SITE KA LINK DAALEIN
+            const url = `${blogger}?user=${encodeURIComponent(savedName)}&vid=${vidId}&buy=${encodeURIComponent(document.getElementById('v-buy').value)}&title=${encodeURIComponent(document.getElementById('v-title').value)}&desc=${encodeURIComponent(document.getElementById('v-desc').value)}`;
+            
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
