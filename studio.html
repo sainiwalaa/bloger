@@ -2,22 +2,51 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Creator Studio</title>
+    <title>SAINIWALAA | Universal Studio</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
 </head>
-<body class="bg-[#050505] text-white p-6">
+<body class="bg-[#050505] text-white p-4">
     <div class="max-w-md mx-auto">
-        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 italic uppercase">Creator Studio</h1>
+        <h1 class="text-[#ff0000] text-3xl font-black text-center mb-8 italic uppercase tracking-tighter">
+            Creator Studio <span class="text-xs block text-gray-500 font-normal mt-1">Universal Link Support</span>
+        </h1>
         
-        <div class="bg-[#111] p-6 rounded-[30px] border border-[#222] space-y-4">
-            <input type="text" id="v-id" placeholder="Paste YouTube Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
-            <input type="text" id="v-title" placeholder="Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
-            <button id="pub-btn" onclick="publishNow()" class="w-full bg-[#d4af37] text-black font-black p-5 rounded-3xl active:scale-95 transition-all">
-                PUBLISH NOW
+        <div class="bg-[#111] p-6 rounded-[35px] border border-[#222] shadow-2xl space-y-4">
+            <div class="space-y-1">
+                <label class="text-[10px] text-red-500 font-bold ml-2 uppercase">Video Link (YT, Insta, GitHub, etc.)</label>
+                <input type="text" id="v-id" placeholder="Paste Link Here..." class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 transition-all text-sm"/>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Video Title</label>
+                <input type="text" id="v-title" placeholder="Enter Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Short Description</label>
+                <input type="text" id="v-desc" placeholder="Enter Description" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] text-gray-500 font-bold ml-2 uppercase">Shop/Buy Link (Optional)</label>
+                <input type="text" id="v-buy" placeholder="https://..." class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-red-600 text-sm"/>
+            </div>
+
+            <button id="pub-btn" onclick="publishNow()" class="w-full bg-red-600 text-white font-black p-5 rounded-3xl active:scale-95 transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)]">
+                PUBLISH TO FEED
             </button>
-            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase">System Ready</div>
+            
+            <div id="debug-msg" class="text-[10px] text-center text-gray-500 uppercase tracking-widest font-bold pt-2">System Online</div>
+        </div>
+
+        <div class="mt-6 p-4 bg-[#0a0a0a] rounded-2xl border border-dashed border-[#333]">
+            <p class="text-[9px] text-gray-400 leading-relaxed uppercase">
+                <span class="text-red-500 font-bold">Supported:</span> YouTube Shorts, Instagram Reels, Pinterest Video, GitHub MP4, Direct MP4 Links. <br/>
+                <span class="text-red-500 font-bold">GitHub Tip:</span> Link mein 'blob' ko 'raw' se replace karein.
+            </p>
         </div>
     </div>
 
@@ -26,7 +55,6 @@
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
             projectId: "sainiwalaainfulencer",
-            // DHAYAN DEIN: Agar ye URL kaam na kare toh console se naya nikaalein
             databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/", 
             storageBucket: "sainiwalaainfulencer.firebasestorage.app",
             messagingSenderId: "116125275008",
@@ -36,24 +64,37 @@
         const db = firebase.database();
 
         function publishNow() {
-            const link = document.getElementById('v-id').value;
-            const title = document.getElementById('v-title').value;
+            const link = document.getElementById('v-id').value.trim();
+            const title = document.getElementById('v-title').value.trim();
+            const desc = document.getElementById('v-desc').value.trim();
+            const buyLink = document.getElementById('v-buy').value.trim();
             const btn = document.getElementById('pub-btn');
             const debug = document.getElementById('debug-msg');
 
-            const match = link.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
-            
-            if(!match) { alert("Invalid YouTube Link!"); return; }
+            if(!link) { alert("Please paste a link!"); return; }
 
-            btn.innerText = "SENDING...";
+            btn.innerText = "VALIDATING...";
             btn.disabled = true;
-            debug.innerText = "Connecting to Firebase...";
 
-            // Instant Set Mode
+            // --- UNIVERSAL LINK HANDLING ---
+            let finalLink = link;
+
+            // GitHub Fixer
+            if(link.includes("github.com") && link.includes("/blob/")) {
+                finalLink = link.replace("/blob/", "/raw/");
+            }
+
+            // Simple check for non-YT links (like Insta/Hipi/Pinterest)
+            // Hum pura link bhej rahe hain, main page ka logic isse handle kar lega
+            
+            debug.innerText = "Connecting to Sainiwalas Cloud...";
+
             const postRef = db.ref('videos').push();
             postRef.set({
-                videoId: match[1],
-                title: title || "New Video",
+                videoId: finalLink, // Ab ID ki jagah pura link save hoga (Universal support)
+                title: title || "SAINIWALAA EXCLUSIVE",
+                desc: desc || "",
+                buyLink: buyLink || "",
                 timestamp: Date.now()
             }, (error) => {
                 if (error) {
@@ -61,12 +102,12 @@
                     btn.disabled = false;
                     debug.innerText = "Error: " + error.message;
                     debug.classList.add('text-red-500');
-                    console.log(error);
                 } else {
                     btn.innerText = "PUBLISHED!";
-                    debug.innerText = "Video is Live!";
+                    debug.innerText = "Content is now Live on Feed!";
+                    debug.classList.remove('text-gray-500');
                     debug.classList.add('text-green-500');
-                    setTimeout(() => location.reload(), 1000);
+                    setTimeout(() => location.reload(), 1500);
                 }
             });
         }
