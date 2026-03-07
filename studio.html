@@ -12,89 +12,17 @@
     <style>
         body { background: #000; color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         .glass-dark { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); }
-        .v-frame { width: 100%; aspect-ratio: 9/16; background: #000; position: relative; overflow: hidden; pointer-events: none; }
-        .v-frame iframe, .v-frame video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-        .seek-bar { width: 100%; height: 5px; background: #222; position: relative; cursor: pointer; border-radius: 10px; overflow: hidden; }
-        .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+        .v-frame { width: 100%; aspect-ratio: 9/16; background: #050505; position: relative; overflow: hidden; pointer-events: none; }
+        .v-frame iframe, .v-frame video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; }
+        .seek-bar { width: 100%; height: 5px; background: #222; position: relative; cursor: pointer; border-radius: 10px; }
+        .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: width 0.1s linear; }
+        .desc-gradient { background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
         ::-webkit-scrollbar { width: 0px; }
-        input[type="color"] { padding: 0; border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; background: none; }
+        input, textarea { transition: all 0.3s border; }
+        input:focus, textarea:focus { border-color: #ff0000 !important; }
     </style>
 </head>
 <body>
-
-    <div id="edit-modal" class="fixed inset-0 z-[300] glass-dark flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-md bg-[#111] border border-[#222] p-6 rounded-[30px] space-y-5 max-h-[90vh] overflow-y-autoscrollbar-hide">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-black uppercase text-red-600">Edit Profile</h3>
-                <button onclick="closeEdit()" class="text-gray-600 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-[10px] text-gray-500 font-bold uppercase">Profile Picture (Avatar)</label>
-                <input type="file" id="edit-avatar-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"/>
-            </div>
-
-            <div class="space-y-3 border-t border-[#222] pt-4">
-                <label class="text-[10px] text-gray-500 font-bold uppercase">Banner Settings</label>
-                <div class="flex gap-2">
-                    <button onclick="setBannerMode('image')" id="btn-mode-image" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs">Image Mode</button>
-                    <button onclick="setBannerMode('color')" id="btn-mode-color" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs">Color Mode</button>
-                </div>
-
-                <div id="banner-image-input" class="space-y-2">
-                    <input type="file" id="edit-banner-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#222] file:text-white hover:file:bg-[#333]"/>
-                </div>
-
-                <div id="banner-color-input" class="space-y-3 hidden bg-black p-4 rounded-xl border border-[#222]">
-                    <div class="flex items-center justify-between gap-2">
-                        <label class="text-xs text-gray-400">Background Color</label>
-                        <input type="color" id="edit-banner-color" value="#800000"/>
-                    </div>
-                    <input type="text" id="edit-banner-text" placeholder="Banner Text (e.g., SAINIWALAA)" class="w-full p-3 bg-black border border-[#333] rounded-xl text-xs outline-none"/>
-                    <div class="flex items-center justify-between gap-2">
-                        <label class="text-xs text-gray-400">Text Color</label>
-                        <input type="color" id="edit-banner-text-color" value="#ffffff"/>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-2 border-t border-[#222] pt-4">
-                <label class="text-[10px] text-gray-500 font-bold uppercase">Bio</label>
-                <textarea id="edit-bio" placeholder="Your Bio" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-20"></textarea>
-            </div>
-
-            <div class="space-y-3 border-t border-[#222] pt-4">
-                <label class="text-[10px] text-gray-500 font-bold uppercase">Social Links</label>
-                <div class="relative">
-                    <i class="fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-pink-600"></i>
-                    <input type="text" id="edit-ig" placeholder="Instagram URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                </div>
-                <div class="relative">
-                    <i class="fa-brands fa-youtube absolute left-4 top-1/2 -translate-y-1/2 text-red-600"></i>
-                    <input type="text" id="edit-yt" placeholder="YouTube URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                </div>
-                <div class="relative">
-                    <i class="fa-brands fa-twitter absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"></i>
-                    <input type="text" id="edit-tw" placeholder="Twitter URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                </div>
-            </div>
-
-            <div class="flex gap-2 border-t border-[#222] pt-5">
-                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-4 rounded-2xl font-bold text-xs">CANCEL</button>
-                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-4 rounded-2xl font-bold text-xs text-white">SAVE CHANGES</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="auth-screen" class="fixed inset-0 z-[200] bg-black flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm space-y-4 text-center">
-            <h1 class="text-5xl font-black text-red-600 italic mb-8">SAINIWALAA</h1>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none"/>
-            <button onclick="handleAuth('login')" class="w-full bg-white text-black font-black p-4 rounded-2xl mb-2">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="text-xs text-gray-500 font-bold uppercase tracking-widest">Create New Account</button>
-        </div>
-    </div>
 
     <div id="main-content" class="max-w-md mx-auto pb-24">
         <div class="relative">
@@ -103,11 +31,11 @@
                 <h1 id="user-banner-text" class="text-4xl font-black italic uppercase tracking-tighter hidden"></h1>
             </div>
             <div class="absolute -bottom-12 left-6 flex items-end gap-4">
-                <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111] shadow-xl relative z-10">
+                <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111] shadow-xl z-10">
                     <img id="user-avatar" src="" class="w-full h-full object-cover"/>
                 </div>
-                <div class="mb-3 relative z-10">
-                    <h2 id="display-name" class="text-2xl font-black italic uppercase leading-none text-white">Creator</h2>
+                <div class="mb-3 z-10">
+                    <h2 id="display-name" class="text-2xl font-black italic uppercase leading-none">Creator</h2>
                     <p id="user-handle" class="text-[10px] text-red-600 font-black tracking-widest uppercase mt-1">@handle</p>
                 </div>
             </div>
@@ -116,154 +44,53 @@
 
         <div class="mt-16 px-6">
             <p id="user-bio" class="text-xs text-gray-400 leading-relaxed italic">Bio loading...</p>
-            <div class="flex gap-5 mt-5 text-xl" id="social-links">
-                <a href="#" id="link-ig-post" class="text-pink-600 hidden"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" id="link-yt-post" class="text-red-600 hidden"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#" id="link-tw-post" class="text-blue-500 hidden"><i class="fa-brands fa-twitter"></i></a>
-            </div>
         </div>
 
         <div id="owner-tools" class="px-6 mt-8 hidden">
-            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a]">
-                <input type="text" id="v-id" placeholder="Paste Video/YT Link" class="w-full mb-3 p-3 bg-black border border-[#222] rounded-xl text-xs outline-none focus:border-red-600"/>
-                <input type="text" id="v-title" placeholder="Title" class="w-full mb-4 p-3 bg-black border border-[#222] rounded-xl text-xs outline-none focus:border-red-600"/>
-                <button onclick="publishNow()" class="w-full bg-red-600 p-3 rounded-xl font-black text-xs">PUBLISH TO FEED</button>
+            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3">
+                <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Post New Content</p>
+                <input type="text" id="v-id" placeholder="Video URL (YT/Direct)" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                <input type="text" id="v-title" placeholder="Catchy Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
+                <textarea id="v-desc" placeholder="Write something about this video... #Sainiwaala" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-20 resize-none"></textarea>
+                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs hover:bg-red-700 active:scale-95 transition-all">PUBLISH TO FEED</button>
             </div>
         </div>
 
-        <div id="video-list" class="p-6 space-y-10">
+        <div id="video-list" class="p-6 space-y-12">
             </div>
     </div>
 
     <script>
-        // Firebase Config (Keep your existing config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
-            authDomain: "sainiwalaainfulencer.firebaseapp.com",
-            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
-            projectId: "sainiwalaainfulencer",
-            storageBucket: "sainiwalaainfulencer.firebasestorage.app",
-            messagingSenderId: "116125275008",
-            appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
-        let ytPlayers = {};
-        let currentBannerMode = 'image';
+        // ... (Keep existing Firebase Initialization and Auth Logic) ...
 
-        // --- AUTH & PROFILE ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('owner-tools').classList.remove('hidden');
-                loadProfile(user.uid);
-                loadVideos(user.uid);
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
-        });
+        function publishNow() {
+            const user = auth.currentUser;
+            const link = document.getElementById('v-id').value;
+            const title = document.getElementById('v-title').value;
+            const desc = document.getElementById('v-desc').value; // Get Description
+            const btn = document.getElementById('pub-btn');
 
-        function loadProfile(uid) {
-            db.ref('users/' + uid).on('value', snap => {
-                const d = snap.val() || {};
-                document.getElementById('display-name').innerText = d.username || "Creator";
-                document.getElementById('user-handle').innerText = "@" + (d.username || "creator");
-                document.getElementById('user-bio').innerText = d.bio || "No bio yet.";
-                document.getElementById('user-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                
-                // Load Socials
-                if(d.ig) { document.getElementById('link-ig-post').href = d.ig; document.getElementById('link-ig-post').classList.remove('hidden'); }
-                if(d.yt) { document.getElementById('link-yt-post').href = d.yt; document.getElementById('link-yt-post').classList.remove('hidden'); }
-                if(d.tw) { document.getElementById('link-tw-post').href = d.tw; document.getElementById('link-tw-post').classList.remove('hidden'); }
+            if(!link || !title) return alert("Link and Title are required!");
 
-                // Load Banner (Image or Color)
-                const bannerDisplay = document.getElementById('banner-display');
-                const bannerImg = document.getElementById('user-banner-img');
-                const bannerText = document.getElementById('user-banner-text');
+            btn.innerText = "UPLOADING...";
+            btn.disabled = true;
 
-                if(d.bannerMode === 'color') {
-                    bannerDisplay.style.background = d.bannerColor || "#800000";
-                    bannerText.innerText = d.bannerText || "SAINIWALAA";
-                    bannerText.style.color = d.bannerTextColor || "#ffffff";
-                    bannerText.classList.remove('hidden');
-                    bannerImg.classList.add('hidden');
-                } else {
-                    bannerDisplay.style.background = "#111";
-                    bannerImg.src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
-                    bannerImg.classList.remove('hidden');
-                    bannerText.classList.add('hidden');
-                }
+            db.ref('videos').push({
+                uid: user.uid,
+                username: document.getElementById('display-name').innerText,
+                videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
+                title: title,
+                desc: desc || "", // Save Description
+                likes: 0,
+                timestamp: Date.now()
+            }).then(() => {
+                document.getElementById('v-id').value = "";
+                document.getElementById('v-title').value = "";
+                document.getElementById('v-desc').value = "";
+                btn.innerText = "PUBLISH TO FEED";
+                btn.disabled = false;
             });
         }
-
-        // Helper: Convert file to Base64 (for easy firebase storage without storage bucket)
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        function setBannerMode(mode) {
-            currentBannerMode = mode;
-            const imgBtn = document.getElementById('btn-mode-image');
-            const colorBtn = document.getElementById('btn-mode-color');
-            const imgInput = document.getElementById('banner-image-input');
-            const colorInput = document.getElementById('banner-color-input');
-
-            if(mode === 'image') {
-                imgBtn.className = "flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs";
-                colorBtn.className = "flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs";
-                imgInput.classList.remove('hidden');
-                colorInput.classList.add('hidden');
-            } else {
-                colorBtn.className = "flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs";
-                imgBtn.className = "flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs";
-                colorInput.classList.remove('hidden');
-                imgInput.classList.add('hidden');
-            }
-        }
-
-        async function saveProfile() {
-            const uid = auth.currentUser.uid;
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.innerText = "SAVING...";
-            saveBtn.disabled = true;
-
-            let updateData = {
-                bio: document.getElementById('edit-bio').value,
-                ig: document.getElementById('edit-ig').value,
-                yt: document.getElementById('edit-yt').value,
-                tw: document.getElementById('edit-tw').value,
-                bannerMode: currentBannerMode
-            };
-
-            // Handle Avatar Upload
-            const avatarFile = document.getElementById('edit-avatar-file').files[0];
-            if(avatarFile) updateData.avatar = await fileToBase64(avatarFile);
-
-            if(currentBannerMode === 'image') {
-                const bannerFile = document.getElementById('edit-banner-file').files[0];
-                if(bannerFile) updateData.banner = await fileToBase64(bannerFile);
-            } else {
-                updateData.bannerColor = document.getElementById('edit-banner-color').value;
-                updateData.bannerText = document.getElementById('edit-banner-text').value;
-                updateData.bannerTextColor = document.getElementById('edit-banner-text-color').value;
-            }
-
-            db.ref('users/' + uid).update(updateData).then(() => {
-                saveBtn.innerText = "SAVE CHANGES";
-                saveBtn.disabled = false;
-                closeEdit();
-            });
-        }
-
-        // --- Original Video Player & Other Functions (KEEP THEM UNCHANGED) ---
-        function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
 
         function loadVideos(uid) {
             db.ref('videos').on('value', snap => {
@@ -280,34 +107,44 @@
                     const card = `
                         <div class="v-card space-y-4">
                             <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-red-600 px-1">
-                                <span>${v.username}</span>
-                                ${isOwner ? `<button onclick="deleteVideo('${key}')">Remove</button>` : ''}
+                                <span class="flex items-center gap-2"><div class="h-2 w-2 rounded-full bg-red-600 animate-pulse"></div>${v.username}</span>
+                                ${isOwner ? `<button onclick="deleteVideo('${key}')" class="text-gray-600">Remove</button>` : ''}
                             </div>
-                            <div class="v-frame rounded-[25px] border border-[#222]">
-                                ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId.replace('blob','raw')}" loop playsinline></video>`}
+                            
+                            <div class="v-frame rounded-[35px] border border-[#1a1a1a] shadow-2xl relative">
+                                ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline></video>`}
+                                
+                                <div class="absolute bottom-0 left-0 right-0 p-6 desc-gradient pointer-events-none">
+                                    <h3 class="text-sm font-black italic uppercase text-white mb-1">${v.title}</h3>
+                                    <p class="text-[11px] text-gray-300 leading-tight line-clamp-2">${v.desc || ''}</p>
+                                </div>
                             </div>
+
                             <div class="space-y-4 px-2">
                                 <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill"></div></div>
                                 <div class="flex justify-between items-center">
-                                    <div class="flex gap-8 text-lg">
-                                        <i class="fa-solid fa-play cursor-pointer" id="p-btn-${key}" onclick="togglePlay('${key}', '${type}')"></i>
-                                        <i class="fa-solid fa-volume-xmark cursor-pointer" id="m-btn-${key}" onclick="toggleMute('${key}', '${type}')"></i>
+                                    <div class="flex gap-8 text-xl">
+                                        <button onclick="togglePlay('${key}', '${type}')"><i class="fa-solid fa-play" id="p-btn-${key}"></i></button>
+                                        <button onclick="toggleMute('${key}', '${type}')"><i class="fa-solid fa-volume-xmark" id="m-btn-${key}"></i></button>
                                     </div>
-                                    <div class="flex gap-4 text-xs font-bold text-gray-500">
-                                        <span><i class="fa-regular fa-heart"></i> ${v.likes || 0}</span>
-                                        <span><i class="fa-regular fa-comment"></i></span>
+                                    <div class="flex gap-5 items-center">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fa-regular fa-heart text-xl"></i>
+                                            <span class="text-[9px] font-bold text-gray-500 mt-1">${v.likes || 0}</span>
+                                        </div>
+                                        <i class="fa-regular fa-paper-plane text-xl text-gray-400"></i>
                                     </div>
                                 </div>
-                                <p class="text-xs font-bold uppercase tracking-tight">${v.title}</p>
                             </div>
                         </div>`;
                     list.innerHTML += card;
 
+                    // Re-init Players (Same as previous logic)
                     if(type === 'yt') {
                         setTimeout(() => {
                             ytPlayers[key] = new YT.Player('yt-' + key, {
                                 videoId: getYTID(v.videoId),
-                                playerVars: { 'controls': 0, 'modestbranding': 1, 'playsinline': 1 },
+                                playerVars: { 'controls': 0, 'modestbranding': 1, 'playsinline': 1, 'rel':0 },
                                 events: { 'onStateChange': (e) => {
                                     document.getElementById('p-btn-'+key).className = (e.data === 1) ? "fa-solid fa-pause" : "fa-solid fa-play";
                                     if(e.data === 1) startYTTrack(key);
@@ -317,84 +154,14 @@
                     } else {
                         setTimeout(() => {
                             const vd = document.getElementById('vid-' + key);
-                            if(vd) { vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; }; }
+                            if(vd) vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; };
                         }, 500);
                     }
                 });
             });
         }
-
-        function getYTID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : url;
-        }
-
-        function togglePlay(key, type) {
-            if(type === 'direct') {
-                const v = document.getElementById('vid-'+key);
-                if(v.paused) { stopAll(); v.play(); } else v.pause();
-                document.getElementById('p-btn-'+key).className = v.paused ? "fa-solid fa-play" : "fa-solid fa-pause";
-            } else {
-                const p = ytPlayers[key];
-                if(p.getPlayerState() === 1) p.pauseVideo(); else { stopAll(); p.playVideo(); }
-            }
-        }
-
-        function toggleMute(key, type) {
-            const btn = document.getElementById('m-btn-'+key);
-            if(type === 'direct') {
-                const v = document.getElementById('vid-'+key);
-                v.muted = !v.muted;
-                btn.className = v.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
-            } else {
-                const p = ytPlayers[key];
-                if(p.isMuted()) { p.unMute(); btn.className = "fa-solid fa-volume-high"; }
-                else { p.mute(); btn.className = "fa-solid fa-volume-xmark"; }
-            }
-        }
-
-        function stopAll() {
-            Object.values(ytPlayers).forEach(p => p.pauseVideo());
-            document.querySelectorAll('video').forEach(v => v.pause());
-            document.querySelectorAll('.fa-pause').forEach(i => i.className = "fa-solid fa-play");
-        }
-
-        function startYTTrack(key) {
-            const p = ytPlayers[key];
-            const t = setInterval(() => {
-                if(!p || p.getPlayerState() !== 1) { clearInterval(t); return; }
-                const fill = document.getElementById('fill-'+key);
-                if(fill) fill.style.width = (p.getCurrentTime()/p.getDuration())*100 + "%";
-            }, 500);
-        }
-
-        function seek(e, key, type) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const per = (e.clientX - rect.left) / rect.width;
-            if(type === 'direct') document.getElementById('vid-'+key).currentTime = document.getElementById('vid-'+key).duration * per;
-            else ytPlayers[key].seekTo(ytPlayers[key].getDuration() * per);
-        }
-
-        function publishNow() {
-            const user = auth.currentUser;
-            const link = document.getElementById('v-id').value;
-            const title = document.getElementById('v-title').value;
-            if(!link) return;
-            db.ref('videos').push({ uid: user.uid, username: document.getElementById('display-name').innerText, videoId: link, title: title, timestamp: Date.now() });
-            document.getElementById('v-id').value = ""; document.getElementById('v-title').value = "";
-        }
-
-        function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-            else auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                db.ref('users/' + u.user.uid).set({ username: email.split('@')[0], bio: "New Creator", banner: "", avatar: "", bannerMode: "image" });
-            });
-        }
-
-        function deleteVideo(key) { if(confirm("Remove video?")) db.ref('videos/' + key).remove(); }
+        
+        // ... (Keep all other functions: getYTID, togglePlay, toggleMute, stopAll, startYTTrack, seek, handleAuth, deleteVideo, openEdit, closeEdit, saveProfile) ...
     </script>
 </body>
 </html>
