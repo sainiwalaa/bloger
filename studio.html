@@ -26,6 +26,7 @@
     <div id="auth-screen" class="fixed inset-0 z-[600] bg-black flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-sm space-y-6 text-center">
             <h1 class="text-5xl font-black text-red-600 italic mb-8 tracking-tighter">SAINIWALAA</h1>
+            <input type="text" id="reg-username" placeholder="Choose Unique Username" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none mb-2 focus:border-red-600"/>
             <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
             <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
             <div class="flex gap-2">
@@ -38,53 +39,68 @@
     <div id="edit-modal" class="fixed inset-0 z-[500] glass-dark flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md bg-[#111] border border-[#222] p-6 rounded-[35px] space-y-5 modal-scroll">
             <div class="flex justify-between items-center">
-                <h3 class="text-xl font-black uppercase text-red-600 italic">Edit Profile</h3>
+                <h3 class="text-xl font-black uppercase text-red-600 italic">Settings</h3>
                 <button onclick="auth.signOut()" class="text-[9px] bg-red-900 px-3 py-1 rounded-full font-bold">LOGOUT</button>
             </div>
+
             <div class="space-y-4">
-                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Avatar & Banner</label>
-                <input type="file" id="edit-avatar-file" accept="image/*" class="text-xs text-gray-500 w-full"/>
-                <input type="file" id="edit-banner-file" accept="image/*" class="text-xs text-gray-500 w-full"/>
-                
-                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Details</label>
-                <input type="text" id="edit-name" placeholder="Display Name" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                <textarea id="edit-bio" placeholder="Bio..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs h-20 outline-none"></textarea>
-                <input type="text" id="edit-ig" placeholder="Instagram URL" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                <div>
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Username (Read Info Below)</label>
+                    <input type="text" id="edit-name" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                    <p id="name-lock-info" class="text-[9px] text-yellow-600 mt-1 font-bold"></p>
+                </div>
+
+                <div class="p-3 bg-black rounded-2xl space-y-3">
+                    <label class="text-[10px] text-gray-500 font-bold uppercase">Banner Style</label>
+                    <div class="flex gap-2">
+                        <button onclick="setBMode('img')" id="btn-bm-img" class="flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold">IMAGE</button>
+                        <button onclick="setBMode('color')" id="btn-bm-clr" class="flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold">COLOR/TEXT</button>
+                    </div>
+                    <div id="inp-bm-img"><input type="file" id="edit-banner-file" class="text-[9px]"/></div>
+                    <div id="inp-bm-clr" class="hidden space-y-2">
+                        <input type="color" id="edit-banner-color" class="w-full h-8 bg-transparent" value="#800000"/>
+                        <input type="text" id="edit-banner-txt" placeholder="Banner Heading" class="w-full p-2 bg-[#111] text-xs rounded-lg outline-none"/>
+                    </div>
+                </div>
+
+                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Profile Photo & Bio</label>
+                <input type="file" id="edit-avatar-file" class="text-[9px] w-full"/>
+                <textarea id="edit-bio" placeholder="Bio..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs h-16 outline-none"></textarea>
             </div>
+
             <div class="flex gap-2 pt-4">
-                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs">CANCEL</button>
-                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs uppercase">Save Profile</button>
+                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs uppercase tracking-widest">Cancel</button>
+                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs uppercase tracking-widest">Save Changes</button>
             </div>
         </div>
     </div>
 
     <div id="main-content" class="max-w-md mx-auto pb-24">
         <div class="relative">
-            <div id="banner-display" class="h-44 w-full bg-[#111] overflow-hidden flex items-center justify-center">
-                <img id="user-banner-img" class="w-full h-full object-cover opacity-60 hidden"/>
-                <h1 id="user-banner-text" class="text-4xl font-black italic uppercase">SAINIWALAA</h1>
+            <div id="banner-box" class="h-44 w-full bg-[#111] overflow-hidden flex items-center justify-center">
+                <img id="view-banner-img" class="w-full h-full object-cover opacity-60 hidden"/>
+                <h1 id="view-banner-txt" class="text-4xl font-black italic uppercase">SAINIWALAA</h1>
             </div>
             <div class="absolute -bottom-12 left-6 flex items-end gap-4">
                 <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111] shadow-2xl">
-                    <img id="user-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-cover"/>
+                    <img id="view-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-cover"/>
                 </div>
                 <div class="mb-3">
-                    <h2 id="display-name" class="text-2xl font-black italic uppercase leading-none">Creator</h2>
-                    <p id="user-handle" class="text-[10px] text-red-600 font-black tracking-widest mt-1 uppercase">@handle</p>
+                    <h2 id="view-name" class="text-2xl font-black italic uppercase leading-none">Creator</h2>
+                    <p id="view-handle" class="text-[10px] text-red-600 font-black tracking-widest mt-1 uppercase">@username</p>
                 </div>
             </div>
-            <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase">Edit Profile</button>
+            <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase">Edit</button>
         </div>
 
-        <div class="mt-16 px-6"><p id="user-bio" class="text-xs text-gray-400 italic">No bio available.</p></div>
+        <div class="mt-16 px-6"><p id="view-bio" class="text-xs text-gray-400 italic">No bio available.</p></div>
 
         <div id="owner-tools" class="px-6 mt-8 hidden">
-            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3 shadow-2xl">
-                <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Post Video</p>
-                <input type="text" id="v-id" placeholder="YouTube or Direct Link" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                <input type="text" id="v-title" placeholder="Catchy Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
-                <textarea id="v-desc" placeholder="Describe your video..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-20 resize-none"></textarea>
-                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs transition-all active:scale-95">PUBLISH TO FEED</button>
+            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3">
+                <input type="text" id="v-id" placeholder="Video Link" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                <input type="text" id="v-title" placeholder="Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
+                <textarea id="v-desc" placeholder="Description..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-16 resize-none"></textarea>
+                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase">Publish</button>
             </div>
         </div>
 
@@ -105,8 +121,10 @@
         const db = firebase.database();
         const auth = firebase.auth();
         let ytPlayers = {};
+        let bMode = 'img';
+        let userStats = {};
 
-        // --- AUTH & LOAD ---
+        // --- AUTH & LOCK LOGIC ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
@@ -115,84 +133,118 @@
                 loadVideos();
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('owner-tools').classList.add('hidden');
             }
         });
 
         function handleAuth(type) {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
-            if(!email || !pass) return alert("Missing Info!");
+            const user = document.getElementById('reg-username').value;
+            if(!email || !pass) return alert("Fill Email & Password!");
             if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-            else auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                db.ref('users/' + u.user.uid).set({ username: email.split('@')[0], bio: "New Sainiwaala Creator" });
-            }).catch(e => alert(e.message));
+            else {
+                if(!user) return alert("Choose a Username first!");
+                auth.createUserWithEmailAndPassword(email, pass).then(u => {
+                    db.ref('users/' + u.user.uid).set({ 
+                        username: user, 
+                        bio: "New Sainiwaala Creator",
+                        nameChangeCount: 0,
+                        lastChangeDate: Date.now(),
+                        bMode: 'img'
+                    });
+                }).catch(e => alert(e.message));
+            }
         }
 
-        // --- PROFILE FUNCTIONS ---
+        // --- PROFILE & BANNER SYSTEM ---
         function loadProfile(uid) {
             db.ref('users/' + uid).on('value', snap => {
                 const d = snap.val() || {};
-                document.getElementById('display-name').innerText = d.username || "Creator";
-                document.getElementById('user-handle').innerText = "@" + (d.username || "user");
-                document.getElementById('user-bio').innerText = d.bio || "No bio yet.";
-                document.getElementById('user-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                if(d.banner) {
-                    document.getElementById('user-banner-img').src = d.banner;
-                    document.getElementById('user-banner-img').classList.remove('hidden');
-                    document.getElementById('user-banner-text').classList.add('hidden');
+                userStats = d;
+                document.getElementById('view-name').innerText = d.username || "Creator";
+                document.getElementById('view-handle').innerText = "@" + (d.username || "user");
+                document.getElementById('view-bio').innerText = d.bio || "No bio yet.";
+                document.getElementById('view-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                document.getElementById('edit-name').value = d.username;
+
+                // Lock Info Logic
+                const nextChangeDate = d.lastChangeDate + (d.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
+                const canChange = Date.now() > nextChangeDate || !d.nameChangeCount;
+                document.getElementById('name-lock-info').innerText = canChange ? "Name change available!" : "Locked until: " + new Date(nextChangeDate).toLocaleDateString();
+
+                // Banner View
+                if(d.bMode === 'color') {
+                    document.getElementById('banner-box').style.background = d.bColor || "#800000";
+                    document.getElementById('view-banner-txt').innerText = d.bText || "SAINIWALAA";
+                    document.getElementById('view-banner-txt').classList.remove('hidden');
+                    document.getElementById('view-banner-img').classList.add('hidden');
+                } else {
+                    document.getElementById('view-banner-img').src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
+                    document.getElementById('view-banner-img').classList.remove('hidden');
+                    document.getElementById('view-banner-txt').classList.add('hidden');
+                    document.getElementById('banner-box').style.background = "#111";
                 }
             });
         }
 
-        function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+        function setBMode(mode) {
+            bMode = mode;
+            document.getElementById('btn-bm-img').className = mode === 'img' ? 'flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold' : 'flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold';
+            document.getElementById('btn-bm-clr').className = mode === 'color' ? 'flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold' : 'flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold';
+            document.getElementById('inp-bm-img').style.display = mode === 'img' ? 'block' : 'none';
+            document.getElementById('inp-bm-clr').style.display = mode === 'color' ? 'block' : 'none';
+        }
 
         async function saveProfile() {
             const uid = auth.currentUser.uid;
             const btn = document.getElementById('save-btn');
-            btn.innerText = "UPDATING...";
+            const newName = document.getElementById('edit-name').value;
             
-            let data = {
-                username: document.getElementById('edit-name').value || document.getElementById('display-name').innerText,
+            let updateData = { 
                 bio: document.getElementById('edit-bio').value,
-                ig: document.getElementById('edit-ig').value
+                bMode: bMode
             };
 
-            const avFile = document.getElementById('edit-avatar-file').files[0];
-            if(avFile) data.avatar = await toBase64(avFile);
-            const bnFile = document.getElementById('edit-banner-file').files[0];
-            if(bnFile) data.banner = await toBase64(bnFile);
+            // Name Lock Implementation
+            if(newName !== userStats.username) {
+                const nextChangeDate = userStats.lastChangeDate + (userStats.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
+                if(userStats.nameChangeCount > 0 && Date.now() < nextChangeDate) {
+                    return alert("Name is LOCKED! Check date.");
+                }
+                updateData.username = newName;
+                updateData.nameChangeCount = (userStats.nameChangeCount || 0) + 1;
+                updateData.lastChangeDate = Date.now();
+            }
 
-            db.ref('users/' + uid).update(data).then(() => {
-                btn.innerText = "SAVE PROFILE";
-                closeEdit();
-            });
+            btn.innerText = "WAIT...";
+            const av = document.getElementById('edit-avatar-file').files[0];
+            if(av) updateData.avatar = await toBase64(av);
+
+            if(bMode === 'img') {
+                const bn = document.getElementById('edit-banner-file').files[0];
+                if(bn) updateData.banner = await toBase64(bn);
+            } else {
+                updateData.bColor = document.getElementById('edit-banner-color').value;
+                updateData.bText = document.getElementById('edit-banner-txt').value;
+            }
+
+            db.ref('users/' + uid).update(updateData).then(() => { btn.innerText = "SAVE CHANGES"; closeEdit(); });
         }
 
-        const toBase64 = file => new Promise((res, rej) => {
-            const r = new FileReader(); r.readAsDataURL(file);
-            r.onload = () => res(r.result); r.onerror = rej;
-        });
-
-        // --- FEED & LIKES ---
+        // --- GLOBAL FEED (NO REFRESH) ---
         function publishNow() {
-            const btn = document.getElementById('pub-btn');
             const link = document.getElementById('v-id').value;
             const title = document.getElementById('v-title').value;
-            const desc = document.getElementById('v-desc').value;
-            if(!link || !title) return alert("Fill all fields!");
+            if(!link || !title) return;
 
-            btn.innerText = "PUBLISHING...";
             db.ref('videos').push({
                 uid: auth.currentUser.uid,
-                username: document.getElementById('display-name').innerText,
+                username: userStats.username,
                 videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
                 title: title,
-                desc: desc || "",
+                desc: document.getElementById('v-desc').value || "",
                 timestamp: Date.now()
             }).then(() => {
-                btn.innerText = "PUBLISH TO FEED";
                 document.getElementById('v-id').value = "";
                 document.getElementById('v-title').value = "";
                 document.getElementById('v-desc').value = "";
@@ -208,7 +260,6 @@
 
                 Object.keys(data).reverse().forEach(key => {
                     const v = data[key];
-                    const isOwner = auth.currentUser.uid === v.uid;
                     const likesCount = v.likes ? Object.keys(v.likes).length : 0;
                     const isLiked = v.likes && v.likes[auth.currentUser.uid] ? 'text-red-600' : 'text-gray-500';
                     let type = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be')) ? 'yt' : 'direct';
@@ -217,45 +268,41 @@
                         <div class="v-card space-y-4">
                             <div class="flex justify-between px-2 text-[10px] font-bold text-red-600 uppercase">
                                 <span>${v.username}</span>
-                                ${isOwner ? `<button onclick="deleteVideo('${key}')">Remove</button>` : ''}
+                                ${auth.currentUser.uid === v.uid ? `<button onclick="deleteVideo('${key}')">Remove</button>` : ''}
                             </div>
                             <div class="v-frame relative">
-                                ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline></video>`}
+                                ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline onclick="togglePlay('${key}','direct')"></video>`}
                                 <div class="absolute inset-0 pointer-events-none desc-gradient flex flex-col justify-end p-6">
                                     <h3 class="text-sm font-black italic uppercase">${v.title}</h3>
-                                    <p class="text-[10px] text-gray-400 mt-1">${v.desc}</p>
+                                    <p class="text-[9px] text-gray-400 mt-1">${v.desc}</p>
                                 </div>
                             </div>
                             <div class="px-2 space-y-3">
-                                <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill"></div></div>
-                                <div class="flex justify-between items-center text-xl">
-                                    <div class="flex gap-6">
+                                <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill" style="width:0%"></div></div>
+                                <div class="flex justify-between items-center px-2">
+                                    <div class="flex gap-6 text-xl">
                                         <i class="fa-solid fa-play" id="p-btn-${key}" onclick="togglePlay('${key}', '${type}')"></i>
-                                        <i class="fa-solid fa-volume-xmark" id="m-btn-${key}" onclick="toggleMute('${key}', '${type}')"></i>
+                                        <i class="fa-solid fa-comment text-gray-500" onclick="alert('Comments coming in v11!')"></i>
                                     </div>
                                     <div class="flex items-center gap-2 cursor-pointer" onclick="handleLike('${key}')">
-                                        <span class="text-xs font-bold ${isLiked}">${likesCount}</span>
+                                        <span class="text-xs font-black ${isLiked}">${likesCount}</span>
                                         <i class="fa-solid fa-heart ${isLiked}"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
-                    
                     renderPlayer(key, v.videoId, type);
                 });
             });
         }
 
+        // --- CORE HELPERS ---
         function handleLike(vKey) {
             const uid = auth.currentUser.uid;
             const ref = db.ref(`videos/${vKey}/likes/${uid}`);
-            ref.once('value', s => {
-                if(s.exists()) ref.remove(); // Unlike
-                else ref.set(true); // Like
-            });
+            ref.once('value', s => { s.exists() ? ref.remove() : ref.set(true); });
         }
 
-        // --- PLAYERS (RE-FIXED) ---
         function renderPlayer(key, url, type) {
             if(type === 'yt') {
                 setTimeout(() => {
@@ -267,12 +314,12 @@
                             if(e.data === 1) startYTTrack(key);
                         }}
                     });
-                }, 500);
+                }, 400);
             } else {
                 setTimeout(() => {
                     const vd = document.getElementById('vid-' + key);
                     if(vd) vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; };
-                }, 500);
+                }, 400);
             }
         }
 
@@ -290,18 +337,6 @@
             } else {
                 const p = ytPlayers[key];
                 if(p.getPlayerState() === 1) p.pauseVideo(); else { stopAll(); p.playVideo(); }
-            }
-        }
-
-        function toggleMute(key, type) {
-            const btn = document.getElementById('m-btn-'+key);
-            if(type === 'direct') {
-                const v = document.getElementById('vid-'+key);
-                v.muted = !v.muted; btn.className = v.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
-            } else {
-                const p = ytPlayers[key];
-                if(p.isMuted()) { p.unMute(); btn.className = "fa-solid fa-volume-high"; }
-                else { p.mute(); btn.className = "fa-solid fa-volume-xmark"; }
             }
         }
 
@@ -327,6 +362,9 @@
             else ytPlayers[key].seekTo(ytPlayers[key].getDuration() * per);
         }
 
+        function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
+        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+        const toBase64 = f => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); r.onerror = rej; });
         function deleteVideo(key) { if(confirm("Remove?")) db.ref('videos/' + key).remove(); }
     </script>
 </body>
