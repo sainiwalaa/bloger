@@ -127,6 +127,22 @@
             <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
             <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
         </section>
+        <div id="dynamic-sitemap" class="hidden" style="display:none;">
+    </div>
+
+<script>
+// initApp() function ke andar ye logic add karein
+function generateSitemapLinks(snap) {
+    const sitemapDiv = document.getElementById('dynamic-sitemap');
+    let links = '<h3>All Creators</h3>';
+    snap.forEach(doc => {
+        const d = doc.data();
+        const profileLink = `https://sainiwalaa.web.app/?creator=${doc.id}`;
+        links += `<a href="${profileLink}">${d.name || 'Creator'} Store</a> `;
+    });
+    sitemapDiv.innerHTML = links;
+}
+</script>
 
         <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
             <div class="text-center max-w-4xl mx-auto px-6">
