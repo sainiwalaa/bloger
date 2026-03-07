@@ -15,10 +15,11 @@
         .v-frame { width: 100%; aspect-ratio: 9/16; background: #050505; position: relative; overflow: hidden; border-radius: 35px; border: 1px solid #1a1a1a; }
         .v-frame iframe, .v-frame video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; }
         .seek-bar { width: 100%; height: 4px; background: #222; position: relative; cursor: pointer; border-radius: 10px; }
-        .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+        .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: width 0.1s linear; }
         .desc-gradient { background: linear-gradient(0deg, rgba(0,0,0,1) 0%, transparent 100%); }
         ::-webkit-scrollbar { width: 0px; }
         .modal-scroll { max-height: 85vh; overflow-y: auto; scrollbar-width: none; }
+        .comment-box { max-height: 150px; overflow-y: auto; scrollbar-width: none; font-size: 10px; border-top: 1px solid #1a1a1a; margin-top: 10px; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -26,12 +27,12 @@
     <div id="auth-screen" class="fixed inset-0 z-[600] bg-black flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-sm space-y-6 text-center">
             <h1 class="text-5xl font-black text-red-600 italic mb-8 tracking-tighter">SAINIWALAA</h1>
-            <input type="text" id="reg-username" placeholder="Choose Unique Username" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none mb-2 focus:border-red-600"/>
+            <input type="text" id="reg-username" placeholder="Unique Username" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
             <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
             <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
             <div class="flex gap-2">
-                <button onclick="handleAuth('login')" class="flex-1 bg-white text-black font-black p-4 rounded-2xl text-xs">LOGIN</button>
-                <button onclick="handleAuth('signup')" class="flex-1 bg-red-600 text-white font-black p-4 rounded-2xl text-xs">SIGNUP</button>
+                <button onclick="handleAuth('login')" class="flex-1 bg-white text-black font-black p-4 rounded-2xl text-xs uppercase">Login</button>
+                <button onclick="handleAuth('signup')" class="flex-1 bg-red-600 text-white font-black p-4 rounded-2xl text-xs uppercase">Signup</button>
             </div>
         </div>
     </div>
@@ -44,17 +45,20 @@
             </div>
 
             <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Username (Read Info Below)</label>
-                    <input type="text" id="edit-name" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                    <p id="name-lock-info" class="text-[9px] text-yellow-600 mt-1 font-bold"></p>
-                </div>
+                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Username</label>
+                <input type="text" id="edit-name" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                <p id="name-lock-info" class="text-[9px] text-yellow-600 mt-1 font-bold"></p>
+
+                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Social Links</label>
+                <input type="text" id="edit-ig" placeholder="Instagram Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
+                <input type="text" id="edit-yt" placeholder="YouTube Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
+                <input type="text" id="edit-fb" placeholder="Facebook Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
 
                 <div class="p-3 bg-black rounded-2xl space-y-3">
                     <label class="text-[10px] text-gray-500 font-bold uppercase">Banner Style</label>
                     <div class="flex gap-2">
                         <button onclick="setBMode('img')" id="btn-bm-img" class="flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold">IMAGE</button>
-                        <button onclick="setBMode('color')" id="btn-bm-clr" class="flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold">COLOR/TEXT</button>
+                        <button onclick="setBMode('color')" id="btn-bm-clr" class="flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold">COLOR</button>
                     </div>
                     <div id="inp-bm-img"><input type="file" id="edit-banner-file" class="text-[9px]"/></div>
                     <div id="inp-bm-clr" class="hidden space-y-2">
@@ -69,8 +73,8 @@
             </div>
 
             <div class="flex gap-2 pt-4">
-                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs uppercase tracking-widest">Cancel</button>
-                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs uppercase tracking-widest">Save Changes</button>
+                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs uppercase">Cancel</button>
+                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs uppercase">Save</button>
             </div>
         </div>
     </div>
@@ -93,14 +97,21 @@
             <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase">Edit</button>
         </div>
 
-        <div class="mt-16 px-6"><p id="view-bio" class="text-xs text-gray-400 italic">No bio available.</p></div>
+        <div class="mt-16 px-6 space-y-3">
+            <p id="view-bio" class="text-xs text-gray-400 italic">No bio available.</p>
+            <div class="flex gap-4 text-xl" id="view-socials">
+                <a id="link-ig" href="#" class="hidden text-pink-600"><i class="fa-brands fa-instagram"></i></a>
+                <a id="link-yt" href="#" class="hidden text-red-600"><i class="fa-brands fa-youtube"></i></a>
+                <a id="link-fb" href="#" class="hidden text-blue-600"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+        </div>
 
         <div id="owner-tools" class="px-6 mt-8 hidden">
-            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3">
-                <input type="text" id="v-id" placeholder="Video Link" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                <input type="text" id="v-title" placeholder="Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
-                <textarea id="v-desc" placeholder="Description..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-16 resize-none"></textarea>
-                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase">Publish</button>
+            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3 shadow-xl">
+                <input type="text" id="v-id" placeholder="Video Link (YT/GitHub)" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                <input type="text" id="v-title" placeholder="Video Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
+                <textarea id="v-desc" placeholder="Write description..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-16 resize-none"></textarea>
+                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase transition-all active:scale-95">Publish Now</button>
             </div>
         </div>
 
@@ -124,7 +135,7 @@
         let bMode = 'img';
         let userStats = {};
 
-        // --- AUTH & LOCK LOGIC ---
+        // --- AUTH & LOAD ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
@@ -133,6 +144,7 @@
                 loadVideos();
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('owner-tools').classList.add('hidden');
             }
         });
 
@@ -140,23 +152,17 @@
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
             const user = document.getElementById('reg-username').value;
-            if(!email || !pass) return alert("Fill Email & Password!");
+            if(!email || !pass) return alert("Fill Email/Pass!");
             if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
             else {
-                if(!user) return alert("Choose a Username first!");
+                if(!user) return alert("Set Username!");
                 auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                    db.ref('users/' + u.user.uid).set({ 
-                        username: user, 
-                        bio: "New Sainiwaala Creator",
-                        nameChangeCount: 0,
-                        lastChangeDate: Date.now(),
-                        bMode: 'img'
-                    });
+                    db.ref('users/' + u.user.uid).set({ username: user, nameChangeCount: 0, lastChangeDate: Date.now(), bMode: 'img' });
                 }).catch(e => alert(e.message));
             }
         }
 
-        // --- PROFILE & BANNER SYSTEM ---
+        // --- PROFILE SYSTEM ---
         function loadProfile(uid) {
             db.ref('users/' + uid).on('value', snap => {
                 const d = snap.val() || {};
@@ -165,14 +171,20 @@
                 document.getElementById('view-handle').innerText = "@" + (d.username || "user");
                 document.getElementById('view-bio').innerText = d.bio || "No bio yet.";
                 document.getElementById('view-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                document.getElementById('edit-name').value = d.username;
+                
+                // Social Links View
+                const sl = ['ig', 'yt', 'fb'];
+                sl.forEach(s => {
+                    const el = document.getElementById('link-'+s);
+                    if(d[s]) { el.href = d[s]; el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
+                });
 
-                // Lock Info Logic
+                // Name Lock Logic
                 const nextChangeDate = d.lastChangeDate + (d.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
                 const canChange = Date.now() > nextChangeDate || !d.nameChangeCount;
                 document.getElementById('name-lock-info').innerText = canChange ? "Name change available!" : "Locked until: " + new Date(nextChangeDate).toLocaleDateString();
 
-                // Banner View
+                // Banner
                 if(d.bMode === 'color') {
                     document.getElementById('banner-box').style.background = d.bColor || "#800000";
                     document.getElementById('view-banner-txt').innerText = d.bText || "SAINIWALAA";
@@ -187,14 +199,6 @@
             });
         }
 
-        function setBMode(mode) {
-            bMode = mode;
-            document.getElementById('btn-bm-img').className = mode === 'img' ? 'flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold' : 'flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold';
-            document.getElementById('btn-bm-clr').className = mode === 'color' ? 'flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold' : 'flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold';
-            document.getElementById('inp-bm-img').style.display = mode === 'img' ? 'block' : 'none';
-            document.getElementById('inp-bm-clr').style.display = mode === 'color' ? 'block' : 'none';
-        }
-
         async function saveProfile() {
             const uid = auth.currentUser.uid;
             const btn = document.getElementById('save-btn');
@@ -202,24 +206,23 @@
             
             let updateData = { 
                 bio: document.getElementById('edit-bio').value,
+                ig: document.getElementById('edit-ig').value,
+                yt: document.getElementById('edit-yt').value,
+                fb: document.getElementById('edit-fb').value,
                 bMode: bMode
             };
 
-            // Name Lock Implementation
             if(newName !== userStats.username) {
                 const nextChangeDate = userStats.lastChangeDate + (userStats.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
-                if(userStats.nameChangeCount > 0 && Date.now() < nextChangeDate) {
-                    return alert("Name is LOCKED! Check date.");
-                }
+                if(userStats.nameChangeCount > 0 && Date.now() < nextChangeDate) return alert("Username Locked!");
                 updateData.username = newName;
                 updateData.nameChangeCount = (userStats.nameChangeCount || 0) + 1;
                 updateData.lastChangeDate = Date.now();
             }
 
-            btn.innerText = "WAIT...";
+            btn.innerText = "...";
             const av = document.getElementById('edit-avatar-file').files[0];
             if(av) updateData.avatar = await toBase64(av);
-
             if(bMode === 'img') {
                 const bn = document.getElementById('edit-banner-file').files[0];
                 if(bn) updateData.banner = await toBase64(bn);
@@ -227,15 +230,14 @@
                 updateData.bColor = document.getElementById('edit-banner-color').value;
                 updateData.bText = document.getElementById('edit-banner-txt').value;
             }
-
-            db.ref('users/' + uid).update(updateData).then(() => { btn.innerText = "SAVE CHANGES"; closeEdit(); });
+            db.ref('users/' + uid).update(updateData).then(() => { btn.innerText = "SAVE"; closeEdit(); });
         }
 
-        // --- GLOBAL FEED (NO REFRESH) ---
+        // --- FEED & COMMENTS ---
         function publishNow() {
             const link = document.getElementById('v-id').value;
             const title = document.getElementById('v-title').value;
-            if(!link || !title) return;
+            if(!link || !title) return alert("Fill fields!");
 
             db.ref('videos').push({
                 uid: auth.currentUser.uid,
@@ -245,9 +247,7 @@
                 desc: document.getElementById('v-desc').value || "",
                 timestamp: Date.now()
             }).then(() => {
-                document.getElementById('v-id').value = "";
-                document.getElementById('v-title').value = "";
-                document.getElementById('v-desc').value = "";
+                document.getElementById('v-id').value = ""; document.getElementById('v-title').value = "";
             });
         }
 
@@ -265,8 +265,8 @@
                     let type = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be')) ? 'yt' : 'direct';
 
                     list.innerHTML += `
-                        <div class="v-card space-y-4">
-                            <div class="flex justify-between px-2 text-[10px] font-bold text-red-600 uppercase">
+                        <div class="v-card space-y-4 bg-[#050505] p-2 rounded-[40px] border border-[#111]">
+                            <div class="flex justify-between px-4 text-[10px] font-bold text-red-600 uppercase">
                                 <span>${v.username}</span>
                                 ${auth.currentUser.uid === v.uid ? `<button onclick="deleteVideo('${key}')">Remove</button>` : ''}
                             </div>
@@ -274,35 +274,71 @@
                                 ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline onclick="togglePlay('${key}','direct')"></video>`}
                                 <div class="absolute inset-0 pointer-events-none desc-gradient flex flex-col justify-end p-6">
                                     <h3 class="text-sm font-black italic uppercase">${v.title}</h3>
-                                    <p class="text-[9px] text-gray-400 mt-1">${v.desc}</p>
                                 </div>
                             </div>
-                            <div class="px-2 space-y-3">
-                                <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill" style="width:0%"></div></div>
-                                <div class="flex justify-between items-center px-2">
-                                    <div class="flex gap-6 text-xl">
+                            <div class="px-4 pb-4 space-y-3">
+                                <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill"></div></div>
+                                <div class="flex justify-between items-center text-xl">
+                                    <div class="flex gap-6">
                                         <i class="fa-solid fa-play" id="p-btn-${key}" onclick="togglePlay('${key}', '${type}')"></i>
-                                        <i class="fa-solid fa-comment text-gray-500" onclick="alert('Comments coming in v11!')"></i>
+                                        <i class="fa-solid fa-message text-gray-500" onclick="toggleCommentSec('${key}')"></i>
                                     </div>
-                                    <div class="flex items-center gap-2 cursor-pointer" onclick="handleLike('${key}')">
+                                    <div class="flex items-center gap-2" onclick="handleLike('${key}')">
                                         <span class="text-xs font-black ${isLiked}">${likesCount}</span>
                                         <i class="fa-solid fa-heart ${isLiked}"></i>
+                                    </div>
+                                </div>
+                                <div id="comment-sec-${key}" class="hidden">
+                                    <div id="comment-list-${key}" class="comment-box"></div>
+                                    <div class="flex gap-2 mt-2">
+                                        <input type="text" id="inp-msg-${key}" placeholder="Add comment..." class="flex-1 bg-black border border-[#222] p-2 rounded-lg text-[10px] outline-none"/>
+                                        <button onclick="postComment('${key}')" class="bg-red-600 px-3 rounded-lg text-[10px] font-bold">POST</button>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
                     renderPlayer(key, v.videoId, type);
+                    loadComments(key);
                 });
             });
         }
 
-        // --- CORE HELPERS ---
+        // --- SOCIAL LOGIC ---
         function handleLike(vKey) {
             const uid = auth.currentUser.uid;
             const ref = db.ref(`videos/${vKey}/likes/${uid}`);
             ref.once('value', s => { s.exists() ? ref.remove() : ref.set(true); });
         }
 
+        function toggleCommentSec(key) {
+            const el = document.getElementById(`comment-sec-${key}`);
+            el.classList.toggle('hidden');
+        }
+
+        function postComment(key) {
+            const msg = document.getElementById(`inp-msg-${key}`).value;
+            if(!msg) return;
+            db.ref(`videos/${key}/comments`).push({
+                user: userStats.username,
+                text: msg,
+                timestamp: Date.now()
+            }).then(() => { document.getElementById(`inp-msg-${key}`).value = ""; });
+        }
+
+        function loadComments(key) {
+            db.ref(`videos/${key}/comments`).on('value', snap => {
+                const box = document.getElementById(`comment-list-${key}`);
+                if(!box) return;
+                box.innerHTML = "";
+                snap.forEach(child => {
+                    const c = child.val();
+                    box.innerHTML += `<div class="mb-1"><span class="text-red-600 font-bold">${c.user}:</span> <span class="text-gray-300">${c.text}</span></div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        // --- HELPERS ---
         function renderPlayer(key, url, type) {
             if(type === 'yt') {
                 setTimeout(() => {
@@ -314,19 +350,13 @@
                             if(e.data === 1) startYTTrack(key);
                         }}
                     });
-                }, 400);
+                }, 500);
             } else {
                 setTimeout(() => {
                     const vd = document.getElementById('vid-' + key);
                     if(vd) vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; };
-                }, 400);
+                }, 500);
             }
-        }
-
-        function getYTID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : url;
         }
 
         function togglePlay(key, type) {
@@ -362,10 +392,12 @@
             else ytPlayers[key].seekTo(ytPlayers[key].getDuration() * per);
         }
 
+        function getYTID(u) { const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/; const m = u.match(reg); return (m && m[2].length === 11) ? m[2] : u; }
         function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+        function setBMode(m) { bMode = m; document.getElementById('inp-bm-img').style.display = m === 'img' ? 'block' : 'none'; document.getElementById('inp-bm-clr').style.display = m === 'color' ? 'block' : 'none'; }
         const toBase64 = f => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); r.onerror = rej; });
-        function deleteVideo(key) { if(confirm("Remove?")) db.ref('videos/' + key).remove(); }
+        function deleteVideo(k) { if(confirm("Remove?")) db.ref('videos/' + k).remove(); }
     </script>
 </body>
 </html>
