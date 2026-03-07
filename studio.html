@@ -1,52 +1,71 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8"/><title>SAINIWALAA | Studio</title>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SAINIWALAA | Creator Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { background: #050505; color: white; font-family: sans-serif; }</style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
 </head>
-<body class="p-6">
+<body class="bg-[#050505] text-white p-6 font-sans">
     <div class="max-w-md mx-auto">
-        <h2 class="text-[#d4af37] text-2xl font-bold mb-6 text-center">CREATOR STUDIO</h2>
+        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 tracking-tighter">CREATOR STUDIO</h1>
         
-        <div id="reg-form" class="space-y-4">
-            <input type="text" id="user-name" placeholder="Apna Naam Likhein" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl outline-none focus:border-[#d4af37]"/>
-            <button onclick="saveUser()" class="w-full bg-[#d4af37] text-black font-bold p-4 rounded-xl">OPEN MY STUDIO</button>
+        <div id="reg-area" class="space-y-4">
+            <div class="bg-[#111] p-6 rounded-3xl border border-[#222]">
+                <p class="text-gray-400 text-sm mb-4">Pehli baar? Apna Brand Name set karein:</p>
+                <input type="text" id="user-name" placeholder="Brand Name (e.g. Saini Wala)" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37] mb-4"/>
+                <button onclick="saveUser()" class="w-full bg-[#d4af37] text-black font-black p-4 rounded-2xl">START CREATING</button>
+            </div>
         </div>
 
-        <div id="post-form" class="hidden space-y-4">
-            <p id="welcome" class="text-center text-gray-400 mb-4"></p>
-            <input type="text" id="v-id" placeholder="YouTube Video Link" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
-            <input type="text" id="v-buy" placeholder="Product Buy Link (Optional)" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
-            <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl"/>
-            <textarea id="v-desc" placeholder="Hashtags & Description" class="w-full p-4 bg-[#111] border border-[#333] rounded-xl h-24"></textarea>
-            <button onclick="sendToBlogger()" class="w-full bg-white text-black font-bold p-4 rounded-xl">PUBLISH POST</button>
-            <button onclick="localStorage.clear(); location.reload();" class="w-full text-red-500 text-xs mt-4">LOGOUT / RESET</button>
+        <div id="post-area" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-[#111] p-4 rounded-2xl border border-[#222] mb-6">
+                <p class="font-bold text-[#d4af37]" id="welcome-msg"></p>
+                <button onclick="localStorage.clear(); location.reload();" class="text-xs text-red-500">Reset Profile</button>
+            </div>
+
+            <div class="space-y-4">
+                <input type="text" id="v-id" placeholder="YouTube Video Link" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-white"/>
+                <input type="text" id="v-buy" placeholder="Product Buy Link (URL)" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-white"/>
+                <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-white"/>
+                <textarea id="v-desc" placeholder="Description & Tags" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl h-24 outline-none focus:border-white"></textarea>
+                
+                <button onclick="publish()" class="w-full bg-white text-black font-black p-5 rounded-3xl shadow-2xl active:scale-95 transition-all">
+                    PUBLISH TO PUBLIC FEED
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        // *** 1. APNA BLOGGER URL YAHA DAALEIN ***
+        const https://sainiwalaa.blogspot.com/p/sainiwalaa-luxury-creator-economy-root.html = "https://sainiwalaafix.blogspot.com/"; 
+
         const savedName = localStorage.getItem('saini_name');
         if(savedName) {
-            document.getElementById('reg-form').classList.add('hidden');
-            document.getElementById('post-form').classList.remove('hidden');
-            document.getElementById('welcome').innerText = "Welcome, " + savedName;
+            document.getElementById('reg-area').classList.add('hidden');
+            document.getElementById('post-area').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = "Studio: " + savedName;
         }
 
         function saveUser() {
-            const name = document.getElementById('user-name').value;
-            if(name) { localStorage.setItem('saini_name', name); location.reload(); }
+            const n = document.getElementById('user-name').value;
+            if(n) { localStorage.setItem('saini_name', n); location.reload(); }
         }
 
-        function sendToBlogger() {
-            const vid = document.getElementById('v-id').value;
-            // Extracting ID
-            const vidId = vid.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/)[1];
+        function publish() {
+            const vidInput = document.getElementById('v-id').value;
+            const match = vidInput.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
             
-            const blogger = "https://your-site.blogspot.com/"; // APNI SITE KA LINK DAALEIN
-            const url = `${blogger}?user=${encodeURIComponent(savedName)}&vid=${vidId}&buy=${encodeURIComponent(document.getElementById('v-buy').value)}&title=${encodeURIComponent(document.getElementById('v-title').value)}&desc=${encodeURIComponent(document.getElementById('v-desc').value)}`;
+            if(!match) { alert("Sahi YouTube link daalein!"); return; }
+
+            const query = `?user=${encodeURIComponent(savedName)}` +
+                          `&vid=${match[1]}` +
+                          `&buy=${encodeURIComponent(document.getElementById('v-buy').value)}` +
+                          `&title=${encodeURIComponent(document.getElementById('v-title').value)}` +
+                          `&desc=${encodeURIComponent(document.getElementById('v-desc').value)}`;
             
-            window.location.href = url;
+            window.location.href = BLOGGER_URL + query;
         }
     </script>
 </body>
