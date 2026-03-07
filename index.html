@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <meta name="google-site-verification" content="T3of_a7SwHge6KHfW1kJ6CXFHrb24va0-HN67ove-WM" />
+    
     <meta name="robots" content="index, follow">
     <meta name="description" id="meta-desc" content="SAINIWALAA - World's First Luxury Creator Marketplace. Buy exclusive digital products.">
     <meta name="keywords" id="meta-keys" content="Sainiwal, Creator Economy, Instagram Shop, Digital Products India">
@@ -127,27 +129,13 @@
             <h2 class="raj-font text-3xl mb-4">Recent Orders</h2>
             <div id="list-orders" class="grid gap-4 md:grid-cols-2"></div>
         </section>
-        <div id="dynamic-sitemap" class="hidden" style="display:none;">
-    </div>
 
-<script>
-// initApp() function ke andar ye logic add karein
-function generateSitemapLinks(snap) {
-    const sitemapDiv = document.getElementById('dynamic-sitemap');
-    let links = '<h3>All Creators</h3>';
-    snap.forEach(doc => {
-        const d = doc.data();
-        const profileLink = `https://sainiwalaa.web.app/?creator=${doc.id}`;
-        links += `<a href="${profileLink}">${d.name || 'Creator'} Store</a> `;
-    });
-    sitemapDiv.innerHTML = links;
-}
-</script>
+        <div id="dynamic-sitemap" style="display:none;" aria-hidden="true"></div>
 
         <footer class="bg-black text-white pt-10 pb-6 mt-20 overflow-hidden">
             <div class="text-center max-w-4xl mx-auto px-6">
                 <h2 class="raj-font text-3xl text-[#d4af37] mb-2">SAINIWALAA Creator Network</h2>
-                <p class="text-gray-300 text-sm leading-relaxed">SAINIWALAA एक Live Creator Marketplace है जहाँ Influencers अपना Store बनाकर सीधे Audience को बेच सकते हैं।</p>
+                <p class="text-gray-300 text-sm leading-relaxed">SAINIWALAA एक Live Creator Marketplace hai जहाँ Influencers अपना Store बनाकर सीधे Audience को बेच सकते हैं।</p>
                 <p class="text-[#d4af37] text-xs mt-3 font-bold tracking-wider uppercase">Live Creators Joined : <span id="creator-count">0</span></p>
             </div>
             <div class="mt-10 overflow-hidden w-full">
@@ -219,11 +207,20 @@ function generateSitemapLinks(snap) {
 
         onAuthStateChanged(auth, u => {
             document.getElementById('loading').classList.add('hidden');
-            if(u) { curU = u; document.getElementById('app').classList.remove('hidden'); document.getElementById('auth-box').classList.add('hidden'); initApp(); }
+            if(u) { 
+                curU = u; 
+                document.getElementById('app').classList.remove('hidden'); 
+                document.getElementById('auth-box').classList.add('hidden'); 
+                initApp(); 
+
+                // URL Parameter Check for SEO Links
+                const urlParams = new URLSearchParams(window.location.search);
+                const creatorId = urlParams.get('creator');
+                if (creatorId) setTimeout(() => viewProfile(creatorId), 800);
+            }
             else { document.getElementById('auth-box').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
         });
 
-        // --- SEO LOGIC ADDED HERE ---
         const updateSEO = (d, uid) => {
             const name = d.name || "Elite Creator";
             const insta = d.insta || "";
@@ -231,6 +228,18 @@ function generateSitemapLinks(snap) {
             document.getElementById('meta-desc').content = `Official store of ${name}. Buy premium digital products from ${name} on SAINIWALAA.`;
             document.getElementById('meta-keys').content = `${name}, ${insta}, Sainiwal, Creator Marketplace, Digital Shop`;
             document.getElementById('seo-engine').innerHTML = `<a href="?creator=${uid}">${name} Store</a><p>${d.bio}</p><span>Instagram: ${insta}</span>`;
+        };
+
+        // Sitemap Link Generator function
+        window.generateSitemapLinks = (snap) => {
+            const sitemapDiv = document.getElementById('dynamic-sitemap');
+            let links = '<h3>All Creators</h3>';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const profileLink = `https://sainiwalaa.web.app/?creator=${doc.id}`;
+                links += `<a href="${profileLink}">${d.name || 'Creator'} Store</a> `;
+            });
+            sitemapDiv.innerHTML = links;
         };
 
         function initApp() {
@@ -251,10 +260,11 @@ function generateSitemapLinks(snap) {
             onSnapshot(collection(db,"users"), snap => {
                 document.getElementById("creator-count").innerText = snap.size;
                 creatorBox.innerHTML="";
+                generateSitemapLinks(snap); // Call sitemap generator
                 snap.forEach(doc=>{
                     const d = doc.data();
                     const img = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${doc.id}`;
-                    creatorBox.innerHTML += `<div class="creator-card"><img src="${img}"><span>@${d.name || "Creator"}</span></div>`;
+                    creatorBox.innerHTML += `<div class="creator-card" onclick="viewProfile('${doc.id}')"><img src="${img}"><span>@${d.name || "Creator"}</span></div>`;
                 });
             });
         }
@@ -274,7 +284,7 @@ function generateSitemapLinks(snap) {
             const s = await getDoc(doc(db, "users", uid));
             if(s.exists()){
                 const d = s.data();
-                updateSEO(d, uid); // Update Metadata for Google
+                updateSEO(d, uid);
                 document.getElementById('u-name').innerText = d.name || "Creator";
                 document.getElementById('u-bio').innerText = d.bio || "Welcome!";
                 document.getElementById('p-img').src = d.profile || `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
@@ -299,7 +309,6 @@ function generateSitemapLinks(snap) {
             });
         };
 
-        // ... Remaining helper functions like pubProd, orderForm, saveProfile etc. remain untouched ...
         window.pubProd = async () => { const btn = document.getElementById('pub-btn'); const n = document.getElementById('pn').value, p = document.getElementById('pp').value, l = document.getElementById('pl').value, d = document.getElementById('pd').value; if(!n || !p || !window.tempP) return alert("Fill data!"); btn.disabled = true; btn.innerText = "PUBLISHING..."; const u = (await getDoc(doc(db, "users", curU.uid))).data(); await addDoc(collection(db, "products"), { name: n, price: p, desc: d, img: window.tempP, link: l, creatorId: curU.uid, creatorName: u?.name || 'Creator', time: serverTimestamp() }); location.reload(); };
         window.confirmPurchase = async () => { const n = document.getElementById('on').value, p = document.getElementById('op').value, city = document.getElementById('oc').value, collab = document.getElementById('collab-check').checked; if(!n || !p) return alert("Fill data!"); await addDoc(collection(db, "orders"), { item: window.activeOrder.name, price: window.activeOrder.price, customer: n, phone: p, city: city, collab: collab, date: new Date().toLocaleDateString('en-GB'), creatorId: window.activeOrder.creatorId, time: serverTimestamp() }); window.open(window.activeOrder.link, '_blank'); document.getElementById('order-modal').classList.add('hidden'); };
         window.nav = (t) => { ['feed','shop','orders'].forEach(s => { document.getElementById('sec-'+s).classList.toggle('hidden', s !== t); document.getElementById('n-'+s).classList.toggle('nav-active', s === t); }); };
