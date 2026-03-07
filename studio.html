@@ -1,22 +1,63 @@
-function publish() {
-    const vidInput = document.getElementById('v-id').value;
-    const match = vidInput.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
-    
-    if(!match) { alert("YouTube Link sahi nahi hai!"); return; }
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SAINIWALAA | Creator Studio</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-[#050505] text-white p-6">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-[#d4af37] text-2xl font-black text-center mb-8 uppercase italic">Creator Studio</h1>
+        
+        <div class="bg-[#111] p-6 rounded-[40px] border border-[#222] space-y-4 shadow-2xl">
+            <input type="text" id="v-id" placeholder="YouTube Video Link" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none focus:border-[#d4af37]"/>
+            <input type="text" id="v-title" placeholder="Video Title" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none"/>
+            <input type="text" id="v-buy" placeholder="Buy Link (Optional)" class="w-full p-4 bg-black border border-[#333] rounded-2xl outline-none"/>
+            <textarea id="v-desc" placeholder="Description" class="w-full p-4 bg-black border border-[#333] rounded-2xl h-24 outline-none"></textarea>
+            
+            <button id="pub-btn" onclick="publishToFirebase()" class="w-full bg-[#d4af37] text-black font-black p-5 rounded-3xl active:scale-95 transition-all">
+                PUBLISH TO FEED <i class="fa-solid fa-bolt ml-2"></i>
+            </button>
+        </div>
+    </div>
 
-    const title = document.getElementById('v-title').value;
-    const buy = document.getElementById('v-buy').value;
-    const desc = document.getElementById('v-desc').value;
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
+            authDomain: "sainiwalaainfulencer.firebaseapp.com",
+            projectId: "sainiwalaainfulencer",
+            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/", // Check your firebase console for this
+            storageBucket: "sainiwalaainfulencer.firebasestorage.app",
+            messagingSenderId: "116125275008",
+            appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    // Blogger Post Content Format
-    // Hum Title aur Body ko aise bhejenge ki Blogger use Post ki tarah save kare
-    // Note: Direct image-src method sirf analytics ke liye hota hai. 
-    // Post karne ke liye aapko "Blogger API" ya "Email-to-Post" chahiye hoga.
-    
-    const finalData = `vid=${match[1]}&buy=${buy}&desc=${desc}`;
-    
-    alert("Data Ready to Post: " + finalData);
-    
-    // Yahan aap Blogger ki API use karke real post kar sakte hain.
-    // Filhaal ye sirf setup ready hai.
-}
+        function publishToFirebase() {
+            const vidLink = document.getElementById('v-id').value;
+            const match = vidLink.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/user\/\S+|\/ytscreeningroom\?v=))([\w\-]{11})/);
+            
+            if(!match) return alert("Sahi YouTube link daalein!");
+
+            const btn = document.getElementById('pub-btn');
+            btn.innerText = "SENDING...";
+            
+            const newPostRef = database.ref('videos').push();
+            newPostRef.set({
+                videoId: match[1],
+                title: document.getElementById('v-title').value,
+                buyLink: document.getElementById('v-buy').value,
+                desc: document.getElementById('v-desc').value,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Video Published Successfully!");
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
