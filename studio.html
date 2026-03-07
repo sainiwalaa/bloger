@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi"> 
+<html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SAINIWALAA | Creator Studio</title>
@@ -11,26 +11,77 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
     <style>
         body { background: #000; color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
-        .glass-dark { background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); }
+        .glass-dark { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); }
         .v-frame { width: 100%; aspect-ratio: 9/16; background: #000; position: relative; overflow: hidden; pointer-events: none; }
         .v-frame iframe, .v-frame video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
         .seek-bar { width: 100%; height: 5px; background: #222; position: relative; cursor: pointer; border-radius: 10px; overflow: hidden; }
         .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; }
         ::-webkit-scrollbar { width: 0px; }
+        input[type="color"] { padding: 0; border: none; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; background: none; }
     </style>
 </head>
 <body>
 
-    <div id="edit-modal" class="fixed inset-0 z-[300] glass-dark flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm bg-[#111] border border-[#222] p-6 rounded-[30px] space-y-4">
-            <h3 class="text-lg font-black uppercase text-red-600">Edit Profile</h3>
-            <input type="text" id="edit-banner" placeholder="Banner Image URL" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-            <input type="text" id="edit-avatar" placeholder="Avatar Image URL" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-            <textarea id="edit-bio" placeholder="Your Bio" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-20"></textarea>
-            <input type="text" id="edit-ig" placeholder="Instagram Link" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-            <div class="flex gap-2">
-                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs">CANCEL</button>
-                <button onclick="saveProfile()" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs text-white">SAVE CHANGES</button>
+    <div id="edit-modal" class="fixed inset-0 z-[300] glass-dark flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-[#111] border border-[#222] p-6 rounded-[30px] space-y-5 max-h-[90vh] overflow-y-autoscrollbar-hide">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-black uppercase text-red-600">Edit Profile</h3>
+                <button onclick="closeEdit()" class="text-gray-600 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Profile Picture (Avatar)</label>
+                <input type="file" id="edit-avatar-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"/>
+            </div>
+
+            <div class="space-y-3 border-t border-[#222] pt-4">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Banner Settings</label>
+                <div class="flex gap-2">
+                    <button onclick="setBannerMode('image')" id="btn-mode-image" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs">Image Mode</button>
+                    <button onclick="setBannerMode('color')" id="btn-mode-color" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs">Color Mode</button>
+                </div>
+
+                <div id="banner-image-input" class="space-y-2">
+                    <input type="file" id="edit-banner-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#222] file:text-white hover:file:bg-[#333]"/>
+                </div>
+
+                <div id="banner-color-input" class="space-y-3 hidden bg-black p-4 rounded-xl border border-[#222]">
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs text-gray-400">Background Color</label>
+                        <input type="color" id="edit-banner-color" value="#800000"/>
+                    </div>
+                    <input type="text" id="edit-banner-text" placeholder="Banner Text (e.g., SAINIWALAA)" class="w-full p-3 bg-black border border-[#333] rounded-xl text-xs outline-none"/>
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs text-gray-400">Text Color</label>
+                        <input type="color" id="edit-banner-text-color" value="#ffffff"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2 border-t border-[#222] pt-4">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Bio</label>
+                <textarea id="edit-bio" placeholder="Your Bio" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-20"></textarea>
+            </div>
+
+            <div class="space-y-3 border-t border-[#222] pt-4">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Social Links</label>
+                <div class="relative">
+                    <i class="fa-brands fa-instagram absolute left-4 top-1/2 -translate-y-1/2 text-pink-600"></i>
+                    <input type="text" id="edit-ig" placeholder="Instagram URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                </div>
+                <div class="relative">
+                    <i class="fa-brands fa-youtube absolute left-4 top-1/2 -translate-y-1/2 text-red-600"></i>
+                    <input type="text" id="edit-yt" placeholder="YouTube URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                </div>
+                <div class="relative">
+                    <i class="fa-brands fa-twitter absolute left-4 top-1/2 -translate-y-1/2 text-blue-500"></i>
+                    <input type="text" id="edit-tw" placeholder="Twitter URL" class="w-full p-3 pl-12 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
+                </div>
+            </div>
+
+            <div class="flex gap-2 border-t border-[#222] pt-5">
+                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-4 rounded-2xl font-bold text-xs">CANCEL</button>
+                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-4 rounded-2xl font-bold text-xs text-white">SAVE CHANGES</button>
             </div>
         </div>
     </div>
@@ -47,26 +98,28 @@
 
     <div id="main-content" class="max-w-md mx-auto pb-24">
         <div class="relative">
-            <div class="h-40 w-full bg-[#111] overflow-hidden">
-                <img id="user-banner" src="" class="w-full h-full object-cover opacity-60"/>
+            <div id="banner-display" class="h-44 w-full bg-[#111] overflow-hidden flex items-center justify-center relative">
+                <img id="user-banner-img" src="" class="w-full h-full object-cover opacity-70 hidden"/>
+                <h1 id="user-banner-text" class="text-4xl font-black italic uppercase tracking-tighter hidden"></h1>
             </div>
             <div class="absolute -bottom-12 left-6 flex items-end gap-4">
-                <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111]">
+                <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111] shadow-xl relative z-10">
                     <img id="user-avatar" src="" class="w-full h-full object-cover"/>
                 </div>
-                <div class="mb-3">
-                    <h2 id="display-name" class="text-2xl font-black italic uppercase leading-none">Creator</h2>
+                <div class="mb-3 relative z-10">
+                    <h2 id="display-name" class="text-2xl font-black italic uppercase leading-none text-white">Creator</h2>
                     <p id="user-handle" class="text-[10px] text-red-600 font-black tracking-widest uppercase mt-1">@handle</p>
                 </div>
             </div>
-            <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-4 py-2 rounded-full text-[10px] font-black uppercase">Edit</button>
+            <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase z-10">Edit</button>
         </div>
 
         <div class="mt-16 px-6">
             <p id="user-bio" class="text-xs text-gray-400 leading-relaxed italic">Bio loading...</p>
-            <div class="flex gap-5 mt-4 text-xl" id="social-links">
-                <a href="#" id="link-ig" class="text-pink-600"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" id="link-tw" class="text-blue-500"><i class="fa-brands fa-twitter"></i></a>
+            <div class="flex gap-5 mt-5 text-xl" id="social-links">
+                <a href="#" id="link-ig-post" class="text-pink-600 hidden"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" id="link-yt-post" class="text-red-600 hidden"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" id="link-tw-post" class="text-blue-500 hidden"><i class="fa-brands fa-twitter"></i></a>
             </div>
         </div>
 
@@ -83,6 +136,7 @@
     </div>
 
     <script>
+        // Firebase Config (Keep your existing config)
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
@@ -96,6 +150,7 @@
         const db = firebase.database();
         const auth = firebase.auth();
         let ytPlayers = {};
+        let currentBannerMode = 'image';
 
         // --- AUTH & PROFILE ---
         auth.onAuthStateChanged(user => {
@@ -115,26 +170,101 @@
                 document.getElementById('display-name').innerText = d.username || "Creator";
                 document.getElementById('user-handle').innerText = "@" + (d.username || "creator");
                 document.getElementById('user-bio').innerText = d.bio || "No bio yet.";
-                document.getElementById('user-banner').src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
                 document.getElementById('user-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                document.getElementById('link-ig').href = d.ig || "#";
+                
+                // Load Socials
+                if(d.ig) { document.getElementById('link-ig-post').href = d.ig; document.getElementById('link-ig-post').classList.remove('hidden'); }
+                if(d.yt) { document.getElementById('link-yt-post').href = d.yt; document.getElementById('link-yt-post').classList.remove('hidden'); }
+                if(d.tw) { document.getElementById('link-tw-post').href = d.tw; document.getElementById('link-tw-post').classList.remove('hidden'); }
+
+                // Load Banner (Image or Color)
+                const bannerDisplay = document.getElementById('banner-display');
+                const bannerImg = document.getElementById('user-banner-img');
+                const bannerText = document.getElementById('user-banner-text');
+
+                if(d.bannerMode === 'color') {
+                    bannerDisplay.style.background = d.bannerColor || "#800000";
+                    bannerText.innerText = d.bannerText || "SAINIWALAA";
+                    bannerText.style.color = d.bannerTextColor || "#ffffff";
+                    bannerText.classList.remove('hidden');
+                    bannerImg.classList.add('hidden');
+                } else {
+                    bannerDisplay.style.background = "#111";
+                    bannerImg.src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
+                    bannerImg.classList.remove('hidden');
+                    bannerText.classList.add('hidden');
+                }
             });
         }
 
+        // Helper: Convert file to Base64 (for easy firebase storage without storage bucket)
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function setBannerMode(mode) {
+            currentBannerMode = mode;
+            const imgBtn = document.getElementById('btn-mode-image');
+            const colorBtn = document.getElementById('btn-mode-color');
+            const imgInput = document.getElementById('banner-image-input');
+            const colorInput = document.getElementById('banner-color-input');
+
+            if(mode === 'image') {
+                imgBtn.className = "flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs";
+                colorBtn.className = "flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs";
+                imgInput.classList.remove('hidden');
+                colorInput.classList.add('hidden');
+            } else {
+                colorBtn.className = "flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs";
+                imgBtn.className = "flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs";
+                colorInput.classList.remove('hidden');
+                imgInput.classList.add('hidden');
+            }
+        }
+
+        async function saveProfile() {
+            const uid = auth.currentUser.uid;
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.innerText = "SAVING...";
+            saveBtn.disabled = true;
+
+            let updateData = {
+                bio: document.getElementById('edit-bio').value,
+                ig: document.getElementById('edit-ig').value,
+                yt: document.getElementById('edit-yt').value,
+                tw: document.getElementById('edit-tw').value,
+                bannerMode: currentBannerMode
+            };
+
+            // Handle Avatar Upload
+            const avatarFile = document.getElementById('edit-avatar-file').files[0];
+            if(avatarFile) updateData.avatar = await fileToBase64(avatarFile);
+
+            if(currentBannerMode === 'image') {
+                const bannerFile = document.getElementById('edit-banner-file').files[0];
+                if(bannerFile) updateData.banner = await fileToBase64(bannerFile);
+            } else {
+                updateData.bannerColor = document.getElementById('edit-banner-color').value;
+                updateData.bannerText = document.getElementById('edit-banner-text').value;
+                updateData.bannerTextColor = document.getElementById('edit-banner-text-color').value;
+            }
+
+            db.ref('users/' + uid).update(updateData).then(() => {
+                saveBtn.innerText = "SAVE CHANGES";
+                saveBtn.disabled = false;
+                closeEdit();
+            });
+        }
+
+        // --- Original Video Player & Other Functions (KEEP THEM UNCHANGED) ---
         function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
         function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
 
-        function saveProfile() {
-            const uid = auth.currentUser.uid;
-            db.ref('users/' + uid).update({
-                banner: document.getElementById('edit-banner').value || "https://wallpaperaccess.com/full/1155013.jpg",
-                avatar: document.getElementById('edit-avatar').value || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-                bio: document.getElementById('edit-bio').value,
-                ig: document.getElementById('edit-ig').value
-            }).then(() => closeEdit());
-        }
-
-        // --- VIDEO PLAYER LOGIC ---
         function loadVideos(uid) {
             db.ref('videos').on('value', snap => {
                 const list = document.getElementById('video-list');
@@ -187,7 +317,7 @@
                     } else {
                         setTimeout(() => {
                             const vd = document.getElementById('vid-' + key);
-                            vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; };
+                            if(vd) { vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; }; }
                         }, 500);
                     }
                 });
@@ -234,7 +364,8 @@
             const p = ytPlayers[key];
             const t = setInterval(() => {
                 if(!p || p.getPlayerState() !== 1) { clearInterval(t); return; }
-                document.getElementById('fill-'+key).style.width = (p.getCurrentTime()/p.getDuration())*100 + "%";
+                const fill = document.getElementById('fill-'+key);
+                if(fill) fill.style.width = (p.getCurrentTime()/p.getDuration())*100 + "%";
             }, 500);
         }
 
@@ -259,7 +390,7 @@
             const pass = document.getElementById('auth-pass').value;
             if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
             else auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                db.ref('users/' + u.user.uid).set({ username: email.split('@')[0], bio: "New Creator", banner: "", avatar: "" });
+                db.ref('users/' + u.user.uid).set({ username: email.split('@')[0], bio: "New Creator", banner: "", avatar: "", bannerMode: "image" });
             });
         }
 
