@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sainiwalaa.web.app/sitemap.xml
+Sitemap: https://sainiwalaa.github.io/bloger/sitemap.xml
