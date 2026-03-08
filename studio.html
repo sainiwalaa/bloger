@@ -2,112 +2,120 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Pro Influencer Feed</title>
+    <title>SAINIWALAA | Creator Studio</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --amz-orange: #febd69; --amz-blue: #232f3e; }
-        body { background: #000; color: white; font-family: 'Poppins', sans-serif; }
+        :root { --accent: #ff0000; --bg-dark: #050505; }
+        body { background: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-premium { background: linear-gradient(90deg, #ff0000, #b30000); transition: 0.3s; }
+        .btn-premium:disabled { background: #333; cursor: not-allowed; }
         
-        /* Header Animation */
-        .scrolling-header { background: #111; border-bottom: 2px solid #ff0000; overflow: hidden; white-space: nowrap; padding: 10px 0; }
-        .scroll-text { display: inline-block; animation: scroll 20s linear infinite; font-size: 12px; font-weight: 900; color: #ff0000; text-transform: uppercase; }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        
-        /* Logo Animation */
-        .logo-spin { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ff0000; animation: rotate 5s linear infinite; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* Modal Animation */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
+        .modal.active { display: block; }
 
-        /* Video Frame */
-        .v-frame { width: 100%; aspect-ratio: 9/16; background: #000; border-radius: 25px; overflow: hidden; border: 1px solid #333; }
-        
-        /* Profile Theme (Amazon/Flipkart Mix) */
-        .profile-card { background: var(--amz-blue); border-radius: 0 0 30px 30px; }
-        .buy-btn { background: #ffd814; color: #000; font-weight: 700; border-radius: 8px; transition: 0.3s; }
-        .buy-btn:hover { background: #f7ca00; }
-
-        /* Input Styles */
-        input, textarea, select { background: #111 !important; border: 1px solid #333 !important; color: white !important; padding: 12px; border-radius: 12px; font-size: 13px; }
-        
-        #order-form-overlay, #edit-profile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; padding: 20px; overflow-y: auto; }
-        .active-modal { display: block !important; }
+        .video-card { position: relative; border-radius: 20px; overflow: hidden; background: #111; }
+        .badge-limit { font-size: 10px; background: rgba(255,0,0,0.2); color: #ff4444; padding: 2px 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="scrolling-header flex items-center">
-        <div class="px-4"><div class="logo-spin flex items-center justify-center font-black text-[8px]">SAINI</div></div>
-        <div class="scroll-text">
-            SAINIWALAA INFLUENCER FEED • EARN NOW • GROW NOW • JOIN THE REVOLUTION • EXCLUSIVE CONTENT • 
+    <div class="p-4 flex justify-between items-center glass sticky top-0 z-50">
+        <h1 class="font-black italic text-xl tracking-tighter text-red-600">SAINIWALAA STUDIO</h1>
+        <div class="flex gap-3">
+            <button onclick="openModal('upload-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-500"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="openModal('profile-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center"><i class="fa-solid fa-user-gear"></i></button>
         </div>
     </div>
 
-    <div id="main-app" class="max-w-md mx-auto">
-        <div id="profile-view" class="profile-card p-6 relative">
-            <div class="flex items-center gap-4">
-                <img id="my-avatar" class="w-20 h-20 rounded-full border-4 border-yellow-500 object-cover" src="https://via.placeholder.com/150"/>
-                <div>
-                    <h2 id="my-name" class="text-xl font-bold">Creator Name</h2>
-                    <p id="my-handle" class="text-xs text-yellow-500">@username</p>
+    <div id="user-banner" class="h-44 w-full relative bg-gray-900 flex items-end p-6">
+        <div class="flex items-center gap-4 z-10">
+            <img id="display-avatar" src="https://via.placeholder.com/100" class="w-20 h-20 rounded-2xl border-2 border-white object-cover shadow-2xl"/>
+            <div>
+                <h2 id="display-name" class="text-2xl font-bold">Influencer Name</h2>
+                <p id="name-timer" class="badge-limit mt-1">Name locked</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold border-l-4 border-red-600 pl-3">MY PRODUCTIONS</h3>
+            <span class="text-xs text-gray-500" id="post-count">0 Posts</span>
+        </div>
+        <div id="my-history" class="grid grid-cols-1 gap-6">
+            </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="max-w-md mx-auto space-y-5 py-10">
+            <h2 class="text-3xl font-black mb-6">EDIT <span class="text-red-600">PROFILE</span></h2>
+            
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500">DISPLAY NAME</label>
+                <input type="text" id="inp-name" class="w-full bg-[#111] p-4 rounded-xl border border-white/10" placeholder="Username">
+                <p id="name-status" class="text-[10px] text-yellow-500 italic"></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500">BANNER COLOR</label>
+                    <input type="color" id="inp-bg-color" class="w-full h-12 rounded-xl bg-transparent">
                 </div>
-                <button onclick="toggleModal('edit-profile-overlay')" class="ml-auto text-xl"><i class="fa-solid fa-gear"></i></button>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500">TEXT COLOR</label>
+                    <input type="color" id="inp-text-color" class="w-full h-12 rounded-xl bg-transparent">
+                </div>
             </div>
-            <p id="my-bio" class="mt-4 text-xs text-gray-300 italic">Bio will appear here (max 300 words)...</p>
-            <div id="my-socials" class="flex gap-4 mt-3 text-xl text-yellow-500"></div>
-        </div>
 
-        <div class="p-6 space-y-4">
-            <div class="bg-[#111] p-4 rounded-3xl border border-[#222]">
-                <h3 class="text-xs font-black mb-3 text-red-500 uppercase">Publish Content</h3>
-                <input type="text" id="v-url" placeholder="Paste Video URL (YT/GitHub/MP4)" class="w-full mb-2"/>
-                <input type="text" id="v-title" placeholder="Title" class="w-full mb-2"/>
-                <textarea id="v-desc" placeholder="Description (Max 200 words)" class="w-full mb-2 h-20"></textarea>
-                <input type="text" id="v-link" placeholder="Product Buy Link" class="w-full mb-4"/>
-                <button onclick="publishPost()" class="w-full bg-red-600 p-4 rounded-xl font-bold uppercase text-xs">Upload to Feed</button>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500">AVATAR (UPLOAD)</label>
+                <input type="file" id="inp-avatar-file" accept="image/*" class="w-full text-xs glass p-2 rounded-lg">
             </div>
-        </div>
 
-        <div id="video-feed" class="p-4 space-y-10"></div>
-    </div>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-gray-500">SOCIAL LINKS</label>
+                <input type="text" id="inp-ig" placeholder="Instagram URL" class="w-full bg-[#111] p-3 rounded-xl text-sm mb-2">
+                <input type="text" id="inp-yt" placeholder="YouTube URL" class="w-full bg-[#111] p-3 rounded-xl text-sm">
+            </div>
 
-    <div id="edit-profile-overlay">
-        <div class="max-w-sm mx-auto space-y-4">
-            <h2 class="text-2xl font-black italic">EDIT STUDIO</h2>
-            <input type="text" id="edit-name" placeholder="Display Name" class="w-full"/>
-            <textarea id="edit-bio" placeholder="Bio (300 Words)" class="w-full h-32"></textarea>
-            <input type="text" id="edit-avatar" placeholder="Avatar Image URL" class="w-full"/>
-            <input type="text" id="edit-bg" placeholder="Profile Background Color (e.g. #232f3e)" class="w-full"/>
-            <input type="text" id="s-ig" placeholder="Instagram Link" class="w-full"/>
-            <input type="text" id="s-yt" placeholder="YouTube Link" class="w-full"/>
-            <input type="text" id="s-tg" placeholder="Telegram Link" class="w-full"/>
-            <button onclick="saveProfile()" class="w-full bg-green-600 p-4 rounded-xl font-bold">SAVE CHANGES</button>
-            <button onclick="toggleModal('edit-profile-overlay')" class="w-full text-gray-500">Close</button>
+            <button onclick="saveProfileData()" class="w-full btn-premium p-4 rounded-2xl font-black mt-6">UPDATE STUDIO</button>
+            <button onclick="closeModal('profile-modal')" class="w-full text-gray-500 text-sm">Cancel</button>
         </div>
     </div>
 
-    <div id="order-form-overlay">
-        <div class="max-w-sm mx-auto bg-white text-black p-6 rounded-3xl space-y-4">
-            <h2 class="text-xl font-black border-b pb-2 text-blue-900">ORDER CONFIRMATION</h2>
-            <input type="text" id="order-name" placeholder="Full Name" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
-            <input type="text" id="order-phone" placeholder="Mobile Number" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
-            <input type="text" id="order-city" placeholder="City" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
-            <div class="flex items-center gap-2 text-xs font-bold">
-                <span>Contact Influencer?</span>
-                <input type="checkbox" id="order-contact" class="w-5 h-5"/>
+    <div id="upload-modal" class="modal">
+        <div class="max-w-md mx-auto py-10">
+            <h2 class="text-3xl font-black mb-2 uppercase">New Content</h2>
+            <p class="text-xs text-gray-500 mb-8">Video max limit: 90 Seconds</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="post-title" placeholder="Video Title" class="w-full bg-[#111] p-4 rounded-xl">
+                <textarea id="post-desc" placeholder="Describe your product (Max 200 words)" class="w-full bg-[#111] p-4 rounded-xl h-24"></textarea>
+                
+                <div class="p-4 border-2 border-dashed border-red-900 rounded-2xl text-center">
+                    <input type="file" id="post-video-file" accept="video/*" class="hidden">
+                    <label for="post-video-file" class="cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-red-600 mb-2"></i>
+                        <p class="text-xs block">Click to select Video (MP4)</p>
+                    </label>
+                </div>
+
+                <input type="text" id="post-link" placeholder="Amazon/Flipkart Product Link" class="w-full bg-[#111] p-4 rounded-xl">
+                
+                <button onclick="handleUpload()" id="btn-upload" class="w-full btn-premium p-4 rounded-2xl font-black">PUBLISH NOW</button>
+                <button onclick="closeModal('upload-modal')" class="w-full text-gray-500 mt-4">Close</button>
             </div>
-            <button id="final-order-btn" class="w-full buy-btn p-4 shadow-lg">CONFIRM & ORDER</button>
-            <button onclick="toggleModal('order-form-overlay')" class="w-full text-red-500 font-bold">Cancel</button>
         </div>
     </div>
 
     <script>
-        // Use your existing Firebase Config
+        // Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
@@ -115,122 +123,26 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth();
+        const userID = "U_SAINI_001"; // Hardcoded for Demo, Replace with dynamic ID
 
-        let currentUserID = "U1"; // Demo ID, login se override hoga
+        let userProfile = {};
 
-        // --- Functions ---
-        function toggleModal(id) {
-            document.getElementById(id).classList.toggle('active-modal');
-        }
+        // --- Core Functions ---
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        function publishPost() {
-            const url = document.getElementById('v-url').value;
-            const title = document.getElementById('v-title').value;
-            const desc = document.getElementById('v-desc').value;
-            const link = document.getElementById('v-link').value;
-
-            if(!url || !title) return alert("Fill video link & title!");
-
-            db.ref('videos').push({
-                uid: currentUserID,
-                url: url,
-                title: title,
-                desc: desc.substring(0, 500),
-                productLink: link,
-                timestamp: Date.now()
-            });
-            alert("Published to Feed!");
-        }
-
-        function loadFeed() {
-            db.ref('videos').on('value', snap => {
-                const feed = document.getElementById('video-feed');
-                feed.innerHTML = "";
-                snap.forEach(child => {
-                    const v = child.val();
-                    const isYT = v.url.includes('youtu');
-                    
-                    feed.innerHTML += `
-                        <div class="space-y-3 bg-[#0a0a0a] p-3 rounded-[30px] border border-[#1a1a1a]">
-                            <div class="v-frame">
-                                ${isYT ? `<iframe src="https://www.youtube.com/embed/${getYTID(v.url)}" frameborder="0"></iframe>` : 
-                                `<video src="${v.url}" controls class="w-full h-full object-cover"></video>`}
-                            </div>
-                            <div class="px-2">
-                                <h3 class="font-bold text-red-500">${v.title}</h3>
-                                <p class="text-[11px] text-gray-400 mt-1">${v.desc || ''}</p>
-                                ${v.productLink ? `
-                                    <button onclick="openOrderForm('${v.productLink}')" class="w-full buy-btn p-3 mt-3 text-xs uppercase">
-                                        <i class="fa-solid fa-cart-shopping mr-2"></i> Buy Now
-                                    </button>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function openOrderForm(link) {
-            toggleModal('order-form-overlay');
-            document.getElementById('final-order-btn').onclick = () => {
-                const orderData = {
-                    name: document.getElementById('order-name').value,
-                    phone: document.getElementById('order-phone').value,
-                    city: document.getElementById('order-city').value,
-                    contact: document.getElementById('order-contact').checked,
-                    date: new Date().toLocaleString()
-                };
-                db.ref('orders').push(orderData).then(() => {
-                    alert("Order Saved! Opening Product...");
-                    window.open(link, '_blank');
-                    toggleModal('order-form-overlay');
-                });
-            };
-        }
-
-        function saveProfile() {
-            const data = {
-                name: document.getElementById('edit-name').value,
-                bio: document.getElementById('edit-bio').value,
-                avatar: document.getElementById('edit-avatar').value,
-                bg: document.getElementById('edit-bg').value,
-                socials: {
-                    ig: document.getElementById('s-ig').value,
-                    yt: document.getElementById('s-yt').value,
-                    tg: document.getElementById('s-tg').value
-                }
-            };
-            db.ref('users/' + currentUserID).set(data);
-            toggleModal('edit-profile-overlay');
-        }
-
-        function getYTID(u) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = u.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        // Initialize
-        loadFeed();
-        
-        // Load User Data
-        db.ref('users/' + currentUserID).on('value', snap => {
-            const d = snap.val();
-            if(d) {
-                document.getElementById('my-name').innerText = d.name || "Creator";
-                document.getElementById('my-bio').innerText = d.bio || "";
-                if(d.avatar) document.getElementById('my-avatar').src = d.avatar;
-                if(d.bg) document.getElementById('profile-view').style.backgroundColor = d.bg;
-                
-                let socHtml = "";
-                if(d.socials.ig) socHtml += `<a href="${d.socials.ig}"><i class="fa-brands fa-instagram"></i></a>`;
-                if(d.socials.yt) socHtml += `<a href="${d.socials.yt}"><i class="fa-brands fa-youtube"></i></a>`;
-                if(d.socials.tg) socHtml += `<a href="${d.socials.tg}"><i class="fa-brands fa-telegram"></i></a>`;
-                document.getElementById('my-socials').innerHTML = socHtml;
-            }
-        });
-
-    </script>
-</body>
-</html>
+        // --- Name Change Logic (The 20-90-200 Rule) ---
+        function checkNameEligibility(profile) {
+            const now = Date.now();
+            const lastChange = profile.lastChangeDate || 0;
+            const changeCount = profile.changeCount || 0;
+            const diffDays = Math.floor((now - lastChange) / (1000 * 60 * 60 * 24));
+            
+            let statusEl = document.getElementById('name-status');
+            let nameInput = document.getElementById('inp-name');
+            
+            if(changeCount === 0) {
+                statusEl.innerText = "First change available!";
+                return true;
+            } else if (changeCount === 1 && diffDays >= 20) {
+                return true;
