@@ -19,8 +19,11 @@
         .btn-premium:active { transform: scale(0.95); }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
         .modal.active { display: block; animation: fadeIn 0.3s ease; }
-        .video-card { border-radius: 20px; background: #0a0a0a; border: 1px solid #1a1a1a; transition: 0.3s; }
-        .order-card { border-left: 4px solid #ff0000; background: #111; border-radius: 12px; transition: 0.2s; }
+        
+        /* Auth Screen Styling */
+        #auth-modal { display: flex; } /* Initial state: Visible */
+        .video-card { border-radius: 20px; background: #0a0a0a; border: 1px solid #1a1a1a; }
+        .order-card { border-left: 4px solid #ff0000; background: #111; border-radius: 12px; }
         .tab-btn { color: #555; transition: 0.3s; position: relative; }
         .tab-btn.active { color: #ff0000; }
         .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #ff0000; }
@@ -29,20 +32,20 @@
 </head>
 <body>
 
-    <div id="auth-modal" class="fixed inset-0 bg-black z-[6000] flex items-center justify-center px-6">
-        <div class="max-w-md w-full">
+    <div id="auth-modal" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center px-6">
+        <div class="max-w-md w-full glass p-8 rounded-[40px] border border-white/5">
             <h1 class="text-4xl font-black italic text-red-600 mb-2 tracking-tighter text-center">SAINIWALAA</h1>
-            <p class="text-zinc-500 text-center text-xs uppercase tracking-widest mb-10">Creator Studio Access</p>
+            <p class="text-zinc-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10">Creator Studio Pro</p>
             
             <div class="space-y-4">
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-zinc-900/50 p-4 rounded-2xl border border-white/10 outline-none focus:border-red-500 transition-all text-sm">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-900/50 p-4 rounded-2xl border border-white/10 outline-none focus:border-red-500 transition-all text-sm">
                 
-                <button onclick="handleAuth('login')" id="btn-login" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white">Login Studio</button>
+                <button onclick="handleAuth('login')" id="btn-auth-main" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white tracking-widest text-sm shadow-2xl">Login Studio</button>
                 
-                <div class="flex justify-between px-2">
-                    <button onclick="handleAuth('register')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Create Account</button>
-                    <button onclick="handleAuth('reset')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Forgot Password?</button>
+                <div class="flex justify-between px-2 pt-2">
+                    <button onclick="handleAuth('register')" class="text-[9px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">Create Account</button>
+                    <button onclick="handleAuth('reset')" class="text-[9px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">Forgot Password?</button>
                 </div>
             </div>
         </div>
@@ -51,7 +54,7 @@
     <div class="p-4 flex justify-between items-center glass sticky top-0 z-50">
         <h1 class="font-black italic text-xl tracking-tighter text-red-600">SAINIWALAA</h1>
         <div class="flex gap-3 items-center">
-            <button onclick="logout()" class="text-[10px] font-bold text-zinc-500 uppercase mr-2">Logout</button>
+            <button onclick="logout()" class="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase transition-colors">Logout</button>
             <button onclick="openModal('upload-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-500 border border-red-500/30"><i class="fa-solid fa-plus"></i></button>
             <button onclick="openModal('profile-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center"><i class="fa-solid fa-user-gear"></i></button>
         </div>
@@ -62,7 +65,7 @@
         <div class="flex items-center gap-5 z-10">
             <img id="display-avatar" src="https://ui-avatars.com/api/?name=S&background=333&color=fff" class="w-24 h-24 rounded-3xl border-4 border-black object-cover shadow-2xl"/>
             <div>
-                <h2 id="display-name" class="text-3xl font-black tracking-tight">Sainiwalaa</h2>
+                <h2 id="display-name" class="text-3xl font-black tracking-tight text-white">Sainiwalaa</h2>
                 <p id="display-banner-txt" class="text-xs uppercase tracking-[0.2em] font-bold opacity-70 mt-1"></p>
             </div>
         </div>
@@ -139,7 +142,6 @@
     </div>
 
     <script>
-        // 2. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
@@ -150,14 +152,13 @@
             appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
         };
 
-        // 3. Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
         let userID = null;
         let uploadMode = 'file';
 
-        // 4. Auth State Check
+        // 1. Monitor Auth State
         auth.onAuthStateChanged(user => {
             if (user) {
                 userID = user.uid;
@@ -169,29 +170,45 @@
             }
         });
 
+        // 2. Main Auth Handler (Login/Register/Reset)
         async function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            if(!email) return alert("Email zaruri hai!");
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const mainBtn = document.getElementById('btn-auth-main');
+
+            if(!email) return alert("Please enter email!");
 
             try {
+                mainBtn.innerText = "PROCESSING...";
+                mainBtn.disabled = true;
+
                 if(type === 'login') {
+                    if(!pass) throw new Error("Please enter password!");
                     await auth.signInWithEmailAndPassword(email, pass);
                 } else if(type === 'register') {
-                    if(pass.length < 6) return alert("Password kam se kam 6 char ka ho");
+                    if(pass.length < 6) throw new Error("Password must be 6+ characters!");
                     await auth.createUserWithEmailAndPassword(email, pass);
+                    alert("Account Created Successfully!");
                 } else if(type === 'reset') {
                     await auth.sendPasswordResetEmail(email);
-                    alert("Reset link email par bhej diya!");
+                    alert("Reset link sent to your email!");
                 }
-            } catch (e) { alert(e.message); }
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                mainBtn.innerText = "Login Studio";
+                mainBtn.disabled = false;
+            }
         }
 
-        function logout() { auth.signOut().then(() => location.reload()); }
+        function logout() {
+            if(confirm("Logout from Studio?")) {
+                auth.signOut().then(() => location.reload());
+            }
+        }
 
-        // 5. Studio Functions
+        // 3. Studio Data Loading
         function initStudio() {
-            // Load Profile
             db.ref('users/' + userID).on('value', snap => {
                 const u = snap.val() || {};
                 document.getElementById('display-name').innerText = u.name || "Sainiwalaa";
@@ -207,15 +224,14 @@
                 document.getElementById('inp-banner-txt').value = u.bannerText || "";
             });
 
-            // Load Productions
             db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
                 const container = document.getElementById('my-history');
                 container.innerHTML = "";
-                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10">No productions found.</p>`; return; }
+                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10 text-xs">No productions found.</p>`; return; }
                 snap.forEach(child => {
                     const v = child.val();
                     container.innerHTML += `
-                        <div class="video-card p-4 flex gap-4">
+                        <div class="video-card p-4 flex gap-4 animate-in fade-in duration-500">
                             <div class="w-20 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0">
                                 ${v.videoUrl.includes('base64') || v.videoUrl.endsWith('.mp4') ? 
                                     `<video src="${v.videoUrl}" class="w-full h-full object-cover" muted></video>` : 
@@ -225,32 +241,93 @@
                             <div class="flex-1 flex flex-col justify-between">
                                 <div><h4 class="font-bold text-sm text-zinc-200">${v.title}</h4><p class="text-[10px] text-zinc-500 line-clamp-1">${v.desc || 'No description'}</p></div>
                                 <div class="flex gap-4 mt-2">
-                                    <button onclick="db.ref('videos/${child.key}').remove()" class="text-[10px] font-black text-red-600 uppercase">Delete</button>
-                                    <a href="${v.productLink || '#'}" target="_blank" class="text-[10px] font-black text-zinc-400 uppercase">Link</a>
+                                    <button onclick="deleteVideo('${child.key}')" class="text-[10px] font-black text-red-600 uppercase">Delete</button>
+                                    <a href="${v.productLink || '#'}" target="_blank" class="text-[10px] font-black text-zinc-400 uppercase">View</a>
                                 </div>
                             </div>
                         </div>`;
                 });
             });
 
-            // Load Orders
             db.ref('orders').on('value', snap => {
                 const container = document.getElementById('orders-list');
                 container.innerHTML = "";
-                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10">No orders received.</p>`; return; }
+                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10 text-xs">Waiting for orders...</p>`; return; }
                 snap.forEach(child => {
                     const o = child.val();
                     container.innerHTML += `
                         <div class="order-card p-4 mb-2">
                             <h4 class="font-bold text-zinc-200">${o.userName}</h4>
-                            <p class="text-xs text-zinc-400">${o.mobile}</p>
-                            <p class="text-xs text-zinc-400">${o.address}</p>
-                            <button onclick="db.ref('orders/${child.key}').remove()" class="text-[9px] font-bold text-red-600 uppercase mt-2">Complete</button>
+                            <p class="text-[10px] text-zinc-400 mt-1">${o.mobile}</p>
+                            <p class="text-[10px] text-zinc-400">${o.address}</p>
+                            <button onclick="db.ref('orders/${child.key}').remove()" class="text-[9px] font-bold text-red-600 uppercase mt-3">Mark Complete</button>
                         </div>`;
                 });
             });
         }
 
-        // Helper & UI Logic
+        // UI & Helper Functions
         function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) {
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function switchTab(tab) {
+            document.getElementById('productions-view').classList.toggle('hidden', tab !== 'productions');
+            document.getElementById('orders-view').classList.toggle('hidden', tab !== 'orders');
+            document.getElementById('tab-prod').classList.toggle('active', tab === 'productions');
+            document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
+        }
+        function deleteVideo(key) { if(confirm("Delete this production?")) db.ref('videos/' + key).remove(); }
+        function toggleUploadSource(mode) {
+            uploadMode = mode;
+            document.getElementById('upload-file-box').classList.toggle('hidden', mode === 'link');
+            document.getElementById('upload-link-box').classList.toggle('hidden', mode === 'file');
+            document.getElementById('src-file-btn').className = mode === 'file' ? 'p-3 rounded-xl bg-red-600 font-bold text-xs text-white' : 'p-3 rounded-xl font-bold text-xs text-zinc-500';
+            document.getElementById('src-link-btn').className = mode === 'link' ? 'p-3 rounded-xl bg-red-600 font-bold text-xs text-white' : 'p-3 rounded-xl font-bold text-xs text-zinc-500';
+        }
+        function toBase64(file) { return new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); reader.onerror = e => j(e); }); }
+
+        async function saveProfileData() {
+            let updates = {
+                name: document.getElementById('inp-name').value,
+                bio: document.getElementById('inp-bio').value,
+                bannerText: document.getElementById('inp-banner-txt').value,
+                bannerColor: document.getElementById('inp-bg-color').value,
+                bannerTxtColor: document.getElementById('inp-banner-txt-color').value,
+                textColor: document.getElementById('inp-text-color').value
+            };
+            const avatarFile = document.getElementById('inp-avatar-file').files[0];
+            if(avatarFile) updates.avatar = await toBase64(avatarFile);
+            db.ref('users/' + userID).update(updates).then(() => { closeModal('profile-modal'); alert("Profile Updated!"); });
+        }
+
+        async function handleUpload() {
+            const title = document.getElementById('post-title').value;
+            const btn = document.getElementById('btn-upload');
+            if(!title) return alert("Title required");
+            let videoSource = "";
+            if(uploadMode === 'file') {
+                const file = document.getElementById('post-video-file').files[0];
+                if(!file) return alert("Select video file");
+                videoSource = await toBase64(file);
+            } else {
+                videoSource = document.getElementById('post-video-link').value;
+                if(!videoSource) return alert("Enter video link");
+            }
+            btn.innerText = "PUBLISHING..."; btn.disabled = true;
+            db.ref('videos').push({
+                uid: userID,
+                username: document.getElementById('display-name').innerText,
+                title: title,
+                desc: document.getElementById('post-desc').value,
+                videoUrl: videoSource,
+                productLink: document.getElementById('post-link').value,
+                timestamp: Date.now()
+            }).then(() => { 
+                closeModal('upload-modal'); 
+                btn.innerText = "Publish Production"; 
+                btn.disabled = false;
+                alert("Published!");
+            });
+        }
+    </script>
+</body>
+</html>
