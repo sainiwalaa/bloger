@@ -1,98 +1,256 @@
-<div id="auth-modal" class="modal !display-block !bg-black">
-    <div class="max-w-md mx-auto py-20 px-6">
-        <h1 class="text-4xl font-black italic text-red-600 mb-2 tracking-tighter text-center">SAINIWALAA</h1>
-        <p class="text-zinc-500 text-center text-xs uppercase tracking-widest mb-10">Creator Studio Access</p>
-        
-        <div id="auth-form-container" class="space-y-4">
-            <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SAINIWALAA | Creator Studio Pro</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    
+    <style>
+        :root { --accent: #ff0000; --bg-dark: #050505; }
+        body { background: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-premium { background: linear-gradient(90deg, #ff0000, #b30000); transition: 0.3s; box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
+        .btn-premium:active { transform: scale(0.95); }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
+        .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .video-card { border-radius: 20px; background: #0a0a0a; border: 1px solid #1a1a1a; transition: 0.3s; }
+        .order-card { border-left: 4px solid #ff0000; background: #111; border-radius: 12px; transition: 0.2s; }
+        .tab-btn { color: #555; transition: 0.3s; position: relative; }
+        .tab-btn.active { color: #ff0000; }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #ff0000; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-modal" class="fixed inset-0 bg-black z-[6000] flex items-center justify-center px-6">
+        <div class="max-w-md w-full">
+            <h1 class="text-4xl font-black italic text-red-600 mb-2 tracking-tighter text-center">SAINIWALAA</h1>
+            <p class="text-zinc-500 text-center text-xs uppercase tracking-widest mb-10">Creator Studio Access</p>
             
-            <button onclick="handleAuth('login')" id="btn-login" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white">Login Studio</button>
-            
-            <div class="flex justify-between px-2">
-                <button onclick="handleAuth('register')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Create Account</button>
-                <button onclick="handleAuth('reset')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Forgot Password?</button>
+            <div class="space-y-4">
+                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                
+                <button onclick="handleAuth('login')" id="btn-login" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white">Login Studio</button>
+                
+                <div class="flex justify-between px-2">
+                    <button onclick="handleAuth('register')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Create Account</button>
+                    <button onclick="handleAuth('reset')" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Forgot Password?</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Header ke HTML mein user-gear ke pehle ye button dal sakte hain agar zarurat ho
-    // <button onclick="logout()" class="text-zinc-500 text-xs font-bold mr-2">LOGOUT</button>
-</script>
+    <div class="p-4 flex justify-between items-center glass sticky top-0 z-50">
+        <h1 class="font-black italic text-xl tracking-tighter text-red-600">SAINIWALAA</h1>
+        <div class="flex gap-3 items-center">
+            <button onclick="logout()" class="text-[10px] font-bold text-zinc-500 uppercase mr-2">Logout</button>
+            <button onclick="openModal('upload-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-500 border border-red-500/30"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="openModal('profile-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center"><i class="fa-solid fa-user-gear"></i></button>
+        </div>
+    </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <div id="user-banner" class="h-64 w-full relative bg-zinc-900 flex flex-col justify-end p-6 transition-all duration-500 border-b border-white/5">
+        <div class="absolute top-10 right-10 text-4xl font-black opacity-10 italic select-none">CREATOR</div>
+        <div class="flex items-center gap-5 z-10">
+            <img id="display-avatar" src="https://ui-avatars.com/api/?name=S&background=333&color=fff" class="w-24 h-24 rounded-3xl border-4 border-black object-cover shadow-2xl"/>
+            <div>
+                <h2 id="display-name" class="text-3xl font-black tracking-tight">Sainiwalaa</h2>
+                <p id="display-banner-txt" class="text-xs uppercase tracking-[0.2em] font-bold opacity-70 mt-1"></p>
+            </div>
+        </div>
+    </div>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
-        databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
-        projectId: "sainiwalaainfulencer",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
-    
-    let userID = null; // Login ke baad set hoga
+    <div class="px-5 -mt-6 relative z-20">
+        <div id="bio-container" class="glass p-5 rounded-3xl border border-white/10 shadow-xl">
+            <p id="display-bio" class="text-zinc-400 text-sm italic">Loading studio profile...</p>
+        </div>
+    </div>
 
-    // Authentication Logic
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            userID = user.uid;
-            document.getElementById('auth-modal').style.display = 'none';
-            initStudio(); // Studio load karo
-        } else {
-            document.getElementById('auth-modal').style.display = 'block';
-        }
-    });
+    <div class="flex border-b border-white/5 mt-8 px-5 gap-8">
+        <button onclick="switchTab('productions')" id="tab-prod" class="tab-btn active pb-3 font-bold text-sm uppercase tracking-widest">Productions</button>
+        <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn pb-3 font-bold text-sm uppercase tracking-widest">Orders Feed</button>
+    </div>
 
-    async function handleAuth(type) {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        const btn = document.getElementById('btn-login');
+    <main class="p-5 max-w-2xl mx-auto pb-24">
+        <div id="productions-view" class="space-y-6">
+            <div id="my-history" class="grid grid-cols-1 gap-4">
+                <p class="text-center text-zinc-600 py-10">No productions yet.</p>
+            </div>
+        </div>
 
-        if(!email) return alert("Please enter email");
+        <div id="orders-view" class="hidden space-y-4">
+            <div id="orders-list" class="space-y-3">
+                <p class="text-center text-zinc-600 py-10">No orders received.</p>
+            </div>
+        </div>
+    </main>
 
-        try {
-            if(type === 'login') {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } else if(type === 'register') {
-                if(pass.length < 6) return alert("Password should be 6+ chars");
-                await auth.createUserWithEmailAndPassword(email, pass);
-                alert("Account Created! Welcome.");
-            } else if(type === 'reset') {
-                await auth.sendPasswordResetEmail(email);
-                alert("Password reset link sent to your email!");
+    <div id="upload-modal" class="modal">
+        <div class="max-w-md mx-auto py-10">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black">STUDIO <span class="text-red-600">UPLOAD</span></h2>
+                <button onclick="closeModal('upload-modal')" class="text-zinc-500 text-3xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="post-title" placeholder="Video Title" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                <div class="grid grid-cols-2 gap-2 p-1 bg-zinc-900 rounded-2xl border border-white/5">
+                    <button onclick="toggleUploadSource('file')" id="src-file-btn" class="p-3 rounded-xl bg-red-600 font-bold text-xs text-white">VIDEO FILE</button>
+                    <button onclick="toggleUploadSource('link')" id="src-link-btn" class="p-3 rounded-xl font-bold text-xs text-zinc-500">VIDEO LINK</button>
+                </div>
+                <div id="upload-file-box"><input type="file" id="post-video-file" accept="video/*" class="w-full glass p-4 rounded-2xl text-xs"></div>
+                <div id="upload-link-box" class="hidden"><input type="text" id="post-video-link" placeholder="Paste Video URL" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none"></div>
+                <input type="text" id="post-link" placeholder="Product Link" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                <textarea id="post-desc" placeholder="Details..." class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-24"></textarea>
+                <button onclick="handleUpload()" id="btn-upload" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white">Publish Production</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="max-w-md mx-auto py-10">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black">STUDIO <span class="text-red-600">CONFIG</span></h2>
+                <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-3xl">&times;</button>
+            </div>
+            <div class="space-y-5">
+                <input type="text" id="inp-name" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Username">
+                <textarea id="inp-bio" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-20" placeholder="Your Bio..."></textarea>
+                <input type="text" id="inp-banner-txt" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Banner Slogan">
+                <div class="grid grid-cols-3 gap-3">
+                    <div><label class="text-[9px] block mb-1">Banner BG</label><input type="color" id="inp-bg-color" value="#18181b" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+                    <div><label class="text-[9px] block mb-1">Banner Txt</label><input type="color" id="inp-banner-txt-color" value="#ffffff" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+                    <div><label class="text-[9px] block mb-1">Name Color</label><input type="color" id="inp-text-color" value="#ffffff" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs text-zinc-500">Profile Picture</label>
+                    <input type="file" id="inp-avatar-file" accept="image/*" class="w-full glass p-3 rounded-2xl text-xs">
+                </div>
+                <button onclick="saveProfileData()" class="w-full btn-premium p-5 rounded-2xl font-black text-white">UPDATE STUDIO</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 2. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
+            authDomain: "sainiwalaainfulencer.firebaseapp.com",
+            databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com",
+            projectId: "sainiwalaainfulencer",
+            storageBucket: "sainiwalaainfulencer.firebasestorage.app",
+            messagingSenderId: "116125275008",
+            appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
+        };
+
+        // 3. Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let userID = null;
+        let uploadMode = 'file';
+
+        // 4. Auth State Check
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                userID = user.uid;
+                document.getElementById('auth-modal').style.display = 'none';
+                initStudio();
+            } else {
+                document.getElementById('auth-modal').style.display = 'flex';
+                userID = null;
             }
-        } catch (error) {
-            alert(error.message);
+        });
+
+        async function handleAuth(type) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(!email) return alert("Email zaruri hai!");
+
+            try {
+                if(type === 'login') {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                } else if(type === 'register') {
+                    if(pass.length < 6) return alert("Password kam se kam 6 char ka ho");
+                    await auth.createUserWithEmailAndPassword(email, pass);
+                } else if(type === 'reset') {
+                    await auth.sendPasswordResetEmail(email);
+                    alert("Reset link email par bhej diya!");
+                }
+            } catch (e) { alert(e.message); }
         }
-    }
 
-    function logout() {
-        auth.signOut().then(() => location.reload());
-    }
+        function logout() { auth.signOut().then(() => location.reload()); }
 
-    // Aapka sara existing data loading logic 'initStudio' function ke andar
-    function initStudio() {
-        // Load Profile
-        db.ref('users/' + userID).on('value', snap => {
-            const u = snap.val() || {};
-            document.getElementById('display-name').innerText = u.name || "New Creator";
-            // ... (baaki sara purana code yahan)
-        });
+        // 5. Studio Functions
+        function initStudio() {
+            // Load Profile
+            db.ref('users/' + userID).on('value', snap => {
+                const u = snap.val() || {};
+                document.getElementById('display-name').innerText = u.name || "Sainiwalaa";
+                document.getElementById('display-name').style.color = u.textColor || "#ffffff";
+                document.getElementById('display-bio').innerText = u.bio || "No bio added yet.";
+                document.getElementById('display-banner-txt').innerText = u.bannerText || "";
+                document.getElementById('display-banner-txt').style.color = u.bannerTxtColor || "#ffffff";
+                document.getElementById('user-banner').style.backgroundColor = u.bannerColor || "#18181b";
+                if(u.avatar) document.getElementById('display-avatar').src = u.avatar;
+                
+                document.getElementById('inp-name').value = u.name || "";
+                document.getElementById('inp-bio').value = u.bio || "";
+                document.getElementById('inp-banner-txt').value = u.bannerText || "";
+            });
 
-        // Load Videos
-        db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
-            // ... (aapka purana videos wala code)
-        });
+            // Load Productions
+            db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
+                const container = document.getElementById('my-history');
+                container.innerHTML = "";
+                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10">No productions found.</p>`; return; }
+                snap.forEach(child => {
+                    const v = child.val();
+                    container.innerHTML += `
+                        <div class="video-card p-4 flex gap-4">
+                            <div class="w-20 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0">
+                                ${v.videoUrl.includes('base64') || v.videoUrl.endsWith('.mp4') ? 
+                                    `<video src="${v.videoUrl}" class="w-full h-full object-cover" muted></video>` : 
+                                    `<div class="w-full h-full flex items-center justify-center bg-zinc-900 text-[10px] text-zinc-700">Link</div>`
+                                }
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div><h4 class="font-bold text-sm text-zinc-200">${v.title}</h4><p class="text-[10px] text-zinc-500 line-clamp-1">${v.desc || 'No description'}</p></div>
+                                <div class="flex gap-4 mt-2">
+                                    <button onclick="db.ref('videos/${child.key}').remove()" class="text-[10px] font-black text-red-600 uppercase">Delete</button>
+                                    <a href="${v.productLink || '#'}" target="_blank" class="text-[10px] font-black text-zinc-400 uppercase">Link</a>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            });
 
-        // Load Orders
-        db.ref('orders').on('value', snap => {
-            // ... (aapka purana orders wala code)
-        });
-    }
+            // Load Orders
+            db.ref('orders').on('value', snap => {
+                const container = document.getElementById('orders-list');
+                container.innerHTML = "";
+                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10">No orders received.</p>`; return; }
+                snap.forEach(child => {
+                    const o = child.val();
+                    container.innerHTML += `
+                        <div class="order-card p-4 mb-2">
+                            <h4 class="font-bold text-zinc-200">${o.userName}</h4>
+                            <p class="text-xs text-zinc-400">${o.mobile}</p>
+                            <p class="text-xs text-zinc-400">${o.address}</p>
+                            <button onclick="db.ref('orders/${child.key}').remove()" class="text-[9px] font-bold text-red-600 uppercase mt-2">Complete</button>
+                        </div>`;
+                });
+            });
+        }
 
-    // Existing UI Functions (openModal, switchTab, etc.) wahi rahenge...
-</script>
+        // Helper & UI Logic
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) {
