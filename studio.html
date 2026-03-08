@@ -18,15 +18,19 @@
         .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: width 0.1s linear; }
         .desc-gradient { background: linear-gradient(0deg, rgba(0,0,0,1) 0%, transparent 100%); }
         ::-webkit-scrollbar { width: 0px; }
-        .modal-scroll { max-height: 85vh; overflow-y: auto; scrollbar-width: none; }
-        .comment-box { max-height: 150px; overflow-y: auto; scrollbar-width: none; font-size: 10px; border-top: 1px solid #1a1a1a; margin-top: 10px; padding-top: 10px; }
         
-        /* Profile Overlay Style */
-        #profile-overlay { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(100%); }
-        #profile-overlay.active { transform: translateY(0); }
+        /* Fixed Overlay - No New Tab */
+        #profile-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; z-index: 1000; 
+            transform: translateX(100%); transition: transform 0.3s ease-out;
+            overflow-y: auto;
+        }
+        #profile-overlay.active { transform: translateX(0); }
+        
         .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-        .grid-item { aspect-ratio: 9/16; background: #111; overflow: hidden; cursor: pointer; border: 0.5px solid #222; }
-        .grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .grid-item { aspect-ratio: 9/16; background: #111; overflow: hidden; border: 0.1px solid #222; }
+        .grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -44,66 +48,31 @@
         </div>
     </div>
 
-    <div id="edit-modal" class="fixed inset-0 z-[500] glass-dark flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-md bg-[#111] border border-[#222] p-6 rounded-[35px] space-y-5 modal-scroll">
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-black uppercase text-red-600 italic">Settings</h3>
-                <button onclick="auth.signOut()" class="text-[9px] bg-red-900 px-3 py-1 rounded-full font-bold">LOGOUT</button>
+    <div id="profile-overlay">
+        <div class="max-w-md mx-auto pb-20">
+            <div class="p-4 flex items-center gap-4 sticky top-0 bg-black z-20">
+                <button onclick="closeUserProfile()" class="text-2xl"><i class="fa-solid fa-arrow-left"></i></button>
+                <h2 id="u-header-name" class="font-bold text-sm uppercase italic">Profile</h2>
             </div>
-
-            <div class="space-y-4">
-                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Username</label>
-                <input type="text" id="edit-name" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                <p id="name-lock-info" class="text-[9px] text-yellow-600 mt-1 font-bold"></p>
-
-                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Social Links</label>
-                <input type="text" id="edit-ig" placeholder="Instagram Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
-                <input type="text" id="edit-yt" placeholder="YouTube Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
-                <input type="text" id="edit-fb" placeholder="Facebook Link" class="w-full p-2 bg-black border border-[#222] rounded-lg text-xs outline-none"/>
-
-                <div class="p-3 bg-black rounded-2xl space-y-3">
-                    <label class="text-[10px] text-gray-500 font-bold uppercase">Banner Style</label>
-                    <div class="flex gap-2">
-                        <button onclick="setBMode('img')" id="btn-bm-img" class="flex-1 bg-red-600 p-2 rounded-lg text-[9px] font-bold">IMAGE</button>
-                        <button onclick="setBMode('color')" id="btn-bm-clr" class="flex-1 bg-[#222] p-2 rounded-lg text-[9px] font-bold">COLOR</button>
-                    </div>
-                    <div id="inp-bm-img"><input type="file" id="edit-banner-file" class="text-[9px]"/></div>
-                    <div id="inp-bm-clr" class="hidden space-y-2">
-                        <input type="color" id="edit-banner-color" class="w-full h-8 bg-transparent" value="#800000"/>
-                        <input type="text" id="edit-banner-txt" placeholder="Banner Heading" class="w-full p-2 bg-[#111] text-xs rounded-lg outline-none"/>
-                    </div>
+            
+            <div class="relative h-40 bg-zinc-900 overflow-hidden">
+                <img id="u-banner-img" class="w-full h-full object-cover opacity-40"/>
+                <div class="absolute -bottom-10 left-6 flex items-end gap-3">
+                    <img id="u-avatar" class="w-20 h-20 rounded-2xl border-4 border-black bg-zinc-800 object-cover shadow-xl"/>
                 </div>
-
-                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Profile Photo & Bio</label>
-                <input type="file" id="edit-avatar-file" class="text-[9px] w-full"/>
-                <textarea id="edit-bio" placeholder="Bio..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs h-16 outline-none"></textarea>
             </div>
 
-            <div class="flex gap-2 pt-4">
-                <button onclick="closeEdit()" class="flex-1 bg-[#222] p-3 rounded-xl font-bold text-xs uppercase">Cancel</button>
-                <button onclick="saveProfile()" id="save-btn" class="flex-1 bg-red-600 p-3 rounded-xl font-bold text-xs uppercase">Save</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="profile-overlay" class="fixed inset-0 z-[550] bg-black overflow-y-auto">
-        <div class="max-w-md mx-auto min-h-screen relative pb-20">
-            <button onclick="closeUserProfile()" class="absolute top-6 left-6 z-10 bg-black/50 p-2 rounded-full h-10 w-10"><i class="fa-solid fa-arrow-left"></i></button>
-            
-            <div id="u-banner" class="h-40 bg-zinc-900 overflow-hidden">
-                <img id="u-banner-img" class="w-full h-full object-cover opacity-50"/>
-            </div>
-            
-            <div class="px-6 -mt-10 flex flex-col items-center text-center">
-                <img id="u-avatar" class="w-24 h-24 rounded-[30px] border-4 border-black bg-zinc-800 object-cover shadow-2xl"/>
-                <h2 id="u-name" class="mt-3 text-xl font-black italic uppercase">Username</h2>
-                <p id="u-bio" class="text-[11px] text-gray-400 mt-2 px-4 italic leading-tight">Bio goes here...</p>
-                <div class="flex gap-5 mt-4 text-lg" id="u-socials"></div>
+            <div class="mt-12 px-6">
+                <h3 id="u-name" class="text-xl font-black italic">Creator</h3>
+                <p id="u-bio" class="text-xs text-gray-400 mt-2 italic">Bio description...</p>
+                <div id="u-socials" class="flex gap-4 mt-4 text-xl"></div>
             </div>
 
-            <div class="mt-8 px-1">
-                <h4 class="px-5 mb-3 text-[10px] font-black uppercase tracking-[3px] text-red-600">Creations</h4>
-                <div id="u-grid" class="profile-grid"></div>
+            <div class="mt-8">
+                <div class="border-t border-zinc-800 pt-4">
+                    <h4 class="px-6 mb-4 text-[10px] font-black uppercase text-red-600">User Videos</h4>
+                    <div id="u-grid" class="profile-grid"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -126,21 +95,11 @@
             <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase">Edit</button>
         </div>
 
-        <div class="mt-16 px-6 space-y-3">
-            <p id="view-bio" class="text-xs text-gray-400 italic">No bio available.</p>
-            <div class="flex gap-4 text-xl" id="view-socials">
-                <a id="link-ig" href="#" class="hidden text-pink-600"><i class="fa-brands fa-instagram"></i></a>
-                <a id="link-yt" href="#" class="hidden text-red-600"><i class="fa-brands fa-youtube"></i></a>
-                <a id="link-fb" href="#" class="hidden text-blue-600"><i class="fa-brands fa-facebook"></i></a>
-            </div>
-        </div>
-
-        <div id="owner-tools" class="px-6 mt-8 hidden">
-            <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3 shadow-xl">
+        <div id="owner-tools" class="px-6 mt-20 hidden">
+             <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3 shadow-xl">
                 <input type="text" id="v-id" placeholder="Video Link (YT/GitHub)" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
                 <input type="text" id="v-title" placeholder="Video Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
-                <textarea id="v-desc" placeholder="Write description..." class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none h-16 resize-none"></textarea>
-                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase transition-all active:scale-95">Publish Now</button>
+                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase">Publish Now</button>
             </div>
         </div>
 
@@ -161,10 +120,8 @@
         const db = firebase.database();
         const auth = firebase.auth();
         let ytPlayers = {};
-        let bMode = 'img';
         let userStats = {};
 
-        // --- AUTH & LOAD ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
@@ -173,107 +130,16 @@
                 loadVideos();
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('owner-tools').classList.add('hidden');
             }
         });
 
-        function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-pass').value;
-            const user = document.getElementById('reg-username').value;
-            if(!email || !pass) return alert("Fill Email/Pass!");
-            if(type === 'login') auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-            else {
-                if(!user) return alert("Set Username!");
-                auth.createUserWithEmailAndPassword(email, pass).then(u => {
-                    db.ref('users/' + u.user.uid).set({ username: user, nameChangeCount: 0, lastChangeDate: Date.now(), bMode: 'img' });
-                }).catch(e => alert(e.message));
-            }
-        }
-
-        // --- PROFILE SYSTEM ---
         function loadProfile(uid) {
             db.ref('users/' + uid).on('value', snap => {
                 const d = snap.val() || {};
                 userStats = d;
                 document.getElementById('view-name').innerText = d.username || "Creator";
                 document.getElementById('view-handle').innerText = "@" + (d.username || "user");
-                document.getElementById('view-bio').innerText = d.bio || "No bio yet.";
                 document.getElementById('view-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                
-                const sl = ['ig', 'yt', 'fb'];
-                sl.forEach(s => {
-                    const el = document.getElementById('link-'+s);
-                    if(d[s]) { el.href = d[s]; el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
-                });
-
-                const nextChangeDate = d.lastChangeDate + (d.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
-                const canChange = Date.now() > nextChangeDate || !d.nameChangeCount;
-                document.getElementById('name-lock-info').innerText = canChange ? "Name change available!" : "Locked until: " + new Date(nextChangeDate).toLocaleDateString();
-
-                if(d.bMode === 'color') {
-                    document.getElementById('banner-box').style.background = d.bColor || "#800000";
-                    document.getElementById('view-banner-txt').innerText = d.bText || "SAINIWALAA";
-                    document.getElementById('view-banner-txt').classList.remove('hidden');
-                    document.getElementById('view-banner-img').classList.add('hidden');
-                } else {
-                    document.getElementById('view-banner-img').src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
-                    document.getElementById('view-banner-img').classList.remove('hidden');
-                    document.getElementById('view-banner-txt').classList.add('hidden');
-                    document.getElementById('banner-box').style.background = "#111";
-                }
-            });
-        }
-
-        async function saveProfile() {
-            const uid = auth.currentUser.uid;
-            const btn = document.getElementById('save-btn');
-            const newName = document.getElementById('edit-name').value;
-            
-            let updateData = { 
-                bio: document.getElementById('edit-bio').value,
-                ig: document.getElementById('edit-ig').value,
-                yt: document.getElementById('edit-yt').value,
-                fb: document.getElementById('edit-fb').value,
-                bMode: bMode
-            };
-
-            if(newName && newName !== userStats.username) {
-                const nextChangeDate = userStats.lastChangeDate + (userStats.nameChangeCount === 1 ? 20*24*60*60*1000 : 90*24*60*60*1000);
-                if(userStats.nameChangeCount > 0 && Date.now() < nextChangeDate) return alert("Username Locked!");
-                updateData.username = newName;
-                updateData.nameChangeCount = (userStats.nameChangeCount || 0) + 1;
-                updateData.lastChangeDate = Date.now();
-            }
-
-            btn.innerText = "...";
-            const av = document.getElementById('edit-avatar-file').files[0];
-            if(av) updateData.avatar = await toBase64(av);
-            if(bMode === 'img') {
-                const bn = document.getElementById('edit-banner-file').files[0];
-                if(bn) updateData.banner = await toBase64(bn);
-            } else {
-                updateData.bColor = document.getElementById('edit-banner-color').value;
-                updateData.bText = document.getElementById('edit-banner-txt').value;
-            }
-            db.ref('users/' + uid).update(updateData).then(() => { btn.innerText = "SAVE"; closeEdit(); });
-        }
-
-        // --- FEED & COMMENTS ---
-        function publishNow() {
-            const link = document.getElementById('v-id').value;
-            const title = document.getElementById('v-title').value;
-            if(!link || !title) return alert("Fill fields!");
-
-            db.ref('videos').push({
-                uid: auth.currentUser.uid,
-                username: userStats.username,
-                videoId: link.includes("github.com") ? link.replace("/blob/", "/raw/") : link,
-                title: title,
-                desc: document.getElementById('v-desc').value || "",
-                timestamp: Date.now()
-            }).then(() => {
-                document.getElementById('v-id').value = ""; document.getElementById('v-title').value = "";
             });
         }
 
@@ -286,85 +152,47 @@
 
                 Object.keys(data).reverse().forEach(key => {
                     const v = data[key];
-                    const likesCount = v.likes ? Object.keys(v.likes).length : 0;
-                    const isLiked = v.likes && v.likes[auth.currentUser.uid] ? 'text-red-600' : 'text-gray-500';
                     let type = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be')) ? 'yt' : 'direct';
 
                     list.innerHTML += `
                         <div class="v-card space-y-4 bg-[#050505] p-2 rounded-[40px] border border-[#111]">
-                            <div class="flex justify-between px-4 text-[10px] font-bold text-red-600 uppercase">
-                                <span class="cursor-pointer hover:underline" onclick="openUserProfile('${v.uid}')">${v.username}</span>
-                                ${auth.currentUser.uid === v.uid ? `<button onclick="deleteVideo('${key}')">Remove</button>` : ''}
+                            <div class="px-4 text-[10px] font-bold text-red-600">
+                                <span class="cursor-pointer" onclick="openUserProfile('${v.uid}')">${v.username}</span>
                             </div>
                             <div class="v-frame relative">
                                 ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline onclick="togglePlay('${key}','direct')"></video>`}
-                                <div class="absolute inset-0 pointer-events-none desc-gradient flex flex-col justify-end p-6">
-                                    <h3 class="text-sm font-black italic uppercase">${v.title}</h3>
-                                </div>
-                            </div>
-                            <div class="px-4 pb-4 space-y-3">
-                                <div class="seek-bar" onclick="seek(event, '${key}', '${type}')"><div id="fill-${key}" class="seek-fill"></div></div>
-                                <div class="flex justify-between items-center text-xl">
-                                    <div class="flex gap-6">
-                                        <i class="fa-solid fa-play" id="p-btn-${key}" onclick="togglePlay('${key}', '${type}')"></i>
-                                        <i class="fa-solid fa-message text-gray-500" onclick="toggleCommentSec('${key}')"></i>
-                                    </div>
-                                    <div class="flex items-center gap-2" onclick="handleLike('${key}')">
-                                        <span class="text-xs font-black ${isLiked}">${likesCount}</span>
-                                        <i class="fa-solid fa-heart ${isLiked}"></i>
-                                    </div>
-                                </div>
-                                <div id="comment-sec-${key}" class="hidden">
-                                    <div id="comment-list-${key}" class="comment-box"></div>
-                                    <div class="flex gap-2 mt-2">
-                                        <input type="text" id="inp-msg-${key}" placeholder="Add comment..." class="flex-1 bg-black border border-[#222] p-2 rounded-lg text-[10px] outline-none"/>
-                                        <button onclick="postComment('${key}')" class="bg-red-600 px-3 rounded-lg text-[10px] font-bold">POST</button>
-                                    </div>
-                                </div>
                             </div>
                         </div>`;
                     renderPlayer(key, v.videoId, type);
-                    loadComments(key);
                 });
             });
         }
 
-        // --- NEW: USER PROFILE OVERLAY LOGIC ---
+        // --- THE FIX: Same Page Overlay Logic ---
         function openUserProfile(uid) {
             const overlay = document.getElementById('profile-overlay');
             overlay.classList.add('active');
             stopAll();
 
-            // Load User Info
             db.ref('users/' + uid).once('value', snap => {
                 const d = snap.val() || {};
+                document.getElementById('u-header-name').innerText = d.username || "Profile";
                 document.getElementById('u-name').innerText = d.username || "Creator";
                 document.getElementById('u-bio').innerText = d.bio || "No bio available.";
                 document.getElementById('u-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
                 document.getElementById('u-banner-img').src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
-                
-                const soc = document.getElementById('u-socials');
-                soc.innerHTML = "";
-                if(d.ig) soc.innerHTML += `<a href="${d.ig}" class="text-pink-600"><i class="fa-brands fa-instagram"></i></a>`;
-                if(d.yt) soc.innerHTML += `<a href="${d.yt}" class="text-red-600"><i class="fa-brands fa-youtube"></i></a>`;
-                if(d.fb) soc.innerHTML += `<a href="${d.fb}" class="text-blue-600"><i class="fa-brands fa-facebook"></i></a>`;
             });
 
-            // Load User's Videos Grid
             db.ref('videos').orderByChild('uid').equalTo(uid).once('value', snap => {
                 const grid = document.getElementById('u-grid');
                 grid.innerHTML = "";
                 const data = snap.val();
                 if(!data) return;
-                Object.keys(data).reverse().forEach(k => {
+                Object.keys(data).forEach(k => {
                     const v = data[k];
                     const isYT = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be'));
-                    const thumb = isYT ? `https://img.youtube.com/vi/${getYTID(v.videoId)}/mqdefault.jpg` : "";
-                    
-                    grid.innerHTML += `
-                        <div class="grid-item" onclick="closeUserProfile()">
-                            ${isYT ? `<img src="${thumb}"/>` : `<video src="${v.videoId}"></video>`}
-                        </div>`;
+                    const thumb = isYT ? `https://img.youtube.com/vi/${getYTID(v.videoId)}/0.jpg` : v.videoId;
+                    grid.innerHTML += `<div class="grid-item">${isYT ? `<img src="${thumb}"/>` : `<video src="${thumb}"></video>`}</div>`;
                 });
             });
         }
@@ -373,106 +201,16 @@
             document.getElementById('profile-overlay').classList.remove('active');
         }
 
-        // --- SOCIAL LOGIC ---
-        function handleLike(vKey) {
-            const uid = auth.currentUser.uid;
-            const ref = db.ref(`videos/${vKey}/likes/${uid}`);
-            ref.once('value', s => { s.exists() ? ref.remove() : ref.set(true); });
-        }
-
-        function toggleCommentSec(key) {
-            const el = document.getElementById(`comment-sec-${key}`);
-            el.classList.toggle('hidden');
-        }
-
-        function postComment(key) {
-            const msg = document.getElementById(`inp-msg-${key}`).value;
-            if(!msg) return;
-            db.ref(`videos/${key}/comments`).push({
-                user: userStats.username,
-                text: msg,
-                timestamp: Date.now()
-            }).then(() => { document.getElementById(`inp-msg-${key}`).value = ""; });
-        }
-
-        function loadComments(key) {
-            db.ref(`videos/${key}/comments`).on('value', snap => {
-                const box = document.getElementById(`comment-list-${key}`);
-                if(!box) return;
-                box.innerHTML = "";
-                snap.forEach(child => {
-                    const c = child.val();
-                    box.innerHTML += `<div class="mb-1"><span class="text-red-600 font-bold">${c.user}:</span> <span class="text-gray-300">${c.text}</span></div>`;
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        }
-
-        // --- HELPERS ---
+        // --- Helpers ---
+        function getYTID(u) { const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/; const m = u.match(reg); return (m && m[2].length === 11) ? m[2] : u; }
+        function stopAll() { document.querySelectorAll('video').forEach(v => v.pause()); }
         function renderPlayer(key, url, type) {
             if(type === 'yt') {
                 setTimeout(() => {
-                    ytPlayers[key] = new YT.Player('yt-' + key, {
-                        videoId: getYTID(url),
-                        playerVars: { 'controls': 0, 'modestbranding': 1, 'playsinline': 1 },
-                        events: { 'onStateChange': (e) => {
-                            const btn = document.getElementById('p-btn-'+key);
-                            if(btn) btn.className = (e.data === 1) ? "fa-solid fa-pause" : "fa-solid fa-play";
-                            if(e.data === 1) startYTTrack(key);
-                        }}
-                    });
-                }, 500);
-            } else {
-                setTimeout(() => {
-                    const vd = document.getElementById('vid-' + key);
-                    if(vd) vd.ontimeupdate = () => { document.getElementById('fill-'+key).style.width = (vd.currentTime/vd.duration)*100 + "%"; };
+                    ytPlayers[key] = new YT.Player('yt-' + key, { videoId: getYTID(url), playerVars: { 'controls': 0, 'playsinline': 1 } });
                 }, 500);
             }
         }
-
-        function togglePlay(key, type) {
-            if(type === 'direct') {
-                const v = document.getElementById('vid-'+key);
-                if(v.paused) { stopAll(); v.play(); } else v.pause();
-                document.getElementById('p-btn-'+key).className = v.paused ? "fa-solid fa-play" : "fa-solid fa-pause";
-            } else {
-                const p = ytPlayers[key];
-                if(p && p.getPlayerState() === 1) p.pauseVideo(); else { stopAll(); p.playVideo(); }
-            }
-        }
-
-        function stopAll() {
-            Object.values(ytPlayers).forEach(p => p.pauseVideo ? p.pauseVideo() : null);
-            document.querySelectorAll('video').forEach(v => v.pause());
-            document.querySelectorAll('.fa-pause').forEach(i => i.className = "fa-solid fa-play");
-        }
-
-        function startYTTrack(key) {
-            const p = ytPlayers[key];
-            const t = setInterval(() => {
-                if(!p || typeof p.getPlayerState !== 'function' || p.getPlayerState() !== 1) { clearInterval(t); return; }
-                const fill = document.getElementById('fill-'+key);
-                if(fill) fill.style.width = (p.getCurrentTime()/p.getDuration())*100 + "%";
-            }, 500);
-        }
-
-        function seek(e, key, type) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const per = (e.clientX - rect.left) / rect.width;
-            if(type === 'direct') {
-                const v = document.getElementById('vid-'+key);
-                v.currentTime = v.duration * per;
-            } else {
-                ytPlayers[key].seekTo(ytPlayers[key].getDuration() * per);
-            }
-        }
-
-        function getYTID(u) { const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/; const m = u.match(reg); return (m && m[2].length === 11) ? m[2] : u; }
-        function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
-        function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-        function setBMode(m) { bMode = m; document.getElementById('inp-bm-img').style.display = m === 'img' ? 'block' : 'none'; document.getElementById('inp-bm-clr').style.display = m === 'color' ? 'block' : 'none'; }
-        const toBase64 = f => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); r.onerror = rej; });
-        function deleteVideo(k) { if(confirm("Remove?")) db.ref('videos/' + k).remove(); }
     </script>
 </body>
 </html>
