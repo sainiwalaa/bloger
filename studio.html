@@ -12,13 +12,12 @@
         body { background: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
         .btn-premium { background: linear-gradient(90deg, #ff0000, #b30000); transition: 0.3s; box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
-        .btn-premium:active { transform: scale(0.95); }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
         .modal.active { display: block; animation: fadeIn 0.3s ease; }
+        .video-card { border-radius: 20px; background: #0a0a0a; border: 1px solid #1a1a1a; transition: 0.3s; }
+        .order-card { border-left: 4px solid #ff0000; background: #111; border-radius: 12px; }
+        .tab-btn.active { border-bottom: 2px solid #ff0000; color: #ff0000; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .video-card { border-radius: 24px; overflow: hidden; background: #111; border: 1px solid #222; transition: 0.3s; }
-        .video-card:hover { border-color: #ff0000; }
-        .badge-limit { font-size: 10px; background: rgba(255,0,0,0.1); color: #ff4444; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -31,107 +30,99 @@
         </div>
     </div>
 
-    <div id="user-banner" class="h-56 w-full relative bg-zinc-900 flex items-end p-6 transition-colors duration-700">
+    <div id="user-banner" class="h-64 w-full relative bg-zinc-900 flex flex-col justify-end p-6 transition-all duration-500 border-b border-white/5">
+        <div id="banner-overlay-text" class="absolute top-10 right-10 text-4xl font-black opacity-20 italic select-none">CREATOR</div>
         <div class="flex items-center gap-5 z-10">
             <div class="relative">
-                <img id="display-avatar" src="https://via.placeholder.com/150" class="w-24 h-24 rounded-3xl border-4 border-black object-cover shadow-2xl"/>
-                <div class="absolute -bottom-2 -right-2 bg-green-500 w-5 h-5 rounded-full border-4 border-black"></div>
+                <img id="display-avatar" src="https://ui-avatars.com/api/?name=S&background=333&color=fff" class="w-24 h-24 rounded-3xl border-4 border-black object-cover shadow-2xl"/>
             </div>
             <div>
                 <h2 id="display-name" class="text-3xl font-black tracking-tight">Loading...</h2>
-                <div class="flex items-center gap-2 mt-1">
-                    <span id="name-timer" class="badge-limit">Checking Status...</span>
-                </div>
+                <p id="display-banner-txt" class="text-xs uppercase tracking-[0.2em] font-bold opacity-70 mt-1"></p>
             </div>
         </div>
     </div>
 
-    <main class="p-5 max-w-2xl mx-auto">
-        <div class="flex justify-between items-end mb-8">
-            <div>
-                <h3 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Portfolio</h3>
-                <h2 class="text-2xl font-bold">My Productions</h2>
-            </div>
-            <span class="text-xs font-mono text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full" id="post-count">0 Posts</span>
+    <div class="px-5 -mt-6 relative z-20">
+        <div id="bio-container" class="glass p-5 rounded-3xl border border-white/10 shadow-xl">
+            <p id="display-bio" class="text-zinc-400 text-sm italic">No bio added yet.</p>
+        </div>
+    </div>
+
+    <div class="flex border-b border-white/5 mt-8 px-5 gap-8">
+        <button onclick="switchTab('productions')" id="tab-prod" class="tab-btn active pb-3 font-bold text-sm uppercase tracking-widest">Productions</button>
+        <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn pb-3 font-bold text-sm uppercase tracking-widest">Orders Feed</button>
+    </div>
+
+    <main class="p-5 max-w-2xl mx-auto pb-24">
+        <div id="productions-view" class="space-y-6">
+            <div id="my-history" class="grid grid-cols-1 gap-4"></div>
         </div>
 
-        <div id="my-history" class="grid grid-cols-1 gap-6 pb-20">
-            <div class="text-center py-20 text-zinc-600">
-                <i class="fa-solid fa-clapperboard text-4xl mb-4 opacity-20"></i>
-                <p>No videos uploaded yet</p>
-            </div>
+        <div id="orders-view" class="hidden space-y-4">
+            <div id="orders-list" class="space-y-3"></div>
         </div>
     </main>
 
     <div id="upload-modal" class="modal">
         <div class="max-w-md mx-auto py-10">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-3xl font-black">UPLOAD <span class="text-red-600">STUDIO</span></h2>
-                <button onclick="closeModal('upload-modal')" class="text-zinc-500 text-2xl">&times;</button>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black">STUDIO <span class="text-red-600">UPLOAD</span></h2>
+                <button onclick="closeModal('upload-modal')" class="text-zinc-500 text-3xl">&times;</button>
             </div>
             
-            <div class="space-y-5">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Content Info</label>
-                    <input type="text" id="post-title" placeholder="Catchy Video Title" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 focus:border-red-500 outline-none">
-                    <textarea id="post-desc" placeholder="Product details (Max 200 words)" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 focus:border-red-500 outline-none h-28"></textarea>
-                </div>
-
-                <div class="relative group">
-                    <input type="file" id="post-video-file" accept="video/*" class="hidden" onchange="updateFileName(this)">
-                    <label for="post-video-file" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-3xl cursor-pointer group-hover:border-red-600 transition-all bg-zinc-900/50">
-                        <i class="fa-solid fa-video text-3xl text-zinc-700 mb-3 group-hover:text-red-500"></i>
-                        <p id="file-name-display" class="text-xs text-zinc-500">Click to select 90s MP4 Video</p>
-                    </label>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Monetization</label>
-                    <input type="text" id="post-link" placeholder="Affiliate/Product Buy Link" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 focus:border-red-500 outline-none">
-                </div>
+            <div class="space-y-4">
+                <input type="text" id="post-title" placeholder="Video Title" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
                 
-                <button onclick="handleUpload()" id="btn-upload" class="w-full btn-premium p-5 rounded-2xl font-black uppercase tracking-widest">Publish to Feed</button>
+                <div class="grid grid-cols-2 gap-2 p-1 bg-zinc-900 rounded-2xl border border-white/5">
+                    <button onclick="toggleUploadSource('file')" id="src-file-btn" class="p-3 rounded-xl bg-red-600 font-bold text-xs">VIDEO FILE</button>
+                    <button onclick="toggleUploadSource('link')" id="src-link-btn" class="p-3 rounded-xl font-bold text-xs">VIDEO LINK</button>
+                </div>
+
+                <div id="upload-file-box">
+                    <input type="file" id="post-video-file" accept="video/*" class="w-full glass p-4 rounded-2xl text-xs">
+                </div>
+                <div id="upload-link-box" class="hidden">
+                    <input type="text" id="post-video-link" placeholder="Paste Video URL (MP4/YT)" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                </div>
+
+                <input type="text" id="post-link" placeholder="Product / Affiliate Link" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
+                <textarea id="post-desc" placeholder="Product Details..." class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-24"></textarea>
+                
+                <button onclick="handleUpload()" id="btn-upload" class="w-full btn-premium p-5 rounded-2xl font-black uppercase">Publish Production</button>
             </div>
         </div>
     </div>
 
     <div id="profile-modal" class="modal">
         <div class="max-w-md mx-auto py-10">
-            <div class="flex justify-between items-center mb-10">
+            <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-black">STUDIO <span class="text-red-600">CONFIG</span></h2>
-                <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-2xl">&times;</button>
+                <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-3xl">&times;</button>
             </div>
 
-            <div class="space-y-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Identity</label>
-                    <input type="text" id="inp-name" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Username">
-                    <p id="name-status" class="text-[10px] text-yellow-600"></p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Banner Theme</label>
-                        <input type="color" id="inp-bg-color" class="w-full h-14 rounded-2xl bg-zinc-900 border-none cursor-pointer">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Text Theme</label>
-                        <input type="color" id="inp-text-color" class="w-full h-14 rounded-2xl bg-zinc-900 border-none cursor-pointer">
-                    </div>
+            <div class="space-y-5">
+                <input type="text" id="inp-name" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Username">
+                <textarea id="inp-bio" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-20" placeholder="Your Bio..."></textarea>
+                <input type="text" id="inp-banner-txt" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Banner Slogan">
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div><label class="text-[9px] block mb-1">Banner BG</label><input type="color" id="inp-bg-color" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+                    <div><label class="text-[9px] block mb-1">Banner Text</label><input type="color" id="inp-banner-txt-color" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+                    <div><label class="text-[9px] block mb-1">Name Color</label><input type="color" id="inp-text-color" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-zinc-500 tracking-widest uppercase">Profile Picture</label>
-                    <input type="file" id="inp-avatar-file" accept="image/*" class="w-full text-xs text-zinc-500 glass p-3 rounded-2xl">
+                    <label class="text-xs text-zinc-500">Profile Picture</label>
+                    <input type="file" id="inp-avatar-file" accept="image/*" class="w-full glass p-3 rounded-2xl text-xs">
                 </div>
 
-                <button onclick="saveProfileData()" class="w-full btn-premium p-5 rounded-2xl font-black">SAVE SETTINGS</button>
+                <button onclick="saveProfileData()" class="w-full btn-premium p-5 rounded-2xl font-black">UPDATE STUDIO</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
@@ -139,191 +130,94 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const userID = "U_SAINI_001"; // User logic based on registration
+        const userID = "U_SAINI_001";
+        let uploadMode = 'file';
 
-        let userProfile = {};
-
-        // 2. Navigation
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function updateFileName(input) {
-            if(input.files[0]) document.getElementById('file-name-display').innerText = input.files[0].name;
+
+        function toggleUploadSource(mode) {
+            uploadMode = mode;
+            document.getElementById('upload-file-box').classList.toggle('hidden', mode === 'link');
+            document.getElementById('upload-link-box').classList.toggle('hidden', mode === 'file');
+            document.getElementById('src-file-btn').className = mode === 'file' ? 'p-3 rounded-xl bg-red-600 font-bold text-xs' : 'p-3 rounded-xl font-bold text-xs';
+            document.getElementById('src-link-btn').className = mode === 'link' ? 'p-3 rounded-xl bg-red-600 font-bold text-xs' : 'p-3 rounded-xl font-bold text-xs';
         }
 
-        // 3. Name Change Algorithm
-        function checkNameEligibility(profile) {
-            const now = Date.now();
-            const lastChange = profile.lastChangeDate || 0;
-            const changeCount = profile.changeCount || 0;
-            const diffDays = Math.floor((now - lastChange) / (1000 * 60 * 60 * 24));
-            
-            let statusEl = document.getElementById('name-status');
-            let nameInput = document.getElementById('inp-name');
-            let timerDisplay = document.getElementById('name-timer');
-
-            if(changeCount === 0) {
-                statusEl.innerText = "Available: First change is free.";
-                timerDisplay.innerText = "Verified Creator";
-                return true;
-            }
-
-            let requiredDays = changeCount === 1 ? 20 : (changeCount === 2 ? 90 : 200);
-            
-            if(changeCount >= 4) {
-                statusEl.innerText = "Locked: Contact Admin to change.";
-                nameInput.disabled = true;
-                timerDisplay.innerText = "Name Locked (L4)";
-                return false;
-            }
-
-            if(diffDays >= requiredDays) {
-                statusEl.innerText = `Eligible: You can change now.`;
-                timerDisplay.innerText = "Change Available";
-                return true;
-            } else {
-                let wait = requiredDays - diffDays;
-                statusEl.innerText = `Wait ${wait} days for next change.`;
-                nameInput.disabled = true;
-                timerDisplay.innerText = `Locked for ${wait}d`;
-                return false;
-            }
+        function switchTab(tab) {
+            document.getElementById('productions-view').classList.toggle('hidden', tab !== 'productions');
+            document.getElementById('orders-view').classList.toggle('hidden', tab !== 'orders');
+            document.getElementById('tab-prod').classList.toggle('active', tab === 'productions');
+            document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
         }
 
-        // 4. Save Profile Data
         async function saveProfileData() {
-            const newName = document.getElementById('inp-name').value;
             let updates = {
+                name: document.getElementById('inp-name').value,
+                bio: document.getElementById('inp-bio').value,
+                bannerText: document.getElementById('inp-banner-txt').value,
                 bannerColor: document.getElementById('inp-bg-color').value,
+                bannerTxtColor: document.getElementById('inp-banner-txt-color').value,
                 textColor: document.getElementById('inp-text-color').value
             };
-
-            // Process Name Change
-            if(newName !== userProfile.name && checkNameEligibility(userProfile)) {
-                updates.name = newName;
-                updates.lastChangeDate = Date.now();
-                updates.changeCount = (userProfile.changeCount || 0) + 1;
-            }
-
-            // Avatar Upload
             const avatarFile = document.getElementById('inp-avatar-file').files[0];
-            if(avatarFile) {
-                updates.avatar = await toBase64(avatarFile);
-            }
-
-            db.ref('users/' + userID).update(updates).then(() => {
-                alert("Profile Updated!");
-                closeModal('profile-modal');
-            });
+            if(avatarFile) updates.avatar = await toBase64(avatarFile);
+            db.ref('users/' + userID).update(updates).then(() => { closeModal('profile-modal'); alert("Studio Saved!"); });
         }
 
-        // 5. Handle Video Upload
         async function handleUpload() {
-            const file = document.getElementById('post-video-file').files[0];
             const title = document.getElementById('post-title').value;
             const btn = document.getElementById('btn-upload');
+            let videoSource = "";
 
-            if(!file || !title) return alert("Please fill Title and select Video!");
+            if(uploadMode === 'file') {
+                const file = document.getElementById('post-video-file').files[0];
+                if(!file) return alert("Select video file");
+                videoSource = await toBase64(file);
+            } else {
+                videoSource = document.getElementById('post-video-link').value;
+                if(!videoSource) return alert("Enter video link");
+            }
 
-            btn.innerText = "UPLOADING...";
-            btn.disabled = true;
-
-            const video = document.createElement('video');
-            video.preload = 'metadata';
-            video.onloadedmetadata = async function() {
-                if(video.duration > 91) {
-                    alert("Maximum 90 seconds allowed!");
-                    btn.innerText = "PUBLISH NOW";
-                    btn.disabled = false;
-                    return;
-                }
-
-                const base64Video = await toBase64(file);
-                const postData = {
-                    uid: userID,
-                    title: title,
-                    desc: document.getElementById('post-desc').value,
-                    videoUrl: base64Video,
-                    productLink: document.getElementById('post-link').value,
-                    timestamp: Date.now()
-                };
-
-                db.ref('videos').push(postData).then(() => {
-                    alert("Successfully Published!");
-                    closeModal('upload-modal');
-                    btn.innerText = "PUBLISH NOW";
-                    btn.disabled = false;
-                });
-            };
-            video.src = URL.createObjectURL(file);
+            btn.innerText = "PUBLISHING...";
+            db.ref('videos').push({
+                uid: userID,
+                title: title,
+                desc: document.getElementById('post-desc').value,
+                videoUrl: videoSource,
+                productLink: document.getElementById('post-link').value,
+                timestamp: Date.now()
+            }).then(() => { closeModal('upload-modal'); location.reload(); });
         }
 
-        // 6. Delete Post
-        window.deletePost = function(key) {
-            if(confirm("Are you sure you want to delete this video?")) {
-                db.ref('videos/' + key).remove();
-            }
-        };
+        // Real-time Data Loading
+        db.ref('users/' + userID).on('value', snap => {
+            const u = snap.val() || {};
+            document.getElementById('display-name').innerText = u.name || "New Creator";
+            document.getElementById('display-name').style.color = u.textColor || "#ffffff";
+            document.getElementById('display-bio').innerText = u.bio || "No bio added yet.";
+            document.getElementById('display-banner-txt').innerText = u.bannerText || "";
+            document.getElementById('display-banner-txt').style.color = u.bannerTxtColor || "#ffffff";
+            document.getElementById('user-banner').style.backgroundColor = u.bannerColor || "#18181b";
+            if(u.avatar) document.getElementById('display-avatar').src = u.avatar;
+        });
 
-        // 7. Load Feed (Real-time)
-        function initFeed() {
-            db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
-                const container = document.getElementById('my-history');
-                const countLabel = document.getElementById('post-count');
-                container.innerHTML = "";
-                let count = 0;
-
-                if(!snap.exists()) {
-                    container.innerHTML = `<div class="text-center py-20 text-zinc-600"><p>No productions yet.</p></div>`;
-                }
-
-                snap.forEach(child => {
-                    count++;
-                    const v = child.val();
-                    container.innerHTML += `
-                        <div class="video-card p-4">
-                            <div class="flex gap-4">
-                                <div class="w-24 h-36 bg-black rounded-xl overflow-hidden flex-shrink-0">
-                                    <video src="${v.videoUrl}" class="w-full h-full object-cover" muted onmouseover="this.play()" onmouseout="this.pause()"></video>
-                                </div>
-                                <div class="flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h4 class="font-bold text-lg leading-tight mb-1">${v.title}</h4>
-                                        <p class="text-[11px] text-zinc-500 line-clamp-2">${v.desc}</p>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button onclick="deletePost('${child.key}')" class="text-[10px] font-bold text-red-500 bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20">DELETE</button>
-                                        <a href="${v.productLink}" target="_blank" class="text-[10px] font-bold text-zinc-300 bg-zinc-800 px-4 py-2 rounded-lg">LINK</a>
-                                    </div>
-                                </div>
+        db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
+            const container = document.getElementById('my-history');
+            container.innerHTML = "";
+            snap.forEach(child => {
+                const v = child.val();
+                container.innerHTML += `
+                    <div class="video-card p-4 flex gap-4">
+                        <div class="w-20 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0">
+                            <video src="${v.videoUrl}" class="w-full h-full object-cover" muted></video>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div><h4 class="font-bold text-sm">${v.title}</h4><p class="text-[10px] text-zinc-500 line-clamp-1">${v.desc}</p></div>
+                            <div class="flex gap-2">
+                                <button onclick="db.ref('videos/${child.key}').remove()" class="text-[9px] font-bold text-red-500">DELETE</button>
+                                <a href="${v.productLink}" target="_blank" class="text-[9px] font-bold text-zinc-400">PRODUCT</a>
                             </div>
                         </div>
-                    `;
-                });
-                countLabel.innerText = `${count} Posts`;
+                    </div>`;
             });
-        }
-
-        // 8. Helper
-        const toBase64 = file => new Promise((res, rej) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => res(reader.result);
-            reader.onerror = e => rej(e);
-        });
-
-        // Init App
-        db.ref('users/' + userID).on('value', snap => {
-            userProfile = snap.val() || { name: "New Creator", changeCount: 0 };
-            document.getElementById('display-name').innerText = userProfile.name;
-            document.getElementById('inp-name').value = userProfile.name;
-            if(userProfile.avatar) document.getElementById('display-avatar').src = userProfile.avatar;
-            if(userProfile.bannerColor) document.getElementById('user-banner').style.backgroundColor = userProfile.bannerColor;
-            if(userProfile.textColor) document.getElementById('display-name').style.color = userProfile.textColor;
-            
-            checkNameEligibility(userProfile);
-            initFeed();
-        });
-
-    </script>
-</body>
-</html>
