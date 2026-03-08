@@ -2,215 +2,235 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Creator Studio</title>
+    <title>SAINIWALAA | Pro Influencer Feed</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { background: #000; color: white; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
-        .glass-dark { background: rgba(0, 0, 0, 0.98); backdrop-filter: blur(25px); }
-        .v-frame { width: 100%; aspect-ratio: 9/16; background: #050505; position: relative; overflow: hidden; border-radius: 35px; border: 1px solid #1a1a1a; }
-        .v-frame iframe, .v-frame video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; object-fit: cover; }
-        .seek-bar { width: 100%; height: 4px; background: #222; position: relative; cursor: pointer; border-radius: 10px; }
-        .seek-fill { width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: width 0.1s linear; }
-        .desc-gradient { background: linear-gradient(0deg, rgba(0,0,0,1) 0%, transparent 100%); }
-        ::-webkit-scrollbar { width: 0px; }
+        :root { --amz-orange: #febd69; --amz-blue: #232f3e; }
+        body { background: #000; color: white; font-family: 'Poppins', sans-serif; }
         
-        /* Fixed Overlay - No New Tab */
-        #profile-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; z-index: 1000; 
-            transform: translateX(100%); transition: transform 0.3s ease-out;
-            overflow-y: auto;
-        }
-        #profile-overlay.active { transform: translateX(0); }
+        /* Header Animation */
+        .scrolling-header { background: #111; border-bottom: 2px solid #ff0000; overflow: hidden; white-space: nowrap; padding: 10px 0; }
+        .scroll-text { display: inline-block; animation: scroll 20s linear infinite; font-size: 12px; font-weight: 900; color: #ff0000; text-transform: uppercase; }
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         
-        .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-        .grid-item { aspect-ratio: 9/16; background: #111; overflow: hidden; border: 0.1px solid #222; }
-        .grid-item img, .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+        /* Logo Animation */
+        .logo-spin { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #ff0000; animation: rotate 5s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Video Frame */
+        .v-frame { width: 100%; aspect-ratio: 9/16; background: #000; border-radius: 25px; overflow: hidden; border: 1px solid #333; }
+        
+        /* Profile Theme (Amazon/Flipkart Mix) */
+        .profile-card { background: var(--amz-blue); border-radius: 0 0 30px 30px; }
+        .buy-btn { background: #ffd814; color: #000; font-weight: 700; border-radius: 8px; transition: 0.3s; }
+        .buy-btn:hover { background: #f7ca00; }
+
+        /* Input Styles */
+        input, textarea, select { background: #111 !important; border: 1px solid #333 !important; color: white !important; padding: 12px; border-radius: 12px; font-size: 13px; }
+        
+        #order-form-overlay, #edit-profile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; padding: 20px; overflow-y: auto; }
+        .active-modal { display: block !important; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="fixed inset-0 z-[600] bg-black flex items-center justify-center p-6 hidden">
-        <div class="w-full max-w-sm space-y-6 text-center">
-            <h1 class="text-5xl font-black text-red-600 italic mb-8 tracking-tighter">SAINIWALAA</h1>
-            <input type="text" id="reg-username" placeholder="Unique Username" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 bg-[#111] border border-[#222] rounded-2xl outline-none focus:border-red-600"/>
-            <div class="flex gap-2">
-                <button onclick="handleAuth('login')" class="flex-1 bg-white text-black font-black p-4 rounded-2xl text-xs uppercase">Login</button>
-                <button onclick="handleAuth('signup')" class="flex-1 bg-red-600 text-white font-black p-4 rounded-2xl text-xs uppercase">Signup</button>
-            </div>
+    <div class="scrolling-header flex items-center">
+        <div class="px-4"><div class="logo-spin flex items-center justify-center font-black text-[8px]">SAINI</div></div>
+        <div class="scroll-text">
+            SAINIWALAA INFLUENCER FEED • EARN NOW • GROW NOW • JOIN THE REVOLUTION • EXCLUSIVE CONTENT • 
         </div>
     </div>
 
-    <div id="profile-overlay">
-        <div class="max-w-md mx-auto pb-20">
-            <div class="p-4 flex items-center gap-4 sticky top-0 bg-black z-20">
-                <button onclick="closeUserProfile()" class="text-2xl"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2 id="u-header-name" class="font-bold text-sm uppercase italic">Profile</h2>
-            </div>
-            
-            <div class="relative h-40 bg-zinc-900 overflow-hidden">
-                <img id="u-banner-img" class="w-full h-full object-cover opacity-40"/>
-                <div class="absolute -bottom-10 left-6 flex items-end gap-3">
-                    <img id="u-avatar" class="w-20 h-20 rounded-2xl border-4 border-black bg-zinc-800 object-cover shadow-xl"/>
+    <div id="main-app" class="max-w-md mx-auto">
+        <div id="profile-view" class="profile-card p-6 relative">
+            <div class="flex items-center gap-4">
+                <img id="my-avatar" class="w-20 h-20 rounded-full border-4 border-yellow-500 object-cover" src="https://via.placeholder.com/150"/>
+                <div>
+                    <h2 id="my-name" class="text-xl font-bold">Creator Name</h2>
+                    <p id="my-handle" class="text-xs text-yellow-500">@username</p>
                 </div>
+                <button onclick="toggleModal('edit-profile-overlay')" class="ml-auto text-xl"><i class="fa-solid fa-gear"></i></button>
             </div>
+            <p id="my-bio" class="mt-4 text-xs text-gray-300 italic">Bio will appear here (max 300 words)...</p>
+            <div id="my-socials" class="flex gap-4 mt-3 text-xl text-yellow-500"></div>
+        </div>
 
-            <div class="mt-12 px-6">
-                <h3 id="u-name" class="text-xl font-black italic">Creator</h3>
-                <p id="u-bio" class="text-xs text-gray-400 mt-2 italic">Bio description...</p>
-                <div id="u-socials" class="flex gap-4 mt-4 text-xl"></div>
+        <div class="p-6 space-y-4">
+            <div class="bg-[#111] p-4 rounded-3xl border border-[#222]">
+                <h3 class="text-xs font-black mb-3 text-red-500 uppercase">Publish Content</h3>
+                <input type="text" id="v-url" placeholder="Paste Video URL (YT/GitHub/MP4)" class="w-full mb-2"/>
+                <input type="text" id="v-title" placeholder="Title" class="w-full mb-2"/>
+                <textarea id="v-desc" placeholder="Description (Max 200 words)" class="w-full mb-2 h-20"></textarea>
+                <input type="text" id="v-link" placeholder="Product Buy Link" class="w-full mb-4"/>
+                <button onclick="publishPost()" class="w-full bg-red-600 p-4 rounded-xl font-bold uppercase text-xs">Upload to Feed</button>
             </div>
+        </div>
 
-            <div class="mt-8">
-                <div class="border-t border-zinc-800 pt-4">
-                    <h4 class="px-6 mb-4 text-[10px] font-black uppercase text-red-600">User Videos</h4>
-                    <div id="u-grid" class="profile-grid"></div>
-                </div>
-            </div>
+        <div id="video-feed" class="p-4 space-y-10"></div>
+    </div>
+
+    <div id="edit-profile-overlay">
+        <div class="max-w-sm mx-auto space-y-4">
+            <h2 class="text-2xl font-black italic">EDIT STUDIO</h2>
+            <input type="text" id="edit-name" placeholder="Display Name" class="w-full"/>
+            <textarea id="edit-bio" placeholder="Bio (300 Words)" class="w-full h-32"></textarea>
+            <input type="text" id="edit-avatar" placeholder="Avatar Image URL" class="w-full"/>
+            <input type="text" id="edit-bg" placeholder="Profile Background Color (e.g. #232f3e)" class="w-full"/>
+            <input type="text" id="s-ig" placeholder="Instagram Link" class="w-full"/>
+            <input type="text" id="s-yt" placeholder="YouTube Link" class="w-full"/>
+            <input type="text" id="s-tg" placeholder="Telegram Link" class="w-full"/>
+            <button onclick="saveProfile()" class="w-full bg-green-600 p-4 rounded-xl font-bold">SAVE CHANGES</button>
+            <button onclick="toggleModal('edit-profile-overlay')" class="w-full text-gray-500">Close</button>
         </div>
     </div>
 
-    <div id="main-content" class="max-w-md mx-auto pb-24">
-        <div class="relative">
-            <div id="banner-box" class="h-44 w-full bg-[#111] overflow-hidden flex items-center justify-center">
-                <img id="view-banner-img" class="w-full h-full object-cover opacity-60 hidden"/>
-                <h1 id="view-banner-txt" class="text-4xl font-black italic uppercase">SAINIWALAA</h1>
+    <div id="order-form-overlay">
+        <div class="max-w-sm mx-auto bg-white text-black p-6 rounded-3xl space-y-4">
+            <h2 class="text-xl font-black border-b pb-2 text-blue-900">ORDER CONFIRMATION</h2>
+            <input type="text" id="order-name" placeholder="Full Name" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
+            <input type="text" id="order-phone" placeholder="Mobile Number" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
+            <input type="text" id="order-city" placeholder="City" class="w-full !border-gray-300 !text-black !bg-gray-50"/>
+            <div class="flex items-center gap-2 text-xs font-bold">
+                <span>Contact Influencer?</span>
+                <input type="checkbox" id="order-contact" class="w-5 h-5"/>
             </div>
-            <div class="absolute -bottom-12 left-6 flex items-end gap-4">
-                <div class="h-28 w-28 rounded-[35px] border-4 border-black overflow-hidden bg-[#111] shadow-2xl">
-                    <img id="view-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-full h-full object-cover"/>
-                </div>
-                <div class="mb-3">
-                    <h2 id="view-name" class="text-2xl font-black italic uppercase leading-none">Creator</h2>
-                    <p id="view-handle" class="text-[10px] text-red-600 font-black tracking-widest mt-1 uppercase">@username</p>
-                </div>
-            </div>
-            <button onclick="openEdit()" class="absolute -bottom-10 right-6 bg-[#111] border border-[#222] px-5 py-2 rounded-full text-[10px] font-black uppercase">Edit</button>
+            <button id="final-order-btn" class="w-full buy-btn p-4 shadow-lg">CONFIRM & ORDER</button>
+            <button onclick="toggleModal('order-form-overlay')" class="w-full text-red-500 font-bold">Cancel</button>
         </div>
-
-        <div id="owner-tools" class="px-6 mt-20 hidden">
-             <div class="bg-[#0a0a0a] p-5 rounded-[30px] border border-[#1a1a1a] space-y-3 shadow-xl">
-                <input type="text" id="v-id" placeholder="Video Link (YT/GitHub)" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none"/>
-                <input type="text" id="v-title" placeholder="Video Title" class="w-full p-3 bg-black border border-[#222] rounded-xl text-xs outline-none font-bold"/>
-                <button onclick="publishNow()" id="pub-btn" class="w-full bg-red-600 p-4 rounded-2xl font-black text-xs uppercase">Publish Now</button>
-            </div>
-        </div>
-
-        <div id="video-list" class="p-6 space-y-12"></div>
     </div>
 
     <script>
+        // Use your existing Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
-            authDomain: "sainiwalaainfulencer.firebaseapp.com",
             databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com/",
             projectId: "sainiwalaainfulencer",
-            storageBucket: "sainiwalaainfulencer.firebasestorage.app",
-            messagingSenderId: "116125275008",
-            appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
-        let ytPlayers = {};
-        let userStats = {};
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('owner-tools').classList.remove('hidden');
-                loadProfile(user.uid);
-                loadVideos();
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
+        let currentUserID = "U1"; // Demo ID, login se override hoga
+
+        // --- Functions ---
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('active-modal');
+        }
+
+        function publishPost() {
+            const url = document.getElementById('v-url').value;
+            const title = document.getElementById('v-title').value;
+            const desc = document.getElementById('v-desc').value;
+            const link = document.getElementById('v-link').value;
+
+            if(!url || !title) return alert("Fill video link & title!");
+
+            db.ref('videos').push({
+                uid: currentUserID,
+                url: url,
+                title: title,
+                desc: desc.substring(0, 500),
+                productLink: link,
+                timestamp: Date.now()
+            });
+            alert("Published to Feed!");
+        }
+
+        function loadFeed() {
+            db.ref('videos').on('value', snap => {
+                const feed = document.getElementById('video-feed');
+                feed.innerHTML = "";
+                snap.forEach(child => {
+                    const v = child.val();
+                    const isYT = v.url.includes('youtu');
+                    
+                    feed.innerHTML += `
+                        <div class="space-y-3 bg-[#0a0a0a] p-3 rounded-[30px] border border-[#1a1a1a]">
+                            <div class="v-frame">
+                                ${isYT ? `<iframe src="https://www.youtube.com/embed/${getYTID(v.url)}" frameborder="0"></iframe>` : 
+                                `<video src="${v.url}" controls class="w-full h-full object-cover"></video>`}
+                            </div>
+                            <div class="px-2">
+                                <h3 class="font-bold text-red-500">${v.title}</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">${v.desc || ''}</p>
+                                ${v.productLink ? `
+                                    <button onclick="openOrderForm('${v.productLink}')" class="w-full buy-btn p-3 mt-3 text-xs uppercase">
+                                        <i class="fa-solid fa-cart-shopping mr-2"></i> Buy Now
+                                    </button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function openOrderForm(link) {
+            toggleModal('order-form-overlay');
+            document.getElementById('final-order-btn').onclick = () => {
+                const orderData = {
+                    name: document.getElementById('order-name').value,
+                    phone: document.getElementById('order-phone').value,
+                    city: document.getElementById('order-city').value,
+                    contact: document.getElementById('order-contact').checked,
+                    date: new Date().toLocaleString()
+                };
+                db.ref('orders').push(orderData).then(() => {
+                    alert("Order Saved! Opening Product...");
+                    window.open(link, '_blank');
+                    toggleModal('order-form-overlay');
+                });
+            };
+        }
+
+        function saveProfile() {
+            const data = {
+                name: document.getElementById('edit-name').value,
+                bio: document.getElementById('edit-bio').value,
+                avatar: document.getElementById('edit-avatar').value,
+                bg: document.getElementById('edit-bg').value,
+                socials: {
+                    ig: document.getElementById('s-ig').value,
+                    yt: document.getElementById('s-yt').value,
+                    tg: document.getElementById('s-tg').value
+                }
+            };
+            db.ref('users/' + currentUserID).set(data);
+            toggleModal('edit-profile-overlay');
+        }
+
+        function getYTID(u) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = u.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // Initialize
+        loadFeed();
+        
+        // Load User Data
+        db.ref('users/' + currentUserID).on('value', snap => {
+            const d = snap.val();
+            if(d) {
+                document.getElementById('my-name').innerText = d.name || "Creator";
+                document.getElementById('my-bio').innerText = d.bio || "";
+                if(d.avatar) document.getElementById('my-avatar').src = d.avatar;
+                if(d.bg) document.getElementById('profile-view').style.backgroundColor = d.bg;
+                
+                let socHtml = "";
+                if(d.socials.ig) socHtml += `<a href="${d.socials.ig}"><i class="fa-brands fa-instagram"></i></a>`;
+                if(d.socials.yt) socHtml += `<a href="${d.socials.yt}"><i class="fa-brands fa-youtube"></i></a>`;
+                if(d.socials.tg) socHtml += `<a href="${d.socials.tg}"><i class="fa-brands fa-telegram"></i></a>`;
+                document.getElementById('my-socials').innerHTML = socHtml;
             }
         });
 
-        function loadProfile(uid) {
-            db.ref('users/' + uid).on('value', snap => {
-                const d = snap.val() || {};
-                userStats = d;
-                document.getElementById('view-name').innerText = d.username || "Creator";
-                document.getElementById('view-handle').innerText = "@" + (d.username || "user");
-                document.getElementById('view-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            });
-        }
-
-        function loadVideos() {
-            db.ref('videos').on('value', snap => {
-                const list = document.getElementById('video-list');
-                list.innerHTML = "";
-                const data = snap.val();
-                if(!data) return;
-
-                Object.keys(data).reverse().forEach(key => {
-                    const v = data[key];
-                    let type = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be')) ? 'yt' : 'direct';
-
-                    list.innerHTML += `
-                        <div class="v-card space-y-4 bg-[#050505] p-2 rounded-[40px] border border-[#111]">
-                            <div class="px-4 text-[10px] font-bold text-red-600">
-                                <span class="cursor-pointer" onclick="openUserProfile('${v.uid}')">${v.username}</span>
-                            </div>
-                            <div class="v-frame relative">
-                                ${type === 'yt' ? `<div id="yt-${key}"></div>` : `<video id="vid-${key}" src="${v.videoId}" loop playsinline onclick="togglePlay('${key}','direct')"></video>`}
-                            </div>
-                        </div>`;
-                    renderPlayer(key, v.videoId, type);
-                });
-            });
-        }
-
-        // --- THE FIX: Same Page Overlay Logic ---
-        function openUserProfile(uid) {
-            const overlay = document.getElementById('profile-overlay');
-            overlay.classList.add('active');
-            stopAll();
-
-            db.ref('users/' + uid).once('value', snap => {
-                const d = snap.val() || {};
-                document.getElementById('u-header-name').innerText = d.username || "Profile";
-                document.getElementById('u-name').innerText = d.username || "Creator";
-                document.getElementById('u-bio').innerText = d.bio || "No bio available.";
-                document.getElementById('u-avatar').src = d.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                document.getElementById('u-banner-img').src = d.banner || "https://wallpaperaccess.com/full/1155013.jpg";
-            });
-
-            db.ref('videos').orderByChild('uid').equalTo(uid).once('value', snap => {
-                const grid = document.getElementById('u-grid');
-                grid.innerHTML = "";
-                const data = snap.val();
-                if(!data) return;
-                Object.keys(data).forEach(k => {
-                    const v = data[k];
-                    const isYT = (v.videoId.includes('youtube') || v.videoId.includes('youtu.be'));
-                    const thumb = isYT ? `https://img.youtube.com/vi/${getYTID(v.videoId)}/0.jpg` : v.videoId;
-                    grid.innerHTML += `<div class="grid-item">${isYT ? `<img src="${thumb}"/>` : `<video src="${thumb}"></video>`}</div>`;
-                });
-            });
-        }
-
-        function closeUserProfile() {
-            document.getElementById('profile-overlay').classList.remove('active');
-        }
-
-        // --- Helpers ---
-        function getYTID(u) { const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/; const m = u.match(reg); return (m && m[2].length === 11) ? m[2] : u; }
-        function stopAll() { document.querySelectorAll('video').forEach(v => v.pause()); }
-        function renderPlayer(key, url, type) {
-            if(type === 'yt') {
-                setTimeout(() => {
-                    ytPlayers[key] = new YT.Player('yt-' + key, { videoId: getYTID(url), playerVars: { 'controls': 0, 'playsinline': 1 } });
-                }, 500);
-            }
-        }
     </script>
 </body>
 </html>
