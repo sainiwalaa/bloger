@@ -13,31 +13,26 @@
     <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' rel='stylesheet'/>
 
     <b:skin><![CDATA[
-        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; }
-        .ig-input { background: #121212; border: 1px solid #363636; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 12px; color: #fff; font-size: 14px; }
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
+        .ig-input { background: #121212; border: 1px solid #363636; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 12px; color: #fff; font-size: 14px; outline: none; }
+        .ig-input:focus { border-color: #555; }
         
-        /* Instagram Style Modal */
-        .ig-modal { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #121212; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px 20px 0 0; padding: 20px; border-top: 1px solid #262626; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
+        /* Modals */
+        .ig-modal { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #121212; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px 20px 0 0; padding: 20px; border-top: 1px solid #262626; }
         .ig-modal.active { bottom: 0; }
         
         .profile-header { padding: 20px 16px; display: flex; align-items: center; gap: 20px; }
-        .avatar-container { position: relative; width: 85px; height: 85px; padding: 3px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .avatar-container { position: relative; width: 85px; height: 85px; padding: 3px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
         .avatar-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #000; background: #222; background-size: cover; background-position: center; }
         
-        .stat-item { text-align: center; flex: 1; }
         .stat-num { font-weight: 800; font-size: 18px; display: block; }
         .stat-label { font-size: 13px; color: #a8a8a8; }
+        .video-grid-item { position: relative; width: 100%; aspect-ratio: 1/1; background: #121212; overflow: hidden; }
+        .video-grid-item video { width: 100%; height: 100%; object-fit: cover; }
 
-        .video-grid-item { position: relative; width: 100%; aspect-ratio: 1/1; background: #121212; overflow: hidden; cursor: pointer; }
-        .video-grid-item video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .video-grid-item i.fa-play { position: absolute; top: 8px; right: 8px; font-size: 12px; }
-
-        .action-btn { background: #363636; color: #fff; padding: 7px 0; border-radius: 8px; font-weight: 600; font-size: 14px; flex: 1; text-align: center; }
-        .btn-primary { background: #0095f6; }
-
+        .action-btn { background: #363636; color: #fff; padding: 8px 0; border-radius: 8px; font-weight: 600; font-size: 14px; flex: 1; text-align: center; }
         #blogger-fix { display: none !important; }
-        
-        .loading-bar { height: 2px; background: #ff3040; width: 0%; position: fixed; top: 0; left: 0; z-index: 9999; transition: 0.3s; }
+        .loading-bar { height: 2px; background: #0095f6; width: 0%; position: fixed; top: 0; left: 0; z-index: 9999; transition: 0.3s; }
     ]]></b:skin>
 </head>
 <body>
@@ -47,20 +42,20 @@
     <div id="auth-ui" class="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center p-8">
         <h1 class="text-4xl italic font-serif mb-10 tracking-widest">SAINIWALAA</h1>
         <div class="w-full max-w-sm space-y-3">
-            <input id="email" class="ig-input" placeholder="Phone number, username, or email"/>
+            <input id="email" class="ig-input" placeholder="Email address"/>
             <input id="pass" class="ig-input" placeholder="Password" type="password"/>
-            <button onclick="authManager('login')" class="w-full bg-[#0095f6] text-white p-2.5 rounded-lg font-bold">Log In</button>
+            <button id="login-btn" onclick="authManager('login')" class="w-full bg-[#0095f6] text-white p-3 rounded-lg font-bold active:opacity-70">Log In</button>
             <div class="flex items-center my-4 opacity-50"><hr class="flex-1 border-zinc-700"/><span class="px-4 text-xs font-bold">OR</span><hr class="flex-1 border-zinc-700"/></div>
-            <p class="text-center text-sm">Don't have an account? <span onclick="authManager('reg')" class="text-[#0095f6] font-bold cursor-pointer">Sign up</span></p>
+            <p class="text-center text-sm text-zinc-400">Don't have an account? <span onclick="authManager('reg')" class="text-[#0095f6] font-bold cursor-pointer">Sign up</span></p>
         </div>
     </div>
 
     <div id="studio-content" class="hidden max-w-md mx-auto">
         <div class="flex justify-between items-center p-4 border-b border-zinc-900">
-            <i class="fa-solid fa-lock text-sm"> <span id="user-display" class="font-bold ml-1">username</span></i>
+            <span id="user-display" class="font-bold text-lg">username</span>
             <div class="flex gap-5 text-xl">
                 <i class="fa-regular fa-square-plus cursor-pointer" onclick="openUploadModal()"></i>
-                <i class="fa-solid fa-bars cursor-pointer" onclick="firebase.auth().signOut().then(()=>location.reload())"></i>
+                <i class="fa-solid fa-right-from-bracket cursor-pointer text-red-500" onclick="firebase.auth().signOut().then(()=>location.reload())"></i>
             </div>
         </div>
 
@@ -68,29 +63,23 @@
             <div class="avatar-container">
                 <div id="p-avatar" class="avatar-img"></div>
             </div>
-            <div class="flex flex-1 gap-2">
-                <div class="stat-item"><span class="stat-num" id="post-count">0</span><span class="stat-label">Posts</span></div>
-                <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">Followers</span></div>
-                <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">Following</span></div>
+            <div class="flex flex-1 text-center">
+                <div class="flex-1"><span class="stat-num" id="post-count">0</span><span class="stat-label">Posts</span></div>
+                <div class="flex-1"><span class="stat-num">1.2k</span><span class="stat-label">Followers</span></div>
+                <div class="flex-1"><span class="stat-num">150</span><span class="stat-label">Following</span></div>
             </div>
         </div>
         
         <div class="px-4 pb-4">
             <h2 id="p-name" class="font-bold text-sm">Name</h2>
-            <p id="p-bio" class="text-sm whitespace-pre-wrap">Bio goes here...</p>
+            <p id="p-bio" class="text-sm text-zinc-300">Bio content...</p>
             <div class="flex gap-2 mt-4">
                 <button onclick="openEditProfile()" class="action-btn">Edit Profile</button>
-                <button onclick="alert('Shared!')" class="action-btn">Share Profile</button>
+                <button onclick="alert('Link Copied!')" class="action-btn">Share Profile</button>
             </div>
         </div>
 
-        <div class="flex border-t border-zinc-900 mt-4">
-            <div class="flex-1 text-center py-3 border-b border-white"><i class="fa-solid fa-table-cells text-xl"></i></div>
-            <div class="flex-1 text-center py-3 opacity-40"><i class="fa-solid fa-clapperboard text-xl"></i></div>
-            <div class="flex-1 text-center py-3 opacity-40"><i class="fa-regular fa-id-badge text-xl"></i></div>
-        </div>
-
-        <div id="my-grid" class="grid grid-cols-3 gap-[2px]">
+        <div id="my-grid" class="grid grid-cols-3 gap-[2px] border-t border-zinc-900 mt-4 pt-[2px]">
             </div>
     </div>
 
@@ -98,18 +87,18 @@
         <div class="flex justify-between items-center pb-4 border-b border-zinc-800 mb-4">
             <span class="text-zinc-400" onclick="closeModal('upload-modal')">Cancel</span>
             <h2 class="font-bold">New Reel</h2>
-            <span id="publish-btn" class="text-[#0095f6] font-bold" onclick="publishPost()">Share</span>
+            <span id="share-btn" class="text-[#0095f6] font-bold cursor-pointer" onclick="publishPost()">Share</span>
         </div>
         <div class="space-y-4">
             <div class="flex gap-3">
-                <div class="w-20 h-28 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-700">
-                    <input id="post-file" type="file" accept="video/*" class="hidden" onchange="previewVideo(this)"/>
-                    <label for="post-file" id="file-label" class="text-xs text-center p-2 cursor-pointer">Select<br/>Video</label>
+                <div class="w-20 h-28 bg-zinc-800 rounded border border-zinc-700 flex items-center justify-center overflow-hidden">
+                    <input id="post-file" type="file" accept="video/*" class="hidden" onchange="document.getElementById('file-status').innerText='Selected ✅'"/>
+                    <label for="post-file" id="file-status" class="text-[10px] text-center p-2 cursor-pointer">Select Video</label>
                 </div>
-                <textarea id="post-desc" class="flex-1 bg-transparent outline-none text-sm resize-none" placeholder="Write a caption..."></textarea>
+                <textarea id="post-desc" class="flex-1 bg-transparent outline-none text-sm resize-none pt-1" placeholder="Write a caption..."></textarea>
             </div>
-            <input id="post-title" class="ig-input" placeholder="Title/Product Name"/>
-            <input id="prod-link" class="ig-input" placeholder="Product URL (Optional)"/>
+            <input id="post-title" class="ig-input" placeholder="Video Title"/>
+            <input id="prod-link" class="ig-input" placeholder="Product Link (Optional)"/>
         </div>
     </div>
 
@@ -117,15 +106,16 @@
         <div class="flex justify-between items-center pb-4 border-b border-zinc-800 mb-6">
             <span onclick="closeModal('profile-modal')">Cancel</span>
             <h2 class="font-bold">Edit Profile</h2>
-            <span class="text-[#0095f6] font-bold" onclick="saveProfile()">Done</span>
+            <span class="text-[#0095f6] font-bold cursor-pointer" onclick="saveProfile()">Done</span>
         </div>
         <input id="edit-avatar" class="ig-input" placeholder="Profile Image URL"/>
-        <input id="edit-name" class="ig-input" placeholder="Name"/>
+        <input id="edit-name" class="ig-input" placeholder="Full Name"/>
         <input id="edit-bio" class="ig-input" placeholder="Bio"/>
     </div>
 
     <script>
     //<![CDATA[
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
@@ -139,6 +129,7 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // Auth State
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('auth-ui').style.display = 'none';
@@ -148,27 +139,115 @@
             }
         });
 
+        // Login & Register Function
         async function authManager(type) {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return alert("Fill all fields");
+            const btn = document.getElementById('login-btn');
+            
+            if(!e || !p) return alert("Please enter email and password");
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
             try {
-                if(type==='login') await auth.signInWithEmailAndPassword(e,p);
-                if(type==='reg') {
-                    const res = await auth.createUserWithEmailAndPassword(e,p);
+                if(type === 'login') {
+                    await auth.signInWithEmailAndPassword(e, p);
+                } else {
+                    const res = await auth.createUserWithEmailAndPassword(e, p);
                     await db.ref('users/' + res.user.uid).set({
                         name: e.split('@')[0],
-                        bio: "Artist | Creator",
-                        avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                        bio: "New Creator",
+                        avatar: "https://www.w3schools.com/howto/img_avatar.png"
                     });
                 }
-            } catch(err) { alert(err.message); }
+            } catch(err) {
+                alert("Error: " + err.message);
+                btn.innerText = type === 'login' ? "Log In" : "Sign Up";
+                btn.disabled = false;
+            }
         }
 
+        // Load Data
         function loadUserProfile(uid) {
             db.ref('users/' + uid).on('value', snap => {
                 const u = snap.val();
                 if(!u) return;
                 document.getElementById('p-name').innerText = u.name;
-                document.getElementById('user-display').innerText = u.name.toLowerCase().replace(/\s/g, '_');
-                document.getElementById('p-bio').innerText
+                document.getElementById('user-display').innerText = u.name.toLowerCase().replace(/\s/g, '');
+                document.getElementById('p-bio').innerText = u.bio;
+                document.getElementById('p-avatar').style.backgroundImage = `url('${u.avatar}')`;
+            });
+        }
+
+        function loadUserPosts(uid) {
+            db.ref('videos').orderByChild('uid').equalTo(uid).on('value', snap => {
+                const grid = document.getElementById('my-grid');
+                grid.innerHTML = '';
+                let count = 0;
+                snap.forEach(child => {
+                    count++;
+                    const v = child.val();
+                    grid.innerHTML += `
+                        <div class="video-grid-item" onclick="deletePost('${child.key}')">
+                            <video src="${v.videoUrl}" muted onmouseover="this.play()" onmouseout="this.pause()"></video>
+                            <i class="fa-solid fa-play absolute top-2 right-2 text-[10px]"></i>
+                        </div>`;
+                });
+                document.getElementById('post-count').innerText = count;
+            });
+        }
+
+        // Actions
+        async function publishPost() {
+            const file = document.getElementById('post-file').files[0];
+            const title = document.getElementById('post-title').value;
+            const desc = document.getElementById('post-desc').value;
+            const ldr = document.getElementById('loader');
+            const sBtn = document.getElementById('share-btn');
+
+            if(!file || !title) return alert("Select video and add a title");
+            
+            sBtn.innerText = "Sharing...";
+            ldr.style.width = "40%";
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    await db.ref('videos').push({
+                        uid: auth.currentUser.uid,
+                        title: title,
+                        desc: desc,
+                        videoUrl: reader.result,
+                        timestamp: Date.now()
+                    });
+                    ldr.style.width = "100%";
+                    alert("Reel Published!");
+                    location.reload();
+                } catch(e) { alert(e.message); }
+            };
+        }
+
+        function deletePost(key) {
+            if(confirm("Delete this post permanently?")) {
+                db.ref('videos/' + key).remove();
+            }
+        }
+
+        function saveProfile() {
+            const uid = auth.currentUser.uid;
+            db.ref('users/' + uid).update({
+                name: document.getElementById('edit-name').value || document.getElementById('p-name').innerText,
+                bio: document.getElementById('edit-bio').value || document.getElementById('p-bio').innerText,
+                avatar: document.getElementById('edit-avatar').value || ""
+            }).then(() => closeModal('profile-modal'));
+        }
+
+        function openEditProfile() { document.getElementById('profile-modal').classList.add('active'); }
+        function openUploadModal() { document.getElementById('upload-modal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    //]]>
+    </script>
+</body>
+</html>
