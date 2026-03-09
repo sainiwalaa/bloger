@@ -13,110 +13,115 @@
     <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' rel='stylesheet'/>
 
     <b:skin><![CDATA[
-        body { background: #0f0f0f; color: #fff; font-family: "Roboto", Arial, sans-serif; margin: 0; }
-        .yt-input { background: #1a1a1a; border: 1px solid #333; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 12px; color: #fff; outline: none; }
-        .yt-input:focus { border-color: #3ea6ff; }
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; }
+        .ig-input { background: #121212; border: 1px solid #363636; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 12px; color: #fff; font-size: 14px; }
         
-        /* YouTube Style Modal */
-        .yt-modal { position: fixed; bottom: -100%; left: 0; width: 100%; height: 90%; background: #0f0f0f; z-index: 1000; transition: 0.4s cubic-bezier(0,0,0,1); border-radius: 15px 15px 0 0; padding: 20px; border-top: 1px solid #333; }
-        .yt-modal.active { bottom: 0; }
+        /* Instagram Style Modal */
+        .ig-modal { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #121212; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px 20px 0 0; padding: 20px; border-top: 1px solid #262626; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
+        .ig-modal.active { bottom: 0; }
         
-        /* Profile Section */
-        .channel-banner { width: 100%; height: 120px; background: #222; background-size: cover; background-position: center; }
-        .channel-info { padding: 0 16px; margin-top: -30px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .channel-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #0f0f0f; background: #333; background-size: cover; }
+        .profile-header { padding: 20px 16px; display: flex; align-items: center; gap: 20px; }
+        .avatar-container { position: relative; width: 85px; height: 85px; padding: 3px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #000; background: #222; background-size: cover; background-position: center; }
         
-        /* Video Grid */
-        .video-card { position: relative; width: 100%; aspect-ratio: 9/16; background: #000; border-radius: 12px; overflow: hidden; }
-        .video-card video { width: 100%; height: 100%; object-fit: cover; }
-        .video-stats { position: absolute; bottom: 8px; left: 8px; font-size: 11px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
-        
-        .tab-btn { padding: 10px 0; font-weight: 500; font-size: 14px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
-        
+        .stat-item { text-align: center; flex: 1; }
+        .stat-num { font-weight: 800; font-size: 18px; display: block; }
+        .stat-label { font-size: 13px; color: #a8a8a8; }
+
+        .video-grid-item { position: relative; width: 100%; aspect-ratio: 1/1; background: #121212; overflow: hidden; cursor: pointer; }
+        .video-grid-item video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .video-grid-item i.fa-play { position: absolute; top: 8px; right: 8px; font-size: 12px; }
+
+        .action-btn { background: #363636; color: #fff; padding: 7px 0; border-radius: 8px; font-weight: 600; font-size: 14px; flex: 1; text-align: center; }
+        .btn-primary { background: #0095f6; }
+
         #blogger-fix { display: none !important; }
-        .btn-blue { background: #3ea6ff; color: #000; padding: 8px 16px; border-radius: 18px; font-weight: 600; font-size: 14px; }
+        
+        .loading-bar { height: 2px; background: #ff3040; width: 0%; position: fixed; top: 0; left: 0; z-index: 9999; transition: 0.3s; }
     ]]></b:skin>
 </head>
 <body>
     <div id='blogger-fix'><b:section id='main' maxwidgets='1'/></div>
+    <div id="loader" class="loading-bar"></div>
 
-    <div id="auth-ui" class="fixed inset-0 bg-[#0f0f0f] z-[9999] flex items-center justify-center p-6">
-        <div class="w-full max-w-sm">
-            <div class="text-center mb-10">
-                <i class="fa-brands fa-youtube text-red-600 text-6xl"></i>
-                <h1 class="text-2xl font-bold mt-4">Creator Studio</h1>
-            </div>
-            <input id="email" class="yt-input" placeholder="Email"/>
-            <input id="pass" class="yt-input" placeholder="Password" type="password"/>
-            <button onclick="authManager('login')" class="w-full bg-white text-black p-3 rounded-full font-bold mt-2">Sign in</button>
-            <div class="flex justify-center gap-6 mt-6 text-sm text-[#3ea6ff]">
-                <span onclick="authManager('reg')" class="cursor-pointer">Create account</span>
-                <span onclick="authManager('reset')" class="cursor-pointer">Forgot?</span>
-            </div>
+    <div id="auth-ui" class="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center p-8">
+        <h1 class="text-4xl italic font-serif mb-10 tracking-widest">SAINIWALAA</h1>
+        <div class="w-full max-w-sm space-y-3">
+            <input id="email" class="ig-input" placeholder="Phone number, username, or email"/>
+            <input id="pass" class="ig-input" placeholder="Password" type="password"/>
+            <button onclick="authManager('login')" class="w-full bg-[#0095f6] text-white p-2.5 rounded-lg font-bold">Log In</button>
+            <div class="flex items-center my-4 opacity-50"><hr class="flex-1 border-zinc-700"/><span class="px-4 text-xs font-bold">OR</span><hr class="flex-1 border-zinc-700"/></div>
+            <p class="text-center text-sm">Don't have an account? <span onclick="authManager('reg')" class="text-[#0095f6] font-bold cursor-pointer">Sign up</span></p>
         </div>
     </div>
 
-    <div id="studio-content" class="hidden">
-        <div id="p-banner" class="channel-banner"></div>
-        <div class="channel-info">
-            <div id="p-avatar" class="channel-avatar"></div>
-            <h1 id="p-name" class="text-xl font-bold mt-2">Channel Name</h1>
-            <p id="p-bio" class="text-[#aaa] text-xs mt-1">@handle • 0 subscribers</p>
+    <div id="studio-content" class="hidden max-w-md mx-auto">
+        <div class="flex justify-between items-center p-4 border-b border-zinc-900">
+            <i class="fa-solid fa-lock text-sm"> <span id="user-display" class="font-bold ml-1">username</span></i>
+            <div class="flex gap-5 text-xl">
+                <i class="fa-regular fa-square-plus cursor-pointer" onclick="openUploadModal()"></i>
+                <i class="fa-solid fa-bars cursor-pointer" onclick="firebase.auth().signOut().then(()=>location.reload())"></i>
+            </div>
+        </div>
+
+        <div class="profile-header">
+            <div class="avatar-container">
+                <div id="p-avatar" class="avatar-img"></div>
+            </div>
+            <div class="flex flex-1 gap-2">
+                <div class="stat-item"><span class="stat-num" id="post-count">0</span><span class="stat-label">Posts</span></div>
+                <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">Followers</span></div>
+                <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">Following</span></div>
+            </div>
+        </div>
+        
+        <div class="px-4 pb-4">
+            <h2 id="p-name" class="font-bold text-sm">Name</h2>
+            <p id="p-bio" class="text-sm whitespace-pre-wrap">Bio goes here...</p>
             <div class="flex gap-2 mt-4">
-                <button onclick="openEditProfile()" class="bg-[#272727] text-white px-4 py-1.5 rounded-full text-sm font-bold">Edit Profile</button>
-                <button onclick="firebase.auth().signOut().then(()=>location.reload())" class="bg-[#272727] text-white px-4 py-1.5 rounded-full text-sm font-bold">Sign out</button>
+                <button onclick="openEditProfile()" class="action-btn">Edit Profile</button>
+                <button onclick="alert('Shared!')" class="action-btn">Share Profile</button>
             </div>
         </div>
 
-        <div class="flex justify-around mt-6 border-b border-[#333]">
-            <span class="tab-btn active">SHORTS</span>
-            <span class="tab-btn" onclick="alert('Analytics coming soon')">ANALYTICS</span>
-            <span class="tab-btn" onclick="alert('Orders coming soon')">ORDERS</span>
+        <div class="flex border-t border-zinc-900 mt-4">
+            <div class="flex-1 text-center py-3 border-b border-white"><i class="fa-solid fa-table-cells text-xl"></i></div>
+            <div class="flex-1 text-center py-3 opacity-40"><i class="fa-solid fa-clapperboard text-xl"></i></div>
+            <div class="flex-1 text-center py-3 opacity-40"><i class="fa-regular fa-id-badge text-xl"></i></div>
         </div>
 
-        <div id="my-grid" class="p-2 grid grid-cols-3 gap-1">
+        <div id="my-grid" class="grid grid-cols-3 gap-[2px]">
             </div>
     </div>
 
-    <button onclick="openUploadModal()" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#272727] p-3 px-6 rounded-full border border-[#444] shadow-2xl z-50 flex items-center gap-2">
-        <i class="fa-solid fa-plus text-xl"></i>
-        <span class="font-bold text-sm">Create</span>
-    </button>
-
-    <div id="upload-modal" class="yt-modal">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold">Create Short</h2>
-            <i class="fa-solid fa-xmark text-xl" onclick="closeModal('upload-modal')"></i>
+    <div id="upload-modal" class="ig-modal">
+        <div class="flex justify-between items-center pb-4 border-b border-zinc-800 mb-4">
+            <span class="text-zinc-400" onclick="closeModal('upload-modal')">Cancel</span>
+            <h2 class="font-bold">New Reel</h2>
+            <span id="publish-btn" class="text-[#0095f6] font-bold" onclick="publishPost()">Share</span>
         </div>
-        <div class="overflow-y-auto h-[80%]">
-            <p class="text-xs text-[#aaa] mb-2 font-bold uppercase">Details</p>
-            <input id="post-title" class="yt-input" placeholder="Title (required)"/>
-            <textarea id="post-desc" class="yt-input h-20" placeholder="Description"></textarea>
-            <input id="prod-link" class="yt-input" placeholder="Product link (optional)"/>
-            
-            <div class="bg-[#1a1a1a] p-6 rounded-xl border-2 border-dashed border-[#333] text-center mb-6">
-                <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2 text-[#aaa]"></i>
-                <p class="text-sm text-[#aaa]">Select video file</p>
-                <input id="post-file" type="file" accept="video/*" class="hidden" onchange="this.nextElementSibling.innerText = this.files[0].name"/>
-                <label for="post-file" class="text-[#3ea6ff] text-sm mt-2 block cursor-pointer">Choose File</label>
-                <p class="text-xs mt-1 text-zinc-600">Max 90s • 15MB</p>
+        <div class="space-y-4">
+            <div class="flex gap-3">
+                <div class="w-20 h-28 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-700">
+                    <input id="post-file" type="file" accept="video/*" class="hidden" onchange="previewVideo(this)"/>
+                    <label for="post-file" id="file-label" class="text-xs text-center p-2 cursor-pointer">Select<br/>Video</label>
+                </div>
+                <textarea id="post-desc" class="flex-1 bg-transparent outline-none text-sm resize-none" placeholder="Write a caption..."></textarea>
             </div>
-            
-            <button id="publish-btn" onclick="publishPost()" class="w-full bg-[#3ea6ff] text-black p-3 rounded-full font-bold">NEXT</button>
+            <input id="post-title" class="ig-input" placeholder="Title/Product Name"/>
+            <input id="prod-link" class="ig-input" placeholder="Product URL (Optional)"/>
         </div>
     </div>
 
-    <div id="profile-modal" class="yt-modal">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold">Channel Settings</h2>
-            <i class="fa-solid fa-xmark text-xl" onclick="closeModal('profile-modal')"></i>
+    <div id="profile-modal" class="ig-modal">
+        <div class="flex justify-between items-center pb-4 border-b border-zinc-800 mb-6">
+            <span onclick="closeModal('profile-modal')">Cancel</span>
+            <h2 class="font-bold">Edit Profile</h2>
+            <span class="text-[#0095f6] font-bold" onclick="saveProfile()">Done</span>
         </div>
-        <input id="edit-name" class="yt-input" placeholder="Name"/>
-        <input id="edit-bio" class="yt-input" placeholder="Bio"/>
-        <input id="edit-avatar" class="yt-input" placeholder="Profile Image URL"/>
-        <input id="edit-banner" class="yt-input" placeholder="Banner Image URL"/>
-        <button onclick="saveProfile()" class="w-full bg-white text-black p-3 rounded-full font-bold">Save Changes</button>
+        <input id="edit-avatar" class="ig-input" placeholder="Profile Image URL"/>
+        <input id="edit-name" class="ig-input" placeholder="Name"/>
+        <input id="edit-bio" class="ig-input" placeholder="Bio"/>
     </div>
 
     <script>
@@ -134,8 +139,6 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        let isUploading = false;
-
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('auth-ui').style.display = 'none';
@@ -148,19 +151,17 @@
         async function authManager(type) {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return alert("Please fill all fields");
+            if(!e || !p) return alert("Fill all fields");
             try {
                 if(type==='login') await auth.signInWithEmailAndPassword(e,p);
                 if(type==='reg') {
                     const res = await auth.createUserWithEmailAndPassword(e,p);
                     await db.ref('users/' + res.user.uid).set({
                         name: e.split('@')[0],
-                        bio: "Welcome to my channel",
-                        avatar: "https://www.w3schools.com/howto/img_avatar.png",
-                        banner: "https://via.placeholder.com/1200x400/222/555"
+                        bio: "Artist | Creator",
+                        avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                     });
                 }
-                if(type==='reset') { await auth.sendPasswordResetEmail(e); alert("Reset link sent!"); }
             } catch(err) { alert(err.message); }
         }
 
@@ -169,86 +170,5 @@
                 const u = snap.val();
                 if(!u) return;
                 document.getElementById('p-name').innerText = u.name;
-                document.getElementById('p-bio').innerText = u.bio;
-                document.getElementById('p-avatar').style.backgroundImage = `url('${u.avatar}')`;
-                document.getElementById('p-banner').style.backgroundImage = `url('${u.banner}')`;
-            });
-        }
-
-        function openEditProfile() { document.getElementById('profile-modal').classList.add('active'); }
-
-        async function saveProfile() {
-            const uid = auth.currentUser.uid;
-            await db.ref('users/' + uid).update({
-                name: document.getElementById('edit-name').value,
-                bio: document.getElementById('edit-bio').value,
-                avatar: document.getElementById('edit-avatar').value,
-                banner: document.getElementById('edit-banner').value
-            });
-            closeModal('profile-modal');
-        }
-
-        async function publishPost() {
-            if(isUploading) return;
-            const file = document.getElementById('post-file').files[0];
-            const title = document.getElementById('post-title').value;
-            const desc = document.getElementById('post-desc').value;
-            const link = document.getElementById('prod-link').value;
-            const btn = document.getElementById('publish-btn');
-
-            if(!file || !title) return alert("Select Video & Enter Title");
-            if(file.size > 15 * 1024 * 1024) return alert("File too large! Max 15MB");
-
-            isUploading = true;
-            btn.innerText = "UPLOADING...";
-            btn.disabled = true;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                try {
-                    await db.ref('videos').push({
-                        uid: auth.currentUser.uid,
-                        username: document.getElementById('p-name').innerText,
-                        title: title,
-                        desc: desc,
-                        productLink: link || '#',
-                        videoUrl: reader.result,
-                        timestamp: Date.now()
-                    });
-                    alert("Short Published!");
-                    location.reload();
-                } catch(e) { 
-                    alert(e.message); 
-                    isUploading = false;
-                    btn.innerText = "NEXT";
-                }
-            };
-        }
-
-        function loadUserPosts(uid) {
-            db.ref('videos').orderByChild('uid').equalTo(uid).on('value', snap => {
-                const grid = document.getElementById('my-grid');
-                grid.innerHTML = '';
-                snap.forEach(c => {
-                    const v = c.val();
-                    grid.innerHTML += `
-                    <div class="video-card">
-                        <video src="${v.videoUrl}" muted onmouseover="this.play()" onmouseout="this.pause()"></video>
-                        <div class="video-stats"><i class="fa-solid fa-chart-simple"></i> Live</div>
-                        <button onclick="deletePost('${c.key}')" class="absolute top-1 right-1 bg-black/50 w-6 h-6 rounded flex items-center justify-center text-xs text-red-500"><i class="fa-solid fa-trash"></i></button>
-                    </div>`;
-                });
-            });
-        }
-
-        function deletePost(k) {
-            if(confirm("Delete this short?")) db.ref('videos/'+k).remove();
-        }
-
-        function openUploadModal() { document.getElementById('upload-modal').classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    //]]>
-    </script>
-</body>
-</html>
+                document.getElementById('user-display').innerText = u.name.toLowerCase().replace(/\s/g, '_');
+                document.getElementById('p-bio').innerText
