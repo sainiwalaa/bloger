@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SAINIWALAA | Creator Studio Pro</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <title>SAINIWALAA | Creator Studio</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -10,135 +11,133 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --accent: #ff0000; --bg-dark: #050505; }
-        body { background: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-premium { background: linear-gradient(90deg, #ff0000, #b30000); transition: 0.3s; box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
-        .btn-premium:active { transform: scale(0.95); }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; padding: 20px; overflow-y: auto; }
-        .modal.active { display: block; animation: fadeIn 0.3s ease; }
-        
-        .video-card { border-radius: 20px; background: #0a0a0a; border: 1px solid #1a1a1a; overflow: hidden; }
-        .order-card { background: #111; border-radius: 12px; border-left: 4px solid #333; transition: 0.3s; }
-        .order-priority { border-left: 4px solid #ff0000 !important; background: rgba(255,0,0,0.05); }
-        
-        .tab-btn { color: #555; transition: 0.3s; position: relative; }
-        .tab-btn.active { color: #ff0000; }
-        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #ff0000; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --accent: #ff0000; --bg: #000000; --card: #121212; }
+        body { background: var(--bg); color: white; font-family: 'Outfit', sans-serif; }
+        .glass-nav { background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .video-container { aspect-ratio: 9/16; background: #000; border-radius: 12px; position: relative; overflow: hidden; }
+        .premium-input { background: #1a1a1a; border: 1px solid #333; transition: 0.3s; }
+        .premium-input:focus { border-color: var(--accent); background: #222; }
+        .modal { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; transition: 0.3s; }
+        .modal.active { display: block; }
+        .shimmer { background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <div id="auth-modal" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center px-6">
-        <div class="max-w-md w-full glass p-8 rounded-[40px] border border-white/5 text-center">
-            <h1 class="text-4xl font-black italic text-red-600 mb-2 tracking-tighter">SAINIWALAA</h1>
-            <p class="text-zinc-500 text-[10px] uppercase tracking-[0.3em] mb-10">Creator Studio Pro</p>
-            <div class="space-y-4 text-left">
-                <input type="email" id="auth-email" placeholder="Email Address" class="w-full bg-zinc-900/50 p-4 rounded-2xl border border-white/10 outline-none focus:border-red-500 text-sm">
-                <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-900/50 p-4 rounded-2xl border border-white/10 outline-none focus:border-red-500 text-sm">
-                <button onclick="handleAuth('login')" id="btn-auth-main" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white tracking-widest text-sm">Login Studio</button>
-                <div class="flex justify-between px-2 pt-2">
-                    <button onclick="handleAuth('register')" class="text-[9px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest">Create Account</button>
-                    <button onclick="handleAuth('reset')" class="text-[9px] font-bold text-zinc-500 hover:text-white uppercase tracking-widest">Forgot Password?</button>
+    <div id="auth-modal" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center px-8">
+        <div class="w-full max-w-sm text-center">
+            <h1 class="text-5xl font-black italic text-red-600 mb-2 tracking-tighter">SAINIWALAA</h1>
+            <p class="text-zinc-500 text-[10px] uppercase tracking-[0.4em] mb-12">Creator Studio Pro</p>
+            <div class="space-y-4">
+                <input type="email" id="auth-email" placeholder="Email" class="w-full premium-input p-4 rounded-2xl outline-none text-sm">
+                <input type="password" id="auth-pass" placeholder="Password" class="w-full premium-input p-4 rounded-2xl outline-none text-sm">
+                <button onclick="handleAuth('login')" id="btn-auth-main" class="w-full bg-red-600 p-4 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-lg shadow-red-600/20">Login</button>
+                <div class="flex justify-between px-2 pt-4">
+                    <button onclick="handleAuth('register')" class="text-[10px] text-zinc-500 font-bold uppercase">Create Account</button>
+                    <button onclick="handleAuth('reset')" class="text-[10px] text-zinc-500 font-bold uppercase">Forgot?</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="p-4 flex justify-between items-center glass sticky top-0 z-50">
-        <h1 class="font-black italic text-xl tracking-tighter text-red-600">SAINIWALAA</h1>
-        <div class="flex gap-3 items-center">
-            <button onclick="logout()" class="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase transition-colors">Logout</button>
-            <button onclick="openModal('upload-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-500 border border-red-500/30"><i class="fa-solid fa-plus"></i></button>
-            <button onclick="openModal('profile-modal')" class="w-10 h-10 rounded-full glass flex items-center justify-center"><i class="fa-solid fa-user-gear"></i></button>
+    <div class="p-5 flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-md z-40">
+        <h1 class="font-black italic text-2xl tracking-tighter text-red-600">SAINIWALAA</h1>
+        <div class="flex gap-4">
+            <button onclick="openModal('profile-modal')" class="text-xl"><i class="fa-solid fa-sliders"></i></button>
+            <button onclick="logout()" class="text-xl text-zinc-600"><i class="fa-solid fa-right-from-bracket"></i></button>
         </div>
     </div>
 
-    <div id="user-banner" class="h-64 w-full relative bg-zinc-900 flex flex-col justify-end p-6 border-b border-white/5">
-        <div class="absolute top-10 right-10 text-4xl font-black opacity-10 italic">STUDIO</div>
-        <div class="flex items-center gap-5 z-10">
-            <img id="display-avatar" src="https://ui-avatars.com/api/?name=S&background=333&color=fff" class="w-24 h-24 rounded-3xl border-4 border-black object-cover shadow-2xl"/>
-            <div>
-                <h2 id="display-name" class="text-3xl font-black tracking-tight text-white">Sainiwalaa</h2>
-                <p id="display-banner-txt" class="text-xs uppercase tracking-[0.2em] font-bold opacity-70 mt-1"></p>
-            </div>
+    <div id="user-banner" class="px-5 py-6 flex items-center gap-4 border-b border-zinc-900">
+        <img id="display-avatar" src="https://ui-avatars.com/api/?background=333&color=fff" class="w-20 h-20 rounded-full border-2 border-red-600 p-0.5 object-cover"/>
+        <div>
+            <h2 id="display-name" class="text-2xl font-bold tracking-tight">Loading...</h2>
+            <p id="display-banner-txt" class="text-[10px] font-bold text-red-500 uppercase tracking-widest"></p>
+            <p id="display-bio" class="text-zinc-500 text-xs mt-1 line-clamp-2 italic"></p>
         </div>
     </div>
 
-    <div class="px-5 -mt-6 relative z-20">
-        <div id="bio-container" class="glass p-5 rounded-3xl border border-white/10 shadow-xl">
-            <p id="display-bio" class="text-zinc-400 text-sm italic">Loading profile...</p>
+    <main class="p-4">
+        <div id="main-view-title" class="flex items-center justify-between mb-4">
+            <h3 class="font-black text-sm uppercase tracking-tighter">My Productions</h3>
+            <span class="text-[10px] text-zinc-600" id="status-msg">Live Sync On</span>
         </div>
-    </div>
 
-    <div class="flex border-b border-white/5 mt-8 px-5 gap-8">
-        <button onclick="switchTab('productions')" id="tab-prod" class="tab-btn active pb-3 font-bold text-sm uppercase tracking-widest">Productions</button>
-        <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn pb-3 font-bold text-sm uppercase tracking-widest">Orders Feed</button>
-    </div>
-
-    <main class="p-5 max-w-2xl mx-auto pb-24">
-        <div id="productions-view" class="space-y-6">
-            <div id="my-history" class="grid grid-cols-1 gap-4">
-                <p class="text-center text-zinc-600 py-10">Loading productions...</p>
-            </div>
+        <div id="my-history" class="grid grid-cols-2 gap-3">
+            <div class="shimmer h-64 rounded-2xl"></div>
+            <div class="shimmer h-64 rounded-2xl"></div>
         </div>
 
         <div id="orders-view" class="hidden space-y-4">
-            <div id="orders-list" class="space-y-3">
-                <p class="text-center text-zinc-600 py-10">Waiting for orders...</p>
-            </div>
+            <div id="orders-list" class="space-y-3"></div>
         </div>
     </main>
 
-    <div id="upload-modal" class="modal">
-        <div class="max-w-md mx-auto py-10">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-black">PUBLISH <span class="text-red-600">NEW</span></h2>
-                <button onclick="closeModal('upload-modal')" class="text-zinc-500 text-3xl">&times;</button>
+    <nav class="fixed bottom-0 inset-x-0 glass-nav h-20 flex items-center justify-around px-6 z-50">
+        <button onclick="switchTab('productions')" class="text-2xl nav-icon text-red-600"><i class="fa-solid fa-table-cells"></i></button>
+        <button onclick="openModal('upload-modal')" class="text-4xl text-white -mt-8 bg-red-600 w-16 h-16 rounded-full border-4 border-black flex items-center justify-center shadow-xl shadow-red-600/40"><i class="fa-solid fa-plus"></i></button>
+        <button onclick="switchTab('orders')" class="text-2xl nav-icon text-zinc-600"><i class="fa-solid fa- BAGS-shopping"></i><i class="fa-solid fa-list-check"></i></button>
+    </nav>
+
+    <div id="upload-modal" class="modal overflow-y-auto p-6">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-black">NEW <span class="text-red-600">POST</span></h2>
+            <button onclick="closeModal('upload-modal')" class="text-3xl text-zinc-500">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <input type="text" id="post-title" placeholder="Title" class="w-full premium-input p-4 rounded-2xl outline-none">
+            <div class="grid grid-cols-2 gap-2 p-1 bg-zinc-900 rounded-2xl">
+                <button onclick="toggleUploadSource('file')" id="src-file-btn" class="p-3 rounded-xl bg-red-600 font-bold text-[10px]">FILE</button>
+                <button onclick="toggleUploadSource('link')" id="src-link-btn" class="p-3 rounded-xl font-bold text-[10px] text-zinc-500">LINK/URL</button>
             </div>
-            <div class="space-y-4">
-                <input type="text" id="post-title" placeholder="Video Title" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
-                <div class="grid grid-cols-2 gap-2 p-1 bg-zinc-900 rounded-2xl">
-                    <button onclick="toggleUploadSource('file')" id="src-file-btn" class="p-3 rounded-xl bg-red-600 font-bold text-xs text-white">FILE</button>
-                    <button onclick="toggleUploadSource('link')" id="src-link-btn" class="p-3 rounded-xl font-bold text-xs text-zinc-500">LINK</button>
-                </div>
-                <div id="upload-file-box"><input type="file" id="post-video-file" accept="video/*" class="w-full glass p-4 rounded-2xl text-xs"></div>
-                <div id="upload-link-box" class="hidden"><input type="text" id="post-video-link" placeholder="Paste Video URL" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none"></div>
-                <input type="text" id="post-link" placeholder="Product Link" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none">
-                <textarea id="post-desc" placeholder="Details..." class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-24"></textarea>
-                <button onclick="handleUpload()" id="btn-upload" class="w-full btn-premium p-5 rounded-2xl font-black uppercase text-white">Publish Now</button>
-            </div>
+            <div id="upload-file-box"><input type="file" id="post-video-file" accept="video/*" class="w-full premium-input p-4 rounded-2xl text-xs"></div>
+            <div id="upload-link-box" class="hidden"><input type="text" id="post-video-link" placeholder="Paste URL" class="w-full premium-input p-4 rounded-2xl outline-none"></div>
+            <input type="text" id="post-link" placeholder="Product Link (Amazon/Flipkart)" class="w-full premium-input p-4 rounded-2xl outline-none">
+            <textarea id="post-desc" placeholder="Caption..." class="w-full premium-input p-4 rounded-2xl outline-none h-32"></textarea>
+            <button onclick="handleUpload()" id="btn-upload" class="w-full bg-red-600 p-5 rounded-2xl font-black uppercase tracking-widest mt-4">Publish</button>
         </div>
     </div>
 
-    <div id="profile-modal" class="modal">
-        <div class="max-w-md mx-auto py-10">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-black">STUDIO <span class="text-red-600">CONFIG</span></h2>
-                <button onclick="closeModal('profile-modal')" class="text-zinc-500 text-3xl">&times;</button>
-            </div>
-            <div class="space-y-5">
-                <input type="text" id="inp-name" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Username">
-                <textarea id="inp-bio" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none h-20" placeholder="Your Bio..."></textarea>
-                <input type="text" id="inp-banner-txt" class="w-full bg-zinc-900 p-4 rounded-2xl border border-white/5 outline-none" placeholder="Banner Slogan">
-                <div class="grid grid-cols-3 gap-3">
-                    <div><label class="text-[9px] block mb-1 uppercase">Banner</label><input type="color" id="inp-bg-color" value="#18181b" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
-                    <div><label class="text-[9px] block mb-1 uppercase">Slogan</label><input type="color" id="inp-banner-txt-color" value="#ffffff" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
-                    <div><label class="text-[9px] block mb-1 uppercase">Name</label><input type="color" id="inp-text-color" value="#ffffff" class="w-full h-12 rounded-xl bg-zinc-900 border-none"></div>
+    <div id="profile-modal" class="modal overflow-y-auto p-6">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-black text-red-600">SETTINGS</h2>
+            <button onclick="closeModal('profile-modal')" class="text-3xl text-zinc-500">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <input type="text" id="inp-name" class="w-full premium-input p-4 rounded-2xl outline-none" placeholder="Studio Name">
+            <textarea id="inp-bio" class="w-full premium-input p-4 rounded-2xl outline-none h-24" placeholder="About your studio..."></textarea>
+            <input type="text" id="inp-banner-txt" class="w-full premium-input p-4 rounded-2xl outline-none" placeholder="Slogan (e.g. Verified Creator)">
+            
+            <div class="grid grid-cols-3 gap-3">
+                <div class="text-center">
+                    <label class="text-[8px] uppercase font-bold text-zinc-500">Background</label>
+                    <input type="color" id="inp-bg-color" class="w-full h-10 rounded-lg bg-transparent border-0">
                 </div>
-                <div class="space-y-2">
-                    <label class="text-xs text-zinc-500 uppercase font-bold">Profile Picture</label>
-                    <input type="file" id="inp-avatar-file" accept="image/*" class="w-full glass p-3 rounded-2xl text-xs">
+                <div class="text-center">
+                    <label class="text-[8px] uppercase font-bold text-zinc-500">Accent</label>
+                    <input type="color" id="inp-banner-txt-color" class="w-full h-10 rounded-lg bg-transparent border-0">
                 </div>
-                <button onclick="saveProfileData()" class="w-full btn-premium p-5 rounded-2xl font-black text-white">UPDATE STUDIO</button>
+                <div class="text-center">
+                    <label class="text-[8px] uppercase font-bold text-zinc-500">Text</label>
+                    <input type="color" id="inp-text-color" class="w-full h-10 rounded-lg bg-transparent border-0">
+                </div>
             </div>
+            
+            <label class="block text-xs font-bold text-zinc-500 uppercase mt-4">Change Profile Picture</label>
+            <input type="file" id="inp-avatar-file" accept="image/*" class="w-full premium-input p-4 rounded-2xl text-xs">
+            
+            <button onclick="saveProfileData()" class="w-full bg-white text-black p-5 rounded-2xl font-black uppercase tracking-widest mt-6">Save Changes</button>
         </div>
     </div>
 
     <script>
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
             authDomain: "sainiwalaainfulencer.firebaseapp.com",
@@ -155,6 +154,7 @@
         let userID = null;
         let uploadMode = 'file';
 
+        // Auth Listener
         auth.onAuthStateChanged(user => {
             if (user) {
                 userID = user.uid;
@@ -162,117 +162,148 @@
                 initStudio();
             } else {
                 document.getElementById('auth-modal').style.display = 'flex';
-                userID = null;
             }
         });
 
         async function handleAuth(type) {
             const email = document.getElementById('auth-email').value.trim();
             const pass = document.getElementById('auth-pass').value.trim();
-            const mainBtn = document.getElementById('btn-auth-main');
-            if(!email) return alert("Email required!");
+            if(!email || !pass) return alert("All fields required");
+            const btn = document.getElementById('btn-auth-main');
+            btn.innerText = "Processing...";
             try {
-                mainBtn.innerText = "WAIT..."; mainBtn.disabled = true;
                 if(type === 'login') await auth.signInWithEmailAndPassword(email, pass);
                 else if(type === 'register') await auth.createUserWithEmailAndPassword(email, pass);
-                else if(type === 'reset') { await auth.sendPasswordResetEmail(email); alert("Reset link sent!"); }
-            } catch (e) { alert(e.message); } 
-            finally { mainBtn.innerText = "Login Studio"; mainBtn.disabled = false; }
+                else if(type === 'reset') { await auth.sendPasswordResetEmail(email); alert("Check email"); }
+            } catch (e) { alert(e.message); }
+            btn.innerText = "Login";
         }
 
         function logout() { if(confirm("Logout?")) auth.signOut().then(() => location.reload()); }
 
         function initStudio() {
-            // Load Profile
+            // Instant Profile Sync
             db.ref('users/' + userID).on('value', snap => {
                 const u = snap.val() || {};
-                document.getElementById('display-name').innerText = u.name || "Sainiwalaa";
+                document.getElementById('display-name').innerText = u.name || "Creator";
                 document.getElementById('display-name').style.color = u.textColor || "#ffffff";
-                document.getElementById('display-bio').innerText = u.bio || "Welcome to your studio.";
+                document.getElementById('display-bio').innerText = u.bio || "No bio yet.";
                 document.getElementById('display-banner-txt').innerText = u.bannerText || "";
-                document.getElementById('display-banner-txt').style.color = u.bannerTxtColor || "#ffffff";
-                document.getElementById('user-banner').style.backgroundColor = u.bannerColor || "#18181b";
+                document.getElementById('display-banner-txt').style.color = u.bannerTxtColor || "#ff0000";
+                document.getElementById('user-banner').style.backgroundColor = u.bannerColor || "#000000";
                 if(u.avatar) document.getElementById('display-avatar').src = u.avatar;
             });
 
-            // Load ONLY User's Productions
-            db.ref('videos').orderByChild('uid').equalTo(userID).on('value', snap => {
+            // Fast Productions Feed (Instagram Style)
+            db.ref('videos').orderByChild('uid').equalTo(userID).limitToLast(20).on('value', snap => {
                 const container = document.getElementById('my-history');
                 container.innerHTML = "";
-                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10 text-xs">No productions yet.</p>`; return; }
-                snap.forEach(child => {
-                    const v = child.val();
+                if(!snap.exists()) {
+                    container.innerHTML = `<div class="col-span-2 text-center py-20 text-zinc-600 text-xs">No posts yet. Start creating!</div>`;
+                    return;
+                }
+                let items = [];
+                snap.forEach(child => { items.push({key: child.key, ...child.val()}); });
+                items.reverse().forEach(v => {
+                    const isVid = v.videoUrl.includes('data:video') || v.videoUrl.includes('.mp4');
                     container.innerHTML += `
-                        <div class="video-card p-4 flex gap-4">
-                            <div class="w-20 h-28 bg-black rounded-xl overflow-hidden flex-shrink-0">
-                                ${v.videoUrl.includes('data:video') || v.videoUrl.endsWith('.mp4') ? 
-                                    `<video src="${v.videoUrl}" class="w-full h-full object-cover" muted></video>` : 
-                                    `<div class="w-full h-full flex items-center justify-center bg-zinc-900 text-[8px] text-zinc-600">LINK</div>`
-                                }
-                            </div>
-                            <div class="flex-1 flex flex-col justify-between">
-                                <div><h4 class="font-bold text-sm text-zinc-200">${v.title}</h4></div>
-                                <div class="flex gap-4">
-                                    <button onclick="deleteVideo('${child.key}')" class="text-[10px] font-black text-red-600 uppercase"><i class="fa-solid fa-trash"></i> Delete</button>
-                                    <a href="${v.productLink || '#'}" target="_blank" class="text-[10px] font-black text-zinc-500 uppercase"><i class="fa-solid fa-link"></i> Link</a>
+                        <div class="video-container group">
+                            ${isVid ? `<video src="${v.videoUrl}" class="w-full h-full object-cover" muted loop playsinline></video>` : `<div class="w-full h-full flex items-center justify-center bg-zinc-900 text-[10px] text-zinc-500">IMAGE/LINK</div>`}
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-3 flex flex-col justify-end">
+                                <p class="text-[10px] font-bold truncate">${v.title}</p>
+                                <div class="flex justify-between mt-2">
+                                    <button onclick="deleteVideo('${v.key}')" class="text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                    <a href="${v.productLink || '#'}" target="_blank" class="text-white text-xs"><i class="fa-solid fa-link"></i></a>
                                 </div>
                             </div>
                         </div>`;
                 });
+                // Auto-play videos on hover/scroll
+                setTimeout(attachVideoListeners, 500);
             });
 
-            // Load Orders Feed
+            // Fast Orders Sync
             db.ref('orders').on('value', snap => {
                 const container = document.getElementById('orders-list');
                 container.innerHTML = "";
-                if(!snap.exists()) { container.innerHTML = `<p class="text-center text-zinc-600 py-10 text-xs">No orders yet.</p>`; return; }
-                
-                let ordersArr = [];
-                snap.forEach(child => { ordersArr.push({key: child.key, ...child.val()}); });
-                ordersArr.reverse().forEach(o => {
+                snap.forEach(child => {
+                    const o = child.val();
                     const isPriority = o.contactChoice === 'Yes';
-                    container.innerHTML += `
-                        <div class="order-card p-4 ${isPriority ? 'order-priority' : ''}">
+                    container.innerHTML = `
+                        <div class="p-4 rounded-2xl border-l-4 ${isPriority ? 'border-red-600 bg-red-600/5' : 'border-zinc-800 bg-zinc-900'} mb-3">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    ${isPriority ? '<span class="text-[8px] bg-red-600 text-white px-2 py-0.5 rounded-full font-black uppercase mb-2 inline-block">Priority Contact</span>' : ''}
-                                    <h4 class="font-bold text-zinc-200 text-lg">${o.name}</h4>
-                                    <p class="text-red-500 font-bold text-sm">${o.mobile}</p>
+                                    <h4 class="font-bold text-sm">${o.name}</h4>
+                                    <p class="text-red-500 text-xs font-bold">${o.mobile}</p>
                                 </div>
-                                <span class="text-[9px] text-zinc-600 font-bold">${o.time || ''}</span>
+                                <span class="text-[8px] opacity-50 uppercase">${o.time || 'New'}</span>
                             </div>
-                            <div class="mt-3 pt-3 border-t border-white/5">
-                                <p class="text-[11px] text-zinc-400"><span class="text-zinc-600 uppercase">Product:</span> ${o.product}</p>
-                                <p class="text-[11px] text-zinc-400 mt-1"><span class="text-zinc-600 uppercase">Address:</span> ${o.address || 'N/A'}</p>
-                            </div>
-                            <button onclick="db.ref('orders/${o.key}').remove()" class="w-full bg-zinc-800 text-white text-[10px] font-black uppercase py-2 rounded-lg mt-4 hover:bg-red-600 transition-colors">Mark as Done</button>
-                        </div>`;
+                            <p class="text-[10px] text-zinc-400 mt-2"><b class="text-zinc-600">ITEM:</b> ${o.product}</p>
+                            <button onclick="db.ref('orders/${child.key}').remove()" class="w-full mt-3 py-2 bg-zinc-800 rounded-xl text-[9px] font-black uppercase">Complete</button>
+                        </div>` + container.innerHTML;
                 });
             });
         }
 
         function switchTab(tab) {
-            document.getElementById('productions-view').classList.toggle('hidden', tab !== 'productions');
-            document.getElementById('orders-view').classList.toggle('hidden', tab !== 'orders');
-            document.getElementById('tab-prod').classList.toggle('active', tab === 'productions');
-            document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
+            const isProd = tab === 'productions';
+            document.getElementById('my-history').classList.toggle('hidden', !isProd);
+            document.getElementById('orders-view').classList.toggle('hidden', isProd);
+            document.getElementById('main-view-title').querySelector('h3').innerText = isProd ? "My Productions" : "Customer Orders";
+            
+            // Icon Colors
+            document.querySelectorAll('.nav-icon').forEach((el, idx) => {
+                el.classList.toggle('text-red-600', (idx === 0 && isProd) || (idx === 1 && !isProd));
+                el.classList.toggle('text-zinc-600', !((idx === 0 && isProd) || (idx === 1 && !isProd)));
+            });
         }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
         function toggleUploadSource(mode) {
             uploadMode = mode;
             document.getElementById('upload-file-box').classList.toggle('hidden', mode === 'link');
             document.getElementById('upload-link-box').classList.toggle('hidden', mode === 'file');
-            document.getElementById('src-file-btn').classList.toggle('bg-red-600', mode === 'file');
-            document.getElementById('src-link-btn').classList.toggle('bg-red-600', mode === 'link');
+            document.getElementById('src-file-btn').className = mode === 'file' ? 'p-3 rounded-xl bg-red-600 font-bold text-[10px]' : 'p-3 rounded-xl font-bold text-[10px] text-zinc-500';
+            document.getElementById('src-link-btn').className = mode === 'link' ? 'p-3 rounded-xl bg-red-600 font-bold text-[10px]' : 'p-3 rounded-xl font-bold text-[10px] text-zinc-500';
         }
 
-        function deleteVideo(key) { if(confirm("Permanently delete this production?")) db.ref('videos/' + key).remove(); }
-        function toBase64(file) { return new Promise((r, j) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => r(reader.result); }); }
+        async function handleUpload() {
+            const title = document.getElementById('post-title').value;
+            const btn = document.getElementById('btn-upload');
+            if(!title) return alert("Title required");
+            
+            btn.innerText = "Uploading to Cloud..."; btn.disabled = true;
+            let videoSource = "";
+
+            try {
+                if(uploadMode === 'file') {
+                    const f = document.getElementById('post-video-file').files[0];
+                    if(!f) throw new Error("Select a file");
+                    if(f.size > 15 * 1024 * 1024) throw new Error("File too large (Max 15MB)");
+                    videoSource = await toBase64(f);
+                } else {
+                    videoSource = document.getElementById('post-video-link').value;
+                }
+
+                await db.ref('videos').push({
+                    uid: userID,
+                    title: title,
+                    desc: document.getElementById('post-desc').value,
+                    videoUrl: videoSource,
+                    productLink: document.getElementById('post-link').value,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                closeModal('upload-modal');
+                alert("Published Successfully!");
+            } catch (e) { alert(e.message); }
+            btn.innerText = "Publish"; btn.disabled = false;
+        }
 
         async function saveProfileData() {
-            let updates = {
+            const updates = {
                 name: document.getElementById('inp-name').value,
                 bio: document.getElementById('inp-bio').value,
                 bannerText: document.getElementById('inp-banner-txt').value,
@@ -282,28 +313,26 @@
             };
             const av = document.getElementById('inp-avatar-file').files[0];
             if(av) updates.avatar = await toBase64(av);
-            db.ref('users/' + userID).update(updates).then(() => { closeModal('profile-modal'); alert("Studio Updated!"); });
+            await db.ref('users/' + userID).update(updates);
+            closeModal('profile-modal');
         }
 
-        async function handleUpload() {
-            const title = document.getElementById('post-title').value;
-            const btn = document.getElementById('btn-upload');
-            if(!title) return alert("Title required");
-            let videoSource = "";
-            btn.innerText = "UPLOADING..."; btn.disabled = true;
-            if(uploadMode === 'file') {
-                const f = document.getElementById('post-video-file').files[0];
-                if(!f) { btn.disabled = false; return alert("Select file"); }
-                videoSource = await toBase64(f);
-            } else {
-                videoSource = document.getElementById('post-video-link').value;
-            }
-            db.ref('videos').push({
-                uid: userID, username: document.getElementById('display-name').innerText,
-                title: title, desc: document.getElementById('post-desc').value,
-                videoUrl: videoSource, productLink: document.getElementById('post-link').value,
-                timestamp: Date.now()
-            }).then(() => { closeModal('upload-modal'); btn.disabled = false; btn.innerText = "Publish Now"; alert("Success!"); });
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function deleteVideo(key) { if(confirm("Delete this post?")) db.ref('videos/' + key).remove(); }
+
+        function attachVideoListeners() {
+            document.querySelectorAll('video').forEach(v => {
+                v.addEventListener('mouseenter', () => v.play());
+                v.addEventListener('mouseleave', () => v.pause());
+            });
         }
     </script>
 </body>
