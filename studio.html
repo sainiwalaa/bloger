@@ -1,75 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html lang="hi">
+<html b:css='false' b:defaultmessages='false' b:layoutsVersion='3' b:responsive='true' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset='UTF-8'/>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'/>
     <title>Creator Studio | SAINIWALAA</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
-    <style>
-        body { background: #000; color: #fff; font-family: 'Outfit', sans-serif; }
-        .premium-input { background: #111; border: 1px solid #333; padding: 14px; border-radius: 12px; width: 100%; margin-bottom: 12px; outline: none; }
-        .modal { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; padding: 25px; }
+    
+    <script src='https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js'></script>
+    <script src='https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js'></script>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' rel='stylesheet'/>
+
+    <b:skin><![CDATA[
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 80px; }
+        .premium-input { background: #111; border: 1px solid #333; padding: 12px; border-radius: 10px; width: 100%; margin-bottom: 10px; color: #fff; font-size: 14px; outline: none; transition: 0.3s; }
+        .premium-input:focus { border-color: #ff0000; box-shadow: 0 0 5px rgba(255,0,0,0.3); }
+        
+        .modal { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; padding: 20px; overflow-y: auto; }
         .modal.active { display: block; }
-        .post-preview { aspect-ratio: 9/16; background: #111; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid #222; }
-    </style>
+        
+        /* Profile UI */
+        .profile-banner { width: 100%; height: 140px; background: linear-gradient(45deg, #111, #222); background-size: cover; background-position: center; border-bottom: 2px solid #ff0000; }
+        .avatar-box { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #000; background: #222; margin-top: -45px; margin-left: 20px; position: relative; overflow: hidden; background-size: cover; }
+        
+        .post-grid-item { aspect-ratio: 9/16; background: #111; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #222; }
+        .status-badge { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+        
+        #blogger-fix { display: none !important; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); }
+    ]]></b:skin>
 </head>
-<body class="pb-24">
+<body>
+    <div id='blogger-fix'><b:section id='main' maxwidgets='1'/></div>
 
     <div id="auth-ui" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center p-8">
         <div class="w-full max-w-sm text-center">
-            <h1 class="text-4xl font-black text-red-600 italic mb-8">SAINIWALAA</h1>
-            <input id="email" class="premium-input" placeholder="Email" type="email"/>
+            <h1 class="text-4xl font-black text-red-600 italic mb-2">SAINIWALAA</h1>
+            <p class="text-zinc-500 text-xs mb-8">INFLUENCER CREATOR STUDIO</p>
+            <input id="email" class="premium-input" placeholder="Email Address" type="email"/>
             <input id="pass" class="premium-input" placeholder="Password" type="password"/>
-            <button onclick="authManager('login')" class="w-full bg-red-600 p-4 rounded-xl font-bold mb-4">LOGIN</button>
-            <div class="flex justify-between text-[10px] text-zinc-500 font-black">
-                <span onclick="authManager('reg')">REGISTER</span>
-                <span onclick="authManager('reset')">FORGOT PASSWORD</span>
+            <button onclick="authManager('login')" class="w-full bg-red-600 p-4 rounded-xl font-bold mb-4 shadow-lg shadow-red-600/20">LOG IN</button>
+            <div class="flex justify-between text-[11px] text-zinc-400 font-bold px-2">
+                <span onclick="authManager('reg')" class="cursor-pointer hover:text-white">REGISTER</span>
+                <span onclick="authManager('reset')" class="cursor-pointer hover:text-white">RESET PASSWORD</span>
             </div>
         </div>
     </div>
 
-    <div class="p-5 flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-lg border-b border-white/5">
-        <h2 class="text-xl font-black italic text-red-600">STUDIO</h2>
-        <button onclick="firebase.auth().signOut().then(()=>location.reload())" class="text-zinc-500"><i class="fa-solid fa-power-off"></i></button>
-    </div>
-
-    <div id="my-grid" class="p-4 grid grid-cols-2 gap-3">
+    <div id="studio-content" class="hidden">
+        <div id="p-banner" class="profile-banner"></div>
+        <div class="flex justify-between items-start pr-4">
+            <div id="p-avatar" class="avatar-box"></div>
+            <div class="flex gap-2 mt-2">
+                <button onclick="openEditProfile()" class="bg-zinc-800 text-[11px] px-3 py-1.5 rounded-full font-bold">Edit Profile</button>
+                <button onclick="firebase.auth().signOut().then(()=>location.reload())" class="bg-red-900/30 text-red-500 text-[11px] px-3 py-1.5 rounded-full font-bold">Logout</button>
+            </div>
         </div>
 
-    <button onclick="document.getElementById('upload-modal').classList.add('active')" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-600 w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-xl shadow-red-600/20">
+        <div class="px-5 mt-3">
+            <h2 id="p-name" class="text-xl font-black">Username</h2>
+            <p id="p-bio" class="text-zinc-400 text-xs mt-1">Digital Creator | Influencer</p>
+            <div id="p-socials" class="flex gap-4 mt-3 text-zinc-500 text-sm">
+                <i class="fa-brands fa-instagram"></i>
+                <i class="fa-brands fa-youtube"></i>
+                <i class="fa-brands fa-x-twitter"></i>
+            </div>
+        </div>
+
+        <div class="flex border-b border-zinc-800 mt-6 px-4 gap-6 text-sm font-bold text-zinc-500">
+            <span class="text-white border-b-2 border-red-600 pb-2">POSTS</span>
+            <span onclick="alert('Order history coming soon!')">ORDERS</span>
+            <span onclick="alert('No new notifications')">ALERTS</span>
+        </div>
+
+        <div id="my-grid" class="p-4 grid grid-cols-3 gap-2">
+            </div>
+    </div>
+
+    <button onclick="openUploadModal()" class="fixed bottom-6 right-6 bg-red-600 w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-xl z-50">
         <i class="fa-solid fa-plus"></i>
     </button>
 
     <div id="upload-modal" class="modal">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black">NEW PRODUCTION</h2>
-            <i class="fa-solid fa-xmark text-2xl" onclick="this.parentElement.parentElement.classList.remove('active')"></i>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-black">NEW POST</h2>
+            <i class="fa-solid fa-xmark text-xl" onclick="closeModal('upload-modal')"></i>
         </div>
-        <input id="p-title" class="premium-input" placeholder="Title (Max 50 chars)"/>
-        <input id="p-link" class="premium-input" placeholder="Product URL (Amazon/Flipkart)"/>
-        <p class="text-xs text-zinc-500 mb-2 font-bold">SELECT VIDEO FILE:</p>
-        <input id="p-file" type="file" accept="video/*" class="premium-input"/>
-        <button id="up-btn" onclick="startUpload()" class="w-full bg-white text-black font-black p-5 rounded-2xl mt-4">PUBLISH TO FEED</button>
+        <input id="post-title" class="premium-input" placeholder="Catchy Title..."/>
+        <textarea id="post-desc" class="premium-input h-24" placeholder="Description..."></textarea>
+        <input id="prod-link" class="premium-input" placeholder="Product Link (URL)"/>
+        
+        <div class="bg-zinc-900 p-4 rounded-xl mb-4 border border-dashed border-zinc-700">
+            <p class="text-[10px] text-zinc-500 font-bold mb-2">VIDEO FILE (MAX 90 SEC / 15MB)</p>
+            <input id="post-file" type="file" accept="video/*" class="text-xs"/>
+        </div>
+        
+        <button id="publish-btn" onclick="publishPost()" class="w-full bg-red-600 p-4 rounded-xl font-black shadow-lg">PUBLISH CONTENT</button>
+        <p class="text-[10px] text-center text-zinc-600 mt-4">By publishing, you agree to our Content Guidelines.</p>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-black">EDIT PROFILE</h2>
+            <i class="fa-solid fa-xmark text-xl" onclick="closeModal('profile-modal')"></i>
+        </div>
+        <input id="edit-name" class="premium-input" placeholder="Display Name"/>
+        <input id="edit-bio" class="premium-input" placeholder="Your Bio"/>
+        <input id="edit-avatar" class="premium-input" placeholder="Avatar Image URL"/>
+        <input id="edit-banner" class="premium-input" placeholder="Banner Image URL"/>
+        <button onclick="saveProfile()" class="w-full bg-white text-black p-4 rounded-xl font-black">SAVE CHANGES</button>
     </div>
 
     <script>
     //<![CDATA[
         const firebaseConfig = {
             apiKey: "AIzaSyCm-5fJ49MxP0MFT8dDIkptue15x_GaaYc",
+            authDomain: "sainiwalaainfulencer.firebaseapp.com",
             databaseURL: "https://sainiwalaainfulencer-default-rtdb.firebaseio.com",
             projectId: "sainiwalaainfulencer",
+            storageBucket: "sainiwalaainfulencer.firebasestorage.app",
+            messagingSenderId: "116125275008",
+            appId: "1:116125275008:web:dc09ab0c6ce0317436e765"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
+        let isUploading = false;
+
         auth.onAuthStateChanged(user => {
             if(user) {
                 document.getElementById('auth-ui').style.display = 'none';
+                document.getElementById('studio-content').classList.remove('hidden');
+                loadUserProfile(user.uid);
                 loadUserPosts(user.uid);
             }
         });
@@ -77,38 +141,92 @@
         async function authManager(type) {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
+            if(!e || !p) return alert("Fill all fields");
             try {
                 if(type==='login') await auth.signInWithEmailAndPassword(e,p);
-                if(type==='reg') await auth.createUserWithEmailAndPassword(e,p);
-                if(type==='reset') { await auth.sendPasswordResetEmail(e); alert("Check Email!"); }
+                if(type==='reg') {
+                    const res = await auth.createUserWithEmailAndPassword(e,p);
+                    await db.ref('users/' + res.user.uid).set({
+                        name: e.split('@')[0],
+                        bio: "New Influencer",
+                        avatar: "https://via.placeholder.com/150",
+                        banner: "https://via.placeholder.com/600x200"
+                    });
+                }
+                if(type==='reset') { await auth.sendPasswordResetEmail(e); alert("Reset link sent!"); }
             } catch(err) { alert(err.message); }
         }
 
-        async function startUpload() {
-            const file = document.getElementById('p-file').files[0];
-            const title = document.getElementById('p-title').value;
-            const link = document.getElementById('p-link').value;
-            const btn = document.getElementById('up-btn');
+        function loadUserProfile(uid) {
+            db.ref('users/' + uid).on('value', snap => {
+                const u = snap.val();
+                if(!u) return;
+                document.getElementById('p-name').innerText = u.name;
+                document.getElementById('p-bio').innerText = u.bio;
+                document.getElementById('p-avatar').style.backgroundImage = `url('${u.avatar}')`;
+                document.getElementById('p-banner').style.backgroundImage = `url('${u.banner}')`;
+            });
+        }
+
+        function openEditProfile() {
+            document.getElementById('profile-modal').classList.add('active');
+            const uid = auth.currentUser.uid;
+            db.ref('users/' + uid).once('value', snap => {
+                const u = snap.val();
+                document.getElementById('edit-name').value = u.name;
+                document.getElementById('edit-bio').value = u.bio;
+                document.getElementById('edit-avatar').value = u.avatar;
+                document.getElementById('edit-banner').value = u.banner;
+            });
+        }
+
+        async function saveProfile() {
+            const uid = auth.currentUser.uid;
+            await db.ref('users/' + uid).update({
+                name: document.getElementById('edit-name').value,
+                bio: document.getElementById('edit-bio').value,
+                avatar: document.getElementById('edit-avatar').value,
+                banner: document.getElementById('edit-banner').value
+            });
+            closeModal('profile-modal');
+        }
+
+        async function publishPost() {
+            if(isUploading) return;
+            const file = document.getElementById('post-file').files[0];
+            const title = document.getElementById('post-title').value;
+            const desc = document.getElementById('post-desc').value;
+            const link = document.getElementById('prod-link').value;
+            const btn = document.getElementById('publish-btn');
 
             if(!file || !title) return alert("Select Video & Enter Title");
-            if(file.size > 15 * 1024 * 1024) return alert("Video too large! Max 15MB");
+            if(file.size > 15 * 1024 * 1024) return alert("Video too large (Max 15MB)");
 
-            btn.innerText = "Processing Data...";
-            btn.disabled = true;
+            isUploading = true;
+            btn.innerText = "UPLOADING... PLEASE WAIT";
+            btn.classList.replace('bg-red-600', 'bg-zinc-700');
 
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = async () => {
-                await db.ref('videos').push({
-                    uid: auth.currentUser.uid,
-                    username: auth.currentUser.email.split('@')[0],
-                    title: title,
-                    productLink: link || '#',
-                    videoUrl: reader.result,
-                    timestamp: Date.now()
-                });
-                alert("Published!");
-                location.reload();
+                try {
+                    await db.ref('videos').push({
+                        uid: auth.currentUser.uid,
+                        username: document.getElementById('p-name').innerText,
+                        title: title,
+                        desc: desc,
+                        productLink: link || '#',
+                        videoUrl: reader.result,
+                        timestamp: Date.now()
+                    });
+                    alert("POST PUBLISHED!");
+                    closeModal('upload-modal');
+                    location.reload();
+                } catch(e) { 
+                    alert("Error: " + e.message); 
+                    isUploading = false;
+                    btn.innerText = "PUBLISH CONTENT";
+                }
             };
         }
 
@@ -119,17 +237,21 @@
                 snap.forEach(c => {
                     const v = c.val();
                     grid.innerHTML += `
-                    <div class="post-preview">
+                    <div class="post-grid-item">
                         <video src="${v.videoUrl}" class="w-full h-full object-cover" muted></video>
-                        <button onclick="deletePost('${c.key}')" class="absolute top-2 right-2 bg-black/60 p-2 rounded-lg text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        <div class="status-badge">Live</div>
+                        <button onclick="deletePost('${c.key}')" class="absolute bottom-1 right-1 text-[10px] bg-red-600/80 px-2 py-1 rounded text-white">Delete</button>
                     </div>`;
                 });
             });
         }
 
         function deletePost(k) {
-            if(confirm("Permanently delete video?")) db.ref('videos/'+k).remove();
+            if(confirm("Confirm Delete?")) db.ref('videos/'+k).remove();
         }
+
+        function openUploadModal() { document.getElementById('upload-modal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     //]]>
     </script>
 </body>
