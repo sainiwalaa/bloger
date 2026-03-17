@@ -2,199 +2,187 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>3D Creator Shooter</title>
+<title>Loader Rush</title>
 
 <style>
-body { margin:0; overflow:hidden; background:black; }
-
-#ui {
-position:fixed;
-top:10px; left:10px;
-color:white;
-z-index:10;
-font-size:18px;
+body{
+margin:0;
+overflow:hidden;
+font-family:sans-serif;
+background:linear-gradient(#020024,#090979,#00d4ff);
 }
 
-#joystick {
-position:fixed;
-bottom:30px; left:30px;
-width:100px; height:100px;
-background:rgba(255,255,255,0.1);
-border-radius:50%;
-z-index:10;
-touch-action:none;
-}
-
-#stick {
-width:40px; height:40px;
-background:white;
-border-radius:50%;
+/* moving background */
+.bg{
 position:absolute;
-top:30px; left:30px;
+width:200%;
+height:100%;
+background:linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+animation:moveBg 5s linear infinite;
 }
 
-#reward {
+@keyframes moveBg{
+0%{transform:translateX(0);}
+100%{transform:translateX(-50%);}
+}
+
+/* HUD */
+#hud{
 position:fixed;
-top:50%; left:50%;
+top:10px;
+left:10px;
+color:white;
+font-size:18px;
+z-index:10;
+}
+
+/* player */
+#player{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+font-size:50px;
+z-index:10;
+}
+
+/* targets */
+.item{
+position:absolute;
+font-size:40px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.item:active{
+transform:scale(0.8);
+}
+
+/* reward popup */
+#reward{
+position:fixed;
+top:50%;
+left:50%;
 transform:translate(-50%,-50%);
 background:#111;
 padding:20px;
 border-radius:15px;
 display:none;
 z-index:20;
-color:white;
 text-align:center;
+color:white;
 }
 
-.btn {
+.btn{
 margin-top:10px;
 padding:10px;
 background:#ffd000;
 color:black;
-cursor:pointer;
 border-radius:10px;
+cursor:pointer;
 }
+
 </style>
 </head>
-
 <body>
 
-<div id="ui">Score: <span id="score">0</span></div>
+<div class="bg"></div>
 
-<div id="joystick"><div id="stick"></div></div>
+<div id="hud">Score: 0 | Load: 0/10</div>
+
+<div id="player">🚚</div>
 
 <div id="reward">
-<h3>🎁 Reward</h3>
-<img id="img" width="120"><br>
-<div id="off"></div>
-<div class="btn" onclick="openLink()">Open</div>
+<h3>🔥 Offer Attack</h3>
+<p>20% OFF — distract or ignore?</p>
+<div class="btn" onclick="closeReward()">Ignore</div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
 <script>
 
-// BASIC SCENE
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
-
-camera.position.set(0,2,5);
-
-// PLAYER
-let playerGeo = new THREE.BoxGeometry(1,2,1);
-let playerMat = new THREE.MeshBasicMaterial({color:0x00ff00});
-let player = new THREE.Mesh(playerGeo, playerMat);
-scene.add(player);
-
-// GROUND
-let ground = new THREE.Mesh(
-new THREE.PlaneGeometry(50,50),
-new THREE.MeshBasicMaterial({color:0x222222})
-);
-ground.rotation.x = -Math.PI/2;
-scene.add(ground);
-
-// ENEMIES
-let enemies = [];
-
-function spawnEnemy(){
-let e = new THREE.Mesh(
-new THREE.BoxGeometry(1,1,1),
-new THREE.MeshBasicMaterial({color:0xff0000})
-);
-e.position.set((Math.random()-0.5)*10,0.5,-10);
-scene.add(e);
-enemies.push(e);
-}
-setInterval(spawnEnemy,2000);
-
-// SHOOT
-window.addEventListener("click",()=>{
-enemies.forEach((e,i)=>{
-if(e.position.distanceTo(player.position)<5){
-scene.remove(e);
-enemies.splice(i,1);
-score+=10;
-updateUI();
-
-if(score%30===0) showReward();
-}
-});
-});
-
-// JOYSTICK
-let joy = document.getElementById("joystick");
-let stick = document.getElementById("stick");
-
-let moveX=0, moveZ=0;
-
-joy.addEventListener("touchmove",(e)=>{
-let t = e.touches[0];
-let rect = joy.getBoundingClientRect();
-
-let x = t.clientX - rect.left - 50;
-let y = t.clientY - rect.top - 50;
-
-moveX = x/50;
-moveZ = y/50;
-
-stick.style.left = (30+x/2)+"px";
-stick.style.top = (30+y/2)+"px";
-});
-
-// SCORE
 let score=0;
+let load=0;
 
-function updateUI(){
-document.getElementById("score").innerText=score;
+// types
+let types=["📦","🎁","❌"];
+
+function spawn(){
+
+let el=document.createElement("div");
+el.className="item";
+
+let type=types[Math.floor(Math.random()*types.length)];
+el.innerText=type;
+
+el.style.left=Math.random()*90+"vw";
+el.style.top="10%";
+
+document.body.appendChild(el);
+
+// move toward player
+let pos=10;
+
+let move=setInterval(()=>{
+
+pos+=2;
+el.style.top=pos+"%";
+
+if(pos>90){
+el.remove();
+clearInterval(move);
 }
 
-// REWARD
-let products=[
-{img:"https://m.media-amazon.com/images/I/61a7voWbxtL._SX522_.jpg",link:"https://amzn.to/3Lb50mc"},
-{img:"https://m.media-amazon.com/images/I/71H5JdZJjBL._SX522_.jpg",link:"https://amzn.to/4jpYTqK"}
-];
+},50);
 
-let current=null;
+// click logic
+el.onclick=()=>{
 
-function showReward(){
-current = products[Math.floor(Math.random()*products.length)];
+if(type==="📦"){
+score+=5;
+load++;
+}
 
-document.getElementById("img").src=current.img;
-document.getElementById("off").innerText="🔥 20% OFF";
+else if(type==="🎁"){
+score-=3;
+showOffer();
+}
 
+else{
+score-=5;
+}
+
+update();
+el.remove();
+clearInterval(move);
+
+};
+
+}
+
+function update(){
+
+document.getElementById("hud").innerText=
+"Score: "+score+" | Load: "+load+"/10";
+
+// level complete
+if(load>=10){
+alert("🚚 Load Complete!");
+load=0;
+}
+
+}
+
+// offer popup
+function showOffer(){
 document.getElementById("reward").style.display="block";
 }
 
-function openLink(){
-window.open(current.link);
+function closeReward(){
+document.getElementById("reward").style.display="none";
 }
 
-// ANIMATE
-function animate(){
-requestAnimationFrame(animate);
-
-// movement
-player.position.x += moveX*0.1;
-player.position.z += moveZ*0.1;
-
-// camera follow
-camera.position.x = player.position.x;
-camera.position.z = player.position.z + 5;
-camera.lookAt(player.position);
-
-// enemy move
-enemies.forEach(e=>{
-e.position.z += 0.05;
-});
-
-renderer.render(scene,camera);
-}
-
-animate();
+// spawn loop
+setInterval(spawn,1200);
 
 </script>
 
