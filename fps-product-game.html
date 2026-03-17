@@ -2,43 +2,42 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Sainiwalaa FPS Pro</title>
+<title>Racing Shooter Reward</title>
 
 <style>
-body { margin:0; overflow:hidden; background:black; font-family:sans-serif; color:white; }
+body{margin:0;overflow:hidden;background:black;color:white;font-family:sans-serif;}
 
 #hud{
-position:fixed;
-top:10px; left:10px;
-font-size:18px;
-z-index:10;
+position:fixed;top:10px;left:10px;z-index:10;
 }
 
 #crosshair{
-position:fixed;
-top:50%; left:50%;
+position:fixed;top:50%;left:50%;
 transform:translate(-50%,-50%);
-font-size:30px;
-z-index:10;
+font-size:30px;z-index:10;
 }
 
-#gun{
+#reward{
 position:fixed;
-bottom:0;
-left:50%;
-transform:translateX(-50%);
-width:200px;
-transition:0.1s;
-z-index:10;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+background:#111;
+padding:20px;
+border-radius:15px;
+display:none;
+z-index:20;
+text-align:center;
 }
 
-.hit{
-position:fixed;
-top:50%; left:50%;
-transform:translate(-50%,-50%);
-color:red;
-font-size:40px;
-opacity:0;
+#reward img{width:120px;}
+
+.btn{
+margin-top:10px;
+padding:10px;
+background:#ffd000;
+color:black;
+cursor:pointer;
+border-radius:10px;
 }
 
 </style>
@@ -46,74 +45,85 @@ opacity:0;
 <body>
 
 <div id="hud">
-Score: <span id="score">0</span> |
-Time: <span id="time">30</span> |
-Level: <span id="level">1</span>
+Score: <span id="score">0</span>
 </div>
 
 <div id="crosshair">+</div>
 
-<img id="gun" src="https://i.imgur.com/6X4R6Hk.png">
+<div id="reward">
+<h2>🎁 Reward Unlocked</h2>
+<img id="rewardImg">
+<div id="offer"></div>
+<div class="btn" onclick="copyLink()">Copy Link</div>
+<div class="btn" onclick="openLink()">Open Product</div>
+</div>
 
-<div id="hit" class="hit">💥</div>
-
-<audio id="shootSound" src="https://www.soundjay.com/mechanical/sounds/gunshot-01.mp3"></audio>
+<audio id="shoot" src="https://www.soundjay.com/mechanical/sounds/gunshot-01.mp3"></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
 
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+let scene=new THREE.Scene();
+let camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+let renderer=new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-camera.position.z = 5;
+camera.position.z=5;
 
-let score=0, time=30, level=1;
-let objects=[];
+let score=0;
+let targets=[];
 
-// SAMPLE PRODUCTS
-let products = [
-{img:"https://m.media-amazon.com/images/I/61a7voWbxtL._SX522_.jpg", price:99, good:true, link:"https://amzn.to/3Lb50mc"},
-{img:"https://m.media-amazon.com/images/I/71H5JdZJjBL._SX522_.jpg", price:499, good:false, link:"#"}
+let products=[
+{img:"https://m.media-amazon.com/images/I/61a7voWbxtL._SX522_.jpg",link:"https://amzn.to/3Lb50mc"},
+{img:"https://m.media-amazon.com/images/I/71H5JdZJjBL._SX522_.jpg",link:"https://amzn.to/4jpYTqK"}
 ];
 
-function createProduct(){
+let currentReward=null;
 
-let p = products[Math.floor(Math.random()*products.length)];
+// CREATE TARGET
+function createTarget(){
 
-let texture = new THREE.TextureLoader().load(p.img);
+let icons=["🔥","💰","📦","🎁"];
 
-let geo = new THREE.PlaneGeometry(2,2);
-let mat = new THREE.MeshBasicMaterial({map:texture});
+let canvas=document.createElement("canvas");
+canvas.width=256;
+canvas.height=256;
+let ctx=canvas.getContext("2d");
 
-let obj = new THREE.Mesh(geo,mat);
+ctx.fillStyle="white";
+ctx.font="150px Arial";
+ctx.fillText(icons[Math.floor(Math.random()*icons.length)],50,180);
 
-obj.position.x=(Math.random()-0.5)*8;
+let texture=new THREE.CanvasTexture(canvas);
+
+let geo=new THREE.PlaneGeometry(2,2);
+let mat=new THREE.MeshBasicMaterial({map:texture,transparent:true});
+
+let obj=new THREE.Mesh(geo,mat);
+
+obj.position.x=(Math.random()-0.5)*6;
 obj.position.y=(Math.random()-0.5)*4;
-obj.position.z=-Math.random()*10;
-
-obj.userData = p;
+obj.position.z=-10;
 
 scene.add(obj);
-objects.push(obj);
+targets.push(obj);
 }
 
-for(let i=0;i<5;i++) createProduct();
+for(let i=0;i<5;i++) createTarget();
 
+// ANIMATE
 function animate(){
-
 requestAnimationFrame(animate);
 
-objects.forEach(obj=>{
-obj.position.z += 0.05 + level*0.01;
+targets.forEach(t=>{
+t.position.z+=0.2;
 
-if(obj.position.z>5){
-scene.remove(obj);
-objects.splice(objects.indexOf(obj),1);
-createProduct();
+if(t.position.z>5){
+scene.remove(t);
+targets.splice(targets.indexOf(t),1);
+createTarget();
 }
 });
 
@@ -122,68 +132,65 @@ renderer.render(scene,camera);
 
 animate();
 
-// SHOOT EVENT
+// SHOOT
 window.addEventListener("click",(e)=>{
 
-// gun recoil
-let gun = document.getElementById("gun");
-gun.style.transform="translateX(-50%) translateY(10px)";
-setTimeout(()=>gun.style.transform="translateX(-50%)",100);
+document.getElementById("shoot").play();
 
-// sound
-document.getElementById("shootSound").play();
-
-// raycast
-let mouse = new THREE.Vector2(
+let mouse=new THREE.Vector2(
 (e.clientX/window.innerWidth)*2-1,
 -(e.clientY/window.innerHeight)*2+1
 );
 
-let raycaster = new THREE.Raycaster();
-raycaster.setFromCamera(mouse,camera);
+let ray=new THREE.Raycaster();
+ray.setFromCamera(mouse,camera);
 
-let hits = raycaster.intersectObjects(objects);
+let hits=ray.intersectObjects(targets);
 
 if(hits.length>0){
 
-let hit = hits[0].object;
-let data = hit.userData;
+let hit=hits[0].object;
 
-// hit effect
-let hitEl = document.getElementById("hit");
-hitEl.style.opacity=1;
-setTimeout(()=>hitEl.style.opacity=0,200);
-
-// scoring
-if(data.good){
-score+=10;
-window.open(data.link);
-}else{
-score-=5;
-}
-
-// remove + respawn
 scene.remove(hit);
-objects.splice(objects.indexOf(hit),1);
-createProduct();
+targets.splice(targets.indexOf(hit),1);
+createTarget();
 
+score++;
 document.getElementById("score").innerText=score;
+
+// REWARD EVERY 5 SCORE
+if(score%5===0){
+showReward();
 }
 
+}
 });
 
-// TIMER
-setInterval(()=>{
-time--;
-document.getElementById("time").innerText=time;
+// SHOW REWARD
+function showReward(){
 
-if(time<=0){
-level++;
-time=30;
-document.getElementById("level").innerText=level;
+currentReward=products[Math.floor(Math.random()*products.length)];
+
+document.getElementById("rewardImg").src=currentReward.img;
+
+let off=[10,15,20,25];
+let discount=off[Math.floor(Math.random()*off.length)];
+
+document.getElementById("offer").innerText="🔥 "+discount+"% OFF";
+
+document.getElementById("reward").style.display="block";
 }
 
-},1000);
+// COPY LINK
+function copyLink(){
+navigator.clipboard.writeText(currentReward.link);
+alert("Link Copied!");
+}
+
+// OPEN LINK
+function openLink(){
+window.open(currentReward.link);
+}
 
 </script>
 
