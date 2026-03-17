@@ -2,136 +2,153 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Mission Hunter</title>
+    <title>Sainiwalaa Cyber-Shooter 2026</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@400;700&display=swap');
         
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
         
-        /* Mission & Stats UI */
-        #hud {
-            position: fixed; top: 20px; left: 20px;
-            color: white; z-index: 10; display: flex; flex-direction: column; gap: 10px;
+        /* High-Tech HUD */
+        #ui-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; border: 15px solid rgba(0, 255, 204, 0.1);
+            box-sizing: border-box; z-index: 10;
         }
-        .panel {
-            background: rgba(0, 255, 204, 0.1);
-            backdrop-filter: blur(15px);
-            padding: 15px; border-radius: 10px;
-            border: 1px solid #00ffcc;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+        .stat-panel {
+            position: absolute; padding: 20px;
+            background: rgba(0,0,0,0.7); border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px #00ffcc; border-radius: 0 0 20px 20px;
         }
-        #mission-text { color: #ffcc00; font-weight: bold; font-size: 1.2em; }
-        .count-badge { font-size: 1.5em; color: #fff; }
+        #top-center { left: 50%; transform: translateX(-50%); text-align: center; width: 300px; }
+        #top-left { top: 20px; left: 20px; border-radius: 10px; }
 
-        /* Reward Alert */
-        #reward-alert {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(255, 0, 204, 0.9);
-            color: white; padding: 40px; border-radius: 20px;
-            text-align: center; z-index: 200;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 5px solid gold;
+        .mission-title { font-size: 14px; color: #ff00cc; text-transform: uppercase; margin-bottom: 5px; }
+        .timer { font-size: 30px; font-family: 'Black Ops One'; color: #ffcc00; }
+        
+        /* Reward & Game Over Overlays */
+        .overlay {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: rgba(0,0,0,0.9); border: 4px solid #ff00cc; padding: 50px;
+            text-align: center; color: white; z-index: 1000; border-radius: 30px;
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        #reward-alert.show { transform: translate(-50%, -50%) scale(1); }
+        .overlay.active { transform: translate(-50%, -50%) scale(1); }
 
-        /* Aiming Circle */
         #aimer {
-            position: fixed; width: 50px; height: 50px;
-            border: 2px solid #ffcc00; border-radius: 50%;
-            pointer-events: none; z-index: 1000;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 20px #ffcc00;
+            position: fixed; width: 40px; height: 40px;
+            border: 2px solid #00ffcc; border-radius: 50%;
+            pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #00ffcc; transition: 0.05s linear;
         }
+        #aimer::before { content: ''; position: absolute; width: 100%; height: 2px; background: #00ffcc; top: 50%; }
+        #aimer::after { content: ''; position: absolute; height: 100%; width: 2px; background: #00ffcc; left: 50%; }
 
-        #flash {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            pointer-events:none; background: red; opacity: 0; z-index: 5;
-        }
+        .combo-text { position: absolute; font-size: 40px; color: gold; font-family: 'Black Ops One'; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div id="flash"></div>
 <div id="aimer"></div>
-
-<div id="hud">
-    <div class="panel">
-        <div id="mission-text">MISSION: Loading...</div>
-        <div class="count-badge"><span id="current-count">0</span> / <span id="target-count">10</span></div>
+<div id="ui-container">
+    <div id="top-left" class="stat-panel">
+        <div>SCORE: <span id="score">0</span></div>
+        <div style="color: #ff00cc;">COMBO: x<span id="combo">1</span></div>
     </div>
-    <div class="panel">
-        SCORE: <span id="score">0</span> | LEVEL: <span id="lvl">1</span>
+    <div id="top-center" class="stat-panel">
+        <div class="mission-title" id="m-title">MISSION STARTING</div>
+        <div id="m-progress" style="font-size: 20px; font-weight: bold;">0 / 0</div>
+        <div class="timer" id="timer">60s</div>
     </div>
 </div>
 
-<div id="reward-alert">
-    <h1>MISSION COMPLETE!</h1>
-    <h2 id="deal-title">56% OFF ON SHOES</h2>
-    <p>Aapne target pura kiya!</p>
-    <button onclick="closeReward()" style="padding:10px 20px; cursor:pointer; font-family:'Orbitron';">CLAIM NOW</button>
+<div id="reward-box" class="overlay">
+    <h1 style="color: gold; text-shadow: 0 0 20px gold;">MISSION COMPLETE!</h1>
+    <h2 id="deal-text">OFFER UNLOCKED</h2>
+    <a href="https://sainiwalaa.com" id="reward-link" target="_blank"><button style="padding:15px 30px; font-weight:bold; cursor:pointer;">CLAIM NOW</button></a>
+    <p style="margin-top:20px; cursor:pointer; font-size:12px;" onclick="nextLevel()">CONTINUE TO NEXT LEVEL >> </p>
+</div>
+
+<div id="game-over" class="overlay">
+    <h1 style="color: red;">MISSION FAILED!</h1>
+    <p>TIME'S UP OR WRONG TARGETS HIT</p>
+    <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">RETRY MISSION</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1, speed = 0.3;
-let objects = [];
-let currentMission = { type: 'BALL', target: 5, collected: 0 };
-const types = ['BALL', 'STAR', 'KITE'];
+let scene, camera, renderer, score = 0, level = 1, combo = 1, timeLeft = 60;
+let objects = [], particles = [], mission = { type: '', target: 0, count: 0 };
+const types = ['BALL', 'STAR', 'KITE', 'VIRUS']; // VIRUS is the obstacle
 
 window.addEventListener('mousemove', (e) => {
-    document.getElementById('aimer').style.left = e.clientX + 'px';
-    document.getElementById('aimer').style.top = e.clientY + 'px';
+    const aimer = document.getElementById('aimer');
+    aimer.style.left = e.clientX + 'px';
+    aimer.style.top = e.clientY + 'px';
 });
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.03);
-
+    scene.fog = new THREE.FogExp2(0x000000, 0.05);
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    // Dynamic Lights
+    const light = new THREE.PointLight(0x00ffcc, 1, 100);
+    light.position.set(0, 0, 10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x222222));
+
     camera.position.z = 5;
 
-    newMission();
+    setupMission();
     spawnLoop();
+    startTimer();
     animate();
 }
 
-function newMission() {
-    currentMission.type = types[Math.floor(Math.random() * types.length)];
-    currentMission.target = 5 + (level * 2);
-    currentMission.collected = 0;
+function setupMission() {
+    mission.type = types[Math.floor(Math.random() * 3)];
+    mission.target = 5 + (level * 3);
+    mission.count = 0;
+    timeLeft = 60;
     
-    document.getElementById('mission-text').innerText = `TARGET: SHOOT ${currentMission.target} ${currentMission.type}s`;
-    updateHUD();
+    document.getElementById('m-title').innerText = `TARGET: SHOOT ${mission.type}S`;
+    document.getElementById('m-progress').innerText = `${mission.count} / ${mission.target}`;
 }
 
-function updateHUD() {
-    document.getElementById('current-count').innerText = currentMission.collected;
-    document.getElementById('target-count').innerText = currentMission.target;
-    document.getElementById('score').innerText = score;
-    document.getElementById('lvl').innerText = level;
+function startTimer() {
+    const timerInt = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = timeLeft + "s";
+        if(timeLeft <= 0) {
+            clearInterval(timerInt);
+            if(mission.count < mission.target) document.getElementById('game-over').classList.add('active');
+        }
+    }, 1000);
 }
 
 function createObject() {
-    const type = types[Math.floor(Math.random() * types.length)];
+    const type = types[Math.floor(Math.random() * 4)];
     let geo;
-    
-    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 32, 32);
-    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
-    else if(type === 'KITE') geo = new THREE.ConeGeometry(0.5, 1, 4);
+    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 16, 16);
+    else if(type === 'STAR') geo = new THREE.OctahedronGeometry(0.6);
+    else if(type === 'KITE') geo = new THREE.ConeGeometry(0.4, 1, 4);
+    else geo = new THREE.BoxGeometry(0.5, 0.5, 0.5); // VIRUS
 
-    const color = type === 'BALL' ? 0xff3300 : (type === 'STAR' ? 0xffff00 : 0x00ccff);
-    const mat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.2 });
+    const colors = { BALL: 0xff00cc, STAR: 0xffff00, KITE: 0x00ffcc, VIRUS: 0xff0000 };
+    const mat = new THREE.MeshPhongMaterial({ 
+        color: colors[type], 
+        emissive: colors[type], 
+        emissiveIntensity: 0.5,
+        wireframe: type === 'VIRUS'
+    });
+
     const mesh = new THREE.Mesh(geo, mat);
-    
-    mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*12, -50);
-    mesh.userData = { type: type };
+    mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
+    mesh.userData = { type: type, rot: Math.random()*0.05 };
     
     scene.add(mesh);
     objects.push(mesh);
@@ -139,14 +156,14 @@ function createObject() {
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 800 - (level * 50));
+    setTimeout(spawnLoop, Math.max(300, 1000 - (level * 100)));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
-        obj.position.z += speed;
-        obj.rotation.y += 0.02;
+        obj.position.z += 0.3 + (level * 0.05);
+        obj.rotation.y += obj.userData.rot;
         if(obj.position.z > 6) {
             scene.remove(obj);
             objects.splice(i, 1);
@@ -163,45 +180,33 @@ window.addEventListener("mousedown", (e) => {
 
     if(hits.length > 0) {
         const hit = hits[0].object;
-        const hitType = hit.userData.type;
-
-        if(hitType === currentMission.type) {
-            // Sahi Target!
-            currentMission.collected++;
-            score += 50;
-            if(currentMission.collected >= currentMission.target) {
-                showReward();
+        if(hit.userData.type === mission.type) {
+            mission.count++;
+            combo++;
+            score += 10 * combo;
+            if(mission.count >= mission.target) {
+                document.getElementById('reward-box').classList.add('active');
+                document.getElementById('deal-text').innerText = (level * 10 + 25) + "% OFF ON ALL ITEMS";
             }
         } else {
-            // Galat Target!
-            score -= 20;
-            triggerFlash();
+            combo = 1;
+            score -= 50;
+            if(hit.userData.type === 'VIRUS') timeLeft -= 5; // Penalty
         }
-
+        
+        document.getElementById('score').innerText = score;
+        document.getElementById('combo').innerText = combo;
+        document.getElementById('m-progress').innerText = `${mission.count} / ${mission.target}`;
+        
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
-        updateHUD();
     }
 });
 
-function triggerFlash() {
-    const f = document.getElementById('flash');
-    f.style.opacity = '0.5';
-    setTimeout(() => f.style.opacity = '0', 100);
-}
-
-function showReward() {
-    const alert = document.getElementById('reward-alert');
-    const deal = level % 2 === 0 ? "35% OFF ON ELECTRONICS" : "56% OFF ON JEWELRY";
-    document.getElementById('deal-title').innerText = deal;
-    alert.classList.add('show');
-}
-
-function closeReward() {
-    document.getElementById('reward-alert').classList.remove('show');
+function nextLevel() {
     level++;
-    speed += 0.05;
-    newMission();
+    document.getElementById('reward-box').classList.remove('active');
+    setupMission();
 }
 
 init();
