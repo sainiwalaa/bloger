@@ -2,111 +2,191 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Creator Run Shooter</title>
+<title>Creator Arena</title>
 
 <style>
-body{margin:0;overflow:hidden;background:linear-gradient(black,#001f3f);}
-
-#score{
-position:fixed;top:10px;left:10px;color:white;z-index:10;
-font-size:18px;
+body{
+margin:0;
+background:radial-gradient(circle,#0f2027,#000);
+color:white;
+font-family:sans-serif;
+overflow:hidden;
 }
 
-#player{
+/* HUD */
+#hud{
 position:fixed;
-bottom:10px;
-left:50%;
-transform:translateX(-50%);
-font-size:40px;
+top:10px;
+left:10px;
+font-size:18px;
 z-index:10;
 }
 
-.target{
-position:absolute;
-font-size:35px;
-animation:fall linear;
+/* Player */
+#player{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+font-size:50px;
 }
 
-@keyframes fall{
-0%{top:-50px;}
-100%{top:100vh;}
+/* Target */
+.target{
+position:absolute;
+top:30%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:60px;
+cursor:pointer;
+transition:0.2s;
+}
+
+/* hit animation */
+.target:active{
+transform:translate(-50%,-50%) scale(0.8);
+}
+
+/* reward box */
+#reward{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#111;
+padding:20px;
+border-radius:15px;
+display:none;
+z-index:20;
+text-align:center;
+width:250px;
+}
+
+#reward img{
+width:120px;
+border-radius:10px;
+}
+
+.btn{
+margin-top:10px;
+padding:10px;
+background:#ffd000;
+color:black;
+border-radius:10px;
+cursor:pointer;
 }
 
 </style>
 </head>
 <body>
 
-<div id="score">Score: 0 | Level: 1</div>
+<div id="hud">
+Score: <span id="score">0</span> | Level: <span id="level">1</span>
+</div>
+
 <div id="player">🧍‍♂️</div>
+
+<div id="target" class="target">🎯</div>
+
+<div id="reward">
+<h3>🎁 Reward</h3>
+<img id="img">
+<div id="off"></div>
+<div class="btn" onclick="openLink()">Open</div>
+<div class="btn" onclick="closeReward()">Continue</div>
+</div>
 
 <script>
 
 let score=0;
 let level=1;
-let speed=3;
 
-// random targets
+let target=document.getElementById("target");
+
 let types=["🎯","💰","📦","❌"];
 
-function createTarget(){
+let products=[
+{img:"https://m.media-amazon.com/images/I/61a7voWbxtL._SX522_.jpg",link:"https://amzn.to/3Lb50mc"},
+{img:"https://m.media-amazon.com/images/I/71H5JdZJjBL._SX522_.jpg",link:"https://amzn.to/4jpYTqK"}
+];
 
-let t=document.createElement("div");
-t.className="target";
+let currentProduct=null;
 
-let type=types[Math.floor(Math.random()*types.length)];
-t.innerText=type;
+// move target randomly (not rain)
+function moveTarget(){
 
-t.style.left=Math.random()*90+"vw";
-t.style.animationDuration=(3-speed*0.3)+"s";
+target.style.top=(20+Math.random()*50)+"%";
+target.style.left=(20+Math.random()*60)+"%";
 
-document.body.appendChild(t);
+let t=types[Math.floor(Math.random()*types.length)];
+target.innerText=t;
 
-// CLICK (mobile friendly)
-t.addEventListener("click",()=>{
+}
 
-if(type==="🎯"){
+// click shoot
+target.onclick=()=>{
+
+let t=target.innerText;
+
+if(t==="🎯"){
 score+=5;
 }
-else if(type==="💰"){
+else if(t==="💰"){
 score+=10;
 }
-else if(type==="📦"){
+else if(t==="📦"){
 showReward();
 }
 else{
 score-=5;
 }
 
-t.remove();
 updateUI();
-
-});
-
-// auto remove
-setTimeout(()=>t.remove(),4000);
+moveTarget();
 
 }
 
+// update UI
 function updateUI(){
-document.getElementById("score").innerText=
-"Score: "+score+" | Level: "+level;
+
+document.getElementById("score").innerText=score;
+document.getElementById("level").innerText=level;
 
 // level up
-if(score>20*level){
+if(score>level*20){
 level++;
-speed+=0.5;
-}
 }
 
-// reward popup
+}
+
+// reward
 function showReward(){
-alert("🎁 Product Reward Unlock!");
+
+currentProduct=products[Math.floor(Math.random()*products.length)];
+
+document.getElementById("img").src=currentProduct.img;
+
+let off=[10,15,20,30];
+let d=off[Math.floor(Math.random()*off.length)];
+
+document.getElementById("off").innerText="🔥 "+d+"% OFF";
+
+document.getElementById("reward").style.display="block";
+
 }
 
-// spawn loop (speed increase)
-setInterval(()=>{
-createTarget();
-},600-speed*50);
+// open link
+function openLink(){
+window.open(currentProduct.link);
+}
+
+// close reward
+function closeReward(){
+document.getElementById("reward").style.display="none";
+}
+
+// auto move target every 2 sec
+setInterval(moveTarget,2000);
 
 </script>
 
