@@ -2,168 +2,185 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Cyber-Shooter 2026</title>
+    <title>Sainiwalaa Balanced Shooter</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
         
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
         
-        /* High-Tech HUD */
-        #ui-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; border: 15px solid rgba(0, 255, 204, 0.1);
-            box-sizing: border-box; z-index: 10;
+        /* Balanced HUD */
+        #hud {
+            position: fixed; top: 20px; left: 20px;
+            color: white; z-index: 10; display: flex; flex-direction: column; gap: 10px;
+            pointer-events: none;
         }
-        .stat-panel {
-            position: absolute; padding: 20px;
-            background: rgba(0,0,0,0.7); border: 2px solid #00ffcc;
-            box-shadow: 0 0 20px #00ffcc; border-radius: 0 0 20px 20px;
+        .glass-panel {
+            background: rgba(0, 255, 204, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 15px; border-radius: 12px;
+            border: 1px solid rgba(0, 255, 204, 0.4);
+            min-width: 200px;
         }
-        #top-center { left: 50%; transform: translateX(-50%); text-align: center; width: 300px; }
-        #top-left { top: 20px; left: 20px; border-radius: 10px; }
-
-        .mission-title { font-size: 14px; color: #ff00cc; text-transform: uppercase; margin-bottom: 5px; }
-        .timer { font-size: 30px; font-family: 'Black Ops One'; color: #ffcc00; }
+        #rush-timer { 
+            color: #ff3300; font-size: 24px; font-weight: bold; 
+            display: none; /* Only shows during Rush Mode */
+            text-shadow: 0 0 10px red;
+        }
         
-        /* Reward & Game Over Overlays */
+        /* Reward Center */
         .overlay {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(0,0,0,0.9); border: 4px solid #ff00cc; padding: 50px;
-            text-align: center; color: white; z-index: 1000; border-radius: 30px;
-            transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            background: rgba(10, 10, 10, 0.95); border: 3px solid #00ffcc;
+            padding: 40px; border-radius: 20px; text-align: center; color: white;
+            z-index: 100; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .overlay.active { transform: translate(-50%, -50%) scale(1); }
 
+        /* Aiming Circle */
         #aimer {
-            position: fixed; width: 40px; height: 40px;
+            position: fixed; width: 50px; height: 50px;
             border: 2px solid #00ffcc; border-radius: 50%;
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px #00ffcc; transition: 0.05s linear;
+            box-shadow: 0 0 15px #00ffcc;
         }
-        #aimer::before { content: ''; position: absolute; width: 100%; height: 2px; background: #00ffcc; top: 50%; }
-        #aimer::after { content: ''; position: absolute; height: 100%; width: 2px; background: #00ffcc; left: 50%; }
-
-        .combo-text { position: absolute; font-size: 40px; color: gold; font-family: 'Black Ops One'; opacity: 0; pointer-events: none; }
+        button {
+            background: #00ffcc; color: #000; border: none; padding: 12px 25px;
+            font-family: 'Orbitron'; font-weight: bold; border-radius: 5px; cursor: pointer;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
 <div id="aimer"></div>
-<div id="ui-container">
-    <div id="top-left" class="stat-panel">
-        <div>SCORE: <span id="score">0</span></div>
-        <div style="color: #ff00cc;">COMBO: x<span id="combo">1</span></div>
+
+<div id="hud">
+    <div class="glass-panel">
+        <div id="mission-info" style="color: #ffcc00; font-size: 14px;">MISSION: COLLECT TARGETS</div>
+        <div style="font-size: 24px;"><span id="curr">0</span> / <span id="total">10</span></div>
+        <div id="rush-timer">RUSH: <span id="time-left">60</span>s</div>
     </div>
-    <div id="top-center" class="stat-panel">
-        <div class="mission-title" id="m-title">MISSION STARTING</div>
-        <div id="m-progress" style="font-size: 20px; font-weight: bold;">0 / 0</div>
-        <div class="timer" id="timer">60s</div>
+    <div class="glass-panel">
+        SCORE: <span id="score">0</span> | LEVEL: <span id="lvl">1</span>
     </div>
 </div>
 
 <div id="reward-box" class="overlay">
-    <h1 style="color: gold; text-shadow: 0 0 20px gold;">MISSION COMPLETE!</h1>
-    <h2 id="deal-text">OFFER UNLOCKED</h2>
-    <a href="https://sainiwalaa.com" id="reward-link" target="_blank"><button style="padding:15px 30px; font-weight:bold; cursor:pointer;">CLAIM NOW</button></a>
-    <p style="margin-top:20px; cursor:pointer; font-size:12px;" onclick="nextLevel()">CONTINUE TO NEXT LEVEL >> </p>
-</div>
-
-<div id="game-over" class="overlay">
-    <h1 style="color: red;">MISSION FAILED!</h1>
-    <p>TIME'S UP OR WRONG TARGETS HIT</p>
-    <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">RETRY MISSION</button>
+    <h1 id="res-title" style="color: #00ffcc;">DEAL UNLOCKED!</h1>
+    <h2 id="deal-name">56% OFF ON PRODUCTS</h2>
+    <p>Aapne target successfully pura kiya.</p>
+    <button onclick="nextLevel()">NEXT LEVEL</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1, combo = 1, timeLeft = 60;
-let objects = [], particles = [], mission = { type: '', target: 0, count: 0 };
-const types = ['BALL', 'STAR', 'KITE', 'VIRUS']; // VIRUS is the obstacle
+let scene, camera, renderer, score = 0, level = 1, speed = 0.2; // Slow & Steady speed
+let objects = [], mission = { type: 'BALL', target: 5, count: 0, isRush: false };
+let timerInterval;
+
+const types = ['BALL', 'STAR', 'KITE'];
 
 window.addEventListener('mousemove', (e) => {
-    const aimer = document.getElementById('aimer');
-    aimer.style.left = e.clientX + 'px';
-    aimer.style.top = e.clientY + 'px';
+    document.getElementById('aimer').style.left = e.clientX + 'px';
+    document.getElementById('aimer').style.top = e.clientY + 'px';
 });
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.05);
+    scene.fog = new THREE.FogExp2(0x000000, 0.04);
+
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Dynamic Lights
-    const light = new THREE.PointLight(0x00ffcc, 1, 100);
-    light.position.set(0, 0, 10);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x222222));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const pointLight = new THREE.PointLight(0x00ffcc, 1);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
 
     camera.position.z = 5;
 
-    setupMission();
+    startNewMission();
     spawnLoop();
-    startTimer();
     animate();
 }
 
-function setupMission() {
-    mission.type = types[Math.floor(Math.random() * 3)];
-    mission.target = 5 + (level * 3);
+function startNewMission() {
+    mission.type = types[Math.floor(Math.random() * types.length)];
+    mission.target = 5 + (level * 2);
     mission.count = 0;
-    timeLeft = 60;
     
-    document.getElementById('m-title').innerText = `TARGET: SHOOT ${mission.type}S`;
-    document.getElementById('m-progress').innerText = `${mission.count} / ${mission.target}`;
+    // 30% Chance to trigger RUSH MODE
+    mission.isRush = Math.random() < 0.3; 
+    
+    const timerDisplay = document.getElementById('rush-timer');
+    if(mission.isRush) {
+        timerDisplay.style.display = 'block';
+        startRushTimer(45); // 45 seconds for rush
+        document.getElementById('mission-info').innerText = "⚡ RUSH MISSION: " + mission.type;
+    } else {
+        timerDisplay.style.display = 'none';
+        document.getElementById('mission-info').innerText = "TARGET: " + mission.type;
+        clearInterval(timerInterval);
+    }
+    
+    updateUI();
 }
 
-function startTimer() {
-    const timerInt = setInterval(() => {
+function startRushTimer(seconds) {
+    let timeLeft = seconds;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
         timeLeft--;
-        document.getElementById('timer').innerText = timeLeft + "s";
+        document.getElementById('time-left').innerText = timeLeft;
         if(timeLeft <= 0) {
-            clearInterval(timerInt);
-            if(mission.count < mission.target) document.getElementById('game-over').classList.add('active');
+            clearInterval(timerInterval);
+            if(mission.count < mission.target) {
+                alert("Rush Mission Failed! Level Restarting...");
+                resetMission();
+            }
         }
     }, 1000);
 }
 
-function createObject() {
-    const type = types[Math.floor(Math.random() * 4)];
+function updateUI() {
+    document.getElementById('curr').innerText = mission.count;
+    document.getElementById('total').innerText = mission.target;
+    document.getElementById('score').innerText = score;
+    document.getElementById('lvl').innerText = level;
+}
+
+function spawnObject() {
+    const type = types[Math.floor(Math.random() * types.length)];
     let geo;
-    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 16, 16);
-    else if(type === 'STAR') geo = new THREE.OctahedronGeometry(0.6);
-    else if(type === 'KITE') geo = new THREE.ConeGeometry(0.4, 1, 4);
-    else geo = new THREE.BoxGeometry(0.5, 0.5, 0.5); // VIRUS
+    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 24, 24);
+    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
+    else if(type === 'KITE') geo = new THREE.ConeGeometry(0.5, 1, 4);
 
-    const colors = { BALL: 0xff00cc, STAR: 0xffff00, KITE: 0x00ffcc, VIRUS: 0xff0000 };
-    const mat = new THREE.MeshPhongMaterial({ 
-        color: colors[type], 
-        emissive: colors[type], 
-        emissiveIntensity: 0.5,
-        wireframe: type === 'VIRUS'
-    });
-
+    const colors = { BALL: 0xff4400, STAR: 0xffcc00, KITE: 0x00ccff };
+    const mat = new THREE.MeshPhongMaterial({ color: colors[type], emissive: colors[type], emissiveIntensity: 0.3 });
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
-    mesh.userData = { type: type, rot: Math.random()*0.05 };
+    
+    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*10, -40);
+    mesh.userData = { type: type };
     
     scene.add(mesh);
     objects.push(mesh);
 }
 
 function spawnLoop() {
-    createObject();
-    setTimeout(spawnLoop, Math.max(300, 1000 - (level * 100)));
+    spawnObject();
+    // Normal speed spawning
+    setTimeout(spawnLoop, 1000 - (level * 30));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
-        obj.position.z += 0.3 + (level * 0.05);
-        obj.rotation.y += obj.userData.rot;
+        obj.position.z += speed;
+        obj.rotation.y += 0.01;
         if(obj.position.z > 6) {
             scene.remove(obj);
             objects.splice(i, 1);
@@ -182,31 +199,37 @@ window.addEventListener("mousedown", (e) => {
         const hit = hits[0].object;
         if(hit.userData.type === mission.type) {
             mission.count++;
-            combo++;
-            score += 10 * combo;
+            score += 20;
             if(mission.count >= mission.target) {
-                document.getElementById('reward-box').classList.add('active');
-                document.getElementById('deal-text').innerText = (level * 10 + 25) + "% OFF ON ALL ITEMS";
+                clearInterval(timerInterval);
+                showReward();
             }
         } else {
-            combo = 1;
-            score -= 50;
-            if(hit.userData.type === 'VIRUS') timeLeft -= 5; // Penalty
+            score = Math.max(0, score - 10);
         }
-        
-        document.getElementById('score').innerText = score;
-        document.getElementById('combo').innerText = combo;
-        document.getElementById('m-progress').innerText = `${mission.count} / ${mission.target}`;
-        
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
+        updateUI();
     }
 });
 
+function showReward() {
+    const box = document.getElementById('reward-box');
+    const discounts = [40, 50, 56, 60, 70];
+    document.getElementById('deal-name').innerText = `${discounts[level%5]}% OFF ON SAINIWALAA SPECIALS`;
+    box.classList.add('active');
+}
+
 function nextLevel() {
-    level++;
     document.getElementById('reward-box').classList.remove('active');
-    setupMission();
+    level++;
+    speed += 0.02; // Very slight speed increase
+    startNewMission();
+}
+
+function resetMission() {
+    mission.count = 0;
+    updateUI();
 }
 
 init();
