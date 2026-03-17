@@ -5,14 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sainiwalaa Trending Feed</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- AOS Animation -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
 <style>
 
@@ -22,8 +19,13 @@ color:white;
 font-family:Segoe UI;
 }
 
+.header{
+background:linear-gradient(90deg,#000000,#111827);
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
 .logo{
-font-size:26px;
+font-size:28px;
 font-weight:900;
 color:#ffd000;
 letter-spacing:2px;
@@ -40,15 +42,15 @@ margin:auto;
 
 .card{
 background:linear-gradient(145deg,#1b1f2e,#0f111a);
-border-radius:20px;
+border-radius:18px;
 overflow:hidden;
 border:1px solid rgba(255,255,255,0.08);
-transition:0.4s;
+transition:0.3s;
 }
 
 .card:hover{
-transform:translateY(-10px);
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
+transform:translateY(-8px);
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
 .video-box{
@@ -62,6 +64,36 @@ width:100%;
 height:100%;
 }
 
+.play-btn{
+position:absolute;
+bottom:12px;
+left:12px;
+background:#ffd000;
+color:black;
+width:40px;
+height:40px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+cursor:pointer;
+}
+
+.mute-btn{
+position:absolute;
+bottom:12px;
+right:12px;
+background:#00000080;
+width:36px;
+height:36px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
 .buy{
 display:block;
 margin-top:12px;
@@ -71,6 +103,7 @@ background:white;
 color:black;
 font-weight:700;
 border-radius:12px;
+transition:.2s;
 }
 
 .buy:hover{
@@ -91,19 +124,23 @@ color:white;
 <body>
 
 <!-- HEADER -->
-<div class="flex justify-between items-center p-4 backdrop-blur sticky top-0 bg-black/60 z-50">
+
+<div class="header flex justify-between items-center p-4 sticky top-0 z-50">
 
 <div class="logo">
 <i class="fa-solid fa-crown"></i> SAINIWALAA
 </div>
 
-<input id="searchBox" class="search" placeholder="Search products...">
+<input id="searchBox" class="search" placeholder="Search product...">
+
+<div class="text-sm text-gray-400">
+<i class="fa-solid fa-shield-halved text-green-400"></i> Trusted Deals
+</div>
 
 </div>
 
 
 <div id="feed" class="feed"></div>
-
 
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -118,21 +155,33 @@ const API="https://script.google.com/macros/s/AKfycbzD61Fuj_TZqxNPiDjvbGMtY4OJoU
 
 let ALL_DATA=[];
 let players={};
-let isGlobalUnmuted=false;
 
 function getID(url){
-if(url.includes("shorts/")) return url.split("shorts/")[1].split("?")[0];
-if(url.includes("v=")) return url.split("v=")[1].split("&")[0];
+
+if(url.includes("shorts/"))
+return url.split("shorts/")[1].split("?")[0];
+
+if(url.includes("v="))
+return url.split("v=")[1].split("&")[0];
+
 return "";
+
 }
 
 function shuffle(array){
+
 for(let i=array.length-1;i>0;i--){
+
 const j=Math.floor(Math.random()*(i+1));
+
 [array[i],array[j]]=[array[j],array[i]];
+
 }
+
 return array;
+
 }
+
 
 function render(data){
 
@@ -148,6 +197,14 @@ html+=`
 
 <div class="video-frame" id="video${i}"></div>
 
+<div class="play-btn" onclick="playVideo(${i})">
+<i class="fa-solid fa-play"></i>
+</div>
+
+<div class="mute-btn" onclick="toggleMute(${i})">
+<i class="fa-solid fa-volume-xmark"></i>
+</div>
+
 </div>
 
 <div class="p-4">
@@ -162,12 +219,12 @@ ${p.desc}
 
 <div class="flex justify-between items-center mt-3">
 
-<div class="text-pink-500 font-bold">
+<div class="text-green-400 font-bold">
 ₹${p.price}
 </div>
 
 <a class="buy" href="${p.link}" target="_blank">
-<i class="fa-solid fa-cart-shopping"></i> Buy
+<i class="fa-solid fa-cart-shopping"></i> Buy Now
 </a>
 
 </div>
@@ -186,9 +243,11 @@ loadVideos(data);
 
 }
 
+
 async function load(){
 
 let res=await fetch(API);
+
 let data=await res.json();
 
 ALL_DATA=shuffle(data);
@@ -197,26 +256,63 @@ render(ALL_DATA);
 
 }
 
+
 function loadVideos(data){
 
 data.forEach((p,i)=>{
 
 players[i]=new YT.Player("video"+i,{
+
 videoId:getID(p.video),
+
 playerVars:{
 autoplay:0,
 controls:0,
 mute:1,
-rel:0
+rel:0,
+modestbranding:1
 }
-});
 
 });
 
+});
+
 }
+
+
+function playVideo(i){
+
+Object.keys(players).forEach(key=>{
+
+if(key!=i)
+players[key].pauseVideo();
+
+});
+
+players[i].playVideo();
+
+}
+
+
+function toggleMute(i){
+
+if(players[i].isMuted()){
+
+players[i].unMute();
+
+}else{
+
+players[i].mute();
+
+}
+
+}
+
 
 let tag=document.createElement("script");
+
 tag.src="https://www.youtube.com/iframe_api";
+
 document.body.appendChild(tag);
 
 window.onYouTubeIframeAPIReady=load;
@@ -234,7 +330,7 @@ p.videotitle.toLowerCase().includes(q)
 
 );
 
-render(filtered); 
+render(filtered);
 
 });
 
