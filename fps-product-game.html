@@ -1,123 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<title>FPS Product Hunt Game</title>
-<style>
-body { margin:0; overflow:hidden; background:black; color:white; font-family:sans-serif;}
-#hud {
-position:fixed;
-top:10px; left:10px;
-font-size:18px;
-}
-#crosshair {
-position:fixed;
-top:50%; left:50%;
-transform:translate(-50%,-50%);
-font-size:30px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Neon Hunter - Ultra Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050505; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Modern HUD */
+        #hud {
+            position: fixed;
+            top: 20px; left: 20px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            z-index: 10;
+        }
+
+        .stat { font-weight: bold; font-size: 20px; margin-right: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        #score { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; }
+        #time { color: #ffcc00; }
+        #level { color: #ff00ff; }
+
+        /* Fancy Crosshair */
+        #crosshair {
+            position: fixed;
+            top: 50%; left: 50%;
+            width: 30px; height: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+        }
+        #crosshair::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 4px; height: 4px; background: red; border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Message popup */
+        #msg {
+            position: fixed;
+            bottom: 50px; width: 100%;
+            text-align: center; font-size: 24px;
+            color: #00ffcc; text-shadow: 0 0 10px #00ffcc;
+            opacity: 0; transition: 0.3s;
+        }
+    </style>
 </head>
 <body>
 
 <div id="hud">
-Score: <span id="score">0</span> |
-Time: <span id="time">30</span> |
-Level: <span id="level">1</span>
+    <span class="stat">Score: <span id="score">0</span></span>
+    <span class="stat">Time: <span id="time">30</span></span>
+    <span class="stat">Level: <span id="level">1</span></span>
 </div>
 
-<div id="crosshair">+</div>
+<div id="crosshair"></div>
+<div id="msg">LEVEL UP! SPEED INCREASED!</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-
 let scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050505, 0.1);
+
 let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer();
+let renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-let score=0, time=30, level=1;
+let score = 0, time = 30, level = 1;
+let objects = [];
+let particles = [];
 
-let objects=[];
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(5, 5, 5);
+scene.add(pointLight);
 
-camera.position.z=5;
+camera.position.z = 5;
 
-function createTarget(){
-let geo = new THREE.BoxGeometry();
-let mat = new THREE.MeshBasicMaterial({color: Math.random()>0.5 ? 0x00ff00 : 0xff0000});
-let cube = new THREE.Mesh(geo, mat);
+// Random Color Generator
+const getNeonColor = () => {
+    const colors = [0x00ffcc, 0xff00ff, 0x00ff00, 0xffcc00, 0xff3300, 0x3399ff];
+    return colors[Math.floor(Math.random() * colors.length)];
+};
 
-cube.position.x = (Math.random()-0.5)*10;
-cube.position.y = (Math.random()-0.5)*5;
-cube.position.z = -Math.random()*10;
+function createTarget() {
+    // Random shapes
+    let geo;
+    const rand = Math.random();
+    if(rand > 0.7) geo = new THREE.IcosahedronGeometry(0.5, 0);
+    else if(rand > 0.4) geo = new THREE.TorusGeometry(0.3, 0.1, 16, 100);
+    else geo = new THREE.BoxGeometry(0.6, 0.6, 0.6);
 
-scene.add(cube);
-objects.push(cube);
+    let color = getNeonColor();
+    let mat = new THREE.MeshPhongMaterial({ 
+        color: color, 
+        emissive: color,
+        emissiveIntensity: 0.5,
+        shininess: 100 
+    });
+    
+    let obj = new THREE.Mesh(geo, mat);
+    obj.position.x = (Math.random() - 0.5) * 12;
+    obj.position.y = (Math.random() - 0.5) * 7;
+    obj.position.z = -15 - Math.random() * 10;
+    
+    // Rotation speed
+    obj.userData.rot = { x: Math.random()*0.02, y: Math.random()*0.02 };
+
+    scene.add(obj);
+    objects.push(obj);
 }
 
-for(let i=0;i<5;i++) createTarget();
+// Initial targets
+for(let i=0; i<8; i++) createTarget();
 
-function animate(){
-requestAnimationFrame(animate);
-
-objects.forEach(obj=>{
-obj.position.z += 0.05 + level*0.01;
-if(obj.position.z>5){
-scene.remove(obj);
-objects.splice(objects.indexOf(obj),1);
-createTarget();
+// Particle Effect System
+function createExplosion(pos, color) {
+    for(let i=0; i<10; i++) {
+        let pGeo = new THREE.SphereGeometry(0.05, 4, 4);
+        let pMat = new THREE.MeshBasicMaterial({ color: color });
+        let p = new THREE.Mesh(pGeo, pMat);
+        p.position.copy(pos);
+        p.userData.vel = new THREE.Vector3((Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2);
+        p.userData.life = 1.0;
+        scene.add(p);
+        particles.push(p);
+    }
 }
-});
 
-renderer.render(scene,camera);
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Objects movement
+    objects.forEach((obj, index) => {
+        obj.position.z += 0.05 + (level * 0.02);
+        obj.rotation.x += obj.userData.rot.x;
+        obj.rotation.y += obj.userData.rot.y;
+
+        if(obj.position.z > 6) {
+            scene.remove(obj);
+            objects.splice(index, 1);
+            createTarget();
+        }
+    });
+
+    // Particles movement
+    particles.forEach((p, index) => {
+        p.position.add(p.userData.vel);
+        p.userData.life -= 0.02;
+        p.scale.set(p.userData.life, p.userData.life, p.userData.life);
+        if(p.userData.life <= 0) {
+            scene.remove(p);
+            particles.splice(index, 1);
+        }
+    });
+
+    renderer.render(scene, camera);
 }
 animate();
 
-window.addEventListener("click", (event)=>{
+// Shooting Logic
+window.addEventListener("mousedown", (event) => {
+    let mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
 
-let mouse = new THREE.Vector2(
-(event.clientX/window.innerWidth)*2-1,
--(event.clientY/window.innerHeight)*2+1
-);
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let hits = raycaster.intersectObjects(objects);
 
-let raycaster = new THREE.Raycaster();
-raycaster.setFromCamera(mouse,camera);
+    if(hits.length > 0) {
+        let hit = hits[0].object;
+        createExplosion(hit.position, hit.material.color);
+        
+        score += 10;
+        document.getElementById("score").innerText = score;
+        
+        // Visual feedback
+        document.body.style.backgroundColor = "#111";
+        setTimeout(() => document.body.style.backgroundColor = "black", 50);
 
-let hits = raycaster.intersectObjects(objects);
-
-if(hits.length>0){
-let hit = hits[0].object;
-
-if(hit.material.color.getHex()===0x00ff00){
-score+=10;
-}else{
-score-=5;
-}
-
-scene.remove(hit);
-objects.splice(objects.indexOf(hit),1);
-createTarget();
-
-document.getElementById("score").innerText=score;
-}
-
+        scene.remove(hit);
+        objects.splice(objects.indexOf(hit), 1);
+        createTarget();
+    }
 });
 
-setInterval(()=>{
-time--;
-document.getElementById("time").innerText=time;
+// Timer & Level Logic
+setInterval(() => {
+    time--;
+    document.getElementById("time").innerText = time;
 
-if(time<=0){
-level++;
-time=30;
-document.getElementById("level").innerText=level;
-}
+    if(time <= 0) {
+        level++;
+        time = 30;
+        document.getElementById("level").innerText = level;
+        
+        // Show level up message
+        let msg = document.getElementById("msg");
+        msg.style.opacity = "1";
+        setTimeout(() => msg.style.opacity = "0", 2000);
+        
+        // Add more difficulty
+        createTarget(); 
+    }
+}, 1000);
 
-},1000);
+// Responsive window
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 </script>
-
 </body>
 </html>
