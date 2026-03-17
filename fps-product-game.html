@@ -1,159 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<title>Lane Runner Shooter</title>
+    <meta charset="UTF-8">
+    <title>Shop Shooter - Endless Rewards</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        
+        /* HUD UI */
+        #ui-layer {
+            position: fixed;
+            top: 20px; left: 20px;
+            color: white; z-index: 10;
+            pointer-events: none;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border-left: 5px solid #00ffcc;
+            margin-bottom: 10px;
+        }
 
-<style>
-body{
-margin:0;
-overflow:hidden;
-background:black;
-color:white;
-font-family:sans-serif;
-}
+        /* Reward Popup */
+        #reward-box {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            background: linear-gradient(45deg, #ff00cc, #333);
+            padding: 20px;
+            border-radius: 15px;
+            display: none; /* Default hidden */
+            color: white;
+            text-align: center;
+            box-shadow: 0 0 20px #ff00cc;
+            z-index: 20;
+            animation: bounce 0.5s infinite alternate;
+        }
+        button {
+            background: white; color: black; border: none;
+            padding: 10px 20px; border-radius: 5px; cursor: pointer;
+            font-weight: bold; margin-top: 10px;
+        }
 
-/* road */
-#road{
-position:absolute;
-width:100%;
-height:100%;
-background:linear-gradient(#111,#333);
-}
-
-/* lanes */
-.lane{
-position:absolute;
-width:33.3%;
-height:100%;
-border-right:1px dashed #555;
-}
-
-/* player */
-#player{
-position:absolute;
-bottom:20px;
-width:60px;
-left:50%;
-transform:translateX(-50%);
-font-size:40px;
-text-align:center;
-}
-
-/* targets */
-.target{
-position:absolute;
-top:-80px;
-font-size:40px;
-text-align:center;
-width:33.3%;
-}
-
-/* HUD */
-#hud{
-position:fixed;
-top:10px;
-left:10px;
-}
-
-</style>
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        
+        #crosshair {
+            position: fixed; top: 50%; left: 50%;
+            width: 40px; height: 40px; border: 2px dashed #00ffcc;
+            border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
 
-<div id="road"></div>
+<div id="ui-layer">
+    <div class="stat-box">💰 Coins: <span id="score">0</span></div>
+    <div class="stat-box">🚀 Speed: <span id="speed-val">1.0</span>x</div>
+    <div class="stat-box">🎁 Offers Collected: <span id="offers-count">0</span></div>
+</div>
 
-<div class="lane" style="left:0%"></div>
-<div class="lane" style="left:33.3%"></div>
-<div class="lane" style="left:66.6%"></div>
+<div id="crosshair"></div>
 
-<div id="player">🚗</div>
+<div id="reward-box">
+    <h3 id="offer-text">Special 30% OFF!</h3>
+    <p>Aapne Deal Unlock Kar Li Hai!</p>
+    <a id="buy-link" href="https://www.producthunt.com" target="_blank">
+        <button>ABHI KHARIDE (BUY NOW)</button>
+    </a>
+    <div style="font-size: 10px; margin-top: 10px; cursor: pointer;" onclick="closeReward()">[Close]</div>
+</div>
 
-<div id="hud">Score: 0</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
+let scene, camera, renderer, score = 0, offers = 0, speed = 0.2;
+let objects = [];
+let roadBlocks = [];
 
-let lanes=[0,1,2];
-let playerLane=1;
+function init() {
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.05);
 
-let score=0;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-let types=["📦","🎁","❌"];
+    // Light
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(0, 10, 10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
 
-// move player
-document.addEventListener("keydown",(e)=>{
-if(e.key==="ArrowLeft" && playerLane>0) playerLane--;
-if(e.key==="ArrowRight" && playerLane<2) playerLane--;
-updatePlayer();
+    camera.position.z = 5;
+    camera.position.y = 1;
+
+    createFloor();
+    spawnLoop();
+    animate();
+}
+
+// Floor/Road
+function createFloor() {
+    let geo = new THREE.PlaneGeometry(100, 1000);
+    let mat = new THREE.MeshPhongMaterial({ color: 0x111111, side: THREE.DoubleSide });
+    let floor = new THREE.Mesh(geo, mat);
+    floor.rotation.x = Math.PI / 2;
+    floor.position.y = -2;
+    scene.add(floor);
+
+    // Grid Lines for "Fast" feeling
+    let grid = new THREE.GridHelper(100, 50, 0x00ffcc, 0x222222);
+    grid.position.y = -1.9;
+    scene.add(grid);
+}
+
+// Create Target or Product Offer
+function spawnObject() {
+    let isProduct = Math.random() > 0.7; // 30% chance for Product Offer
+    let geo, mat, color;
+
+    if(isProduct) {
+        // Product Offer Box (Bright Pink)
+        geo = new THREE.BoxGeometry(1.5, 2, 0.2);
+        color = 0xff00cc;
+        mat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 });
+    } else {
+        // Normal Target (Cyan)
+        geo = new THREE.IcosahedronGeometry(0.6);
+        color = 0x00ffcc;
+        mat = new THREE.MeshPhongMaterial({ color: color });
+    }
+
+    let mesh = new THREE.Mesh(geo, mat);
+    mesh.position.x = (Math.random() - 0.5) * 15;
+    mesh.position.y = Math.random() * 3;
+    mesh.position.z = -50; // Spawn far away
+    
+    mesh.userData = { 
+        isProduct: isProduct, 
+        offerValue: Math.random() > 0.5 ? "20% OFF" : "30% OFF",
+        link: "https://www.google.com/search?q=awesome+products" // Yahan apna link dalein
+    };
+
+    scene.add(mesh);
+    objects.push(mesh);
+}
+
+function spawnLoop() {
+    spawnObject();
+    let nextSpawn = Math.max(500, 2000 - (score * 10)); // Speed increase hone par spawn rate badhega
+    setTimeout(spawnLoop, nextSpawn);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Move objects towards player
+    objects.forEach((obj, index) => {
+        obj.position.z += speed;
+        obj.rotation.y += 0.02;
+
+        // If missed (passed the player)
+        if(obj.position.z > 5) {
+            scene.remove(obj);
+            objects.splice(index, 1);
+        }
+    });
+
+    // Gradually increase speed for "Endless" difficulty
+    speed += 0.0001;
+    document.getElementById("speed-val").innerText = (speed * 10).toFixed(1);
+
+    renderer.render(scene, camera);
+}
+
+// Click to Shoot / Collect
+window.addEventListener("mousedown", (event) => {
+    let mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
+
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    let hits = raycaster.intersectObjects(objects);
+
+    if(hits.length > 0) {
+        let hit = hits[0].object;
+        
+        if(hit.userData.isProduct) {
+            // Reward Logic
+            offers++;
+            document.getElementById("offers-count").innerText = offers;
+            showReward(hit.userData.offerValue, hit.userData.link);
+        } else {
+            score += 10;
+            document.getElementById("score").innerText = score;
+        }
+
+        scene.remove(hit);
+        objects.splice(objects.indexOf(hit), 1);
+    }
 });
 
-function updatePlayer(){
-document.getElementById("player").style.left=(playerLane*33+16)+"%";
+function showReward(val, link) {
+    const box = document.getElementById("reward-box");
+    document.getElementById("offer-text").innerText = "HUGE " + val + " UNLOCKED!";
+    document.getElementById("buy-link").href = link;
+    box.style.display = "block";
 }
 
-// mobile tap control
-document.addEventListener("click",(e)=>{
-if(e.clientX < window.innerWidth/2){
-if(playerLane>0) playerLane--;
-}else{
-if(playerLane<2) playerLane++;
+function closeReward() {
+    document.getElementById("reward-box").style.display = "none";
 }
-updatePlayer();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// spawn target
-function spawn(){
-
-let t=document.createElement("div");
-t.className="target";
-
-let lane=Math.floor(Math.random()*3);
-let type=types[Math.floor(Math.random()*types.length)];
-
-t.innerText=type;
-t.style.left=(lane*33.3)+"%";
-
-document.body.appendChild(t);
-
-let pos=-80;
-
-let fall=setInterval(()=>{
-
-pos+=10;
-t.style.top=pos+"px";
-
-// collision
-if(pos>window.innerHeight-120 && lane===playerLane){
-
-if(type==="📦"){
-score+=10;
-}
-else if(type==="🎁"){
-score-=5;
-alert("🔥 Offer distract!");
-}
-else{
-score-=10;
-}
-
-document.getElementById("hud").innerText="Score: "+score;
-
-t.remove();
-clearInterval(fall);
-}
-
-// remove
-if(pos>window.innerHeight){
-t.remove();
-clearInterval(fall);
-}
-
-},50);
-
-}
-
-setInterval(spawn,1000);
-
+init();
 </script>
-
 </body>
 </html>
