@@ -234,7 +234,7 @@ p.videotitle.toLowerCase().includes(q)
 
 );
 
-render(filtered);
+render(filtered); 
 
 });
 
