@@ -2,245 +2,206 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Cyber-Shop Hunter Pro</title>
+    <title>Sainiwalaa Mission Hunter</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
         
-        /* Glassmorphism HUD */
+        /* Mission & Stats UI */
         #hud {
             position: fixed; top: 20px; left: 20px;
-            color: white; z-index: 10; display: flex; gap: 15px;
+            color: white; z-index: 10; display: flex; flex-direction: column; gap: 10px;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px; border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+        .panel {
+            background: rgba(0, 255, 204, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 15px; border-radius: 10px;
+            border: 1px solid #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
         }
+        #mission-text { color: #ffcc00; font-weight: bold; font-size: 1.2em; }
+        .count-badge { font-size: 1.5em; color: #fff; }
 
-        /* Animated Reward Popup */
-        #reward-box {
-            position: fixed; top: 20%; right: -350px; /* Hidden initially */
-            width: 280px; background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #ff00cc; border-radius: 20px;
-            padding: 20px; color: white; text-align: center;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100; box-shadow: 0 0 30px #ff00cc;
+        /* Reward Alert */
+        #reward-alert {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(255, 0, 204, 0.9);
+            color: white; padding: 40px; border-radius: 20px;
+            text-align: center; z-index: 200;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid gold;
         }
-        #reward-box.active { right: 30px; }
-        
-        .timer-bar {
-            width: 100%; height: 5px; background: #333;
-            margin-top: 15px; border-radius: 5px; overflow: hidden;
-        }
-        #progress { width: 100%; height: 100%; background: #ff00cc; transition: width linear; }
+        #reward-alert.show { transform: translate(-50%, -50%) scale(1); }
 
-        /* Aiming Circle (Crosshair) */
+        /* Aiming Circle */
         #aimer {
-            position: fixed; width: 60px; height: 60px;
-            border: 2px solid #00ffcc; border-radius: 50%;
+            position: fixed; width: 50px; height: 50px;
+            border: 2px solid #ffcc00; border-radius: 50%;
             pointer-events: none; z-index: 1000;
             transform: translate(-50%, -50%);
-            transition: width 0.1s, height 0.1s;
-            box-shadow: 0 0 15px #00ffcc;
-        }
-        #aimer::before {
-            content: ''; position: absolute; top: 50%; left: 50%;
-            width: 2px; height: 20px; background: #00ffcc; transform: translate(-50%, -50%);
-        }
-        #aimer::after {
-            content: ''; position: absolute; top: 50%; left: 50%;
-            width: 20px; height: 2px; background: #00ffcc; transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #ffcc00;
         }
 
-        button {
-            background: #ff00cc; color: white; border: none;
-            padding: 12px 25px; border-radius: 30px; cursor: pointer;
-            font-weight: bold; margin-top: 15px; width: 100%;
-            text-transform: uppercase; letter-spacing: 1px;
+        #flash {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            pointer-events:none; background: red; opacity: 0; z-index: 5;
         }
     </style>
 </head>
 <body>
 
+<div id="flash"></div>
 <div id="aimer"></div>
 
 <div id="hud">
-    <div class="glass-panel">LEVEL: <span id="lvl">1</span></div>
-    <div class="glass-panel">POINTS: <span id="score">0</span></div>
+    <div class="panel">
+        <div id="mission-text">MISSION: Loading...</div>
+        <div class="count-badge"><span id="current-count">0</span> / <span id="target-count">10</span></div>
+    </div>
+    <div class="panel">
+        SCORE: <span id="score">0</span> | LEVEL: <span id="lvl">1</span>
+    </div>
 </div>
 
-<div id="reward-box">
-    <div style="font-size: 12px; color: #ff00cc;">FLASH DEAL UNLOCKED</div>
-    <h2 id="offer-text">50% OFF</h2>
-    <p id="offer-desc">Limited time reward!</p>
-    <a id="buy-link" href="#" target="_blank"><button>CLAIM NOW</button></a>
-    <div class="timer-bar"><div id="progress"></div></div>
+<div id="reward-alert">
+    <h1>MISSION COMPLETE!</h1>
+    <h2 id="deal-title">56% OFF ON SHOES</h2>
+    <p>Aapne target pura kiya!</p>
+    <button onclick="closeReward()" style="padding:10px 20px; cursor:pointer; font-family:'Orbitron';">CLAIM NOW</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1, speed = 0.25;
+let scene, camera, renderer, score = 0, level = 1, speed = 0.3;
 let objects = [];
-const aimer = document.getElementById('aimer');
+let currentMission = { type: 'BALL', target: 5, collected: 0 };
+const types = ['BALL', 'STAR', 'KITE'];
 
-// Mouse movement for Crosshair
 window.addEventListener('mousemove', (e) => {
-    aimer.style.left = e.clientX + 'px';
-    aimer.style.top = e.clientY + 'px';
+    document.getElementById('aimer').style.left = e.clientX + 'px';
+    document.getElementById('aimer').style.top = e.clientY + 'px';
 });
 
 function init() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020205);
-    scene.fog = new THREE.FogExp2(0x020205, 0.04);
+    scene.fog = new THREE.FogExp2(0x000000, 0.03);
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Lights
-    const pLight = new THREE.PointLight(0xff00cc, 1, 100);
-    pLight.position.set(0, 5, 5);
-    scene.add(pLight);
-    scene.add(new THREE.AmbientLight(0x404040, 2));
-
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     camera.position.z = 5;
 
-    createStarfield();
+    newMission();
     spawnLoop();
     animate();
 }
 
-// Background Decoration
-function createStarfield() {
-    const geo = new THREE.BufferGeometry();
-    const vertices = [];
-    for(let i=0; i<5000; i++) {
-        vertices.push(Math.random()*200-100, Math.random()*200-100, Math.random()*200-100);
-    }
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const mat = new THREE.PointsMaterial({ color: 0x444444, size: 0.1 });
-    const points = new THREE.Points(geo, mat);
-    scene.add(points);
+function newMission() {
+    currentMission.type = types[Math.floor(Math.random() * types.length)];
+    currentMission.target = 5 + (level * 2);
+    currentMission.collected = 0;
+    
+    document.getElementById('mission-text').innerText = `TARGET: SHOOT ${currentMission.target} ${currentMission.type}s`;
+    updateHUD();
 }
 
-function spawnObject() {
-    let isProduct = Math.random() > 0.8;
+function updateHUD() {
+    document.getElementById('current-count').innerText = currentMission.collected;
+    document.getElementById('target-count').innerText = currentMission.target;
+    document.getElementById('score').innerText = score;
+    document.getElementById('lvl').innerText = level;
+}
+
+function createObject() {
+    const type = types[Math.floor(Math.random() * types.length)];
     let geo;
     
-    // Changing Shapes
-    const shapeType = Math.floor(Math.random() * 3);
-    if(shapeType === 0) geo = new THREE.IcosahedronGeometry(0.7);
-    else if(shapeType === 1) geo = new THREE.TorusKnotGeometry(0.4, 0.1);
-    else geo = new THREE.OctahedronGeometry(0.8);
+    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 32, 32);
+    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
+    else if(type === 'KITE') geo = new THREE.ConeGeometry(0.5, 1, 4);
 
-    let color = isProduct ? 0xff00cc : (0x00ffcc + Math.random()*0x0000ff);
-    let mat = new THREE.MeshPhongMaterial({ 
-        color: color, 
-        emissive: color, 
-        emissiveIntensity: 0.4,
-        shininess: 100
-    });
-
-    let mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*10, -60);
+    const color = type === 'BALL' ? 0xff3300 : (type === 'STAR' ? 0xffff00 : 0x00ccff);
+    const mat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.2 });
+    const mesh = new THREE.Mesh(geo, mat);
     
-    mesh.userData = { 
-        isProduct: isProduct,
-        rot: Math.random() * 0.05
-    };
-
+    mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*12, -50);
+    mesh.userData = { type: type };
+    
     scene.add(mesh);
     objects.push(mesh);
 }
 
 function spawnLoop() {
-    spawnObject();
-    setTimeout(spawnLoop, Math.max(400, 1500 - (level * 100)));
+    createObject();
+    setTimeout(spawnLoop, 800 - (level * 50));
 }
 
 function animate() {
     requestAnimationFrame(animate);
-
-    objects.forEach((obj, index) => {
+    objects.forEach((obj, i) => {
         obj.position.z += speed;
-        obj.rotation.x += obj.userData.rot;
-        obj.rotation.y += obj.userData.rot;
-
+        obj.rotation.y += 0.02;
         if(obj.position.z > 6) {
             scene.remove(obj);
-            objects.splice(index, 1);
+            objects.splice(i, 1);
         }
     });
-
-    // Level Logic
-    if(score > level * 100) {
-        level++;
-        speed += 0.05;
-        document.getElementById('lvl').innerText = level;
-    }
-
     renderer.render(scene, camera);
 }
 
-// Shooting Logic
-window.addEventListener("mousedown", () => {
-    // Visual Feedback for click
-    aimer.style.width = '40px';
-    aimer.style.height = '40px';
-    setTimeout(() => { aimer.style.width = '60px'; aimer.style.height = '60px'; }, 100);
-
-    const mouse = new THREE.Vector2(
-        (event.clientX / window.innerWidth) * 2 - 1,
-        -(event.clientY / window.innerHeight) * 2 + 1
-    );
-
+window.addEventListener("mousedown", (e) => {
+    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     const hits = raycaster.intersectObjects(objects);
 
     if(hits.length > 0) {
-        let hit = hits[0].object;
-        if(hit.userData.isProduct) {
-            triggerReward();
+        const hit = hits[0].object;
+        const hitType = hit.userData.type;
+
+        if(hitType === currentMission.type) {
+            // Sahi Target!
+            currentMission.collected++;
+            score += 50;
+            if(currentMission.collected >= currentMission.target) {
+                showReward();
+            }
         } else {
-            score += 20;
-            document.getElementById("score").innerText = score;
+            // Galat Target!
+            score -= 20;
+            triggerFlash();
         }
+
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
+        updateHUD();
     }
 });
 
-let rewardTimer;
-function triggerReward() {
-    const box = document.getElementById('reward-box');
-    const prog = document.getElementById('progress');
-    const offerText = document.getElementById('offer-text');
-    
-    // Level ke hisab se reward badlega
-    const discount = level * 10 + (Math.floor(Math.random()*10));
-    offerText.innerText = discount + "% OFF!";
-    
-    box.classList.add('active');
-    prog.style.transition = 'none';
-    prog.style.width = '100%';
-    
-    clearTimeout(rewardTimer);
-    
-    // 5 Second ka timer bar
-    setTimeout(() => {
-        prog.style.transition = 'width 5s linear';
-        prog.style.width = '0%';
-    }, 10);
+function triggerFlash() {
+    const f = document.getElementById('flash');
+    f.style.opacity = '0.5';
+    setTimeout(() => f.style.opacity = '0', 100);
+}
 
-    rewardTimer = setTimeout(() => {
-        box.classList.remove('active');
-    }, 5000);
+function showReward() {
+    const alert = document.getElementById('reward-alert');
+    const deal = level % 2 === 0 ? "35% OFF ON ELECTRONICS" : "56% OFF ON JEWELRY";
+    document.getElementById('deal-title').innerText = deal;
+    alert.classList.add('show');
+}
+
+function closeReward() {
+    document.getElementById('reward-alert').classList.remove('show');
+    level++;
+    speed += 0.05;
+    newMission();
 }
 
 init();
