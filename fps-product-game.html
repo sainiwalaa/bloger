@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FPS Product Hunt Game</title>
+<style>
+body { margin:0; overflow:hidden; background:black; color:white; font-family:sans-serif;}
+#hud {
+position:fixed;
+top:10px; left:10px;
+font-size:18px;
+}
+#crosshair {
+position:fixed;
+top:50%; left:50%;
+transform:translate(-50%,-50%);
+font-size:30px;
+}
+</style>
+</head>
+<body>
+
+<div id="hud">
+Score: <span id="score">0</span> |
+Time: <span id="time">30</span> |
+Level: <span id="level">1</span>
+</div>
+
+<div id="crosshair">+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+
+let scene = new THREE.Scene();
+let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+let renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+let score=0, time=30, level=1;
+
+let objects=[];
+
+camera.position.z=5;
+
+function createTarget(){
+let geo = new THREE.BoxGeometry();
+let mat = new THREE.MeshBasicMaterial({color: Math.random()>0.5 ? 0x00ff00 : 0xff0000});
+let cube = new THREE.Mesh(geo, mat);
+
+cube.position.x = (Math.random()-0.5)*10;
+cube.position.y = (Math.random()-0.5)*5;
+cube.position.z = -Math.random()*10;
+
+scene.add(cube);
+objects.push(cube);
+}
+
+for(let i=0;i<5;i++) createTarget();
+
+function animate(){
+requestAnimationFrame(animate);
+
+objects.forEach(obj=>{
+obj.position.z += 0.05 + level*0.01;
+if(obj.position.z>5){
+scene.remove(obj);
+objects.splice(objects.indexOf(obj),1);
+createTarget();
+}
+});
+
+renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener("click", (event)=>{
+
+let mouse = new THREE.Vector2(
+(event.clientX/window.innerWidth)*2-1,
+-(event.clientY/window.innerHeight)*2+1
+);
+
+let raycaster = new THREE.Raycaster();
+raycaster.setFromCamera(mouse,camera);
+
+let hits = raycaster.intersectObjects(objects);
+
+if(hits.length>0){
+let hit = hits[0].object;
+
+if(hit.material.color.getHex()===0x00ff00){
+score+=10;
+}else{
+score-=5;
+}
+
+scene.remove(hit);
+objects.splice(objects.indexOf(hit),1);
+createTarget();
+
+document.getElementById("score").innerText=score;
+}
+
+});
+
+setInterval(()=>{
+time--;
+document.getElementById("time").innerText=time;
+
+if(time<=0){
+level++;
+time=30;
+document.getElementById("level").innerText=level;
+}
+
+},1000);
+
+</script>
+
+</body>
+</html>
