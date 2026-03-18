@@ -2,91 +2,106 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Mega Toy Hunter</title>
+    <title>Sainiwalaa Elite Hunter</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Orbitron:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
         
         body { 
             margin: 0; overflow: hidden; 
-            background: linear-gradient(45deg, #ff00cc, #333, #00ffcc); 
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            font-family: 'Fredoka One', cursive; cursor: none;
+            background: radial-gradient(circle, #1a1a2e 0%, #0f0f1a 100%);
+            font-family: 'Orbitron', sans-serif; cursor: none;
         }
 
-        @keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
-
-        /* Modern UI */
-        #game-interface {
+        /* Impact Flash Animation (Sirf Shot par chalega) */
+        #flash-effect {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 100;
+            background: white; opacity: 0; pointer-events: none; z-index: 5;
         }
 
-        .stat-bar {
-            display: flex; justify-content: space-around; padding: 20px;
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
-            border-bottom: 4px solid #fff; color: white; text-shadow: 2px 2px 5px #000;
+        /* Modern Game HUD */
+        #hud {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100; padding: 30px;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        .mission-box {
-            background: white; color: #ff00cc; padding: 10px 30px;
-            border-radius: 50px; border: 5px solid #ff00cc; font-size: 20px;
-            box-shadow: 0 10px 0 #b30086; transform: translateY(-5px);
+        .top-stats { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .panel {
+            background: rgba(0, 255, 204, 0.05);
+            border-left: 4px solid #00ffcc;
+            padding: 15px 25px; backdrop-filter: blur(10px);
+            box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .mission-panel {
+            text-align: center; border-left: none; border-bottom: 4px solid #ff00cc;
+            min-width: 300px;
         }
 
         #aimer {
-            position: fixed; width: 60px; height: 60px;
-            border: 4px solid white; border-radius: 50%;
+            position: fixed; width: 40px; height: 40px;
+            border: 2px solid #00ffcc; border-radius: 50%;
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.2);
         }
+        #aimer::before { content: ''; position: absolute; top:50%; left:50%; width:10px; height:2px; background:#00ffcc; transform:translate(-50%,-50%); }
 
-        #reward-screen {
+        /* Level Result Overlay */
+        #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); display: none; align-items: center;
             justify-content: center; flex-direction: column; color: white; z-index: 200;
         }
 
         .btn {
-            padding: 15px 40px; font-size: 24px; background: #00ffcc;
-            border: none; border-radius: 50px; cursor: pointer; color: #000;
-            font-family: 'Fredoka One'; margin-top: 20px; box-shadow: 0 8px 0 #00997a;
+            background: #ff00cc; color: white; border: none; padding: 15px 40px;
+            font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-radius: 5px;
+            margin-top: 20px; transition: 0.3s;
         }
+        .btn:hover { background: #00ffcc; color: black; }
     </style>
 </head>
 <body>
 
+<div id="flash-effect"></div>
 <div id="aimer"></div>
 
-<div id="game-interface">
-    <div class="stat-bar">
-        <div>SCORE: <span id="score">0</span><br><small>HIGH: <span id="high-score">0</span></small></div>
-        <div class="mission-box" id="mission-ui">TARGET: Loading...</div>
-        <div>LEVEL: <span id="lvl">1</span></div>
+<div id="hud">
+    <div class="top-stats">
+        <div class="panel">
+            <span style="font-size: 12px; color: #00ffcc;">CURRENT SCORE</span><br>
+            <span id="score" style="font-size: 24px;">0000</span>
+        </div>
+        <div class="panel mission-panel">
+            <span style="font-size: 12px; color: #ff00cc;">ACTIVE MISSION</span><br>
+            <div id="mission-targets" style="font-size: 18px; margin-top: 5px;">Wait...</div>
+        </div>
+        <div class="panel">
+            <span style="font-size: 12px; color: #00ffcc;">HIGH SCORE</span><br>
+            <span id="high-score" style="font-size: 24px;">0</span>
+        </div>
     </div>
 </div>
 
-<div id="reward-screen">
-    <h1 id="res-title" style="font-size: 60px; color: #ffcc00;">AMAZING!</h1>
-    <h2 id="reward-desc">REWARD UNLOCKED</h2>
-    <div id="reward-value" style="font-size: 40px; color: #00ffcc;">56% OFF</div>
-    <button class="btn" onclick="nextLevel()">START NEXT CHALLENGE</button>
+<div id="overlay">
+    <h1 style="font-size: 50px; color: #00ffcc;">MISSION SUCCESS!</h1>
+    <p id="reward-text" style="font-size: 24px; color: gold;">UNLOCKING 56% DISCOUNT...</p>
+    <button class="btn" onclick="nextLevel()">NEXT CHALLENGE</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
 let scene, camera, renderer, score = 0, level = 1;
-let objects = [], mission = { targets: [] };
-const highscore = localStorage.getItem('saini_highscore') || 0;
-document.getElementById('high-score').innerText = highscore;
+let objects = [], missionTargets = [];
+const highScore = localStorage.getItem('sainiwalaa_high') || 0;
+document.getElementById('high-score').innerText = highScore;
 
-// Target Designs
-const TARGET_TYPES = {
-    BEE: { color: 0xffff00, size: 0.3, speed: 0.5 },
-    DOG: { color: 0x964B00, size: 0.6, speed: 0.3 },
-    ELEPHANT: { color: 0x808080, size: 1.2, speed: 0.15 },
-    TOY: { color: 0x00ffcc, size: 0.5, speed: 0.25 }
+const TARGET_DATA = {
+    BEE: { color: 0xffff00, size: 0.3, speed: 0.4 },
+    DOG: { color: 0x00ffcc, size: 0.6, speed: 0.25 },
+    ELEPHANT: { color: 0x0088ff, size: 1.1, speed: 0.15 },
+    TOY: { color: 0xff00cc, size: 0.5, speed: 0.2 }
 };
 
 window.addEventListener('mousemove', (e) => {
@@ -97,58 +112,63 @@ window.addEventListener('mousemove', (e) => {
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    let light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
     camera.position.z = 5;
 
-    setupLevelMission();
+    setupLevel();
     spawnLoop();
     animate();
 }
 
-function setupLevelMission() {
-    mission.targets = [];
-    const available = Object.keys(TARGET_TYPES);
+function setupLevel() {
+    missionTargets = [];
+    const types = Object.keys(TARGET_DATA);
     
-    if(level <= 2) {
-        // Simple Single Target
-        let t = available[Math.floor(Math.random()*available.length)];
-        mission.targets.push({ type: t, goal: 5 + level, current: 0 });
+    // Level Based Target Logic
+    if(level < 3) {
+        let t = types[Math.floor(Math.random() * types.length)];
+        missionTargets.push({ type: t, goal: 5 + level, current: 0 });
     } else {
-        // Combo Mission (Level 3+)
-        mission.targets.push({ type: 'DOG', goal: 3 + level, current: 0 });
-        mission.targets.push({ type: 'ELEPHANT', goal: 2, current: 0 });
+        // Advanced Mixed Targets
+        missionTargets.push({ type: 'DOG', goal: 4, current: 0 });
+        missionTargets.push({ type: 'ELEPHANT', goal: 2, current: 0 });
     }
-    updateMissionUI();
+    updateHUD();
 }
 
-function updateMissionUI() {
-    let text = "TARGET: ";
-    mission.targets.forEach(t => {
-        text += `${t.type} (${t.current}/${t.goal}) `;
+function updateHUD() {
+    let text = "";
+    missionTargets.forEach(t => {
+        text += `${t.type}: ${t.current}/${t.goal}  `;
     });
-    document.getElementById('mission-ui').innerText = text;
+    document.getElementById('mission-targets').innerText = text;
+    document.getElementById('score').innerText = score.toString().padStart(4, '0');
 }
 
 function createObject() {
-    const keys = Object.keys(TARGET_TYPES);
-    const typeKey = keys[Math.floor(Math.random() * keys.length)];
-    const data = TARGET_TYPES[typeKey];
+    const keys = Object.keys(TARGET_DATA);
+    const type = keys[Math.floor(Math.random() * keys.length)];
+    const data = TARGET_DATA[type];
 
     let geo;
-    if(typeKey === 'BEE') geo = new THREE.SphereGeometry(data.size, 8, 8);
-    else if(typeKey === 'DOG') geo = new THREE.BoxGeometry(data.size, data.size, data.size);
-    else if(typeKey === 'ELEPHANT') geo = new THREE.CapsuleGeometry(data.size/2, data.size/2, 4, 8);
-    else geo = new THREE.TorusKnotGeometry(0.3, 0.1, 32, 8);
+    if(type === 'BEE') geo = new THREE.IcosahedronGeometry(data.size);
+    else if(type === 'DOG') geo = new THREE.BoxGeometry(data.size, data.size, data.size);
+    else if(type === 'ELEPHANT') geo = new THREE.CylinderGeometry(data.size/2, data.size/2, data.size);
+    else geo = new THREE.TorusGeometry(0.3, 0.1, 8, 16);
 
     const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.2 });
     const mesh = new THREE.Mesh(geo, mat);
     
     mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
-    mesh.userData = { type: typeKey, speed: data.speed + (level * 0.02) };
+    mesh.userData = { type: type, speed: data.speed + (level * 0.02) };
     
     scene.add(mesh);
     objects.push(mesh);
@@ -156,14 +176,14 @@ function createObject() {
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 800 - (level * 30));
+    setTimeout(spawnLoop, 900 - (level * 30));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
         obj.position.z += obj.userData.speed;
-        obj.rotation.x += 0.02;
+        obj.rotation.x += 0.01;
         if(obj.position.z > 6) {
             scene.remove(obj);
             objects.splice(i, 1);
@@ -180,45 +200,41 @@ window.addEventListener("mousedown", (e) => {
 
     if(hits.length > 0) {
         let hit = hits[0].object;
-        let hitType = hit.userData.type;
+        let type = hit.userData.type;
 
-        let missionPart = mission.targets.find(t => t.type === hitType);
-        
-        if(missionPart && missionPart.current < missionPart.goal) {
-            missionPart.current++;
-            score += 150;
-            checkMissionComplete();
+        // Visual Impact Flash (Sirf ek bar click par)
+        const flash = document.getElementById('flash-effect');
+        flash.style.opacity = '0.3';
+        setTimeout(() => flash.style.opacity = '0', 50);
+
+        let mission = missionTargets.find(m => m.type === type);
+        if(mission && mission.current < mission.goal) {
+            mission.current++;
+            score += 100;
+            checkLevelComplete();
         } else {
-            score = Math.max(0, score - 50);
-        }
-        
-        // Save Score
-        if(score > highscore) {
-            localStorage.setItem('saini_highscore', score);
-            document.getElementById('high-score').innerText = score;
+            score = Math.max(0, score - 20);
         }
 
-        document.getElementById('score').innerText = score;
-        updateMissionUI();
+        if(score > highScore) localStorage.setItem('sainiwalaa_high', score);
+        
+        updateHUD();
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
     }
 });
 
-function checkMissionComplete() {
-    let allDone = mission.targets.every(t => t.current >= t.goal);
-    if(allDone) {
-        document.getElementById('reward-screen').style.display = 'flex';
-        let rewards = ["70% Mega Deal", "BOGO Offer", "56% Sainiwalaa Special", "Flat ₹500 OFF"];
-        document.getElementById('reward-value').innerText = rewards[level % rewards.length];
+function checkLevelComplete() {
+    if(missionTargets.every(m => m.current >= m.goal)) {
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('reward-text').innerText = `OFFER: ${(level * 10) + 20}% OFF ON SAINIWALAA`;
     }
 }
 
 function nextLevel() {
     level++;
-    document.getElementById('lvl').innerText = level;
-    document.getElementById('reward-screen').style.display = 'none';
-    setupLevelMission();
+    document.getElementById('overlay').style.display = 'none';
+    setupLevel();
 }
 
 init();
