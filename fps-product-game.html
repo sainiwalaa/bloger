@@ -2,55 +2,50 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Pro Arcade - Target Master</title>
+    <title>Sainiwalaa Lottie Arcade</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@400;700&display=swap');
         
-        body { 
-            margin: 0; overflow: hidden; 
-            background: #050505; 
-            font-family: 'Orbitron', sans-serif; cursor: none;
-        }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
 
-        /* --- GAME HUD (Score & Levels) --- */
+        /* --- GAME HUD --- */
         #game-hud {
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 20px; box-sizing: border-box;
             display: flex; justify-content: space-between;
             z-index: 100; pointer-events: none;
         }
-
         .stat-box {
-            background: rgba(0, 255, 204, 0.1);
-            border: 2px solid #00ffcc;
-            padding: 10px 20px; border-radius: 8px;
-            color: white; min-width: 150px;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            background: rgba(0, 255, 204, 0.1); border: 2px solid #00ffcc;
+            padding: 10px 20px; border-radius: 8px; color: white; min-width: 150px;
         }
-
-        .label { font-size: 10px; color: #00ffcc; display: block; margin-bottom: 5px; }
         .value { font-size: 24px; font-family: 'Black Ops One'; letter-spacing: 2px; }
 
-        /* --- MISSION PANEL (Target Logic) --- */
+        /* --- MISSION PANEL --- */
         #mission-panel {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 0, 204, 0.1);
-            border: 2px solid #ff00cc;
-            padding: 15px 30px; border-radius: 12px;
-            color: white; text-align: center; z-index: 100;
-            box-shadow: 0 0 20px rgba(255, 0, 204, 0.4);
+            background: rgba(255, 0, 204, 0.1); border: 2px solid #ff00cc;
+            padding: 15px 30px; border-radius: 12px; color: white; text-align: center; z-index: 100;
         }
+        #target-list { font-size: 18px; font-weight: bold; color: #ffcc00; }
 
-        #target-list { font-size: 18px; font-weight: bold; margin-top: 5px; color: #ffcc00; }
-
-        /* --- CROSSHAIR --- */
-        #aimer {
-            position: fixed; width: 50px; height: 50px;
-            border: 2px solid #00ffcc; border-radius: 50%;
+        /* --- CROSSHAIR & LOTTIE SHOT EFFECT --- */
+        #aimer-container {
+            position: fixed; width: 100px; height: 100px; /* Thoda bada Lottie ke liye */
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center;
         }
-        #aimer::before { content: ''; position: absolute; top:50%; left:50%; width:15px; height:2px; background:#00ffcc; transform:translate(-50%,-50%); }
-        #aimer::after { content: ''; position: absolute; top:50%; left:50%; width:2px; height:15px; background:#00ffcc; transform:translate(-50%,-50%); }
+        /* Asli 3D Crosshair */
+        #aimer-visual {
+            position: absolute; width: 40px; height: 40px;
+            border: 2px solid #00ffcc; border-radius: 50%;
+        }
+        /* Lottie Shot Animation (Hidden by default) */
+        #shot-lottie {
+            position: absolute; width: 100%; height: 100%;
+            opacity: 0; /* Shuru mein chhupa hua */
+        }
 
         /* --- WIN OVERLAY --- */
         #win-overlay {
@@ -58,11 +53,8 @@
             background: rgba(0,0,0,0.95); display: none; align-items: center;
             justify-content: center; flex-direction: column; color: white; z-index: 200;
         }
-
-        .reward-card {
-            background: #222; border: 3px solid gold; padding: 30px;
-            border-radius: 20px; text-align: center; box-shadow: 0 0 30px gold;
-        }
+        /* Lottie Celebration Mascot */
+        #success-lottie { width: 300px; height: 300px; }
 
         button {
             background: #ff00cc; color: white; border: none; padding: 15px 40px;
@@ -73,31 +65,25 @@
 </head>
 <body>
 
-<div id="aimer"></div>
+<div id="aimer-container">
+    <div id="aimer-visual"></div>
+    <lottie-player id="shot-lottie" src="https://assets2.lottiefiles.com/packages/lf20_OG9w6o.json" speed="1.5"></lottie-player>
+</div>
 
 <div id="game-hud">
-    <div class="stat-box">
-        <span class="label">CURRENT SCORE</span>
-        <span class="value" id="score">0000</span>
-    </div>
-    <div class="stat-box" style="text-align: right;">
-        <span class="label">LEVEL</span>
-        <span class="value" id="lvl">1</span>
-    </div>
+    <div class="stat-box"> SCORE: <span class="value" id="score">0000</span> </div>
+    <div class="stat-box" style="text-align: right;"> LEVEL: <span class="value" id="lvl">1</span> </div>
 </div>
 
 <div id="mission-panel">
-    <span class="label" style="color: #ff00cc;">ACTIVE MISSION</span>
     <div id="target-list">Loading Targets...</div>
 </div>
 
 <div id="win-overlay">
-    <div class="reward-card">
-        <h1 style="color: #00ffcc;">MISSION SUCCESS!</h1>
-        <p>Aapne target pura kiya.</p>
-        <h2 id="reward-text" style="color: gold; font-size: 32px;">56% OFF</h2>
-        <button onclick="nextLevel()">START NEXT LEVEL</button>
-    </div>
+    <lottie-player id="success-lottie" src="https://assets10.lottiefiles.com/packages/lf20_xl54du.json" loop autoplay></lottie-player>
+    <h1 style="color: #00ffcc; margin-top: -20px;">MISSION SUCCESS!</h1>
+    <h2 id="reward-text" style="color: gold; font-size: 32px;">56% OFF</h2>
+    <button onclick="nextLevel()">START NEXT LEVEL</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -105,32 +91,32 @@
 <script>
 let scene, camera, renderer, score = 0, level = 1;
 let objects = [], missionTargets = [];
-let highScore = localStorage.getItem('saini_high') || 0;
 
-// Target Designs & Metadata
+// 3D Target Designs
 const TARGET_TYPES = {
     BEE: { color: 0xffff00, size: 0.3, points: 50 },
     DOG: { color: 0x00ffcc, size: 0.6, points: 100 },
-    ELEPHANT: { color: 0x0088ff, size: 1.2, points: 200 },
-    TOY: { color: 0xff00cc, size: 0.5, points: 80 }
+    ELEPHANT: { color: 0x0088ff, size: 1.2, points: 200 }
 };
 
+// Mouse movement for Crosshair Container
 window.addEventListener('mousemove', (e) => {
-    const aimer = document.getElementById('aimer');
-    aimer.style.left = e.clientX + 'px';
-    aimer.style.top = e.clientY + 'px';
+    const container = document.getElementById('aimer-container');
+    container.style.left = e.clientX + 'px';
+    container.style.top = e.clientY + 'px';
 });
 
 function init() {
     scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x000000, 0.03); // Halka depth color balance ke liye
+
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const light = new THREE.PointLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const light = new THREE.PointLight(0xffffff, 1); light.position.set(10, 10, 10);
     scene.add(light);
 
     camera.position.z = 5;
@@ -142,17 +128,11 @@ function init() {
 
 function startLevel() {
     missionTargets = [];
-    const keys = Object.keys(TARGET_TYPES);
-    
-    // Mission Logic: Level ke hisab se targets badalte hain
-    if(level === 1) {
-        missionTargets.push({ type: 'BEE', goal: 5, current: 0 });
-    } else if(level === 2) {
-        missionTargets.push({ type: 'DOG', goal: 6, current: 0 });
-    } else {
-        // Mixed Targets for higher levels
-        missionTargets.push({ type: 'DOG', goal: 4, current: 0 });
-        missionTargets.push({ type: 'ELEPHANT', goal: 2, current: 0 });
+    if(level === 1) missionTargets.push({ type: 'BEE', goal: 5, current: 0 });
+    else if(level === 2) missionTargets.push({ type: 'DOG', goal: 5, current: 0 });
+    else {
+        missionTargets.push({ type: 'DOG', goal: level, current: 0 });
+        missionTargets.push({ type: 'ELEPHANT', goal: 1, current: 0 });
     }
     updateHUD();
 }
@@ -160,11 +140,8 @@ function startLevel() {
 function updateHUD() {
     document.getElementById('score').innerText = score.toString().padStart(4, '0');
     document.getElementById('lvl').innerText = level;
-    
     let targetHtml = "";
-    missionTargets.forEach(m => {
-        targetHtml += `${m.type}: ${m.current}/${m.goal} &nbsp;&nbsp;`;
-    });
+    missionTargets.forEach(m => targetHtml += `${m.type}: ${m.current}/${m.goal} &nbsp;&nbsp;`);
     document.getElementById('target-list').innerHTML = targetHtml;
 }
 
@@ -176,14 +153,12 @@ function createObject() {
     let geo;
     if(type === 'BEE') geo = new THREE.IcosahedronGeometry(data.size);
     else if(type === 'DOG') geo = new THREE.BoxGeometry(data.size, data.size, data.size);
-    else if(type === 'ELEPHANT') geo = new THREE.CylinderGeometry(data.size/2, data.size/2, data.size);
-    else geo = new THREE.TorusGeometry(0.3, 0.1, 8, 16);
+    else geo = new THREE.CylinderGeometry(data.size/2, data.size/2, data.size);
 
-    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.3 });
+    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.2 });
     const mesh = new THREE.Mesh(geo, mat);
-    
-    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*12, -50);
-    mesh.userData = { type: type, speed: 0.2 + (level * 0.03) };
+    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*12, -40);
+    mesh.userData = { type: type, speed: 0.2 + (level * 0.02) };
     
     scene.add(mesh);
     objects.push(mesh);
@@ -191,22 +166,20 @@ function createObject() {
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 1000 - (level * 50));
+    setTimeout(spawnLoop, 1000 - (level * 40));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
         obj.position.z += obj.userData.speed;
-        obj.rotation.x += 0.02;
-        if(obj.position.z > 6) {
-            scene.remove(obj);
-            objects.splice(i, 1);
-        }
+        obj.rotation.x += 0.01;
+        if(obj.position.z > 6) { scene.remove(obj); objects.splice(i, 1); }
     });
     renderer.render(scene, camera);
 }
 
+// --- SHOT LOGIC WITH LOTTIE ANIMATION ---
 window.addEventListener("mousedown", (e) => {
     const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
     const raycaster = new THREE.Raycaster();
@@ -217,14 +190,22 @@ window.addEventListener("mousedown", (e) => {
         let hit = hits[0].object;
         let type = hit.userData.type;
 
+        // 1. Play Lottie Shot Animation
+        const shotLottie = document.getElementById('shot-lottie');
+        shotLottie.style.opacity = '1'; // Show
+        shotLottie.seek(0); // Rewind
+        shotLottie.play(); // Play once
+        
+        // Chhupa dein jab animation khatam ho (lagbhag 500ms)
+        setTimeout(() => shotLottie.style.opacity = '0', 500);
+
+        // 2. Mission Logic
         let mission = missionTargets.find(m => m.type === type);
         if(mission && mission.current < mission.goal) {
             mission.current++;
             score += TARGET_TYPES[type].points;
             checkWin();
-        } else {
-            score = Math.max(0, score - 20); // Penalty for wrong hit
-        }
+        } else { score = Math.max(0, score - 20); }
 
         updateHUD();
         scene.remove(hit);
@@ -236,6 +217,7 @@ function checkWin() {
     if(missionTargets.every(m => m.current >= m.goal)) {
         document.getElementById('win-overlay').style.display = 'flex';
         document.getElementById('reward-text').innerText = (level * 10 + 30) + "% OFF ON ALL ITEMS";
+        // Note: Success Lottie autoplay aur loop par set hai HTML mein.
     }
 }
 
