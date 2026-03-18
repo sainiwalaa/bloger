@@ -2,9 +2,8 @@
 <html lang="hi">
 <head>
     <meta charset="utf-8">
-    <title>Sainiwalaa - Free Satellite Game</title>
+    <title>Sainiwalaa - Street Driver</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
@@ -16,49 +15,60 @@
         #game-ui {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
             width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #00ffcc;
-            color: #fff; padding: 12px; border-radius: 15px; z-index: 100;
-            text-align: center; box-shadow: 0 0 15px #00ffcc;
+            color: #fff; padding: 10px; border-radius: 15px; z-index: 100;
+            text-align: center; box-shadow: 0 0 15px #00ffcc; pointer-events: none;
         }
-        #dist-val { font-size: 28px; color: gold; display: block; margin: 2px 0; }
+
+        /* --- CONTROLS BUTTONS --- */
+        #controls {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            display: grid; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px;
+            gap: 10px;
+        }
+        .btn-ctrl {
+            background: rgba(0, 255, 204, 0.3); border: 2px solid #00ffcc; color: #fff;
+            border-radius: 10px; font-size: 24px; display: flex; align-items: center;
+            justify-content: center; backdrop-filter: blur(5px); active-background: #00ffcc;
+        }
+        .btn-up { grid-column: 2; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
 
         /* Reward Modal */
         #reward-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: none; align-items: center;
-            justify-content: center; z-index: 1000; color: white; text-align: center; padding: 20px;
+            justify-content: center; z-index: 2000; text-align: center; padding: 20px;
         }
-        .modal-card {
-            border: 3px solid #ff00cc; padding: 20px; border-radius: 20px;
-            background: #111; width: 100%; max-width: 350px;
-        }
+        .modal-card { border: 3px solid #ff00cc; padding: 20px; border-radius: 20px; background: #111; color: white; width: 100%; max-width: 350px; }
         .product-img { width: 150px; height: 150px; border-radius: 10px; border: 2px solid gold; margin: 10px 0; }
-        .btn-buy {
-            background: #00ffcc; color: #000; padding: 12px; width: 100%;
-            border: none; border-radius: 8px; font-weight: bold; display: block;
-            text-decoration: none; margin-top: 10px;
-        }
+        .btn-buy { background: #00ffcc; color: #000; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; display: block; text-decoration: none; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div id="game-ui">
-    <div style="font-size: 10px; color: #00ffcc;">MISSION: TARGET REACH KARO</div>
-    <span id="dist-val">LOADING...</span>
-    <div style="font-size: 10px;">Road par chalna shuru karein!</div>
+    <div style="font-size: 10px; color: #00ffcc;">MISSION: DRIVE TO THE GIFT</div>
+    <span id="dist-val">FINDING LOCATION...</span>
+    <div style="font-size: 10px;">Buttons se car chalao!</div>
+</div>
+
+<div id="controls">
+    <button class="btn-ctrl btn-up" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</button>
+    <button class="btn-ctrl btn-left" onmousedown="startMove('left')" onmouseup="stopMove()" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</button>
+    <button class="btn-ctrl btn-down" onmousedown="startMove('down')" onmouseup="stopMove()" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</button>
+    <button class="btn-ctrl btn-right" onmousedown="startMove('right')" onmouseup="stopMove()" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</button>
 </div>
 
 <div id="reward-modal">
     <div class="modal-card">
         <h1 style="color: gold; margin: 0;">54% DISCOUNT!</h1>
         <p style="font-size: 12px;">Sainiwalaa Premium Item Unlocked</p>
-        
-        <img src="https://via.placeholder.com/150" id="p-img" class="product-img">
-        
-        <div style="border: 2px dashed #ff00cc; padding: 10px; margin: 10px 0; color: #ff00cc;">CODE: SAINI54</div>
-        
-        <a id="p-link" href="https://wa.me/YOURNUMBER" target="_blank" class="btn-buy">BUY NOW (WhatsApp)</a>
-        <button onclick="copyLink()" style="background:none; border:none; color: #888; margin-top:10px; cursor:pointer;">Copy Product Link</button>
-        <button onclick="location.reload()" style="display:block; width:100%; margin-top:15px; background:#333; color:white; border:none; padding:8px; border-radius:5px;">NEXT TARGET</button>
+        <img src="https://via.placeholder.com/150" class="product-img">
+        <div style="border: 2px dashed #ff00cc; padding: 10px; margin: 10px 0; color: #ff00cc;">CODE: DRIVE54</div>
+        <a href="https://wa.me/YOURNUMBER" class="btn-buy">CLAIM ON WHATSAPP</a>
+        <button onclick="location.reload()" style="background:none; border:none; color: #888; margin-top:15px; cursor:pointer;">PLAY AGAIN</button>
     </div>
 </div>
 
@@ -67,67 +77,66 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    let map, userMarker, targetMarker;
-    let targetLat, targetLon;
-    let isFirstLoad = true;
+    let map, carMarker, targetMarker;
+    let carPos = { lat: 0, lng: 0 };
+    let targetPos = { lat: 0, lng: 0 };
+    let moveInterval = null;
+    const moveStep = 0.00005; // Car ki speed
 
-    // 1. Initialize Map
-    function initMap() {
-        // Map create (Default Jaipur)
-        map = L.map('map', { zoomControl: false, dragging: false }).setView([26.9124, 75.7873], 18);
+    function init() {
+        // 1. Get User Location to start the game in their area
+        navigator.geolocation.getCurrentPosition(pos => {
+            carPos.lat = pos.coords.latitude;
+            carPos.lng = pos.coords.longitude;
+            
+            // 2. Setup Map
+            map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false }).setView([carPos.lat, carPos.lng], 19);
+            
+            // Satellite View
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // 2. Satellite View Layer (NO TOKEN NEEDED)
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Satellite Imagery © Esri'
-        }).addTo(map);
+            // 3. Car Icon
+            const carIcon = L.divIcon({ html: '<div style="font-size: 40px; transform: rotate(0deg);" id="car-emoji">🏎️</div>', className: 'dummy' });
+            carMarker = L.marker([carPos.lat, carPos.lng], { icon: carIcon }).addTo(map);
 
-        // 3. Labels Layer (Road names dikhane ke liye)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
+            // 4. Target Set (100m away)
+            targetPos.lat = carPos.lat + 0.0008;
+            targetPos.lng = carPos.lng + 0.0008;
+            const giftIcon = L.divIcon({ html: '<div style="font-size: 35px;">🎁</div>', className: 'dummy' });
+            targetMarker = L.marker([targetPos.lat, targetPos.lng], { icon: giftIcon }).addTo(map);
 
-        // 4. Character (Emoji as a Icon)
-        const deliveryIcon = L.divIcon({
-            html: '<div style="font-size: 40px; margin-top: -20px; margin-left: -10px;">🚚</div>',
-            className: 'dummy'
+            updateHUD();
         });
-        userMarker = L.marker([0,0], { icon: deliveryIcon }).addTo(map);
-
-        // 5. Target (Gift Box)
-        const giftIcon = L.divIcon({
-            html: '<div style="font-size: 35px; margin-top: -20px; margin-left: -10px;">🎁</div>',
-            className: 'dummy'
-        });
-        targetMarker = L.marker([0,0], { icon: giftIcon }).addTo(map);
-
-        startGPS();
     }
 
-    function startGPS() {
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(pos => {
-                const { latitude, longitude } = pos.coords;
-                
-                // Update Character position
-                userMarker.setLatLng([latitude, longitude]);
-                map.panTo([latitude, longitude]); // Map character ke saath move hoga
+    function startMove(dir) {
+        if (moveInterval) return;
+        moveInterval = setInterval(() => {
+            let rotation = 0;
+            if (dir === 'up') { carPos.lat += moveStep; rotation = 0; }
+            if (dir === 'down') { carPos.lat -= moveStep; rotation = 180; }
+            if (dir === 'left') { carPos.lng -= moveStep; rotation = 270; }
+            if (dir === 'right') { carPos.lng += moveStep; rotation = 90; }
 
-                if(isFirstLoad) {
-                    // Pehla target user se 60m door set karna
-                    targetLat = latitude + 0.0005; 
-                    targetLon = longitude + 0.0005;
-                    targetMarker.setLatLng([targetLat, targetLon]);
-                    isFirstLoad = false;
-                }
+            carMarker.setLatLng([carPos.lat, carPos.lng]);
+            document.getElementById('car-emoji').style.transform = `rotate(${rotation}deg)`;
+            map.panTo([carPos.lat, carPos.lng]);
+            updateHUD();
+        }, 50);
+    }
 
-                // Distance calculation
-                const d = getDist(latitude, longitude, targetLat, targetLon);
-                document.getElementById('dist-val').innerText = Math.round(d) + " METERS";
+    function stopMove() {
+        clearInterval(moveInterval);
+        moveInterval = null;
+    }
 
-                // Target reached (15 meters distance)
-                if(d < 15) {
-                    document.getElementById('reward-modal').style.display = 'flex';
-                }
-
-            }, err => alert("Please Enable GPS!"), { enableHighAccuracy: true });
+    function updateHUD() {
+        const d = getDist(carPos.lat, carPos.lng, targetPos.lat, targetPos.lng);
+        document.getElementById('dist-val').innerText = Math.round(d) + " METERS";
+        if (d < 15) {
+            stopMove();
+            document.getElementById('reward-modal').style.display = 'flex';
         }
     }
 
@@ -139,12 +148,7 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    function copyLink() {
-        const link = document.getElementById('p-link').href;
-        navigator.clipboard.writeText(link).then(() => alert("Link Copied!"));
-    }
-
-    initMap();
+    init();
 </script>
 </body>
 </html>
