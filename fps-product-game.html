@@ -3,40 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sainiwalaa Fly - Game</title>
+    <title>Sainiwalaa Fly Pro</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@700&display=swap');
 
         * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
-        body { margin: 0; overflow: hidden; background: #70c5ce; font-family: 'Orbitron', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
 
-        canvas { display: block; background: linear-gradient(to bottom, #2c3e50, #000); }
+        canvas { display: block; }
 
-        /* UI HUD */
+        /* --- UI HUD --- */
         #ui {
             position: fixed; top: 20px; width: 100%; display: flex;
             justify-content: space-between; padding: 0 20px; pointer-events: none; z-index: 10;
         }
-        .stat { color: #fff; font-size: 20px; text-shadow: 2px 2px #000; }
-        #score { font-family: 'Black Ops One'; font-size: 40px; color: #ff00cc; }
+        .stat { color: #00ffcc; font-size: 16px; text-transform: uppercase; }
+        #score { font-family: 'Black Ops One'; font-size: 50px; color: #ff00cc; text-shadow: 0 0 15px #ff00cc; }
 
-        /* Game Over / Reward Modal */
+        /* --- START SCREEN --- */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center;
+            justify-content: center; flex-direction: column; z-index: 100;
+        }
+        .play-btn {
+            background: #ffcc00; color: #000; padding: 20px 60px;
+            font-size: 28px; font-weight: bold; border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 30px #ffcc00; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
+
+        /* --- REWARD MODAL --- */
         #modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; align-items: center;
-            justify-content: center; flex-direction: column; z-index: 100; color: #fff; text-align: center;
+            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            justify-content: center; flex-direction: column; z-index: 101; color: #fff;
         }
         .card {
-            background: #111; border: 3px solid #00ffcc; padding: 30px;
-            border-radius: 20px; width: 85%; max-width: 350px;
-            box-shadow: 0 0 20px #00ffcc;
+            background: #111; border: 4px solid #ff00cc; padding: 30px;
+            border-radius: 25px; width: 85%; max-width: 380px; text-align: center;
         }
         .btn-buy {
-            background: #ff00cc; color: #fff; padding: 15px; width: 100%;
-            border: none; border-radius: 10px; font-weight: bold; margin-top: 15px;
-            cursor: pointer; text-decoration: none; display: block;
+            background: #00ffcc; color: #000; padding: 15px; width: 100%;
+            border: none; border-radius: 12px; font-weight: bold; margin-top: 15px;
+            text-decoration: none; display: block; font-size: 18px;
         }
-        .btn-retry { background: #555; margin-top: 10px; color: #fff; border: none; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -47,13 +58,19 @@
     <div class="stat">BEST: <span id="best">0</span></div>
 </div>
 
+<div id="start-screen">
+    <h1 style="color: #ff00cc; font-size: 40px; margin-bottom: 20px;">SAINIWALAA FLY</h1>
+    <button class="play-btn" onclick="startGame()">PLAY NOW</button>
+    <p style="color: #fff; margin-top: 20px; font-size: 12px;">TAP TO FLY & DODGE PILLARS</p>
+</div>
+
 <div id="modal">
     <div class="card">
-        <h1 id="status-title" style="color:#00ffcc">OFFER UNLOCKED!</h1>
-        <p>Aapne kamaal ka score kiya!</p>
-        <div id="reward-info" style="font-size: 24px; color: gold; margin: 10px 0;">50% OFF</div>
-        <a id="buy-link" href="#" target="_blank" class="btn-buy">BUY PRODUCT NOW</a>
-        <button class="btn-retry" onclick="resetGame()">TRY AGAIN</button>
+        <h1 style="color:#ffcc00; margin:0;">GAME OVER</h1>
+        <p id="score-report">Your Score: 0</p>
+        <div id="reward-info" style="font-size: 24px; color: #00ffcc; margin: 15px 0; font-weight: bold;">[OFFER]</div>
+        <a id="buy-link" href="https://sainiwalaa.com" target="_blank" class="btn-buy">CLAIM REWARD</a>
+        <button onclick="resetGame()" style="background:none; border:none; color:#aaa; margin-top:20px; cursor:pointer;">TRY AGAIN</button>
     </div>
 </div>
 
@@ -62,174 +79,146 @@
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const scoreEl = document.getElementById("score");
-const bestEl = document.getElementById("best");
-const lvlEl = document.getElementById("lvl");
 
-// Setup Canvas Size
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Game State
-let bird = { x: 50, y: canvas.height / 2, w: 40, h: 30, gravity: 0.5, velocity: 0, jump: -8 };
+// --- CONFIG ---
+let gameRunning = false;
+let score = 0;
+let level = 1;
+let best = localStorage.getItem("saini_fly_best") || 0;
+document.getElementById('best').innerText = best;
+
+let bird = { x: 50, y: canvas.height/2, w: 40, h: 40, v: 0, g: 0.4, jump: -7 };
 let pipes = [];
 let frame = 0;
-let score = 0;
-let best = localStorage.getItem("saini_best") || 0;
-let gameActive = true;
-let level = 1;
 
-bestEl.innerText = best;
-
-// Pipe Config
-const pipeWidth = 70;
-const pipeGap = 180;
-const pipeSpeed = 3;
+function startGame() {
+    document.getElementById("start-screen").style.display = "none";
+    gameRunning = true;
+    requestAnimationFrame(loop);
+}
 
 function createPipe() {
-    let minHeight = 50;
-    let maxHeight = canvas.height - pipeGap - minHeight;
-    let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+    let gap = 180 - (level * 5); // Level ke saath gap kam hoga
+    if(gap < 120) gap = 120;
     
-    pipes.push({
-        x: canvas.width,
-        top: height,
-        bottom: canvas.height - height - pipeGap,
-        passed: false,
-        color: level % 2 === 0 ? "#ff00cc" : "#00ffcc"
-    });
-}
-
-function drawBird() {
-    // Character (Simplified as a glowing neon box for Sainiwalaa)
-    ctx.fillStyle = "#fff";
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00ffcc";
-    ctx.fillRect(bird.x, bird.y, bird.w, bird.h);
-    ctx.shadowBlur = 0;
-    
-    // Eyes
-    ctx.fillStyle = "#000";
-    ctx.fillRect(bird.x + 25, bird.y + 5, 5, 5);
-}
-
-function drawPipes() {
-    pipes.forEach(p => {
-        ctx.fillStyle = p.color;
-        // Top Pipe
-        ctx.fillRect(p.x, 0, pipeWidth, p.top);
-        // Bottom Pipe
-        ctx.fillRect(p.x, canvas.height - p.bottom, pipeWidth, p.bottom);
-        
-        // Product Label on Pipe
-        ctx.fillStyle = "#fff";
-        ctx.font = "12px Orbitron";
-        ctx.fillText("PRODUCT", p.x + 5, p.top - 10);
-    });
+    let height = Math.random() * (canvas.height - gap - 100) + 50;
+    pipes.push({ x: canvas.width, top: height, bottom: canvas.height - height - gap, passed: false });
 }
 
 function update() {
-    if (!gameActive) return;
+    if(!gameRunning) return;
 
-    bird.velocity += bird.gravity;
-    bird.y += bird.velocity;
+    bird.v += bird.g;
+    bird.y += bird.v;
 
-    // Boundary Check
-    if (bird.y + bird.h > canvas.height || bird.y < 0) endGame();
+    // Floor/Ceiling Hit
+    if(bird.y + bird.h > canvas.height || bird.y < 0) endGame();
 
     // Pipes Logic
-    if (frame % 100 === 0) createPipe();
+    if(frame % 90 === 0) createPipe();
 
-    pipes.forEach((p, index) => {
-        p.x -= pipeSpeed + (level * 0.5);
+    pipes.forEach((p, i) => {
+        p.x -= 3 + (level * 0.3); // Speed badhegi
 
-        // Collision Detection
-        if (bird.x < p.x + pipeWidth && bird.x + bird.w > p.x &&
-            (bird.y < p.top || bird.y + bird.h > canvas.height - p.bottom)) {
+        // Collision Check
+        if(bird.x < p.x + 60 && bird.x + bird.w > p.x && (bird.y < p.top || bird.y + bird.h > canvas.height - p.bottom)) {
             endGame();
         }
 
-        // Score Logic
-        if (!p.passed && bird.x > p.x + pipeWidth) {
+        // Score
+        if(!p.passed && bird.x > p.x + 60) {
             score++;
             p.passed = true;
-            scoreEl.innerText = score;
-            if (score % 5 === 0) {
+            document.getElementById('score').innerText = score;
+            if(score % 5 === 0) {
                 level++;
-                lvlEl.innerText = level;
+                document.getElementById('lvl').innerText = level;
             }
         }
-
-        if (p.x + pipeWidth < 0) pipes.splice(index, 1);
+        if(p.x < -70) pipes.splice(i, 1);
     });
-
     frame++;
 }
 
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Background City Look (Static simplified)
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-    for(let i=0; i<5; i++) {
-        ctx.fillRect(i * 200 - (frame % 200), canvas.height - 150, 100, 150);
-    }
+    // Colorful BG
+    let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, "#1a1a2e");
+    grad.addColorStop(1, "#16213e");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawPipes();
-    drawBird();
+    // Draw Pipes (Neon Green & Pink)
+    pipes.forEach(p => {
+        ctx.fillStyle = "#ff00cc";
+        ctx.fillRect(p.x, 0, 60, p.top);
+        ctx.fillStyle = "#00ffcc";
+        ctx.fillRect(p.x, canvas.height - p.bottom, 60, p.bottom);
+        
+        // Borders
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.x, 0, 60, p.top);
+        ctx.strokeRect(p.x, canvas.height - p.bottom, 60, p.bottom);
+    });
+
+    // Draw Bird (Sainiwalaa Logo Box)
+    ctx.fillStyle = "#ffcc00";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#ffcc00";
+    ctx.fillRect(bird.x, bird.y, bird.w, bird.h);
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(bird.x, bird.y, bird.w, bird.h);
+    ctx.shadowBlur = 0;
 }
 
 function loop() {
     update();
     draw();
-    if (gameActive) requestAnimationFrame(loop);
+    if(gameRunning) requestAnimationFrame(loop);
 }
 
 function endGame() {
-    gameActive = false;
-    if (score > best) {
+    gameRunning = false;
+    if(score > best) {
         best = score;
-        localStorage.setItem("saini_best", best);
-        bestEl.innerText = best;
+        localStorage.setItem("saini_fly_best", best);
+        document.getElementById('best').innerText = best;
     }
     
     document.getElementById("modal").style.display = "flex";
+    document.getElementById("score-report").innerText = "Final Score: " + score;
     
-    // Rewards logic
-    const link = document.getElementById("buy-link");
     const info = document.getElementById("reward-info");
-    
-    if (score > 10) {
-        info.innerText = "70% MEGA OFF";
-        link.href = "https://meesho.com/sainiwalaa-special";
-    } else {
-        info.innerText = "30% WELCOME OFF";
-        link.href = "https://amazon.in/sainiwalaa";
-    }
+    if(score >= 10) info.innerText = "70% MEGA DISCOUNT!";
+    else if(score >= 5) info.innerText = "40% SPECIAL OFFER!";
+    else info.innerText = "10% WELCOME COUPON";
 }
 
 function resetGame() {
     bird.y = canvas.height / 2;
-    bird.velocity = 0;
+    bird.v = 0;
     pipes = [];
     score = 0;
     level = 1;
     frame = 0;
-    scoreEl.innerText = "0";
-    lvlEl.innerText = "1";
-    gameActive = true;
+    document.getElementById('score').innerText = "0";
+    document.getElementById('lvl').innerText = "1";
     document.getElementById("modal").style.display = "none";
-    loop();
+    gameRunning = true;
+    requestAnimationFrame(loop);
 }
 
 // Controls
-window.addEventListener("mousedown", () => { if(gameActive) bird.velocity = bird.jump; });
+window.addEventListener("mousedown", () => { if(gameRunning) bird.v = bird.jump; });
 window.addEventListener("touchstart", (e) => { 
-    e.preventDefault();
-    if(gameActive) bird.velocity = bird.jump; 
+    e.preventDefault(); 
+    if(gameRunning) bird.v = bird.jump; 
 });
 
-loop();
 </script>
 </body>
 </html>
