@@ -2,91 +2,102 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Elite Hunter</title>
+    <title>Sainiwalaa Pro Arcade - Target Master</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@400;700&display=swap');
         
         body { 
             margin: 0; overflow: hidden; 
-            background: radial-gradient(circle, #1a1a2e 0%, #0f0f1a 100%);
+            background: #050505; 
             font-family: 'Orbitron', sans-serif; cursor: none;
         }
 
-        /* Impact Flash Animation (Sirf Shot par chalega) */
-        #flash-effect {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none; z-index: 5;
+        /* --- GAME HUD (Score & Levels) --- */
+        #game-hud {
+            position: fixed; top: 0; left: 0; width: 100%; 
+            padding: 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between;
+            z-index: 100; pointer-events: none;
         }
 
-        /* Modern Game HUD */
-        #hud {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 100; padding: 30px;
-            display: flex; flex-direction: column; justify-content: space-between;
+        .stat-box {
+            background: rgba(0, 255, 204, 0.1);
+            border: 2px solid #00ffcc;
+            padding: 10px 20px; border-radius: 8px;
+            color: white; min-width: 150px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
         }
 
-        .top-stats { display: flex; justify-content: space-between; align-items: flex-start; }
-        
-        .panel {
-            background: rgba(0, 255, 204, 0.05);
-            border-left: 4px solid #00ffcc;
-            padding: 15px 25px; backdrop-filter: blur(10px);
-            box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+        .label { font-size: 10px; color: #00ffcc; display: block; margin-bottom: 5px; }
+        .value { font-size: 24px; font-family: 'Black Ops One'; letter-spacing: 2px; }
+
+        /* --- MISSION PANEL (Target Logic) --- */
+        #mission-panel {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 0, 204, 0.1);
+            border: 2px solid #ff00cc;
+            padding: 15px 30px; border-radius: 12px;
+            color: white; text-align: center; z-index: 100;
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.4);
         }
 
-        .mission-panel {
-            text-align: center; border-left: none; border-bottom: 4px solid #ff00cc;
-            min-width: 300px;
-        }
+        #target-list { font-size: 18px; font-weight: bold; margin-top: 5px; color: #ffcc00; }
 
+        /* --- CROSSHAIR --- */
         #aimer {
-            position: fixed; width: 40px; height: 40px;
+            position: fixed; width: 50px; height: 50px;
             border: 2px solid #00ffcc; border-radius: 50%;
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
         }
-        #aimer::before { content: ''; position: absolute; top:50%; left:50%; width:10px; height:2px; background:#00ffcc; transform:translate(-50%,-50%); }
+        #aimer::before { content: ''; position: absolute; top:50%; left:50%; width:15px; height:2px; background:#00ffcc; transform:translate(-50%,-50%); }
+        #aimer::after { content: ''; position: absolute; top:50%; left:50%; width:2px; height:15px; background:#00ffcc; transform:translate(-50%,-50%); }
 
-        /* Level Result Overlay */
-        #overlay {
+        /* --- WIN OVERLAY --- */
+        #win-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            background: rgba(0,0,0,0.95); display: none; align-items: center;
             justify-content: center; flex-direction: column; color: white; z-index: 200;
         }
 
-        .btn {
+        .reward-card {
+            background: #222; border: 3px solid gold; padding: 30px;
+            border-radius: 20px; text-align: center; box-shadow: 0 0 30px gold;
+        }
+
+        button {
             background: #ff00cc; color: white; border: none; padding: 15px 40px;
             font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-radius: 5px;
-            margin-top: 20px; transition: 0.3s;
+            margin-top: 20px; text-transform: uppercase;
         }
-        .btn:hover { background: #00ffcc; color: black; }
     </style>
 </head>
 <body>
 
-<div id="flash-effect"></div>
 <div id="aimer"></div>
 
-<div id="hud">
-    <div class="top-stats">
-        <div class="panel">
-            <span style="font-size: 12px; color: #00ffcc;">CURRENT SCORE</span><br>
-            <span id="score" style="font-size: 24px;">0000</span>
-        </div>
-        <div class="panel mission-panel">
-            <span style="font-size: 12px; color: #ff00cc;">ACTIVE MISSION</span><br>
-            <div id="mission-targets" style="font-size: 18px; margin-top: 5px;">Wait...</div>
-        </div>
-        <div class="panel">
-            <span style="font-size: 12px; color: #00ffcc;">HIGH SCORE</span><br>
-            <span id="high-score" style="font-size: 24px;">0</span>
-        </div>
+<div id="game-hud">
+    <div class="stat-box">
+        <span class="label">CURRENT SCORE</span>
+        <span class="value" id="score">0000</span>
+    </div>
+    <div class="stat-box" style="text-align: right;">
+        <span class="label">LEVEL</span>
+        <span class="value" id="lvl">1</span>
     </div>
 </div>
 
-<div id="overlay">
-    <h1 style="font-size: 50px; color: #00ffcc;">MISSION SUCCESS!</h1>
-    <p id="reward-text" style="font-size: 24px; color: gold;">UNLOCKING 56% DISCOUNT...</p>
-    <button class="btn" onclick="nextLevel()">NEXT CHALLENGE</button>
+<div id="mission-panel">
+    <span class="label" style="color: #ff00cc;">ACTIVE MISSION</span>
+    <div id="target-list">Loading Targets...</div>
+</div>
+
+<div id="win-overlay">
+    <div class="reward-card">
+        <h1 style="color: #00ffcc;">MISSION SUCCESS!</h1>
+        <p>Aapne target pura kiya.</p>
+        <h2 id="reward-text" style="color: gold; font-size: 32px;">56% OFF</h2>
+        <button onclick="nextLevel()">START NEXT LEVEL</button>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -94,19 +105,20 @@
 <script>
 let scene, camera, renderer, score = 0, level = 1;
 let objects = [], missionTargets = [];
-const highScore = localStorage.getItem('sainiwalaa_high') || 0;
-document.getElementById('high-score').innerText = highScore;
+let highScore = localStorage.getItem('saini_high') || 0;
 
-const TARGET_DATA = {
-    BEE: { color: 0xffff00, size: 0.3, speed: 0.4 },
-    DOG: { color: 0x00ffcc, size: 0.6, speed: 0.25 },
-    ELEPHANT: { color: 0x0088ff, size: 1.1, speed: 0.15 },
-    TOY: { color: 0xff00cc, size: 0.5, speed: 0.2 }
+// Target Designs & Metadata
+const TARGET_TYPES = {
+    BEE: { color: 0xffff00, size: 0.3, points: 50 },
+    DOG: { color: 0x00ffcc, size: 0.6, points: 100 },
+    ELEPHANT: { color: 0x0088ff, size: 1.2, points: 200 },
+    TOY: { color: 0xff00cc, size: 0.5, points: 80 }
 };
 
 window.addEventListener('mousemove', (e) => {
-    document.getElementById('aimer').style.left = e.clientX + 'px';
-    document.getElementById('aimer').style.top = e.clientY + 'px';
+    const aimer = document.getElementById('aimer');
+    aimer.style.left = e.clientX + 'px';
+    aimer.style.top = e.clientY + 'px';
 });
 
 function init() {
@@ -117,27 +129,28 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    let light = new THREE.PointLight(0xffffff, 1);
+    const light = new THREE.PointLight(0xffffff, 1);
     light.position.set(10, 10, 10);
     scene.add(light);
 
     camera.position.z = 5;
 
-    setupLevel();
+    startLevel();
     spawnLoop();
     animate();
 }
 
-function setupLevel() {
+function startLevel() {
     missionTargets = [];
-    const types = Object.keys(TARGET_DATA);
+    const keys = Object.keys(TARGET_TYPES);
     
-    // Level Based Target Logic
-    if(level < 3) {
-        let t = types[Math.floor(Math.random() * types.length)];
-        missionTargets.push({ type: t, goal: 5 + level, current: 0 });
+    // Mission Logic: Level ke hisab se targets badalte hain
+    if(level === 1) {
+        missionTargets.push({ type: 'BEE', goal: 5, current: 0 });
+    } else if(level === 2) {
+        missionTargets.push({ type: 'DOG', goal: 6, current: 0 });
     } else {
-        // Advanced Mixed Targets
+        // Mixed Targets for higher levels
         missionTargets.push({ type: 'DOG', goal: 4, current: 0 });
         missionTargets.push({ type: 'ELEPHANT', goal: 2, current: 0 });
     }
@@ -145,18 +158,20 @@ function setupLevel() {
 }
 
 function updateHUD() {
-    let text = "";
-    missionTargets.forEach(t => {
-        text += `${t.type}: ${t.current}/${t.goal}  `;
-    });
-    document.getElementById('mission-targets').innerText = text;
     document.getElementById('score').innerText = score.toString().padStart(4, '0');
+    document.getElementById('lvl').innerText = level;
+    
+    let targetHtml = "";
+    missionTargets.forEach(m => {
+        targetHtml += `${m.type}: ${m.current}/${m.goal} &nbsp;&nbsp;`;
+    });
+    document.getElementById('target-list').innerHTML = targetHtml;
 }
 
 function createObject() {
-    const keys = Object.keys(TARGET_DATA);
+    const keys = Object.keys(TARGET_TYPES);
     const type = keys[Math.floor(Math.random() * keys.length)];
-    const data = TARGET_DATA[type];
+    const data = TARGET_TYPES[type];
 
     let geo;
     if(type === 'BEE') geo = new THREE.IcosahedronGeometry(data.size);
@@ -164,11 +179,11 @@ function createObject() {
     else if(type === 'ELEPHANT') geo = new THREE.CylinderGeometry(data.size/2, data.size/2, data.size);
     else geo = new THREE.TorusGeometry(0.3, 0.1, 8, 16);
 
-    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.2 });
+    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.3 });
     const mesh = new THREE.Mesh(geo, mat);
     
-    mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
-    mesh.userData = { type: type, speed: data.speed + (level * 0.02) };
+    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*12, -50);
+    mesh.userData = { type: type, speed: 0.2 + (level * 0.03) };
     
     scene.add(mesh);
     objects.push(mesh);
@@ -176,14 +191,14 @@ function createObject() {
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 900 - (level * 30));
+    setTimeout(spawnLoop, 1000 - (level * 50));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
         obj.position.z += obj.userData.speed;
-        obj.rotation.x += 0.01;
+        obj.rotation.x += 0.02;
         if(obj.position.z > 6) {
             scene.remove(obj);
             objects.splice(i, 1);
@@ -202,39 +217,32 @@ window.addEventListener("mousedown", (e) => {
         let hit = hits[0].object;
         let type = hit.userData.type;
 
-        // Visual Impact Flash (Sirf ek bar click par)
-        const flash = document.getElementById('flash-effect');
-        flash.style.opacity = '0.3';
-        setTimeout(() => flash.style.opacity = '0', 50);
-
         let mission = missionTargets.find(m => m.type === type);
         if(mission && mission.current < mission.goal) {
             mission.current++;
-            score += 100;
-            checkLevelComplete();
+            score += TARGET_TYPES[type].points;
+            checkWin();
         } else {
-            score = Math.max(0, score - 20);
+            score = Math.max(0, score - 20); // Penalty for wrong hit
         }
 
-        if(score > highScore) localStorage.setItem('sainiwalaa_high', score);
-        
         updateHUD();
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
     }
 });
 
-function checkLevelComplete() {
+function checkWin() {
     if(missionTargets.every(m => m.current >= m.goal)) {
-        document.getElementById('overlay').style.display = 'flex';
-        document.getElementById('reward-text').innerText = `OFFER: ${(level * 10) + 20}% OFF ON SAINIWALAA`;
+        document.getElementById('win-overlay').style.display = 'flex';
+        document.getElementById('reward-text').innerText = (level * 10 + 30) + "% OFF ON ALL ITEMS";
     }
 }
 
 function nextLevel() {
     level++;
-    document.getElementById('overlay').style.display = 'none';
-    setupLevel();
+    document.getElementById('win-overlay').style.display = 'none';
+    startLevel();
 }
 
 init();
