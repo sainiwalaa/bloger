@@ -2,88 +2,89 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Universe - Multi-World</title>
+    <title>Sainiwalaa Universe - Mission Hub</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; transition: background 1s; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
         
         /* Modern Gaming Interface */
-        #game-ui {
+        #ui {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 100;
         }
         
-        .header-bar {
-            display: flex; justify-content: space-between; padding: 20px 40px;
-            background: linear-gradient(to bottom, rgba(0,255,204,0.2), transparent);
+        .top-bar {
+            display: flex; justify-content: space-between; padding: 20px;
+            background: rgba(0,0,0,0.5); border-bottom: 2px solid #00ffcc;
         }
 
-        .stat-card {
-            background: rgba(0,0,0,0.6); border-bottom: 3px solid #00ffcc;
-            padding: 10px 20px; border-radius: 5px; color: #fff;
+        .mission-panel {
+            background: rgba(0, 255, 204, 0.1); padding: 15px;
+            border-radius: 10px; border: 1px solid #00ffcc;
+            text-align: center; min-width: 250px;
         }
 
-        /* Power-up Alert */
-        #power-alert {
-            position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
-            color: gold; font-weight: bold; font-size: 20px; opacity: 0; transition: 0.3s;
-        }
+        #target-display { font-size: 22px; color: #ffcc00; font-weight: bold; }
+        #counter { font-size: 30px; color: #fff; }
 
-        /* Aiming Reticle */
+        /* Reticle / Aim */
         #reticle {
-            position: fixed; width: 60px; height: 60px;
-            border: 2px solid #fff; border-radius: 50%;
+            position: fixed; width: 50px; height: 50px;
+            border: 2px solid #00ffcc; border-radius: 50%;
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #00ffcc;
         }
-        #reticle::before { content: ''; position: absolute; top:50%; left:50%; width:10px; height:2px; background:red; transform:translate(-50%,-50%); }
 
-        /* Level Transition Overlay */
-        #level-up {
+        /* Result Overlay */
+        #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); display: none; align-items: center;
             justify-content: center; flex-direction: column; color: white; z-index: 200;
         }
-
-        .theme-indicator { font-size: 12px; color: #00ffcc; letter-spacing: 5px; margin-top: 10px; }
+        
+        button {
+            padding: 10px 30px; font-family: 'Orbitron'; background: #00ffcc;
+            border: none; cursor: pointer; font-weight: bold; margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div id="reticle"></div>
 
-<div id="game-ui">
-    <div class="header-bar">
-        <div class="stat-card">SCORE: <span id="score">0</span></div>
-        <div id="mission-box" style="text-align: center;">
-            <div id="world-name" style="font-size: 10px; color: #ff00cc;">NEON CYBER</div>
-            <div style="font-size: 18px;">TARGET: <span id="curr">0</span> / <span id="target">10</span> <span id="obj-type">BALL</span></div>
+<div id="ui">
+    <div class="top-bar">
+        <div>SCORE: <span id="score">0</span></div>
+        <div class="mission-panel">
+            <div id="world-tag" style="font-size: 10px; color: #00ffcc;">CYBER WORLD</div>
+            <div id="target-display">TARGET: BALL</div>
+            <div id="counter">0 / 10</div>
         </div>
-        <div class="stat-card">LEVEL: <span id="lvl">1</span></div>
+        <div>LEVEL: <span id="lvl">1</span></div>
     </div>
-    <div id="power-alert">SLOW MOTION ACTIVE!</div>
 </div>
 
-<div id="level-up">
-    <h1 id="lvl-text">LEVEL 1 COMPLETE</h1>
-    <h2 id="reward-text" style="color: gold;">40% DISCOUNT UNLOCKED</h2>
-    <div class="theme-indicator" id="next-theme">ENTERING DEEP SPACE...</div>
-    <button onclick="startNextLevel()" style="margin-top:20px; padding:10px 30px; cursor:pointer; font-family:'Orbitron';">CONTINUE MISSION</button>
+<div id="overlay">
+    <h1 id="overlay-title">MISSION COMPLETE!</h1>
+    <h2 id="reward-text" style="color: gold;">56% OFF UNLOCKED</h2>
+    <p>Aapne target poora kiya!</p>
+    <button onclick="nextLevel()">NEXT WORLD >></button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1, gameSpeed = 0.2;
-let objects = [], particles = [], mission = { type: 'BALL', count: 0, target: 10 };
-let currentTheme = 0; // 0: Neon, 1: Space, 2: Lava
-let slowMo = false;
+let scene, camera, renderer, score = 0, level = 1, currentWorld = 0;
+let objects = [], mission = { type: 'BALL', count: 0, target: 10 };
 
-const themes = [
-    { name: "NEON CYBER", color: 0x00ffcc, bg: 0x000505, fog: 0x000505 },
-    { name: "DEEP SPACE", color: 0x3399ff, bg: 0x000011, fog: 0x000011 },
-    { name: "LAVA INFERNO", color: 0xff3300, bg: 0x110000, fog: 0x110000 }
+const worldThemes = [
+    { name: "CYBER NEON", color: 0x00ffcc, fog: 0x000505 },
+    { name: "GALAXY VOID", color: 0xff00cc, fog: 0x000011 },
+    { name: "DESERT STORM", color: 0xffcc00, fog: 0x110500 }
 ];
+
+const targetTypes = ['BALL', 'STAR', 'KITE'];
 
 window.addEventListener('mousemove', (e) => {
     document.getElementById('reticle').style.left = e.clientX + 'px';
@@ -97,73 +98,68 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    applyTheme();
     camera.position.z = 5;
-
+    
+    setupWorld();
+    setupMission();
     spawnLoop();
     animate();
-    updateMission();
 }
 
-function applyTheme() {
-    let t = themes[currentTheme];
-    scene.background = new THREE.Color(t.bg);
-    scene.fog = new THREE.FogExp2(t.fog, 0.05);
-    document.getElementById('world-name').innerText = t.name;
-    document.getElementById('world-name').style.color = '#' + t.color.toString(16);
+function setupWorld() {
+    let theme = worldThemes[currentWorld];
+    scene.background = new THREE.Color(theme.fog);
+    scene.fog = new THREE.FogExp2(theme.fog, 0.05);
+    document.getElementById('world-tag').innerText = theme.name;
     
-    // Ambient Light based on theme
-    scene.clear(); 
-    const al = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(al);
-    const pl = new THREE.PointLight(t.color, 2, 50);
+    // Clear old lights and add new ones
+    scene.children = scene.children.filter(c => !(c instanceof THREE.Light));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    let pl = new THREE.PointLight(theme.color, 2, 50);
     pl.position.set(0, 0, 5);
     scene.add(pl);
 }
 
-function updateMission() {
-    const types = ['BALL', 'STAR', 'KITE'];
-    mission.type = types[Math.floor(Math.random()*3)];
+function setupMission() {
+    mission.type = targetTypes[Math.floor(Math.random() * 3)];
     mission.target = 5 + (level * 2);
     mission.count = 0;
-    document.getElementById('obj-type').innerText = mission.type;
-    document.getElementById('target').innerText = mission.target;
-    document.getElementById('curr').innerText = 0;
+    
+    document.getElementById('target-display').innerText = "TARGET: " + mission.type;
+    document.getElementById('counter').innerText = `0 / ${mission.target}`;
 }
 
 function createObject() {
-    const types = ['BALL', 'STAR', 'KITE', 'POWERUP'];
-    const r = Math.random();
-    let type = types[Math.floor(r * 3)]; 
-    if(r > 0.92) type = 'POWERUP'; // Rare powerup
-
+    const type = targetTypes[Math.floor(Math.random() * 3)];
     let geo;
-    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 16, 16);
-    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
-    else if(type === 'KITE') geo = new THREE.TorusGeometry(0.4, 0.1, 8, 20);
-    else geo = new THREE.OctahedronGeometry(0.4); // Powerup shape
-
-    let color = (type === 'POWERUP') ? 0xffffff : themes[currentTheme].color;
-    let mat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 });
-    let mesh = new THREE.Mesh(geo, mat);
     
+    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 20, 20);
+    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
+    else if(type === 'KITE') geo = new THREE.TorusGeometry(0.4, 0.15, 8, 20);
+
+    const mat = new THREE.MeshPhongMaterial({ 
+        color: type === mission.type ? 0x00ffcc : 0xff3300,
+        emissive: type === mission.type ? 0x00ffcc : 0x000000,
+        emissiveIntensity: 0.5
+    });
+
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
     mesh.userData = { type: type };
+    
     scene.add(mesh);
     objects.push(mesh);
 }
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 1000 - (level * 50));
+    setTimeout(spawnLoop, 800 - (level * 40));
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    let speedMult = slowMo ? 0.2 : 1.0;
-    
     objects.forEach((obj, i) => {
-        obj.position.z += (gameSpeed + (level * 0.02)) * speedMult;
+        obj.position.z += 0.2 + (level * 0.03);
         obj.rotation.y += 0.02;
         if(obj.position.z > 6) {
             scene.remove(obj);
@@ -181,48 +177,36 @@ window.addEventListener("mousedown", (e) => {
 
     if(hits.length > 0) {
         let hit = hits[0].object;
-        if(hit.userData.type === 'POWERUP') {
-            activateSlowMo();
-        } else if(hit.userData.type === mission.type) {
+        if(hit.userData.type === mission.type) {
             mission.count++;
             score += 100;
-            if(mission.count >= mission.target) triggerLevelUp();
+            document.getElementById('counter').innerText = `${mission.count} / ${mission.target}`;
+            if(mission.count >= mission.target) {
+                showResult();
+            }
         } else {
             score = Math.max(0, score - 50);
+            document.body.style.background = "red";
+            setTimeout(() => document.body.style.background = "#000", 50);
         }
         document.getElementById('score').innerText = score;
-        document.getElementById('curr').innerText = mission.count;
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
     }
 });
 
-function activateSlowMo() {
-    slowMo = true;
-    document.getElementById('power-alert').style.opacity = '1';
-    setTimeout(() => {
-        slowMo = false;
-        document.getElementById('power-alert').style.opacity = '0';
-    }, 5000);
+function showResult() {
+    document.getElementById('overlay').style.display = 'flex';
+    document.getElementById('reward-text').innerText = (level * 12 + 30) + "% OFF ON PRODUCTS";
 }
 
-function triggerLevelUp() {
-    const overlay = document.getElementById('level-up');
-    document.getElementById('lvl-text').innerText = "LEVEL " + level + " COMPLETE";
-    document.getElementById('reward-text').innerText = (level * 10 + 30) + "% DISCOUNT UNLOCKED";
-    
-    currentTheme = (currentTheme + 1) % themes.length;
-    document.getElementById('next-theme').innerText = "NEXT: " + themes[currentTheme].name;
-    
-    overlay.style.display = 'flex';
-}
-
-function startNextLevel() {
+function nextLevel() {
     level++;
+    currentWorld = (currentWorld + 1) % worldThemes.length;
     document.getElementById('lvl').innerText = level;
-    document.getElementById('level-up').style.display = 'none';
-    applyTheme();
-    updateMission();
+    document.getElementById('overlay').style.display = 'none';
+    setupWorld();
+    setupMission();
 }
 
 init();
