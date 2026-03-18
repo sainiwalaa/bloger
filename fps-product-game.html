@@ -2,230 +2,281 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Lottie Arcade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sainiwalaa - Cyber Runner FPS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
 
-        /* --- GAME HUD --- */
-        #game-hud {
-            position: fixed; top: 0; left: 0; width: 100%; 
-            padding: 20px; box-sizing: border-box;
-            display: flex; justify-content: space-between;
-            z-index: 100; pointer-events: none;
-        }
-        .stat-box {
-            background: rgba(0, 255, 204, 0.1); border: 2px solid #00ffcc;
-            padding: 10px 20px; border-radius: 8px; color: white; min-width: 150px;
-        }
-        .value { font-size: 24px; font-family: 'Black Ops One'; letter-spacing: 2px; }
-
-        /* --- MISSION PANEL --- */
-        #mission-panel {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 0, 204, 0.1); border: 2px solid #ff00cc;
-            padding: 15px 30px; border-radius: 12px; color: white; text-align: center; z-index: 100;
-        }
-        #target-list { font-size: 18px; font-weight: bold; color: #ffcc00; }
-
-        /* --- CROSSHAIR & LOTTIE SHOT EFFECT --- */
-        #aimer-container {
-            position: fixed; width: 100px; height: 100px; /* Thoda bada Lottie ke liye */
-            pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
-            display: flex; align-items: center; justify-content: center;
-        }
-        /* Asli 3D Crosshair */
-        #aimer-visual {
-            position: absolute; width: 40px; height: 40px;
-            border: 2px solid #00ffcc; border-radius: 50%;
-        }
-        /* Lottie Shot Animation (Hidden by default) */
-        #shot-lottie {
-            position: absolute; width: 100%; height: 100%;
-            opacity: 0; /* Shuru mein chhupa hua */
-        }
-
-        /* --- WIN OVERLAY --- */
-        #win-overlay {
+        /* --- UI OVERLAY --- */
+        #game-ui {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; align-items: center;
-            justify-content: center; flex-direction: column; color: white; z-index: 200;
+            pointer-events: none; z-index: 10; padding: 15px;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-        /* Lottie Celebration Mascot */
-        #success-lottie { width: 300px; height: 300px; }
 
-        button {
-            background: #ff00cc; color: white; border: none; padding: 15px 40px;
-            font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-radius: 5px;
-            margin-top: 20px; text-transform: uppercase;
+        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .stat-card {
+            background: rgba(0, 255, 204, 0.1); border-left: 4px solid #00ffcc;
+            padding: 10px 20px; backdrop-filter: blur(5px); color: white;
+        }
+        .mission-box {
+            text-align: center; background: rgba(255, 0, 204, 0.1);
+            border-bottom: 3px solid #ff00cc; padding: 10px; min-width: 150px;
+        }
+
+        /* --- CONTROLS --- */
+        #joystick-container {
+            position: absolute; bottom: 40px; left: 40px;
+            width: 120px; height: 120px; background: rgba(255,255,255,0.1);
+            border-radius: 50%; pointer-events: auto; border: 2px solid #00ffcc;
+        }
+        #joystick-knob {
+            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
+            background: #00ffcc; border-radius: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #00ffcc;
+        }
+
+        #shoot-btn {
+            position: absolute; bottom: 40px; right: 40px;
+            width: 80px; height: 80px; background: rgba(255, 0, 204, 0.5);
+            border: 3px solid #ff00cc; border-radius: 50%; pointer-events: auto;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; box-shadow: 0 0 20px #ff00cc;
+        }
+
+        /* --- CROSSHAIR --- */
+        #crosshair {
+            position: fixed; top: 50%; left: 50%; width: 30px; height: 30px;
+            border: 2px solid rgba(0, 255, 204, 0.8); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none;
+        }
+        #crosshair::before { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: red; border-radius: 50%; transform: translate(-50%, -50%); }
+
+        /* --- REWARD POPUP --- */
+        #reward-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            justify-content: center; z-index: 100; pointer-events: auto;
+        }
+        .reward-content {
+            background: #111; border: 2px solid #00ffcc; padding: 30px;
+            border-radius: 20px; text-align: center; color: white; width: 85%; max-width: 400px;
+        }
+        .buy-btn {
+            background: #ff00cc; color: white; border: none; padding: 15px;
+            width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 15px;
+            border-radius: 10px; text-decoration: none; display: block;
         }
     </style>
 </head>
 <body>
 
-<div id="aimer-container">
-    <div id="aimer-visual"></div>
-    <lottie-player id="shot-lottie" src="https://assets2.lottiefiles.com/packages/lf20_OG9w6o.json" speed="1.5"></lottie-player>
+<div id="crosshair"></div>
+
+<div id="game-ui">
+    <div class="hud-top">
+        <div class="stat-card">SCORE: <span id="score">0</span></div>
+        <div class="mission-box">
+            <div style="font-size: 10px; color: #ff00cc;">TARGET</div>
+            <div id="target-count" style="font-size: 18px;">0 / 10</div>
+        </div>
+        <div class="stat-card">LVL: <span id="lvl">1</span></div>
+    </div>
+
+    <div id="joystick-container"><div id="joystick-knob"></div></div>
+    <div id="shoot-btn">FIRE</div>
 </div>
 
-<div id="game-hud">
-    <div class="stat-box"> SCORE: <span class="value" id="score">0000</span> </div>
-    <div class="stat-box" style="text-align: right;"> LEVEL: <span class="value" id="lvl">1</span> </div>
+<div id="reward-modal">
+    <div class="reward-content">
+        <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_xl54du.json" autoplay loop style="width: 150px; margin: 0 auto;"></lottie-player>
+        <h2 id="prod-name" style="color:#00ffcc;">Sainiwalaa Premium</h2>
+        <p id="prod-desc">Special Discount Unlocked!</p>
+        <div id="discount-tag" style="font-size: 32px; color: gold; font-weight: 900; margin: 10px 0;">40% OFF</div>
+        <a id="buy-link" href="#" target="_blank" class="buy-btn">BUY NOW</a>
+        <button onclick="nextLevel()" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">NEXT LEVEL >></button>
+    </div>
 </div>
-
-<div id="mission-panel">
-    <div id="target-list">Loading Targets...</div>
-</div>
-
-<div id="win-overlay">
-    <lottie-player id="success-lottie" src="https://assets10.lottiefiles.com/packages/lf20_xl54du.json" loop autoplay></lottie-player>
-    <h1 style="color: #00ffcc; margin-top: -20px;">MISSION SUCCESS!</h1>
-    <h2 id="reward-text" style="color: gold; font-size: 32px;">56% OFF</h2>
-    <button onclick="nextLevel()">START NEXT LEVEL</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1;
-let objects = [], missionTargets = [];
+/** --- GAME CONFIG --- **/
+let scene, camera, renderer, score = 0, level = 1, targetGoal = 10, currentHits = 0;
+let objects = [], gunGroup, isMoving = false, moveDir = { x: 0 };
+let speed = 0.5;
 
-// 3D Target Designs
-const TARGET_TYPES = {
-    BEE: { color: 0xffff00, size: 0.3, points: 50 },
-    DOG: { color: 0x00ffcc, size: 0.6, points: 100 },
-    ELEPHANT: { color: 0x0088ff, size: 1.2, points: 200 }
-};
+const PRODUCTS = [
+    { name: "Sainiwalaa T-Shirt", discount: "30%", link: "https://meesho.com/sainiwalaa-tshirt" },
+    { name: "Royal Hoodie", discount: "50%", link: "https://amazon.in/sainiwalaa-hoodie" },
+    { name: "Premium Cap", discount: "20%", link: "https://flipkart.com/sainiwalaa-cap" }
+];
 
-// Mouse movement for Crosshair Container
-window.addEventListener('mousemove', (e) => {
-    const container = document.getElementById('aimer-container');
-    container.style.left = e.clientX + 'px';
-    container.style.top = e.clientY + 'px';
-});
-
+/** --- INITIALIZATION --- **/
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.03); // Halka depth color balance ke liye
+    scene.fog = new THREE.FogExp2(0x000000, 0.02);
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const light = new THREE.PointLight(0xffffff, 1); light.position.set(10, 10, 10);
-    scene.add(light);
+    // Lights
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambient);
+    const point = new THREE.PointLight(0x00ffcc, 1); point.position.set(5, 5, 5); scene.add(point);
 
-    camera.position.z = 5;
-
-    startLevel();
+    // Road / Environment
+    createRoad();
+    createGun();
+    
     spawnLoop();
     animate();
 }
 
-function startLevel() {
-    missionTargets = [];
-    if(level === 1) missionTargets.push({ type: 'BEE', goal: 5, current: 0 });
-    else if(level === 2) missionTargets.push({ type: 'DOG', goal: 5, current: 0 });
-    else {
-        missionTargets.push({ type: 'DOG', goal: level, current: 0 });
-        missionTargets.push({ type: 'ELEPHANT', goal: 1, current: 0 });
-    }
-    updateHUD();
+function createRoad() {
+    const geo = new THREE.PlaneGeometry(20, 1000);
+    const mat = new THREE.MeshPhongMaterial({ color: 0x111111, wireframe: true });
+    const road = new THREE.Mesh(geo, mat);
+    road.rotation.x = -Math.PI / 2;
+    scene.add(road);
 }
 
-function updateHUD() {
-    document.getElementById('score').innerText = score.toString().padStart(4, '0');
-    document.getElementById('lvl').innerText = level;
-    let targetHtml = "";
-    missionTargets.forEach(m => targetHtml += `${m.type}: ${m.current}/${m.goal} &nbsp;&nbsp;`);
-    document.getElementById('target-list').innerHTML = targetHtml;
-}
-
-function createObject() {
-    const keys = Object.keys(TARGET_TYPES);
-    const type = keys[Math.floor(Math.random() * keys.length)];
-    const data = TARGET_TYPES[type];
-
-    let geo;
-    if(type === 'BEE') geo = new THREE.IcosahedronGeometry(data.size);
-    else if(type === 'DOG') geo = new THREE.BoxGeometry(data.size, data.size, data.size);
-    else geo = new THREE.CylinderGeometry(data.size/2, data.size/2, data.size);
-
-    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.2 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((Math.random()-0.5)*18, (Math.random()-0.5)*12, -40);
-    mesh.userData = { type: type, speed: 0.2 + (level * 0.02) };
+function createGun() {
+    gunGroup = new THREE.Group();
+    const bodyGeo = new THREE.BoxGeometry(0.2, 0.3, 0.8);
+    const bodyMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    gunGroup.add(body);
     
-    scene.add(mesh);
-    objects.push(mesh);
+    gunGroup.position.set(0.5, -0.4, -0.5); // FPS Position
+    camera.add(gunGroup);
+    scene.add(camera);
 }
 
 function spawnLoop() {
-    createObject();
-    setTimeout(spawnLoop, 1000 - (level * 40));
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    objects.forEach((obj, i) => {
-        obj.position.z += obj.userData.speed;
-        obj.rotation.x += 0.01;
-        if(obj.position.z > 6) { scene.remove(obj); objects.splice(i, 1); }
+    const type = Math.random() > 0.2 ? 'GOOD' : 'BAD';
+    const prod = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+    
+    const geo = type === 'GOOD' ? new THREE.BoxGeometry(1,1,1) : new THREE.SphereGeometry(0.6, 12, 12);
+    const mat = new THREE.MeshPhongMaterial({ 
+        color: type === 'GOOD' ? 0x00ffcc : 0xff0055, 
+        wireframe: true,
+        emissive: type === 'GOOD' ? 0x00ffcc : 0xff0055,
+        emissiveIntensity: 0.5
     });
-    renderer.render(scene, camera);
+    
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set((Math.random() - 0.5) * 10, 0.5, -80);
+    mesh.userData = { type, product: prod };
+    
+    scene.add(mesh);
+    objects.push(mesh);
+    
+    setTimeout(spawnLoop, 1500 - (level * 50));
 }
 
-// --- SHOT LOGIC WITH LOTTIE ANIMATION ---
-window.addEventListener("mousedown", (e) => {
-    const mouse = new THREE.Vector2((e.clientX/window.innerWidth)*2-1, -(e.clientY/window.innerHeight)*2+1);
+/** --- CONTROLS --- **/
+const joystickContainer = document.getElementById('joystick-container');
+const knob = document.getElementById('joystick-knob');
+let touchId = null;
+
+joystickContainer.addEventListener('touchstart', e => { touchId = e.changedTouches[0].identifier; });
+window.addEventListener('touchmove', e => {
+    for (let t of e.changedTouches) {
+        if (t.identifier === touchId) {
+            const rect = joystickContainer.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const dx = Math.min(Math.max(t.clientX - cx, -50), 50);
+            knob.style.left = (50 + dx) + '%';
+            moveDir.x = dx / 50;
+        }
+    }
+});
+window.addEventListener('touchend', () => { knob.style.left = '50%'; moveDir.x = 0; touchId = null; });
+
+document.getElementById('shoot-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    shoot();
+});
+
+function shoot() {
+    // Gun Kick Animation
+    gunGroup.position.z += 0.1;
+    setTimeout(() => gunGroup.position.z -= 0.1, 50);
+
     const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera({ x: 0, y: 0 }, camera);
     const hits = raycaster.intersectObjects(objects);
 
-    if(hits.length > 0) {
-        let hit = hits[0].object;
-        let type = hit.userData.type;
-
-        // 1. Play Lottie Shot Animation
-        const shotLottie = document.getElementById('shot-lottie');
-        shotLottie.style.opacity = '1'; // Show
-        shotLottie.seek(0); // Rewind
-        shotLottie.play(); // Play once
-        
-        // Chhupa dein jab animation khatam ho (lagbhag 500ms)
-        setTimeout(() => shotLottie.style.opacity = '0', 500);
-
-        // 2. Mission Logic
-        let mission = missionTargets.find(m => m.type === type);
-        if(mission && mission.current < mission.goal) {
-            mission.current++;
-            score += TARGET_TYPES[type].points;
-            checkWin();
-        } else { score = Math.max(0, score - 20); }
-
-        updateHUD();
+    if (hits.length > 0) {
+        const hit = hits[0].object;
+        if (hit.userData.type === 'GOOD') {
+            score += 100;
+            currentHits++;
+            if (currentHits >= targetGoal) showReward(hit.userData.product);
+        } else {
+            score = Math.max(0, score - 50);
+            currentHits = Math.max(0, currentHits - 1);
+        }
+        updateUI();
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
     }
-});
+}
 
-function checkWin() {
-    if(missionTargets.every(m => m.current >= m.goal)) {
-        document.getElementById('win-overlay').style.display = 'flex';
-        document.getElementById('reward-text').innerText = (level * 10 + 30) + "% OFF ON ALL ITEMS";
-        // Note: Success Lottie autoplay aur loop par set hai HTML mein.
-    }
+/** --- CORE LOOP --- **/
+function animate() {
+    requestAnimationFrame(animate);
+    
+    // Movement Logic
+    camera.position.x += moveDir.x * 0.1;
+    camera.position.x = Math.max(Math.min(camera.position.x, 5), -5);
+
+    objects.forEach((obj, i) => {
+        obj.position.z += speed + (level * 0.1);
+        obj.rotation.y += 0.02;
+
+        // Auto-damage if wrong target hits you
+        if (obj.position.z > 2) {
+            scene.remove(obj);
+            objects.splice(i, 1);
+        }
+    });
+
+    renderer.render(scene, camera);
+}
+
+function updateUI() {
+    document.getElementById('score').innerText = score;
+    document.getElementById('target-count').innerText = `${currentHits} / ${targetGoal}`;
+    document.getElementById('lvl').innerText = level;
+}
+
+function showReward(prod) {
+    document.getElementById('reward-modal').style.display = 'flex';
+    document.getElementById('prod-name').innerText = prod.name;
+    document.getElementById('discount-tag').innerText = prod.discount + " OFF";
+    document.getElementById('buy-link').href = prod.link;
 }
 
 function nextLevel() {
     level++;
-    document.getElementById('win-overlay').style.display = 'none';
-    startLevel();
+    currentHits = 0;
+    speed += 0.1;
+    targetGoal += 5;
+    document.getElementById('reward-modal').style.display = 'none';
+    updateUI();
 }
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 init();
 </script>
