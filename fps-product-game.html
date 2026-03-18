@@ -2,36 +2,55 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sainiwalaa - Free GPS Game</title>
+    <title>Sainiwalaa - City Quest</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; background: #000; font-family: 'Segoe UI', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        body { margin: 0; padding: 0; background: #000; font-family: 'Orbitron', sans-serif; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
         
-        /* Game UI */
+        /* UI HUD */
         #game-hud {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #ff00cc;
-            color: #00ffcc; padding: 15px; border-radius: 15px; z-index: 100;
-            text-align: center; box-shadow: 0 0 20px #ff00cc;
+            width: 90%; background: rgba(0,0,0,0.85); border: 2px solid #00ffcc;
+            color: #fff; padding: 15px; border-radius: 15px; z-index: 100;
+            text-align: center; box-shadow: 0 0 20px #00ffcc;
         }
+        #dist-val { font-size: 30px; color: #ff00cc; display: block; margin: 5px 0; }
+        #mission-desc { font-size: 12px; color: #00ffcc; text-transform: uppercase; }
 
-        .marker-icon {
-            background: #ff00cc; border: 2px solid white;
-            border-radius: 50%; box-shadow: 0 0 10px #ff00cc;
+        /* Reward Modal */
+        #reward-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            justify-content: center; z-index: 1000; color: white; text-align: center;
         }
-
-        #distance-info { font-size: 24px; font-weight: bold; color: gold; }
+        .modal-card {
+            border: 3px solid #ffcc00; padding: 30px; border-radius: 20px;
+            background: #111; width: 80%;
+        }
+        .btn {
+            background: #ff00cc; color: white; border: none; padding: 15px 30px;
+            border-radius: 10px; font-family: 'Orbitron'; margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div id="game-hud">
-    <div style="font-size: 12px; letter-spacing: 2px;">SAINIWALAA MISSION</div>
-    <div id="mission-text">Target: 50m door ek Virtual Box hai!</div>
-    <div id="distance-info">Wait... GPS Loading</div>
+    <div id="mission-desc">Level 1: Gali No. 1 Explorer</div>
+    <span id="dist-val">-- M</span>
+    <div style="font-size: 10px;">Target ki taraf chalo!</div>
+</div>
+
+<div id="reward-modal">
+    <div class="modal-card">
+        <h1 id="res-title" style="color: gold;">TARGET REACHED!</h1>
+        <p id="res-msg">Aapne Level 1 complete kar liya hai.</p>
+        <div id="res-code" style="font-size: 24px; border: 2px dashed #00ffcc; margin: 15px 0; color: #00ffcc;">CODE: SW10</div>
+        <button class="btn" onclick="nextLevel()">NEXT MISSION</button>
+    </div>
 </div>
 
 <div id="map"></div>
@@ -39,72 +58,90 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // 1. Map Setup (Jaipur Default)
-    const map = L.map('map').setView([26.9124, 75.7873], 18);
-
-    // 2. OpenStreetMap Tiles (Bilkul Free, No Token)
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    // 3. User & Target Markers
-    let userMarker = L.circleMarker([0, 0], {
-        radius: 10, color: '#fff', fillColor: '#ff00cc', fillOpacity: 1
-    }).addTo(map);
-
+    let map, userMarker, targetMarker;
+    let currentLevel = 1;
     let targetLat, targetLon;
-    let targetMarker = L.marker([0, 0]).addTo(map);
-    targetMarker.bindPopup("<b>Sainiwalaa Reward!</b><br>Yahan pahuncho!").openPopup();
+    let firstPos = true;
 
-    // 4. Mission Logic: Pehla target user se 50m door set karna
-    function setFirstTarget(lat, lon) {
-        targetLat = lat + 0.0004; // Thoda sa door
-        targetLon = lon + 0.0004;
+    // Targets Config (Har level mein kitni door jana hai)
+    const LEVELS = [
+        { desc: "Level 1: Gali Explorer", dist: 0.0005, code: "SW10", msg: "10% Off Unlocked!" },
+        { desc: "Level 2: Building Hunter", dist: 0.0012, code: "SW30", msg: "30% Off Unlocked!" },
+        { desc: "Level 3: Sainiwalaa Boss", dist: 0.0025, code: "SW70", msg: "70% MEGA DISCOUNT!" }
+    ];
+
+    function initMap() {
+        map = L.map('map', { zoomControl: false }).setView([26.9124, 75.7873], 18);
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
+
+        userMarker = L.circleMarker([0,0], { radius: 12, color: '#fff', fillColor: '#ff00cc', fillOpacity: 1 }).addTo(map);
+        targetMarker = L.marker([0,0]).addTo(map);
+        
+        startTracking();
+    }
+
+    function setTarget(lat, lon) {
+        const config = LEVELS[currentLevel - 1];
+        // Thoda aage ka target set karna
+        targetLat = lat + config.dist; 
+        targetLon = lon + config.dist;
         targetMarker.setLatLng([targetLat, targetLon]);
+        document.getElementById('mission-desc').innerText = config.desc;
     }
 
-    let firstLoad = true;
+    function startTracking() {
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(pos => {
+                const { latitude, longitude } = pos.coords;
+                
+                userMarker.setLatLng([latitude, longitude]);
+                if(firstPos) {
+                    map.setView([latitude, longitude], 18);
+                    setTarget(latitude, longitude);
+                    firstPos = false;
+                }
 
-    // 5. GPS Real-time Tracking
-    if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(position => {
-            const { latitude, longitude } = position.coords;
-            
-            userMarker.setLatLng([latitude, longitude]);
-            if(firstLoad) {
-                map.setView([latitude, longitude], 18);
-                setFirstTarget(latitude, longitude);
-                firstLoad = false;
-            }
+                const d = calculateDistance(latitude, longitude, targetLat, targetLon);
+                document.getElementById('dist-val').innerText = Math.round(d) + " M";
 
-            // Distance Calculation (Haversine Formula)
-            const dist = getDistance(latitude, longitude, targetLat, targetLon);
-            document.getElementById('distance-info').innerText = Math.round(dist) + " METERS";
-
-            if(dist < 10) {
-                alert("CONGRATS! Aapne Sainiwalaa Box dhund liya. Code: GET70");
-                location.reload(); // Reset for next target
-            }
-
-        }, err => {
-            alert("Bhai GPS on karo aur permission do!");
-        }, { enableHighAccuracy: true });
+                // Agar 10 meter ke andar ho toh jeet gaye
+                if(d < 15) {
+                    showReward();
+                }
+            }, err => alert("GPS Permission Chahiye!"), { enableHighAccuracy: true });
+        }
     }
 
-    // Distance function
-    function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // metres
-        const φ1 = lat1 * Math.PI/180;
-        const φ2 = lat2 * Math.PI/180;
-        const Δφ = (lat2-lat1) * Math.PI/180;
-        const Δλ = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
+    function showReward() {
+        const config = LEVELS[currentLevel - 1];
+        document.getElementById('reward-modal').style.display = 'flex';
+        document.getElementById('res-msg').innerText = config.msg;
+        document.getElementById('res-code').innerText = "CODE: " + config.code;
     }
+
+    function nextLevel() {
+        currentLevel++;
+        if(currentLevel > 3) {
+            alert("Sainiwalaa Legend! Saare targets poore.");
+            location.reload();
+            return;
+        }
+        document.getElementById('reward-modal').style.display = 'none';
+        // Naya target set karne ke liye user ki current pos leni hogi
+        const currPos = userMarker.getLatLng();
+        setTarget(currPos.lat, currPos.lng);
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    initMap();
 </script>
 </body>
 </html>
