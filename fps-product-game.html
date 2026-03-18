@@ -1,122 +1,32 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sainiwalaa City Navigator</title>
+    <title>Sainiwalaa GPS Tracker</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
-        body { margin: 0; overflow: hidden; background: #111; font-family: 'Orbitron', sans-serif; }
-        canvas { display: block; }
-        
-        #mission-panel {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 255, 204, 0.2); border: 2px solid #00ffcc;
-            padding: 10px 20px; color: white; border-radius: 10px; z-index: 10;
-            text-align: center; width: 80%;
-        }
-        
-        #joystick {
-            position: fixed; bottom: 30px; left: 30px; width: 100px; height: 100px;
-            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid #ff00cc;
-        }
+        body { background: #000; color: #0ff; font-family: sans-serif; text-align: center; }
+        #status { font-size: 20px; margin-top: 50px; border: 2px solid #f0f; padding: 20px; }
     </style>
 </head>
 <body>
+    <h1>Sainiwalaa Real-World Test</h1>
+    <div id="status">Location dhund raha hoon...</div>
+    <p>Bahar nikal kar thoda chalein, coordinates badlenge!</p>
 
-<div id="mission-panel">
-    <div style="font-size: 10px; color: #00ffcc;">CURRENT TASK</div>
-    <div id="task-text">Gali No. 4 ki building tak pahuncho!</div>
-</div>
+    <script>
+        const status = document.getElementById('status');
 
-<div id="joystick"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<script>
-let scene, camera, renderer, player;
-let buildings = [], tasks = [], currentTaskIndex = 0;
-
-function init() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050505);
-    scene.fog = new THREE.Fog(0x050505, 1, 50);
-
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // Light
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-    scene.add(light);
-
-    // Create "Gali" (Roads) & Buildings
-    createCity();
-
-    // Player (The Explorer)
-    const playerGeo = new THREE.SphereGeometry(0.5, 16, 16);
-    const playerMat = new THREE.MeshPhongMaterial({ color: 0xff00cc, emissive: 0xff00cc });
-    player = new THREE.Mesh(playerGeo, playerMat);
-    player.position.y = 0.5;
-    scene.add(player);
-
-    camera.position.set(0, 10, 10);
-    camera.lookAt(player.position);
-
-    animate();
-}
-
-function createCity() {
-    // Ground Grid
-    const grid = new THREE.GridHelper(200, 50, 0x00ffcc, 0x222222);
-    scene.add(grid);
-
-    // Generate Random Buildings (Like a Map)
-    for(let i=0; i<60; i++) {
-        let w = Math.random() * 3 + 1;
-        let h = Math.random() * 10 + 2;
-        let d = Math.random() * 3 + 1;
-        const geo = new THREE.BoxGeometry(w, h, d);
-        const mat = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: true });
-        const b = new THREE.Mesh(geo, mat);
-        
-        // Random placement but keeping "Gali" (Road) space
-        b.position.x = (Math.random() - 0.5) * 100;
-        b.position.z = (Math.random() - 0.5) * 100;
-        if(Math.abs(b.position.x) < 3) b.position.x += 10; // Making a main road
-        
-        b.position.y = h/2;
-        scene.add(b);
-        buildings.push(b);
-    }
-}
-
-// Simple Control Logic
-let move = { x: 0, z: 0 };
-window.addEventListener('keydown', e => {
-    if(e.key === "ArrowUp") move.z = -0.2;
-    if(e.key === "ArrowDown") move.z = 0.2;
-    if(e.key === "ArrowLeft") move.x = -0.2;
-    if(e.key === "ArrowRight") move.x = 0.2;
-});
-window.addEventListener('keyup', () => move = { x: 0, z: 0 });
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    player.position.x += move.x;
-    player.position.z += move.z;
-
-    // Camera follow
-    camera.position.x = player.position.x;
-    camera.position.z = player.position.z + 10;
-    camera.lookAt(player.position);
-
-    renderer.render(scene, camera);
-}
-
-init();
-</script>
+        if (navigator.geolocation) {
+            // User ki movement ko track karna
+            navigator.geolocation.watchPosition(position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                status.innerHTML = `Latitude: ${lat.toFixed(6)}<br>Longitude: ${lon.toFixed(6)}<br><br><b>Aap chal rahe ho!</b>`;
+            }, error => {
+                status.innerHTML = "Error: Permission deni hogi bhai!";
+            }, { enableHighAccuracy: true });
+        } else {
+            status.innerHTML = "Aapka browser purana hai.";
+        }
+    </script>
 </body>
 </html>
