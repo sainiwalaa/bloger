@@ -3,282 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sainiwalaa - Cyber Runner FPS</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <title>Sainiwalaa Fly - Game</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
-        
-        * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@700&display=swap');
 
-        /* --- UI OVERLAY --- */
-        #game-ui {
+        * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #70c5ce; font-family: 'Orbitron', sans-serif; }
+
+        canvas { display: block; background: linear-gradient(to bottom, #2c3e50, #000); }
+
+        /* UI HUD */
+        #ui {
+            position: fixed; top: 20px; width: 100%; display: flex;
+            justify-content: space-between; padding: 0 20px; pointer-events: none; z-index: 10;
+        }
+        .stat { color: #fff; font-size: 20px; text-shadow: 2px 2px #000; }
+        #score { font-family: 'Black Ops One'; font-size: 40px; color: #ff00cc; }
+
+        /* Game Over / Reward Modal */
+        #modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10; padding: 15px;
-            display: flex; flex-direction: column; justify-content: space-between;
+            background: rgba(0,0,0,0.85); display: none; align-items: center;
+            justify-content: center; flex-direction: column; z-index: 100; color: #fff; text-align: center;
         }
-
-        .hud-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .stat-card {
-            background: rgba(0, 255, 204, 0.1); border-left: 4px solid #00ffcc;
-            padding: 10px 20px; backdrop-filter: blur(5px); color: white;
-        }
-        .mission-box {
-            text-align: center; background: rgba(255, 0, 204, 0.1);
-            border-bottom: 3px solid #ff00cc; padding: 10px; min-width: 150px;
-        }
-
-        /* --- CONTROLS --- */
-        #joystick-container {
-            position: absolute; bottom: 40px; left: 40px;
-            width: 120px; height: 120px; background: rgba(255,255,255,0.1);
-            border-radius: 50%; pointer-events: auto; border: 2px solid #00ffcc;
-        }
-        #joystick-knob {
-            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
-            background: #00ffcc; border-radius: 50%; transform: translate(-50%, -50%);
+        .card {
+            background: #111; border: 3px solid #00ffcc; padding: 30px;
+            border-radius: 20px; width: 85%; max-width: 350px;
             box-shadow: 0 0 20px #00ffcc;
         }
-
-        #shoot-btn {
-            position: absolute; bottom: 40px; right: 40px;
-            width: 80px; height: 80px; background: rgba(255, 0, 204, 0.5);
-            border: 3px solid #ff00cc; border-radius: 50%; pointer-events: auto;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; box-shadow: 0 0 20px #ff00cc;
+        .btn-buy {
+            background: #ff00cc; color: #fff; padding: 15px; width: 100%;
+            border: none; border-radius: 10px; font-weight: bold; margin-top: 15px;
+            cursor: pointer; text-decoration: none; display: block;
         }
-
-        /* --- CROSSHAIR --- */
-        #crosshair {
-            position: fixed; top: 50%; left: 50%; width: 30px; height: 30px;
-            border: 2px solid rgba(0, 255, 204, 0.8); border-radius: 50%;
-            transform: translate(-50%, -50%); pointer-events: none;
-        }
-        #crosshair::before { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: red; border-radius: 50%; transform: translate(-50%, -50%); }
-
-        /* --- REWARD POPUP --- */
-        #reward-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; align-items: center;
-            justify-content: center; z-index: 100; pointer-events: auto;
-        }
-        .reward-content {
-            background: #111; border: 2px solid #00ffcc; padding: 30px;
-            border-radius: 20px; text-align: center; color: white; width: 85%; max-width: 400px;
-        }
-        .buy-btn {
-            background: #ff00cc; color: white; border: none; padding: 15px;
-            width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 15px;
-            border-radius: 10px; text-decoration: none; display: block;
-        }
+        .btn-retry { background: #555; margin-top: 10px; color: #fff; border: none; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="crosshair"></div>
-
-<div id="game-ui">
-    <div class="hud-top">
-        <div class="stat-card">SCORE: <span id="score">0</span></div>
-        <div class="mission-box">
-            <div style="font-size: 10px; color: #ff00cc;">TARGET</div>
-            <div id="target-count" style="font-size: 18px;">0 / 10</div>
-        </div>
-        <div class="stat-card">LVL: <span id="lvl">1</span></div>
-    </div>
-
-    <div id="joystick-container"><div id="joystick-knob"></div></div>
-    <div id="shoot-btn">FIRE</div>
+<div id="ui">
+    <div class="stat">LVL: <span id="lvl">1</span></div>
+    <div id="score">0</div>
+    <div class="stat">BEST: <span id="best">0</span></div>
 </div>
 
-<div id="reward-modal">
-    <div class="reward-content">
-        <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_xl54du.json" autoplay loop style="width: 150px; margin: 0 auto;"></lottie-player>
-        <h2 id="prod-name" style="color:#00ffcc;">Sainiwalaa Premium</h2>
-        <p id="prod-desc">Special Discount Unlocked!</p>
-        <div id="discount-tag" style="font-size: 32px; color: gold; font-weight: 900; margin: 10px 0;">40% OFF</div>
-        <a id="buy-link" href="#" target="_blank" class="buy-btn">BUY NOW</a>
-        <button onclick="nextLevel()" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">NEXT LEVEL >></button>
+<div id="modal">
+    <div class="card">
+        <h1 id="status-title" style="color:#00ffcc">OFFER UNLOCKED!</h1>
+        <p>Aapne kamaal ka score kiya!</p>
+        <div id="reward-info" style="font-size: 24px; color: gold; margin: 10px 0;">50% OFF</div>
+        <a id="buy-link" href="#" target="_blank" class="btn-buy">BUY PRODUCT NOW</a>
+        <button class="btn-retry" onclick="resetGame()">TRY AGAIN</button>
     </div>
 </div>
+
+<canvas id="gameCanvas"></canvas>
 
 <script>
-/** --- GAME CONFIG --- **/
-let scene, camera, renderer, score = 0, level = 1, targetGoal = 10, currentHits = 0;
-let objects = [], gunGroup, isMoving = false, moveDir = { x: 0 };
-let speed = 0.5;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
+const lvlEl = document.getElementById("lvl");
 
-const PRODUCTS = [
-    { name: "Sainiwalaa T-Shirt", discount: "30%", link: "https://meesho.com/sainiwalaa-tshirt" },
-    { name: "Royal Hoodie", discount: "50%", link: "https://amazon.in/sainiwalaa-hoodie" },
-    { name: "Premium Cap", discount: "20%", link: "https://flipkart.com/sainiwalaa-cap" }
-];
+// Setup Canvas Size
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-/** --- INITIALIZATION --- **/
-function init() {
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.02);
+// Game State
+let bird = { x: 50, y: canvas.height / 2, w: 40, h: 30, gravity: 0.5, velocity: 0, jump: -8 };
+let pipes = [];
+let frame = 0;
+let score = 0;
+let best = localStorage.getItem("saini_best") || 0;
+let gameActive = true;
+let level = 1;
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+bestEl.innerText = best;
 
-    // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5); scene.add(ambient);
-    const point = new THREE.PointLight(0x00ffcc, 1); point.position.set(5, 5, 5); scene.add(point);
+// Pipe Config
+const pipeWidth = 70;
+const pipeGap = 180;
+const pipeSpeed = 3;
 
-    // Road / Environment
-    createRoad();
-    createGun();
+function createPipe() {
+    let minHeight = 50;
+    let maxHeight = canvas.height - pipeGap - minHeight;
+    let height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
     
-    spawnLoop();
-    animate();
-}
-
-function createRoad() {
-    const geo = new THREE.PlaneGeometry(20, 1000);
-    const mat = new THREE.MeshPhongMaterial({ color: 0x111111, wireframe: true });
-    const road = new THREE.Mesh(geo, mat);
-    road.rotation.x = -Math.PI / 2;
-    scene.add(road);
-}
-
-function createGun() {
-    gunGroup = new THREE.Group();
-    const bodyGeo = new THREE.BoxGeometry(0.2, 0.3, 0.8);
-    const bodyMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    gunGroup.add(body);
-    
-    gunGroup.position.set(0.5, -0.4, -0.5); // FPS Position
-    camera.add(gunGroup);
-    scene.add(camera);
-}
-
-function spawnLoop() {
-    const type = Math.random() > 0.2 ? 'GOOD' : 'BAD';
-    const prod = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
-    
-    const geo = type === 'GOOD' ? new THREE.BoxGeometry(1,1,1) : new THREE.SphereGeometry(0.6, 12, 12);
-    const mat = new THREE.MeshPhongMaterial({ 
-        color: type === 'GOOD' ? 0x00ffcc : 0xff0055, 
-        wireframe: true,
-        emissive: type === 'GOOD' ? 0x00ffcc : 0xff0055,
-        emissiveIntensity: 0.5
+    pipes.push({
+        x: canvas.width,
+        top: height,
+        bottom: canvas.height - height - pipeGap,
+        passed: false,
+        color: level % 2 === 0 ? "#ff00cc" : "#00ffcc"
     });
-    
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((Math.random() - 0.5) * 10, 0.5, -80);
-    mesh.userData = { type, product: prod };
-    
-    scene.add(mesh);
-    objects.push(mesh);
-    
-    setTimeout(spawnLoop, 1500 - (level * 50));
 }
 
-/** --- CONTROLS --- **/
-const joystickContainer = document.getElementById('joystick-container');
-const knob = document.getElementById('joystick-knob');
-let touchId = null;
+function drawBird() {
+    // Character (Simplified as a glowing neon box for Sainiwalaa)
+    ctx.fillStyle = "#fff";
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00ffcc";
+    ctx.fillRect(bird.x, bird.y, bird.w, bird.h);
+    ctx.shadowBlur = 0;
+    
+    // Eyes
+    ctx.fillStyle = "#000";
+    ctx.fillRect(bird.x + 25, bird.y + 5, 5, 5);
+}
 
-joystickContainer.addEventListener('touchstart', e => { touchId = e.changedTouches[0].identifier; });
-window.addEventListener('touchmove', e => {
-    for (let t of e.changedTouches) {
-        if (t.identifier === touchId) {
-            const rect = joystickContainer.getBoundingClientRect();
-            const cx = rect.left + rect.width/2;
-            const dx = Math.min(Math.max(t.clientX - cx, -50), 50);
-            knob.style.left = (50 + dx) + '%';
-            moveDir.x = dx / 50;
+function drawPipes() {
+    pipes.forEach(p => {
+        ctx.fillStyle = p.color;
+        // Top Pipe
+        ctx.fillRect(p.x, 0, pipeWidth, p.top);
+        // Bottom Pipe
+        ctx.fillRect(p.x, canvas.height - p.bottom, pipeWidth, p.bottom);
+        
+        // Product Label on Pipe
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px Orbitron";
+        ctx.fillText("PRODUCT", p.x + 5, p.top - 10);
+    });
+}
+
+function update() {
+    if (!gameActive) return;
+
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    // Boundary Check
+    if (bird.y + bird.h > canvas.height || bird.y < 0) endGame();
+
+    // Pipes Logic
+    if (frame % 100 === 0) createPipe();
+
+    pipes.forEach((p, index) => {
+        p.x -= pipeSpeed + (level * 0.5);
+
+        // Collision Detection
+        if (bird.x < p.x + pipeWidth && bird.x + bird.w > p.x &&
+            (bird.y < p.top || bird.y + bird.h > canvas.height - p.bottom)) {
+            endGame();
         }
-    }
-});
-window.addEventListener('touchend', () => { knob.style.left = '50%'; moveDir.x = 0; touchId = null; });
 
-document.getElementById('shoot-btn').addEventListener('touchstart', (e) => {
+        // Score Logic
+        if (!p.passed && bird.x > p.x + pipeWidth) {
+            score++;
+            p.passed = true;
+            scoreEl.innerText = score;
+            if (score % 5 === 0) {
+                level++;
+                lvlEl.innerText = level;
+            }
+        }
+
+        if (p.x + pipeWidth < 0) pipes.splice(index, 1);
+    });
+
+    frame++;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Background City Look (Static simplified)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    for(let i=0; i<5; i++) {
+        ctx.fillRect(i * 200 - (frame % 200), canvas.height - 150, 100, 150);
+    }
+
+    drawPipes();
+    drawBird();
+}
+
+function loop() {
+    update();
+    draw();
+    if (gameActive) requestAnimationFrame(loop);
+}
+
+function endGame() {
+    gameActive = false;
+    if (score > best) {
+        best = score;
+        localStorage.setItem("saini_best", best);
+        bestEl.innerText = best;
+    }
+    
+    document.getElementById("modal").style.display = "flex";
+    
+    // Rewards logic
+    const link = document.getElementById("buy-link");
+    const info = document.getElementById("reward-info");
+    
+    if (score > 10) {
+        info.innerText = "70% MEGA OFF";
+        link.href = "https://meesho.com/sainiwalaa-special";
+    } else {
+        info.innerText = "30% WELCOME OFF";
+        link.href = "https://amazon.in/sainiwalaa";
+    }
+}
+
+function resetGame() {
+    bird.y = canvas.height / 2;
+    bird.velocity = 0;
+    pipes = [];
+    score = 0;
+    level = 1;
+    frame = 0;
+    scoreEl.innerText = "0";
+    lvlEl.innerText = "1";
+    gameActive = true;
+    document.getElementById("modal").style.display = "none";
+    loop();
+}
+
+// Controls
+window.addEventListener("mousedown", () => { if(gameActive) bird.velocity = bird.jump; });
+window.addEventListener("touchstart", (e) => { 
     e.preventDefault();
-    shoot();
+    if(gameActive) bird.velocity = bird.jump; 
 });
 
-function shoot() {
-    // Gun Kick Animation
-    gunGroup.position.z += 0.1;
-    setTimeout(() => gunGroup.position.z -= 0.1, 50);
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera({ x: 0, y: 0 }, camera);
-    const hits = raycaster.intersectObjects(objects);
-
-    if (hits.length > 0) {
-        const hit = hits[0].object;
-        if (hit.userData.type === 'GOOD') {
-            score += 100;
-            currentHits++;
-            if (currentHits >= targetGoal) showReward(hit.userData.product);
-        } else {
-            score = Math.max(0, score - 50);
-            currentHits = Math.max(0, currentHits - 1);
-        }
-        updateUI();
-        scene.remove(hit);
-        objects.splice(objects.indexOf(hit), 1);
-    }
-}
-
-/** --- CORE LOOP --- **/
-function animate() {
-    requestAnimationFrame(animate);
-    
-    // Movement Logic
-    camera.position.x += moveDir.x * 0.1;
-    camera.position.x = Math.max(Math.min(camera.position.x, 5), -5);
-
-    objects.forEach((obj, i) => {
-        obj.position.z += speed + (level * 0.1);
-        obj.rotation.y += 0.02;
-
-        // Auto-damage if wrong target hits you
-        if (obj.position.z > 2) {
-            scene.remove(obj);
-            objects.splice(i, 1);
-        }
-    });
-
-    renderer.render(scene, camera);
-}
-
-function updateUI() {
-    document.getElementById('score').innerText = score;
-    document.getElementById('target-count').innerText = `${currentHits} / ${targetGoal}`;
-    document.getElementById('lvl').innerText = level;
-}
-
-function showReward(prod) {
-    document.getElementById('reward-modal').style.display = 'flex';
-    document.getElementById('prod-name').innerText = prod.name;
-    document.getElementById('discount-tag').innerText = prod.discount + " OFF";
-    document.getElementById('buy-link').href = prod.link;
-}
-
-function nextLevel() {
-    level++;
-    currentHits = 0;
-    speed += 0.1;
-    targetGoal += 5;
-    document.getElementById('reward-modal').style.display = 'none';
-    updateUI();
-}
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-init();
+loop();
 </script>
 </body>
 </html>
