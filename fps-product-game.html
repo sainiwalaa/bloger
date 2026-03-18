@@ -2,150 +2,153 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwalaa Universe - Mission Hub</title>
+    <title>Sainiwalaa Mega Toy Hunter</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Orbitron:wght@400;900&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
-        
-        /* Modern Gaming Interface */
-        #ui {
+        body { 
+            margin: 0; overflow: hidden; 
+            background: linear-gradient(45deg, #ff00cc, #333, #00ffcc); 
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Fredoka One', cursive; cursor: none;
+        }
+
+        @keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+
+        /* Modern UI */
+        #game-interface {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 100;
         }
-        
-        .top-bar {
-            display: flex; justify-content: space-between; padding: 20px;
-            background: rgba(0,0,0,0.5); border-bottom: 2px solid #00ffcc;
+
+        .stat-bar {
+            display: flex; justify-content: space-around; padding: 20px;
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
+            border-bottom: 4px solid #fff; color: white; text-shadow: 2px 2px 5px #000;
         }
 
-        .mission-panel {
-            background: rgba(0, 255, 204, 0.1); padding: 15px;
-            border-radius: 10px; border: 1px solid #00ffcc;
-            text-align: center; min-width: 250px;
+        .mission-box {
+            background: white; color: #ff00cc; padding: 10px 30px;
+            border-radius: 50px; border: 5px solid #ff00cc; font-size: 20px;
+            box-shadow: 0 10px 0 #b30086; transform: translateY(-5px);
         }
 
-        #target-display { font-size: 22px; color: #ffcc00; font-weight: bold; }
-        #counter { font-size: 30px; color: #fff; }
-
-        /* Reticle / Aim */
-        #reticle {
-            position: fixed; width: 50px; height: 50px;
-            border: 2px solid #00ffcc; border-radius: 50%;
+        #aimer {
+            position: fixed; width: 60px; height: 60px;
+            border: 4px solid white; border-radius: 50%;
             pointer-events: none; z-index: 1000; transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px #00ffcc;
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Result Overlay */
-        #overlay {
+        #reward-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); display: none; align-items: center;
             justify-content: center; flex-direction: column; color: white; z-index: 200;
         }
-        
-        button {
-            padding: 10px 30px; font-family: 'Orbitron'; background: #00ffcc;
-            border: none; cursor: pointer; font-weight: bold; margin-top: 20px;
+
+        .btn {
+            padding: 15px 40px; font-size: 24px; background: #00ffcc;
+            border: none; border-radius: 50px; cursor: pointer; color: #000;
+            font-family: 'Fredoka One'; margin-top: 20px; box-shadow: 0 8px 0 #00997a;
         }
     </style>
 </head>
 <body>
 
-<div id="reticle"></div>
+<div id="aimer"></div>
 
-<div id="ui">
-    <div class="top-bar">
-        <div>SCORE: <span id="score">0</span></div>
-        <div class="mission-panel">
-            <div id="world-tag" style="font-size: 10px; color: #00ffcc;">CYBER WORLD</div>
-            <div id="target-display">TARGET: BALL</div>
-            <div id="counter">0 / 10</div>
-        </div>
+<div id="game-interface">
+    <div class="stat-bar">
+        <div>SCORE: <span id="score">0</span><br><small>HIGH: <span id="high-score">0</span></small></div>
+        <div class="mission-box" id="mission-ui">TARGET: Loading...</div>
         <div>LEVEL: <span id="lvl">1</span></div>
     </div>
 </div>
 
-<div id="overlay">
-    <h1 id="overlay-title">MISSION COMPLETE!</h1>
-    <h2 id="reward-text" style="color: gold;">56% OFF UNLOCKED</h2>
-    <p>Aapne target poora kiya!</p>
-    <button onclick="nextLevel()">NEXT WORLD >></button>
+<div id="reward-screen">
+    <h1 id="res-title" style="font-size: 60px; color: #ffcc00;">AMAZING!</h1>
+    <h2 id="reward-desc">REWARD UNLOCKED</h2>
+    <div id="reward-value" style="font-size: 40px; color: #00ffcc;">56% OFF</div>
+    <button class="btn" onclick="nextLevel()">START NEXT CHALLENGE</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-let scene, camera, renderer, score = 0, level = 1, currentWorld = 0;
-let objects = [], mission = { type: 'BALL', count: 0, target: 10 };
+let scene, camera, renderer, score = 0, level = 1;
+let objects = [], mission = { targets: [] };
+const highscore = localStorage.getItem('saini_highscore') || 0;
+document.getElementById('high-score').innerText = highscore;
 
-const worldThemes = [
-    { name: "CYBER NEON", color: 0x00ffcc, fog: 0x000505 },
-    { name: "GALAXY VOID", color: 0xff00cc, fog: 0x000011 },
-    { name: "DESERT STORM", color: 0xffcc00, fog: 0x110500 }
-];
-
-const targetTypes = ['BALL', 'STAR', 'KITE'];
+// Target Designs
+const TARGET_TYPES = {
+    BEE: { color: 0xffff00, size: 0.3, speed: 0.5 },
+    DOG: { color: 0x964B00, size: 0.6, speed: 0.3 },
+    ELEPHANT: { color: 0x808080, size: 1.2, speed: 0.15 },
+    TOY: { color: 0x00ffcc, size: 0.5, speed: 0.25 }
+};
 
 window.addEventListener('mousemove', (e) => {
-    document.getElementById('reticle').style.left = e.clientX + 'px';
-    document.getElementById('reticle').style.top = e.clientY + 'px';
+    document.getElementById('aimer').style.left = e.clientX + 'px';
+    document.getElementById('aimer').style.top = e.clientY + 'px';
 });
 
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     camera.position.z = 5;
-    
-    setupWorld();
-    setupMission();
+
+    setupLevelMission();
     spawnLoop();
     animate();
 }
 
-function setupWorld() {
-    let theme = worldThemes[currentWorld];
-    scene.background = new THREE.Color(theme.fog);
-    scene.fog = new THREE.FogExp2(theme.fog, 0.05);
-    document.getElementById('world-tag').innerText = theme.name;
+function setupLevelMission() {
+    mission.targets = [];
+    const available = Object.keys(TARGET_TYPES);
     
-    // Clear old lights and add new ones
-    scene.children = scene.children.filter(c => !(c instanceof THREE.Light));
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    let pl = new THREE.PointLight(theme.color, 2, 50);
-    pl.position.set(0, 0, 5);
-    scene.add(pl);
+    if(level <= 2) {
+        // Simple Single Target
+        let t = available[Math.floor(Math.random()*available.length)];
+        mission.targets.push({ type: t, goal: 5 + level, current: 0 });
+    } else {
+        // Combo Mission (Level 3+)
+        mission.targets.push({ type: 'DOG', goal: 3 + level, current: 0 });
+        mission.targets.push({ type: 'ELEPHANT', goal: 2, current: 0 });
+    }
+    updateMissionUI();
 }
 
-function setupMission() {
-    mission.type = targetTypes[Math.floor(Math.random() * 3)];
-    mission.target = 5 + (level * 2);
-    mission.count = 0;
-    
-    document.getElementById('target-display').innerText = "TARGET: " + mission.type;
-    document.getElementById('counter').innerText = `0 / ${mission.target}`;
+function updateMissionUI() {
+    let text = "TARGET: ";
+    mission.targets.forEach(t => {
+        text += `${t.type} (${t.current}/${t.goal}) `;
+    });
+    document.getElementById('mission-ui').innerText = text;
 }
 
 function createObject() {
-    const type = targetTypes[Math.floor(Math.random() * 3)];
+    const keys = Object.keys(TARGET_TYPES);
+    const typeKey = keys[Math.floor(Math.random() * keys.length)];
+    const data = TARGET_TYPES[typeKey];
+
     let geo;
-    
-    if(type === 'BALL') geo = new THREE.SphereGeometry(0.5, 20, 20);
-    else if(type === 'STAR') geo = new THREE.IcosahedronGeometry(0.6, 0);
-    else if(type === 'KITE') geo = new THREE.TorusGeometry(0.4, 0.15, 8, 20);
+    if(typeKey === 'BEE') geo = new THREE.SphereGeometry(data.size, 8, 8);
+    else if(typeKey === 'DOG') geo = new THREE.BoxGeometry(data.size, data.size, data.size);
+    else if(typeKey === 'ELEPHANT') geo = new THREE.CapsuleGeometry(data.size/2, data.size/2, 4, 8);
+    else geo = new THREE.TorusKnotGeometry(0.3, 0.1, 32, 8);
 
-    const mat = new THREE.MeshPhongMaterial({ 
-        color: type === mission.type ? 0x00ffcc : 0xff3300,
-        emissive: type === mission.type ? 0x00ffcc : 0x000000,
-        emissiveIntensity: 0.5
-    });
-
+    const mat = new THREE.MeshPhongMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.2 });
     const mesh = new THREE.Mesh(geo, mat);
+    
     mesh.position.set((Math.random()-0.5)*15, (Math.random()-0.5)*10, -50);
-    mesh.userData = { type: type };
+    mesh.userData = { type: typeKey, speed: data.speed + (level * 0.02) };
     
     scene.add(mesh);
     objects.push(mesh);
@@ -153,14 +156,14 @@ function createObject() {
 
 function spawnLoop() {
     createObject();
-    setTimeout(spawnLoop, 800 - (level * 40));
+    setTimeout(spawnLoop, 800 - (level * 30));
 }
 
 function animate() {
     requestAnimationFrame(animate);
     objects.forEach((obj, i) => {
-        obj.position.z += 0.2 + (level * 0.03);
-        obj.rotation.y += 0.02;
+        obj.position.z += obj.userData.speed;
+        obj.rotation.x += 0.02;
         if(obj.position.z > 6) {
             scene.remove(obj);
             objects.splice(i, 1);
@@ -177,36 +180,45 @@ window.addEventListener("mousedown", (e) => {
 
     if(hits.length > 0) {
         let hit = hits[0].object;
-        if(hit.userData.type === mission.type) {
-            mission.count++;
-            score += 100;
-            document.getElementById('counter').innerText = `${mission.count} / ${mission.target}`;
-            if(mission.count >= mission.target) {
-                showResult();
-            }
+        let hitType = hit.userData.type;
+
+        let missionPart = mission.targets.find(t => t.type === hitType);
+        
+        if(missionPart && missionPart.current < missionPart.goal) {
+            missionPart.current++;
+            score += 150;
+            checkMissionComplete();
         } else {
             score = Math.max(0, score - 50);
-            document.body.style.background = "red";
-            setTimeout(() => document.body.style.background = "#000", 50);
         }
+        
+        // Save Score
+        if(score > highscore) {
+            localStorage.setItem('saini_highscore', score);
+            document.getElementById('high-score').innerText = score;
+        }
+
         document.getElementById('score').innerText = score;
+        updateMissionUI();
         scene.remove(hit);
         objects.splice(objects.indexOf(hit), 1);
     }
 });
 
-function showResult() {
-    document.getElementById('overlay').style.display = 'flex';
-    document.getElementById('reward-text').innerText = (level * 12 + 30) + "% OFF ON PRODUCTS";
+function checkMissionComplete() {
+    let allDone = mission.targets.every(t => t.current >= t.goal);
+    if(allDone) {
+        document.getElementById('reward-screen').style.display = 'flex';
+        let rewards = ["70% Mega Deal", "BOGO Offer", "56% Sainiwalaa Special", "Flat ₹500 OFF"];
+        document.getElementById('reward-value').innerText = rewards[level % rewards.length];
+    }
 }
 
 function nextLevel() {
     level++;
-    currentWorld = (currentWorld + 1) % worldThemes.length;
     document.getElementById('lvl').innerText = level;
-    document.getElementById('overlay').style.display = 'none';
-    setupWorld();
-    setupMission();
+    document.getElementById('reward-screen').style.display = 'none';
+    setupLevelMission();
 }
 
 init();
