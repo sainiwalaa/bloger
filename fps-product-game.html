@@ -1,32 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sainiwalaa GPS Tracker</title>
+    <meta charset="utf-8">
+    <title>Sainiwalaa - Free GPS Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { background: #000; color: #0ff; font-family: sans-serif; text-align: center; }
-        #status { font-size: 20px; margin-top: 50px; border: 2px solid #f0f; padding: 20px; }
+        body { margin: 0; padding: 0; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+        
+        /* Game UI */
+        #game-hud {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #ff00cc;
+            color: #00ffcc; padding: 15px; border-radius: 15px; z-index: 100;
+            text-align: center; box-shadow: 0 0 20px #ff00cc;
+        }
+
+        .marker-icon {
+            background: #ff00cc; border: 2px solid white;
+            border-radius: 50%; box-shadow: 0 0 10px #ff00cc;
+        }
+
+        #distance-info { font-size: 24px; font-weight: bold; color: gold; }
     </style>
 </head>
 <body>
-    <h1>Sainiwalaa Real-World Test</h1>
-    <div id="status">Location dhund raha hoon...</div>
-    <p>Bahar nikal kar thoda chalein, coordinates badlenge!</p>
 
-    <script>
-        const status = document.getElementById('status');
+<div id="game-hud">
+    <div style="font-size: 12px; letter-spacing: 2px;">SAINIWALAA MISSION</div>
+    <div id="mission-text">Target: 50m door ek Virtual Box hai!</div>
+    <div id="distance-info">Wait... GPS Loading</div>
+</div>
 
-        if (navigator.geolocation) {
-            // User ki movement ko track karna
-            navigator.geolocation.watchPosition(position => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                status.innerHTML = `Latitude: ${lat.toFixed(6)}<br>Longitude: ${lon.toFixed(6)}<br><br><b>Aap chal rahe ho!</b>`;
-            }, error => {
-                status.innerHTML = "Error: Permission deni hogi bhai!";
-            }, { enableHighAccuracy: true });
-        } else {
-            status.innerHTML = "Aapka browser purana hai.";
-        }
-    </script>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 1. Map Setup (Jaipur Default)
+    const map = L.map('map').setView([26.9124, 75.7873], 18);
+
+    // 2. OpenStreetMap Tiles (Bilkul Free, No Token)
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // 3. User & Target Markers
+    let userMarker = L.circleMarker([0, 0], {
+        radius: 10, color: '#fff', fillColor: '#ff00cc', fillOpacity: 1
+    }).addTo(map);
+
+    let targetLat, targetLon;
+    let targetMarker = L.marker([0, 0]).addTo(map);
+    targetMarker.bindPopup("<b>Sainiwalaa Reward!</b><br>Yahan pahuncho!").openPopup();
+
+    // 4. Mission Logic: Pehla target user se 50m door set karna
+    function setFirstTarget(lat, lon) {
+        targetLat = lat + 0.0004; // Thoda sa door
+        targetLon = lon + 0.0004;
+        targetMarker.setLatLng([targetLat, targetLon]);
+    }
+
+    let firstLoad = true;
+
+    // 5. GPS Real-time Tracking
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(position => {
+            const { latitude, longitude } = position.coords;
+            
+            userMarker.setLatLng([latitude, longitude]);
+            if(firstLoad) {
+                map.setView([latitude, longitude], 18);
+                setFirstTarget(latitude, longitude);
+                firstLoad = false;
+            }
+
+            // Distance Calculation (Haversine Formula)
+            const dist = getDistance(latitude, longitude, targetLat, targetLon);
+            document.getElementById('distance-info').innerText = Math.round(dist) + " METERS";
+
+            if(dist < 10) {
+                alert("CONGRATS! Aapne Sainiwalaa Box dhund liya. Code: GET70");
+                location.reload(); // Reset for next target
+            }
+
+        }, err => {
+            alert("Bhai GPS on karo aur permission do!");
+        }, { enableHighAccuracy: true });
+    }
+
+    // Distance function
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // metres
+        const φ1 = lat1 * Math.PI/180;
+        const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180;
+        const Δλ = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+</script>
 </body>
 </html>
