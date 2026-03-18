@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="utf-8">
-    <title>Sainiwalaa - Street Pro</title>
+    <title>Sainiwalaa Smooth Racer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -20,21 +20,20 @@
         }
         #dist-val { font-size: 26px; color: #ff00cc; text-shadow: 0 0 10px #ff00cc; }
 
-        /* --- ARCADE CONTROLS --- */
+        /* --- ARCADE CONTROLS (HOLD TO MOVE) --- */
         #controls {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: 75px 75px 75px; grid-template-rows: 75px 75px;
+            display: grid; grid-template-columns: 80px 80px 80px; grid-template-rows: 80px 80px;
             gap: 15px; z-index: 1000;
         }
         .btn {
-            width: 75px; height: 75px; background: rgba(0,0,0,0.8); 
-            border: 3px solid #ff00cc; border-radius: 15px; color: #ff00cc;
-            font-size: 30px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 5px 0 #990066;
+            width: 80px; height: 80px; background: rgba(0,0,0,0.8); 
+            border: 4px solid #00ffcc; border-radius: 20px; color: #00ffcc;
+            font-size: 35px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 0 #008866; touch-action: none;
         }
-        .btn:active { transform: translateY(4px); box-shadow: none; background: #ff00cc; color: #000; }
-        .up { grid-column: 2; border-color: #00ffcc; color: #00ffcc; box-shadow: 0 5px 0 #009977;}
-        .up:active { background: #00ffcc; box-shadow: none;}
+        .btn:active { transform: translateY(4px); box-shadow: none; background: #00ffcc; color: #000; }
+        .up { grid-column: 2; }
         .left { grid-column: 1; grid-row: 2; }
         .down { grid-column: 2; grid-row: 2; }
         .right { grid-column: 3; grid-row: 2; }
@@ -42,26 +41,23 @@
         /* --- REWARD PANEL --- */
         #reward-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); display: none; flex-direction: column;
+            background: rgba(0,0,0,0.95); display: none; flex-direction: column;
             align-items: center; justify-content: center; z-index: 2000; color: white;
             animation: fadeIn 0.5s;
         }
-        .card { border: 4px solid #00ffcc; padding: 30px; border-radius: 30px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 0 30px #00ffcc; }
-        .p-img { width: 100%; max-width: 220px; border-radius: 15px; margin: 15px 0; border: 3px solid gold; animation: pulse 1s infinite alternate;}
+        .card { border: 4px solid #ff00cc; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 0 30px #ff00cc; }
+        .p-img { width: 100%; max-width: 200px; border-radius: 10px; margin: 15px 0; border: 2px solid #00ffcc; }
         
         /* Animation Keyframes */
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-        @keyframes pulse { from {transform: scale(1);} to {transform: scale(1.05);} }
-        @keyframes targetGlow { from {filter: drop-shadow(0 0 5px gold);} to {filter: drop-shadow(0 0 15px gold);} }
-        @keyframes smokeEmit { 0% { opacity: 0.8; transform: scale(0.5) translateY(0); } 100% { opacity: 0; transform: scale(1.5) translateY(20px); } }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+        @keyframes targetPulse { from {transform: scale(1); filter: drop-shadow(0 0 5px gold);} to {transform: scale(1.1); filter: drop-shadow(0 0 15px gold);} }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
 
         /* Custom Marker Styles */
-        .car-marker { font-size: 45px; position: relative; }
-        .smoke { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; animation: smokeEmit 0.5s infinite; opacity: 0; }
-        .target-marker { font-size: 40px; animation: targetGlow 1.5s infinite alternate; }
+        #car-body { font-size: 45px; transition: transform 0.1s linear; }
+        .target-marker { font-size: 40px; animation: targetPulse 1s infinite alternate; }
         .obstacle-marker { font-size: 30px; filter: drop-shadow(0 0 5px red); }
-        .shake-screen { animation: shake 0.5s; animation-iteration-count: 1; }
+        .shake-screen { animation: shake 0.3s; animation-iteration-count: 2; }
     </style>
 </head>
 <body>
@@ -72,17 +68,17 @@
 </div>
 
 <div id="controls">
-    <button class="btn up" onclick="move('up')">▲</button>
-    <button class="btn left" onclick="move('left')">◀</button>
-    <button class="btn down" onclick="move('down')">▼</button>
-    <button class="btn right" onclick="move('right')">▶</button>
+    <button class="btn up" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</button>
+    <button class="btn left" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</button>
+    <button class="btn down" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</button>
+    <button class="btn right" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</button>
 </div>
 
 <div id="reward-screen">
     <div class="card">
         <h1 style="color: gold; margin: 0; font-family: 'Orbitron'; font-weight: 900;">MISSION SUCCESS!</h1>
         <p style="color: #ccc;">Sainiwalaa Premium Product Unlocked</p>
-        <img src="https://via.placeholder.com/220/ffcc00/000000?text=SAINIWALAA" class="p-img">
+        <img src="https://via.placeholder.com/200/00ffcc/000000?text=SAINIWALAA" class="p-img">
         <div style="font-size: 28px; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; margin: 10px 0;">54% MEGA OFF</div>
         <button onclick="location.reload()" style="background:linear-gradient(45deg, #00ffcc, #ff00cc); padding: 18px; width: 100%; border:none; border-radius: 50px; font-weight:bold; color: white; font-family:'Orbitron';">NEXT MISSION</button>
     </div>
@@ -97,8 +93,9 @@
     let obstacles = [];
     let carPos = { lat: 0, lng: 0 };
     let targetPos = { lat: 0, lng: 0 };
+    let moveInterval = null;
     let isFrozen = false;
-    const step = 0.00009; // Movement speed (Gali level safe)
+    const step = 0.00007; // Smooth movement speed
 
     function init() {
         navigator.geolocation.getCurrentPosition(pos => {
@@ -106,12 +103,12 @@
             carPos.lng = pos.coords.longitude;
 
             // 1. Map Setup (Satellite View)
-            map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false }).setView([carPos.lat, carPos.lng], 18);
+            map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false }).setView([carPos.lat, carPos.lng], 19);
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
 
-            // 2. Car Marker (with Smoke Animation)
-            const carIcon = L.divIcon({ html: '<div class="car-marker">🏎️<div id="car-smoke" class="smoke"></div></div>', className: 'dummy' });
+            // 2. Car Marker
+            const carIcon = L.divIcon({ html: '<div id="car-body">🏎️</div>', className: 'dummy' });
             carMarker = L.marker([carPos.lat, carPos.lng], { icon: carIcon }).addTo(map);
 
             // 3. Setup Target & Obstacles (Save to LocalStorage)
@@ -119,7 +116,7 @@
 
             // 4. Update HUD
             updateHUD();
-        }, err => alert("GPS On Karein bhai!"));
+        }, err => alert("GPS Permission On Karein bhai!"));
     }
 
     function setupGameData(lat, lon) {
@@ -128,25 +125,24 @@
             targetPos.lng = parseFloat(localStorage.getItem('target_lng'));
             obstacles = JSON.parse(localStorage.getItem('obstacles'));
         } else {
-            // Fix direction, thoda door (approx 150m)
-            targetPos.lat = lat + 0.0011; 
-            targetPos.lng = lon + 0.0011;
+            // Closer Target (approx 70m away)
+            targetPos.lat = lat + 0.0006; 
+            targetPos.lng = lon + 0.0006;
             localStorage.setItem('target_lat', targetPos.lat);
             localStorage.setItem('target_lng', targetPos.lng);
 
             // Create 3 Random Obstacles
             obstacles = [];
             for(let i=0; i<3; i++) {
-                // Spawn randomly around user and target
                 obstacles.push({
-                    lat: lat + (targetPos.lat - lat) * (0.3 + i*0.25) + (Math.random()-0.5)*0.0003,
-                    lng: lon + (targetPos.lng - lon) * (0.3 + i*0.25) + (Math.random()-0.5)*0.0003
+                    lat: lat + (targetPos.lat - lat) * (0.2 + i*0.3) + (Math.random()-0.5)*0.0002,
+                    lng: lon + (targetPos.lng - lon) * (0.2 + i*0.3) + (Math.random()-0.5)*0.0002
                 });
             }
             localStorage.setItem('obstacles', JSON.stringify(obstacles));
         }
 
-        // Draw Target
+        // Draw Target (Animated)
         const giftIcon = L.divIcon({ html: '<div class="target-marker">🎁</div>', className: 'dummy' });
         targetMarker = L.marker([targetPos.lat, targetPos.lng], { icon: giftIcon }).addTo(map);
 
@@ -157,46 +153,52 @@
         });
     }
 
-    function move(dir) {
-        if(isFrozen) return; // Cant move if hit an obstacle
-
-        // Car smoke animation
-        const smoke = document.getElementById('car-smoke');
-        smoke.style.opacity = 1;
-        setTimeout(() => smoke.style.opacity = 0, 300);
-
-        if(dir === 'up') carPos.lat += step;
-        if(dir === 'down') carPos.lat -= step;
-        if(dir === 'left') carPos.lng -= step;
-        if(dir === 'right') carPos.lng += step;
-
-        carMarker.setLatLng([carPos.lat, carPos.lng]);
-        map.panTo([carPos.lat, carPos.lng]);
+    // --- SMOOTH MOVEMENT LOGIC (HOLD TO MOVE) ---
+    function startMove(dir) {
+        if(moveInterval || isFrozen) return;
         
-        // Check Collision
-        checkCollision();
-        updateHUD();
+        // Rotation logic
+        let rotation = 0;
+        if(dir === 'up') rotation = -90;
+        if(dir === 'down') rotation = 90;
+        if(dir === 'left') rotation = 180;
+        if(dir === 'right') rotation = 0;
+        document.getElementById('car-body').style.transform = `rotate(${rotation}deg)`;
+
+        // Move loop
+        moveInterval = setInterval(() => {
+            if(dir === 'up') carPos.lat += step;
+            if(dir === 'down') carPos.lat -= step;
+            if(dir === 'left') carPos.lng -= step;
+            if(dir === 'right') carPos.lng += step;
+
+            carMarker.setLatLng([carPos.lat, carPos.lng]);
+            map.panTo([carPos.lat, carPos.lng]);
+            
+            checkCollision();
+            updateHUD();
+        }, 50); // Loop every 50ms for smoothness
+    }
+
+    function stopMove() {
+        if(moveInterval) {
+            clearInterval(moveInterval);
+            moveInterval = null;
+        }
     }
 
     function checkCollision() {
         for(let obs of obstacles) {
             const d = getDist(carPos.lat, carPos.lng, obs.lat, obs.lng);
-            if(d < 15) { // Hit within 15 meters radius
+            if(d < 12) { // Hit within 12 meters radius
+                stopMove();
                 isFrozen = true;
-                // Vibration (Android)
-                if(navigator.vibrate) navigator.vibrate([300, 100, 300]);
-                
                 // Shake Screen Effect
                 document.getElementById('map').classList.add('shake-screen');
-                document.getElementById('hud').style.background = 'rgba(255,0,0,0.5)';
-                document.getElementById('hud').style.borderColor = 'red';
-                
                 setTimeout(() => {
                     isFrozen = false;
                     document.getElementById('map').classList.remove('shake-screen');
-                    document.getElementById('hud').style.background = 'rgba(0,255,204,0.1)';
-                    document.getElementById('hud').style.borderColor = '#00ffcc';
-                }, 1000); // 1-second freeze penalty
+                }, 800); // 0.8-second freeze penalty
                 return;
             }
         }
@@ -206,7 +208,8 @@
         const d = getDist(carPos.lat, carPos.lng, targetPos.lat, targetPos.lng);
         document.getElementById('dist-val').innerText = Math.round(d) + " M";
         
-        if(d < 20) {
+        if(d < 15) {
+            stopMove();
             localStorage.clear(); // Clear win data
             document.getElementById('reward-screen').style.display = 'flex';
         }
