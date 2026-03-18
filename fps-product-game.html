@@ -1,55 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
     <meta charset="utf-8">
-    <title>Sainiwalaa - City Quest</title>
+    <title>Sainiwalaa - Free Satellite Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
-        body { margin: 0; padding: 0; background: #000; font-family: 'Orbitron', sans-serif; }
+        
+        body { margin: 0; padding: 0; background: #000; font-family: 'Orbitron', sans-serif; overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
         
-        /* UI HUD */
-        #game-hud {
+        /* Game HUD */
+        #game-ui {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(0,0,0,0.85); border: 2px solid #00ffcc;
-            color: #fff; padding: 15px; border-radius: 15px; z-index: 100;
-            text-align: center; box-shadow: 0 0 20px #00ffcc;
+            width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #00ffcc;
+            color: #fff; padding: 12px; border-radius: 15px; z-index: 100;
+            text-align: center; box-shadow: 0 0 15px #00ffcc;
         }
-        #dist-val { font-size: 30px; color: #ff00cc; display: block; margin: 5px 0; }
-        #mission-desc { font-size: 12px; color: #00ffcc; text-transform: uppercase; }
+        #dist-val { font-size: 28px; color: gold; display: block; margin: 2px 0; }
 
         /* Reward Modal */
         #reward-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; align-items: center;
-            justify-content: center; z-index: 1000; color: white; text-align: center;
+            background: rgba(0,0,0,0.95); display: none; align-items: center;
+            justify-content: center; z-index: 1000; color: white; text-align: center; padding: 20px;
         }
         .modal-card {
-            border: 3px solid #ffcc00; padding: 30px; border-radius: 20px;
-            background: #111; width: 80%;
+            border: 3px solid #ff00cc; padding: 20px; border-radius: 20px;
+            background: #111; width: 100%; max-width: 350px;
         }
-        .btn {
-            background: #ff00cc; color: white; border: none; padding: 15px 30px;
-            border-radius: 10px; font-family: 'Orbitron'; margin-top: 20px;
+        .product-img { width: 150px; height: 150px; border-radius: 10px; border: 2px solid gold; margin: 10px 0; }
+        .btn-buy {
+            background: #00ffcc; color: #000; padding: 12px; width: 100%;
+            border: none; border-radius: 8px; font-weight: bold; display: block;
+            text-decoration: none; margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-<div id="game-hud">
-    <div id="mission-desc">Level 1: Gali No. 1 Explorer</div>
-    <span id="dist-val">-- M</span>
-    <div style="font-size: 10px;">Target ki taraf chalo!</div>
+<div id="game-ui">
+    <div style="font-size: 10px; color: #00ffcc;">MISSION: TARGET REACH KARO</div>
+    <span id="dist-val">LOADING...</span>
+    <div style="font-size: 10px;">Road par chalna shuru karein!</div>
 </div>
 
 <div id="reward-modal">
     <div class="modal-card">
-        <h1 id="res-title" style="color: gold;">TARGET REACHED!</h1>
-        <p id="res-msg">Aapne Level 1 complete kar liya hai.</p>
-        <div id="res-code" style="font-size: 24px; border: 2px dashed #00ffcc; margin: 15px 0; color: #00ffcc;">CODE: SW10</div>
-        <button class="btn" onclick="nextLevel()">NEXT MISSION</button>
+        <h1 style="color: gold; margin: 0;">54% DISCOUNT!</h1>
+        <p style="font-size: 12px;">Sainiwalaa Premium Item Unlocked</p>
+        
+        <img src="https://via.placeholder.com/150" id="p-img" class="product-img">
+        
+        <div style="border: 2px dashed #ff00cc; padding: 10px; margin: 10px 0; color: #ff00cc;">CODE: SAINI54</div>
+        
+        <a id="p-link" href="https://wa.me/YOURNUMBER" target="_blank" class="btn-buy">BUY NOW (WhatsApp)</a>
+        <button onclick="copyLink()" style="background:none; border:none; color: #888; margin-top:10px; cursor:pointer;">Copy Product Link</button>
+        <button onclick="location.reload()" style="display:block; width:100%; margin-top:15px; background:#333; color:white; border:none; padding:8px; border-radius:5px;">NEXT TARGET</button>
     </div>
 </div>
 
@@ -59,86 +68,80 @@
 
 <script>
     let map, userMarker, targetMarker;
-    let currentLevel = 1;
     let targetLat, targetLon;
-    let firstPos = true;
+    let isFirstLoad = true;
 
-    // Targets Config (Har level mein kitni door jana hai)
-    const LEVELS = [
-        { desc: "Level 1: Gali Explorer", dist: 0.0005, code: "SW10", msg: "10% Off Unlocked!" },
-        { desc: "Level 2: Building Hunter", dist: 0.0012, code: "SW30", msg: "30% Off Unlocked!" },
-        { desc: "Level 3: Sainiwalaa Boss", dist: 0.0025, code: "SW70", msg: "70% MEGA DISCOUNT!" }
-    ];
-
+    // 1. Initialize Map
     function initMap() {
-        map = L.map('map', { zoomControl: false }).setView([26.9124, 75.7873], 18);
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
+        // Map create (Default Jaipur)
+        map = L.map('map', { zoomControl: false, dragging: false }).setView([26.9124, 75.7873], 18);
 
-        userMarker = L.circleMarker([0,0], { radius: 12, color: '#fff', fillColor: '#ff00cc', fillOpacity: 1 }).addTo(map);
-        targetMarker = L.marker([0,0]).addTo(map);
-        
-        startTracking();
+        // 2. Satellite View Layer (NO TOKEN NEEDED)
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Satellite Imagery © Esri'
+        }).addTo(map);
+
+        // 3. Labels Layer (Road names dikhane ke liye)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
+
+        // 4. Character (Emoji as a Icon)
+        const deliveryIcon = L.divIcon({
+            html: '<div style="font-size: 40px; margin-top: -20px; margin-left: -10px;">🚚</div>',
+            className: 'dummy'
+        });
+        userMarker = L.marker([0,0], { icon: deliveryIcon }).addTo(map);
+
+        // 5. Target (Gift Box)
+        const giftIcon = L.divIcon({
+            html: '<div style="font-size: 35px; margin-top: -20px; margin-left: -10px;">🎁</div>',
+            className: 'dummy'
+        });
+        targetMarker = L.marker([0,0], { icon: giftIcon }).addTo(map);
+
+        startGPS();
     }
 
-    function setTarget(lat, lon) {
-        const config = LEVELS[currentLevel - 1];
-        // Thoda aage ka target set karna
-        targetLat = lat + config.dist; 
-        targetLon = lon + config.dist;
-        targetMarker.setLatLng([targetLat, targetLon]);
-        document.getElementById('mission-desc').innerText = config.desc;
-    }
-
-    function startTracking() {
+    function startGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition(pos => {
                 const { latitude, longitude } = pos.coords;
                 
+                // Update Character position
                 userMarker.setLatLng([latitude, longitude]);
-                if(firstPos) {
-                    map.setView([latitude, longitude], 18);
-                    setTarget(latitude, longitude);
-                    firstPos = false;
+                map.panTo([latitude, longitude]); // Map character ke saath move hoga
+
+                if(isFirstLoad) {
+                    // Pehla target user se 60m door set karna
+                    targetLat = latitude + 0.0005; 
+                    targetLon = longitude + 0.0005;
+                    targetMarker.setLatLng([targetLat, targetLon]);
+                    isFirstLoad = false;
                 }
 
-                const d = calculateDistance(latitude, longitude, targetLat, targetLon);
-                document.getElementById('dist-val').innerText = Math.round(d) + " M";
+                // Distance calculation
+                const d = getDist(latitude, longitude, targetLat, targetLon);
+                document.getElementById('dist-val').innerText = Math.round(d) + " METERS";
 
-                // Agar 10 meter ke andar ho toh jeet gaye
+                // Target reached (15 meters distance)
                 if(d < 15) {
-                    showReward();
+                    document.getElementById('reward-modal').style.display = 'flex';
                 }
-            }, err => alert("GPS Permission Chahiye!"), { enableHighAccuracy: true });
+
+            }, err => alert("Please Enable GPS!"), { enableHighAccuracy: true });
         }
     }
 
-    function showReward() {
-        const config = LEVELS[currentLevel - 1];
-        document.getElementById('reward-modal').style.display = 'flex';
-        document.getElementById('res-msg').innerText = config.msg;
-        document.getElementById('res-code').innerText = "CODE: " + config.code;
-    }
-
-    function nextLevel() {
-        currentLevel++;
-        if(currentLevel > 3) {
-            alert("Sainiwalaa Legend! Saare targets poore.");
-            location.reload();
-            return;
-        }
-        document.getElementById('reward-modal').style.display = 'none';
-        // Naya target set karne ke liye user ki current pos leni hogi
-        const currPos = userMarker.getLatLng();
-        setTarget(currPos.lat, currPos.lng);
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
+    function getDist(lat1, lon1, lat2, lon2) {
         const R = 6371000;
         const dLat = (lat2-lat1) * Math.PI/180;
         const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function copyLink() {
+        const link = document.getElementById('p-link').href;
+        navigator.clipboard.writeText(link).then(() => alert("Link Copied!"));
     }
 
     initMap();
