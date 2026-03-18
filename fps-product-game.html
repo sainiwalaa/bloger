@@ -2,73 +2,97 @@
 <html lang="hi">
 <head>
     <meta charset="utf-8">
-    <title>Sainiwalaa - Street Driver</title>
+    <title>Sainiwalaa - Street Racer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@700&display=swap');
         
         body { margin: 0; padding: 0; background: #000; font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; filter: saturate(1.2) brightness(0.8); }
         
-        /* Game HUD */
-        #game-ui {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #00ffcc;
-            color: #fff; padding: 10px; border-radius: 15px; z-index: 100;
-            text-align: center; box-shadow: 0 0 15px #00ffcc; pointer-events: none;
+        /* --- GAMING HUD --- */
+        #hud {
+            position: fixed; top: 10px; width: 95%; left: 2.5%; display: flex;
+            justify-content: space-between; z-index: 100; pointer-events: none;
         }
+        .stat-box {
+            background: rgba(0,0,0,0.8); border: 2px solid #00ffcc;
+            padding: 10px; border-radius: 8px; color: #fff; text-align: center;
+            min-width: 100px; box-shadow: 0 0 10px #00ffcc;
+        }
+        #dist-val { font-family: 'Black Ops One'; font-size: 22px; color: #ff00cc; }
 
-        /* --- CONTROLS BUTTONS --- */
-        #controls {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            display: grid; grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px;
-            gap: 10px;
+        /* --- CONSOLE CONTROLS --- */
+        .controls-container {
+            position: fixed; bottom: 30px; width: 100%; display: flex;
+            justify-content: space-between; padding: 0 20px; z-index: 1000;
+            box-sizing: border-box;
         }
+        .pad { display: grid; gap: 10px; }
         .btn-ctrl {
-            background: rgba(0, 255, 204, 0.3); border: 2px solid #00ffcc; color: #fff;
-            border-radius: 10px; font-size: 24px; display: flex; align-items: center;
-            justify-content: center; backdrop-filter: blur(5px); active-background: #00ffcc;
+            width: 70px; height: 70px; background: rgba(255,255,255,0.1);
+            border: 3px solid #00ffcc; border-radius: 50%; color: #fff;
+            font-size: 24px; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); active-background: #00ffcc;
         }
-        .btn-up { grid-column: 2; }
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-down { grid-column: 2; grid-row: 2; }
-        .btn-right { grid-column: 3; grid-row: 2; }
+        .btn-ctrl:active { background: #00ffcc; color: #000; box-shadow: 0 0 20px #00ffcc; }
 
-        /* Reward Modal */
+        /* --- REWARD MODAL --- */
         #reward-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; align-items: center;
-            justify-content: center; z-index: 2000; text-align: center; padding: 20px;
+            background: rgba(0,0,0,0.9); display: none; align-items: center;
+            justify-content: center; z-index: 2000; text-align: center;
         }
-        .modal-card { border: 3px solid #ff00cc; padding: 20px; border-radius: 20px; background: #111; color: white; width: 100%; max-width: 350px; }
-        .product-img { width: 150px; height: 150px; border-radius: 10px; border: 2px solid gold; margin: 10px 0; }
-        .btn-buy { background: #00ffcc; color: #000; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; display: block; text-decoration: none; margin-top: 10px; }
+        .modal-card {
+            border: 4px solid #ff00cc; padding: 25px; border-radius: 30px;
+            background: #111; color: white; width: 90%; max-width: 380px;
+            box-shadow: 0 0 40px #ff00cc;
+        }
+        .p-img { width: 180px; height: 180px; border-radius: 15px; border: 3px solid gold; margin: 15px 0; }
+        .claim-btn {
+            background: linear-gradient(45deg, #00ffcc, #ff00cc); color: #fff;
+            padding: 15px; width: 100%; border: none; border-radius: 50px;
+            font-weight: bold; font-family: 'Orbitron'; cursor: pointer;
+        }
+
+        /* --- CAR ANIMATION --- */
+        #car-body { font-size: 45px; transition: transform 0.1s linear; filter: drop-shadow(0 0 5px red); }
     </style>
 </head>
 <body>
 
-<div id="game-ui">
-    <div style="font-size: 10px; color: #00ffcc;">MISSION: DRIVE TO THE GIFT</div>
-    <span id="dist-val">FINDING LOCATION...</span>
-    <div style="font-size: 10px;">Buttons se car chalao!</div>
+<div id="hud">
+    <div class="stat-box">
+        <div style="font-size: 10px;">DISTANCE</div>
+        <div id="dist-val">-- M</div>
+    </div>
+    <div class="stat-box">
+        <div style="font-size: 10px;">MISSION</div>
+        <div id="mission-name" style="color: #00ffcc;">GET THE BOX</div>
+    </div>
 </div>
 
-<div id="controls">
-    <button class="btn-ctrl btn-up" onmousedown="startMove('up')" onmouseup="stopMove()" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</button>
-    <button class="btn-ctrl btn-left" onmousedown="startMove('left')" onmouseup="stopMove()" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</button>
-    <button class="btn-ctrl btn-down" onmousedown="startMove('down')" onmouseup="stopMove()" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</button>
-    <button class="btn-ctrl btn-right" onmousedown="startMove('right')" onmouseup="stopMove()" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</button>
+<div class="controls-container">
+    <div class="pad">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-ctrl" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</button>
+            <button class="btn-ctrl" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</button>
+        </div>
+    </div>
+    <div class="pad">
+        <button class="btn-ctrl" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</button>
+        <button class="btn-ctrl" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</button>
+    </div>
 </div>
 
 <div id="reward-modal">
     <div class="modal-card">
-        <h1 style="color: gold; margin: 0;">54% DISCOUNT!</h1>
-        <p style="font-size: 12px;">Sainiwalaa Premium Item Unlocked</p>
-        <img src="https://via.placeholder.com/150" class="product-img">
-        <div style="border: 2px dashed #ff00cc; padding: 10px; margin: 10px 0; color: #ff00cc;">CODE: DRIVE54</div>
-        <a href="https://wa.me/YOURNUMBER" class="btn-buy">CLAIM ON WHATSAPP</a>
-        <button onclick="location.reload()" style="background:none; border:none; color: #888; margin-top:15px; cursor:pointer;">PLAY AGAIN</button>
+        <h1 style="color: gold; margin: 0; font-family: 'Black Ops One';">MISSION SUCCESS!</h1>
+        <p>Aapne target dhoond liya!</p>
+        <img src="https://via.placeholder.com/200/ff00cc/ffffff?text=SAINIWALAA+PRODUCT" class="p-img">
+        <h2 style="color: #00ffcc; margin: 10px 0;">54% DISCOUNT</h2>
+        <button class="claim-btn" onclick="nextMission()">CLAIM & NEXT TARGET</button>
     </div>
 </div>
 
@@ -80,47 +104,69 @@
     let map, carMarker, targetMarker;
     let carPos = { lat: 0, lng: 0 };
     let targetPos = { lat: 0, lng: 0 };
+    let rotation = 0;
     let moveInterval = null;
-    const moveStep = 0.00005; // Car ki speed
+    const speed = 0.00006; 
 
     function init() {
-        // 1. Get User Location to start the game in their area
         navigator.geolocation.getCurrentPosition(pos => {
             carPos.lat = pos.coords.latitude;
             carPos.lng = pos.coords.longitude;
             
-            // 2. Setup Map
-            map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false }).setView([carPos.lat, carPos.lng], 19);
+            map = L.map('map', { 
+                zoomControl: false, 
+                dragging: false, 
+                scrollWheelZoom: false,
+                doubleClickZoom: false
+            }).setView([carPos.lat, carPos.lng], 19);
             
-            // Satellite View
+            // Satellite Style
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
 
-            // 3. Car Icon
-            const carIcon = L.divIcon({ html: '<div style="font-size: 40px; transform: rotate(0deg);" id="car-emoji">🏎️</div>', className: 'dummy' });
+            // Car Marker
+            const carIcon = L.divIcon({ 
+                html: `<div id="car-body">🏎️</div>`, 
+                className: 'dummy' 
+            });
             carMarker = L.marker([carPos.lat, carPos.lng], { icon: carIcon }).addTo(map);
 
-            // 4. Target Set (100m away)
-            targetPos.lat = carPos.lat + 0.0008;
-            targetPos.lng = carPos.lng + 0.0008;
-            const giftIcon = L.divIcon({ html: '<div style="font-size: 35px;">🎁</div>', className: 'dummy' });
-            targetMarker = L.marker([targetPos.lat, targetPos.lng], { icon: giftIcon }).addTo(map);
-
-            updateHUD();
+            spawnTarget();
         });
     }
 
+    function spawnTarget() {
+        // Randomly set target within 100-200 meters
+        const offsetLat = (Math.random() > 0.5 ? 1 : -1) * (0.0006 + Math.random() * 0.0005);
+        const offsetLng = (Math.random() > 0.5 ? 1 : -1) * (0.0006 + Math.random() * 0.0005);
+        
+        targetPos.lat = carPos.lat + offsetLat;
+        targetPos.lng = carPos.lng + offsetLng;
+
+        if (targetMarker) map.removeLayer(targetMarker);
+        
+        const giftIcon = L.divIcon({ html: '<div style="font-size: 40px; filter: drop-shadow(0 0 10px gold);">🎁</div>', className: 'dummy' });
+        targetMarker = L.marker([targetPos.lat, targetPos.lng], { icon: giftIcon }).addTo(map);
+        
+        updateHUD();
+    }
+
     function startMove(dir) {
-        if (moveInterval) return;
+        if (moveInterval) clearInterval(moveInterval);
         moveInterval = setInterval(() => {
-            let rotation = 0;
-            if (dir === 'up') { carPos.lat += moveStep; rotation = 0; }
-            if (dir === 'down') { carPos.lat -= moveStep; rotation = 180; }
-            if (dir === 'left') { carPos.lng -= moveStep; rotation = 270; }
-            if (dir === 'right') { carPos.lng += moveStep; rotation = 90; }
+            if (dir === 'up') {
+                carPos.lat += Math.cos(rotation * Math.PI / 180) * speed;
+                carPos.lng += Math.sin(rotation * Math.PI / 180) * speed;
+            }
+            if (dir === 'down') {
+                carPos.lat -= Math.cos(rotation * Math.PI / 180) * speed;
+                carPos.lng -= Math.sin(rotation * Math.PI / 180) * speed;
+            }
+            if (dir === 'left') rotation -= 10;
+            if (dir === 'right') rotation += 10;
 
             carMarker.setLatLng([carPos.lat, carPos.lng]);
-            document.getElementById('car-emoji').style.transform = `rotate(${rotation}deg)`;
+            document.getElementById('car-body').style.transform = `rotate(${rotation}deg)`;
             map.panTo([carPos.lat, carPos.lng]);
             updateHUD();
         }, 50);
@@ -133,11 +179,17 @@
 
     function updateHUD() {
         const d = getDist(carPos.lat, carPos.lng, targetPos.lat, targetPos.lng);
-        document.getElementById('dist-val').innerText = Math.round(d) + " METERS";
+        document.getElementById('dist-val').innerText = Math.round(d) + " M";
+        
         if (d < 15) {
             stopMove();
             document.getElementById('reward-modal').style.display = 'flex';
         }
+    }
+
+    function nextMission() {
+        document.getElementById('reward-modal').style.display = 'none';
+        spawnTarget(); // Naya target har baar alg jagah
     }
 
     function getDist(lat1, lon1, lat2, lon2) {
