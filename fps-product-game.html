@@ -3,209 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sainiwalaa Explorer</title>
+    <title>Sainiwalaa City Navigator</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Black+Ops+One&display=swap');
-
-        * { box-sizing: border-box; touch-action: none; user-select: none; }
-        body { margin: 0; overflow: hidden; background: #0a0a12; font-family: 'Orbitron', sans-serif; }
-
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        body { margin: 0; overflow: hidden; background: #111; font-family: 'Orbitron', sans-serif; }
         canvas { display: block; }
-
-        /* --- UI ELEMENTS --- */
-        #hud {
-            position: fixed; top: 15px; width: 100%; display: flex;
-            justify-content: space-around; pointer-events: none; z-index: 10;
+        
+        #mission-panel {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 255, 204, 0.2); border: 2px solid #00ffcc;
+            padding: 10px 20px; color: white; border-radius: 10px; z-index: 10;
+            text-align: center; width: 80%;
         }
-        .glass-panel {
-            background: rgba(0, 255, 204, 0.1); border: 1px solid #00ffcc;
-            padding: 8px 20px; border-radius: 10px; color: #00ffcc; backdrop-filter: blur(5px);
-        }
-        #score-val { font-family: 'Black Ops One'; font-size: 24px; color: #ff00cc; }
-
-        /* --- SCREENS --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; z-index: 100; background: rgba(0,0,0,0.85);
-            color: white; text-align: center;
-        }
-        .btn {
-            background: #00ffcc; color: #000; padding: 15px 40px;
-            font-size: 20px; font-weight: bold; border: none; border-radius: 50px;
-            cursor: pointer; margin-top: 20px; box-shadow: 0 0 20px #00ffcc;
-        }
-        .reward-card {
-            border: 3px solid #ff00cc; padding: 30px; border-radius: 20px;
-            width: 85%; max-width: 380px; background: #111;
+        
+        #joystick {
+            position: fixed; bottom: 30px; left: 30px; width: 100px; height: 100px;
+            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid #ff00cc;
         }
     </style>
 </head>
 <body>
 
-<div id="hud">
-    <div class="glass-panel">LEVEL: <span id="lvl">1</span></div>
-    <div class="glass-panel">POINTS: <span id="score-val">0</span></div>
+<div id="mission-panel">
+    <div style="font-size: 10px; color: #00ffcc;">CURRENT TASK</div>
+    <div id="task-text">Gali No. 4 ki building tak pahuncho!</div>
 </div>
 
-<div id="start-screen" class="overlay">
-    <h1 style="color: #ff00cc; font-size: 35px; margin: 0;">SAINIWALAA EXPLORER</h1>
-    <p style="margin: 15px; color: #ccc;">Sahi Products ko touch karo,<br>Obstacles se bacho!</p>
-    <button class="btn" onclick="initGame()">START MISSION</button>
-    <p style="font-size: 10px; margin-top: 20px;">CONTROLS: DRAG ON SCREEN / USE ARROWS</p>
-</div>
+<div id="joystick"></div>
 
-<div id="reward-screen" class="overlay" style="display: none;">
-    <div class="reward-card">
-        <h2 style="color: gold;">MISSION SUCCESS!</h2>
-        <p id="final-msg">Aapne kamaal ka collection kiya!</p>
-        <div id="promo-code" style="background:#222; padding:10px; border:1px dashed #00ffcc; color:#00ffcc; font-size:20px; margin:15px 0;">CODE: SAINI56</div>
-        <a id="buy-btn" href="#" target="_blank" style="text-decoration:none;"><button class="btn" style="width:100%; margin:0;">BUY NOW</button></a>
-        <button onclick="location.reload()" style="background:none; border:none; color:#666; margin-top:20px; cursor:pointer;">RESTART</button>
-    </div>
-</div>
-
-<canvas id="gameCanvas"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+let scene, camera, renderer, player;
+let buildings = [], tasks = [], currentTaskIndex = 0;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050505);
+    scene.fog = new THREE.Fog(0x050505, 1, 50);
 
-let active = false, score = 0, level = 1, frame = 0;
-let player = { x: canvas.width/2, y: canvas.height/2, r: 20, speed: 6 };
-let items = [], particles = [];
-let keys = {};
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-// Touch position
-let targetPos = { x: player.x, y: player.y };
+    // Light
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+    scene.add(light);
 
-function initGame() {
-    document.getElementById("start-screen").style.display = "none";
-    active = true;
-    loop();
+    // Create "Gali" (Roads) & Buildings
+    createCity();
+
+    // Player (The Explorer)
+    const playerGeo = new THREE.SphereGeometry(0.5, 16, 16);
+    const playerMat = new THREE.MeshPhongMaterial({ color: 0xff00cc, emissive: 0xff00cc });
+    player = new THREE.Mesh(playerGeo, playerMat);
+    player.position.y = 0.5;
+    scene.add(player);
+
+    camera.position.set(0, 10, 10);
+    camera.lookAt(player.position);
+
+    animate();
 }
 
-// Controls
-window.addEventListener("keydown", e => keys[e.code] = true);
-window.addEventListener("keyup", e => keys[e.code] = false);
-window.addEventListener("pointermove", e => {
-    if(active) { targetPos.x = e.clientX; targetPos.y = e.clientY; }
-});
+function createCity() {
+    // Ground Grid
+    const grid = new THREE.GridHelper(200, 50, 0x00ffcc, 0x222222);
+    scene.add(grid);
 
-function spawnItem() {
-    let type = Math.random() > 0.3 ? 'GOOD' : 'BAD';
-    items.push({
-        x: canvas.width + 50,
-        y: Math.random() * canvas.height,
-        r: type === 'GOOD' ? 25 : 15,
-        type: type,
-        speed: 3 + (level * 0.5),
-        color: type === 'GOOD' ? "#00ffcc" : "#ff0055"
-    });
-}
-
-function update() {
-    if(!active) return;
-
-    // Movement Logic (Interpolation for smooth follow)
-    player.x += (targetPos.x - player.x) * 0.1;
-    player.y += (targetPos.y - player.y) * 0.1;
-
-    // Keyboard backup
-    if(keys['ArrowUp'] || keys['KeyW']) player.y -= player.speed;
-    if(keys['ArrowDown'] || keys['KeyS']) player.y += player.speed;
-    if(keys['ArrowLeft'] || keys['KeyA']) player.x -= player.speed;
-    if(keys['ArrowRight'] || keys['KeyD']) player.x += player.speed;
-
-    // Boundary check
-    player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
-    player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
-
-    if(frame % 60 === 0) spawnItem();
-
-    items.forEach((item, i) => {
-        item.x -= item.speed;
-
-        // Collision Check
-        let dx = player.x - item.x;
-        let dy = player.y - item.y;
-        let dist = Math.sqrt(dx*dx + dy*dy);
-
-        if(dist < player.r + item.r) {
-            if(item.type === 'GOOD') {
-                score += 10;
-                document.getElementById('score-val').innerText = score;
-                if(score % 100 === 0) level++;
-                if(score >= 200) showReward();
-            } else {
-                gameOver();
-            }
-            items.splice(i, 1);
-        }
-
-        if(item.x < -50) items.splice(i, 1);
-    });
-
-    frame++;
-}
-
-function draw() {
-    // Cyber Background
-    ctx.fillStyle = "#0a0a12";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Grid Effect
-    ctx.strokeStyle = "rgba(0, 255, 204, 0.05)";
-    for(let i=0; i<canvas.width; i+=50) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+    // Generate Random Buildings (Like a Map)
+    for(let i=0; i<60; i++) {
+        let w = Math.random() * 3 + 1;
+        let h = Math.random() * 10 + 2;
+        let d = Math.random() * 3 + 1;
+        const geo = new THREE.BoxGeometry(w, h, d);
+        const mat = new THREE.MeshPhongMaterial({ color: 0x333333, wireframe: true });
+        const b = new THREE.Mesh(geo, mat);
+        
+        // Random placement but keeping "Gali" (Road) space
+        b.position.x = (Math.random() - 0.5) * 100;
+        b.position.z = (Math.random() - 0.5) * 100;
+        if(Math.abs(b.position.x) < 3) b.position.x += 10; // Making a main road
+        
+        b.position.y = h/2;
+        scene.add(b);
+        buildings.push(b);
     }
-
-    // Draw Player (Neon Ship)
-    ctx.shadowBlur = 15; ctx.shadowColor = "#ff00cc";
-    ctx.fillStyle = "#ff00cc";
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Draw Items
-    items.forEach(item => {
-        ctx.shadowBlur = 10; ctx.shadowColor = item.color;
-        ctx.fillStyle = item.color;
-        if(item.type === 'GOOD') {
-            ctx.fillRect(item.x - item.r, item.y - item.r, item.r*2, item.r*2); // Box
-        } else {
-            ctx.beginPath(); // Triangle (Obstacle)
-            ctx.moveTo(item.x, item.y - item.r);
-            ctx.lineTo(item.x + item.r, item.y + item.r);
-            ctx.lineTo(item.x - item.r, item.y + item.r);
-            ctx.fill();
-        }
-        ctx.shadowBlur = 0;
-    });
 }
 
-function loop() {
-    update();
-    draw();
-    if(active) requestAnimationFrame(loop);
+// Simple Control Logic
+let move = { x: 0, z: 0 };
+window.addEventListener('keydown', e => {
+    if(e.key === "ArrowUp") move.z = -0.2;
+    if(e.key === "ArrowDown") move.z = 0.2;
+    if(e.key === "ArrowLeft") move.x = -0.2;
+    if(e.key === "ArrowRight") move.x = 0.2;
+});
+window.addEventListener('keyup', () => move = { x: 0, z: 0 });
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    player.position.x += move.x;
+    player.position.z += move.z;
+
+    // Camera follow
+    camera.position.x = player.position.x;
+    camera.position.z = player.position.z + 10;
+    camera.lookAt(player.position);
+
+    renderer.render(scene, camera);
 }
 
-function showReward() {
-    active = false;
-    document.getElementById("reward-screen").style.display = "flex";
-    document.getElementById("buy-btn").href = "https://sainiwalaa.com/mega-offer";
-}
-
-function gameOver() {
-    active = false;
-    alert("Oops! Obstacle hit. Score: " + score);
-    location.reload();
-}
-
+init();
 </script>
 </body>
 </html>
