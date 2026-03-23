@@ -3,22 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - HD Design Extractor</title>
+<title>Mug Tool - Hybrid PRO</title>
 <style>
 body{font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:20px}
-.container{max-width:800px;margin:auto}
-input,button{padding:12px;margin:10px;border:none;border-radius:6px}
-button{background:#ff4d4d;color:#fff;cursor:pointer}
-canvas{margin-top:20px;max-width:100%;border:1px solid #333}
+.container{max-width:900px;margin:auto}
+input,button{padding:10px;margin:10px;border:none;border-radius:6px}
+button{background:#00bcd4;color:#000;cursor:pointer;font-weight:bold}
+canvas{margin-top:20px;max-width:100%;border:1px solid #444}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Mug Tool (Pro)</h1>
-<p>Upload Image → Auto Clean → HD PNG Download (Print Ready)</p>
+<h1>☕ Mug Tool - Hybrid PRO</h1>
+<p>Upload → Select Design Area → Auto Clean → HD Print PNG</p>
 
 <input type="file" id="upload" accept="image/*"><br>
-<button onclick="processImage()">Process Design</button>
+<button onclick="startSelection()">Select Design Area</button>
+<button onclick="processSelection()">Process Design</button>
 <button onclick="downloadImage()">Download HD PNG</button>
 
 <canvas id="canvas"></canvas>
@@ -28,33 +29,65 @@ canvas{margin-top:20px;max-width:100%;border:1px solid #333}
 let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 let img = new Image();
+let selecting = false;
+let startX, startY, endX, endY;
 
-function processImage(){
-  let file = document.getElementById('upload').files[0];
-  if(!file) return alert('Upload image first');
-
+function loadImage(file){
   let reader = new FileReader();
   reader.onload = function(e){
     img.onload = function(){
-      // SET PRINT SIZE (9x4 inch @ 300 DPI = 2700x1200 px)
-      canvas.width = 2700;
-      canvas.height = 1200;
-
-      // draw image center fit
-      let scale = Math.min(canvas.width/img.width, canvas.height/img.height);
-      let w = img.width * scale;
-      let h = img.height * scale;
-      let x = (canvas.width - w)/2;
-      let y = (canvas.height - h)/2;
-
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(img,x,y,w,h);
-
-      removeBackground();
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img,0,0);
     }
     img.src = e.target.result;
   }
   reader.readAsDataURL(file);
+}
+
+document.getElementById('upload').addEventListener('change', function(){
+  loadImage(this.files[0]);
+});
+
+function startSelection(){
+  selecting = true;
+  canvas.onmousedown = function(e){
+    startX = e.offsetX;
+    startY = e.offsetY;
+  }
+  canvas.onmouseup = function(e){
+    endX = e.offsetX;
+    endY = e.offsetY;
+    drawSelection();
+  }
+}
+
+function drawSelection(){
+  ctx.drawImage(img,0,0);
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(startX, startY, endX-startX, endY-startY);
+}
+
+function processSelection(){
+  let w = Math.abs(endX - startX);
+  let h = Math.abs(endY - startY);
+
+  let tempCanvas = document.createElement('canvas');
+  let tctx = tempCanvas.getContext('2d');
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+
+  tctx.drawImage(canvas, startX, startY, w, h, 0, 0, w, h);
+
+  // Resize to print size (2700x1200)
+  canvas.width = 2700;
+  canvas.height = 1200;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+
+  removeBackground();
 }
 
 function removeBackground(){
@@ -63,8 +96,6 @@ function removeBackground(){
 
   for(let i=0;i<data.length;i+=4){
     let r=data[i], g=data[i+1], b=data[i+2];
-
-    // advanced white remove
     if(r>230 && g>230 && b>230){
       data[i+3]=0;
     }
@@ -75,7 +106,7 @@ function removeBackground(){
 
 function downloadImage(){
   let link = document.createElement('a');
-  link.download = 'mug-design-hd.png';
+  link.download = 'mug-design-print.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
 }
