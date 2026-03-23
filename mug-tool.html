@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - Advanced PRO</title>
+<title>Mug Tool - Final PRO</title>
 <style>
 body{font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:20px}
 .container{max-width:900px;margin:auto}
 input,button{padding:10px;margin:10px;border:none;border-radius:6px}
-button{background:#00e676;color:#000;cursor:pointer;font-weight:bold}
+button{background:#ff9800;color:#000;cursor:pointer;font-weight:bold}
 canvas{margin-top:20px;max-width:100%;border:1px solid #444;cursor:crosshair}
-.info{color:#aaa;font-size:14px}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Mug Tool - Advanced PRO</h1>
-<p class="info">Print Size: 9 x 4 inch (2700 x 1200 px @300 DPI)</p>
+<h1>☕ Mug Tool - Final PRO</h1>
+<p>Drag, Resize (4 corners), Move → Perfect Selection → HD PNG</p>
 
 <input type="file" id="upload" accept="image/*"><br>
 <button onclick="enableSelection()">Enable Selection</button>
@@ -31,9 +30,9 @@ let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 let img = new Image();
 
-let rect = {x:50,y:50,w:300,h:200,angle:0};
+let rect = {x:100,y:100,w:300,h:200};
 let mode = null;
-let offsetX, offsetY;
+let handleSize = 10;
 
 function loadImage(file){
   let reader = new FileReader();
@@ -56,64 +55,108 @@ function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(img,0,0);
 
-  ctx.save();
-  ctx.translate(rect.x + rect.w/2, rect.y + rect.h/2);
-  ctx.rotate(rect.angle);
+  ctx.strokeStyle='red';
+  ctx.lineWidth=2;
+  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
 
-  ctx.strokeStyle = 'red';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(-rect.w/2, -rect.h/2, rect.w, rect.h);
+  drawHandle(rect.x,rect.y);
+  drawHandle(rect.x+rect.w,rect.y);
+  drawHandle(rect.x+rect.w,rect.y+rect.h);
+  drawHandle(rect.x,rect.y+rect.h);
+}
 
-  // corner handles
-  let points = [
-    [-rect.w/2,-rect.h/2],
-    [rect.w/2,-rect.h/2],
-    [rect.w/2,rect.h/2],
-    [-rect.w/2,rect.h/2]
+function drawHandle(x,y){
+  ctx.fillStyle='yellow';
+  ctx.fillRect(x-handleSize/2,y-handleSize/2,handleSize,handleSize);
+}
+
+function getHandle(mx,my){
+  let points=[
+    {x:rect.x,y:rect.y,dir:'tl'},
+    {x:rect.x+rect.w,y:rect.y,dir:'tr'},
+    {x:rect.x+rect.w,y:rect.y+rect.h,dir:'br'},
+    {x:rect.x,y:rect.y+rect.h,dir:'bl'}
   ];
 
-  ctx.fillStyle='yellow';
-  points.forEach(p=>ctx.fillRect(p[0]-5,p[1]-5,10,10));
-
-  ctx.restore();
+  for(let p of points){
+    if(Math.abs(mx-p.x)<10 && Math.abs(my-p.y)<10){
+      return p.dir;
+    }
+  }
+  return null;
 }
 
 function enableSelection(){
-  canvas.onmousedown = function(e){
-    mode = 'drag';
-    offsetX = e.offsetX - rect.x;
-    offsetY = e.offsetY - rect.y;
-  }
+  canvas.onmousedown=function(e){
+    let mx=e.offsetX, my=e.offsetY;
+    let handle=getHandle(mx,my);
 
-  canvas.onmousemove = function(e){
-    if(mode==='drag'){
-      rect.x = e.offsetX - offsetX;
-      rect.y = e.offsetY - offsetY;
-      draw();
+    if(handle){
+      mode=handle;
+    } else if(mx>rect.x && mx<rect.x+rect.w && my>rect.y && my<rect.y+rect.h){
+      mode='move';
     }
   }
 
-  canvas.onmouseup = function(){ mode=null; }
+  canvas.onmousemove=function(e){
+    if(!mode) return;
+
+    let mx=e.offsetX, my=e.offsetY;
+
+    if(mode==='move'){
+      rect.x=mx-rect.w/2;
+      rect.y=my-rect.h/2;
+    }
+
+    if(mode==='tl'){
+      rect.w+=rect.x-mx;
+      rect.h+=rect.y-my;
+      rect.x=mx;
+      rect.y=my;
+    }
+
+    if(mode==='tr'){
+      rect.w=mx-rect.x;
+      rect.h+=rect.y-my;
+      rect.y=my;
+    }
+
+    if(mode==='br'){
+      rect.w=mx-rect.x;
+      rect.h=my-rect.y;
+    }
+
+    if(mode==='bl'){
+      rect.w+=rect.x-mx;
+      rect.h=my-rect.y;
+      rect.x=mx;
+    }
+
+    draw();
+  }
+
+  canvas.onmouseup=function(){mode=null;}
 }
 
 function processSelection(){
-  let tempCanvas = document.createElement('canvas');
-  let tctx = tempCanvas.getContext('2d');
-  tempCanvas.width = rect.w;
-  tempCanvas.height = rect.h;
+  let temp=document.createElement('canvas');
+  let tctx=temp.getContext('2d');
 
-  tctx.drawImage(canvas, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
+  temp.width=rect.w;
+  temp.height=rect.h;
 
-  canvas.width = 2700;
-  canvas.height = 1200;
+  tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
 
-  ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+  canvas.width=2700;
+  canvas.height=1200;
+
+  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
-  let link = document.createElement('a');
-  link.download = 'mug-design-hd.png';
-  link.href = canvas.toDataURL('image/png');
+  let link=document.createElement('a');
+  link.download='mug-design.png';
+  link.href=canvas.toDataURL('image/png');
   link.click();
 }
 </script>
