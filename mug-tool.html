@@ -139,15 +139,28 @@ function move(e){
 }
 
 function processSelection(){
- let temp=document.createElement('canvas');
- let tctx=temp.getContext('2d');
- temp.width=rect.w;
- temp.height=rect.h;
- tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
+  let temp=document.createElement('canvas');
+  let tctx=temp.getContext('2d');
 
- canvas.width=2700;
- canvas.height=1200;
- ctx.drawImage(temp,0,0,canvas.width,canvas.height);
+  temp.width=rect.w;
+  temp.height=rect.h;
+
+  // HIGH QUALITY SETTINGS
+  tctx.imageSmoothingEnabled=true;
+  tctx.imageSmoothingQuality='high';
+
+  tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
+
+  // ULTRA HD SIZE (4K–8K Support)
+  let scale=3; // increase for more HD (2 = normal, 3 = ultra, 4 = 8K)
+
+  canvas.width=rect.w*scale;
+  canvas.height=rect.h*scale;
+
+  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingQuality='high';
+
+  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
