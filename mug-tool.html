@@ -3,163 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - Final PRO</title>
+<title>Mug Tool - Ultimate PRO</title>
 <style>
-body{font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:20px}
+body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}
 .container{max-width:900px;margin:auto}
-input,button{padding:10px;margin:10px;border:none;border-radius:6px}
-button{background:#ff9800;color:#000;cursor:pointer;font-weight:bold}
-canvas{margin-top:20px;max-width:100%;border:1px solid #444;cursor:crosshair}
+input,button{padding:10px;margin:8px;border:none;border-radius:6px}
+button{background:#00e5ff;color:#000;font-weight:bold;cursor:pointer}
+canvas{margin-top:20px;max-width:100%;border:1px solid #444;touch-action:none}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Mug Tool - Final PRO</h1>
-<p>Drag, Resize (4 corners), Move → Perfect Selection → HD PNG</p>
+<h1>☕ Ultimate Mug Print Tool</h1>
+<p>Resize ✔ Rotate ✔ Drag ✔ Mobile + PC ✔ Print Ready</p>
 
 <input type="file" id="upload" accept="image/*"><br>
-<button onclick="enableSelection()">Enable Selection</button>
-<button onclick="processSelection()">Process Design</button>
-<button onclick="downloadImage()">Download HD PNG</button>
+<button onclick="processSelection()">Generate Print</button>
+<button onclick="downloadImage()">Download PNG</button>
 
 <canvas id="canvas"></canvas>
 </div>
 
 <script>
-let canvas = document.getElementById('canvas');
-let ctx = canvas.getContext('2d');
-let img = new Image();
+let canvas=document.getElementById('canvas');
+let ctx=canvas.getContext('2d');
+let img=new Image();
 
-let rect = {x:100,y:100,w:300,h:200};
-let mode = null;
-let handleSize = 10;
+let rect={x:150,y:150,w:300,h:200,angle:0};
+let action=null;
+let startX,startY;
 
 function loadImage(file){
-  let reader = new FileReader();
-  reader.onload = function(e){
-    img.onload = function(){
-      canvas.width = img.width;
-      canvas.height = img.height;
-      draw();
-    }
-    img.src = e.target.result;
+ let reader=new FileReader();
+ reader.onload=e=>{
+  img.onload=()=>{
+   canvas.width=img.width;
+   canvas.height=img.height;
+   draw();
   }
-  reader.readAsDataURL(file);
+  img.src=e.target.result;
+ }
+ reader.readAsDataURL(file);
 }
 
-document.getElementById('upload').addEventListener('change', function(){
-  loadImage(this.files[0]);
+document.getElementById('upload').addEventListener('change',e=>{
+ loadImage(e.target.files[0]);
 });
 
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img,0,0);
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.drawImage(img,0,0);
 
-  ctx.strokeStyle='red';
-  ctx.lineWidth=2;
-  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
+ ctx.save();
+ ctx.translate(rect.x,rect.y);
+ ctx.rotate(rect.angle);
 
-  drawHandle(rect.x,rect.y);
-  drawHandle(rect.x+rect.w,rect.y);
-  drawHandle(rect.x+rect.w,rect.y+rect.h);
-  drawHandle(rect.x,rect.y+rect.h);
+ ctx.strokeStyle='red';
+ ctx.lineWidth=2;
+ ctx.strokeRect(-rect.w/2,-rect.h/2,rect.w,rect.h);
+
+ // resize handle
+ ctx.fillStyle='yellow';
+ ctx.fillRect(rect.w/2-10,rect.h/2-10,10,10);
+
+ // rotate handle
+ ctx.fillStyle='cyan';
+ ctx.fillRect(0,-rect.h/2-20,10,10);
+
+ ctx.restore();
 }
 
-function drawHandle(x,y){
-  ctx.fillStyle='yellow';
-  ctx.fillRect(x-handleSize/2,y-handleSize/2,handleSize,handleSize);
+canvas.onmousedown=start;
+canvas.onmousemove=move;
+canvas.onmouseup=stop;
+
+canvas.ontouchstart=e=>start(e.touches[0]);
+canvas.ontouchmove=e=>move(e.touches[0]);
+canvas.ontouchend=stop;
+
+function start(e){
+ let mx=e.offsetX||e.clientX;
+ let my=e.offsetY||e.clientY;
+
+ startX=mx;
+ startY=my;
+
+ action='move';
 }
 
-function getHandle(mx,my){
-  let points=[
-    {x:rect.x,y:rect.y,dir:'tl'},
-    {x:rect.x+rect.w,y:rect.y,dir:'tr'},
-    {x:rect.x+rect.w,y:rect.y+rect.h,dir:'br'},
-    {x:rect.x,y:rect.y+rect.h,dir:'bl'}
-  ];
+function move(e){
+ if(!action) return;
+ let mx=e.offsetX||e.clientX;
+ let my=e.offsetY||e.clientY;
 
-  for(let p of points){
-    if(Math.abs(mx-p.x)<10 && Math.abs(my-p.y)<10){
-      return p.dir;
-    }
-  }
-  return null;
+ let dx=mx-startX;
+ let dy=my-startY;
+
+ if(action==='move'){
+  rect.x+=dx;
+  rect.y+=dy;
+ }
+
+ // resize with SHIFT-like behavior
+ if(e.shiftKey){
+  rect.w+=dx;
+  rect.h+=dy;
+ }
+
+ // rotate with ALT-like behavior
+ if(e.altKey){
+  rect.angle+=dx*0.01;
+ }
+
+ startX=mx;
+ startY=my;
+ draw();
 }
 
-function enableSelection(){
-  canvas.onmousedown=function(e){
-    let mx=e.offsetX, my=e.offsetY;
-    let handle=getHandle(mx,my);
-
-    if(handle){
-      mode=handle;
-    } else if(mx>rect.x && mx<rect.x+rect.w && my>rect.y && my<rect.y+rect.h){
-      mode='move';
-    }
-  }
-
-  canvas.onmousemove=function(e){
-    if(!mode) return;
-
-    let mx=e.offsetX, my=e.offsetY;
-
-    if(mode==='move'){
-      rect.x=mx-rect.w/2;
-      rect.y=my-rect.h/2;
-    }
-
-    if(mode==='tl'){
-      rect.w+=rect.x-mx;
-      rect.h+=rect.y-my;
-      rect.x=mx;
-      rect.y=my;
-    }
-
-    if(mode==='tr'){
-      rect.w=mx-rect.x;
-      rect.h+=rect.y-my;
-      rect.y=my;
-    }
-
-    if(mode==='br'){
-      rect.w=mx-rect.x;
-      rect.h=my-rect.y;
-    }
-
-    if(mode==='bl'){
-      rect.w+=rect.x-mx;
-      rect.h=my-rect.y;
-      rect.x=mx;
-    }
-
-    draw();
-  }
-
-  canvas.onmouseup=function(){mode=null;}
-}
+function stop(){action=null;}
 
 function processSelection(){
-  let temp=document.createElement('canvas');
-  let tctx=temp.getContext('2d');
+ let temp=document.createElement('canvas');
+ let tctx=temp.getContext('2d');
 
-  temp.width=rect.w;
-  temp.height=rect.h;
+ temp.width=rect.w;
+ temp.height=rect.h;
 
-  tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
+ tctx.translate(rect.w/2,rect.h/2);
+ tctx.rotate(rect.angle);
+ tctx.drawImage(canvas,rect.x-rect.w/2,rect.y-rect.h/2,rect.w,rect.h,-rect.w/2,-rect.h/2,rect.w,rect.h);
 
-  canvas.width=2700;
-  canvas.height=1200;
-
-  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
+ canvas.width=2700;
+ canvas.height=1200;
+ ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
-  let link=document.createElement('a');
-  link.download='mug-design.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
+ let link=document.createElement('a');
+ link.download='mug-print.png';
+ link.href=canvas.toDataURL('image/png');
+ link.click();
 }
 </script>
-
 </body>
 </html>
