@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - Ultimate PRO</title>
+<title>Mug Tool - Ultimate UI PRO</title>
 <style>
 body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}
 .container{max-width:900px;margin:auto}
@@ -14,8 +14,8 @@ canvas{margin-top:20px;max-width:100%;border:1px solid #444;touch-action:none}
 </head>
 <body>
 <div class="container">
-<h1>☕ Ultimate Mug Print Tool</h1>
-<p>Resize ✔ Rotate ✔ Drag ✔ Mobile + PC ✔ Print Ready</p>
+<h1>☕ Mug Tool - UI PRO</h1>
+<p>Drag ✔ Resize ✔ Rotate ✔ Mobile Friendly ✔</p>
 
 <input type="file" id="upload" accept="image/*"><br>
 <button onclick="processSelection()">Generate Print</button>
@@ -29,7 +29,7 @@ let canvas=document.getElementById('canvas');
 let ctx=canvas.getContext('2d');
 let img=new Image();
 
-let rect={x:150,y:150,w:300,h:200,angle:0};
+let rect={x:200,y:200,w:300,h:200,angle:0};
 let action=null;
 let startX,startY;
 
@@ -64,59 +64,75 @@ function draw(){
 
  // resize handle
  ctx.fillStyle='yellow';
- ctx.fillRect(rect.w/2-10,rect.h/2-10,10,10);
+ ctx.fillRect(rect.w/2-10,rect.h/2-10,20,20);
 
  // rotate handle
  ctx.fillStyle='cyan';
- ctx.fillRect(0,-rect.h/2-20,10,10);
+ ctx.fillRect(-10,-rect.h/2-30,20,20);
 
  ctx.restore();
 }
 
-canvas.onmousedown=start;
-canvas.onmousemove=move;
-canvas.onmouseup=stop;
+function getTouchPos(e){
+ let rectCanvas=canvas.getBoundingClientRect();
+ return {
+  x:(e.touches?e.touches[0].clientX:e.clientX)-rectCanvas.left,
+  y:(e.touches?e.touches[0].clientY:e.clientY)-rectCanvas.top
+ }
+}
 
-canvas.ontouchstart=e=>start(e.touches[0]);
-canvas.ontouchmove=e=>move(e.touches[0]);
-canvas.ontouchend=stop;
+canvas.addEventListener('mousedown',start);
+canvas.addEventListener('mousemove',move);
+canvas.addEventListener('mouseup',stop);
+
+canvas.addEventListener('touchstart',start);
+canvas.addEventListener('touchmove',move);
+canvas.addEventListener('touchend',stop);
 
 function start(e){
- let mx=e.offsetX||e.clientX;
- let my=e.offsetY||e.clientY;
+ let pos=getTouchPos(e);
+ startX=pos.x;
+ startY=pos.y;
 
- startX=mx;
- startY=my;
+ // detect zones
+ let dx=startX-rect.x;
+ let dy=startY-rect.y;
 
- action='move';
+ if(Math.abs(dx-rect.w/2)<20 && Math.abs(dy-rect.h/2)<20){
+  action='resize';
+ }
+ else if(Math.abs(dx)<20 && Math.abs(dy+rect.h/2+30)<20){
+  action='rotate';
+ }
+ else{
+  action='move';
+ }
 }
 
 function move(e){
  if(!action) return;
- let mx=e.offsetX||e.clientX;
- let my=e.offsetY||e.clientY;
+ e.preventDefault();
 
- let dx=mx-startX;
- let dy=my-startY;
+ let pos=getTouchPos(e);
+ let dx=pos.x-startX;
+ let dy=pos.y-startY;
 
  if(action==='move'){
   rect.x+=dx;
   rect.y+=dy;
  }
 
- // resize with SHIFT-like behavior
- if(e.shiftKey){
+ if(action==='resize'){
   rect.w+=dx;
   rect.h+=dy;
  }
 
- // rotate with ALT-like behavior
- if(e.altKey){
+ if(action==='rotate'){
   rect.angle+=dx*0.01;
  }
 
- startX=mx;
- startY=my;
+ startX=pos.x;
+ startY=pos.y;
  draw();
 }
 
