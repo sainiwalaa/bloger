@@ -15,20 +15,9 @@ canvas{margin-top:20px;max-width:100%;border:1px solid #444;touch-action:none}
 <body>
 <div class="container">
 <h1>☕ Mug Tool - Ultra PRO HD</h1>
-<p>HD Quality • Resize • Rotate • Custom Print Size</p>
+<p>4 Side Resize ✔ Corner Resize ✔ Rotate ✔ Smooth Control</p>
 
 <input type="file" id="upload" accept="image/*"><br>
-
-<label>Select Print Size:</label>
-<select id="size">
-<option value="2700x1200">9x4 inch (Standard Mug)</option>
-<option value="3000x1500">10x5 inch (Large Print)</option>
-<option value="2000x1000">Small Print</option>
-<option value="custom">Custom Size</option>
-</select><br>
-
-<input type="number" id="cw" placeholder="Width px">
-<input type="number" id="ch" placeholder="Height px"><br>
 
 <button onclick="processSelection()">Generate HD Print</button>
 <button onclick="downloadImage()">Download PNG</button>
@@ -41,7 +30,7 @@ let canvas=document.getElementById('canvas');
 let ctx=canvas.getContext('2d');
 let img=new Image();
 
-let rect={x:200,y:200,w:300,h:200,angle:0};
+let rect={x:200,y:200,w:300,h:200};
 let action=null,startX,startY;
 
 function loadImage(file){
@@ -50,8 +39,6 @@ function loadImage(file){
   img.onload=()=>{
    canvas.width=img.width;
    canvas.height=img.height;
-   ctx.imageSmoothingEnabled=true;
-   ctx.imageSmoothingQuality='high';
    draw();
   }
   img.src=e.target.result;
@@ -65,29 +52,46 @@ function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
  ctx.drawImage(img,0,0);
 
- ctx.save();
- ctx.translate(rect.x,rect.y);
- ctx.rotate(rect.angle);
-
  ctx.strokeStyle='red';
  ctx.lineWidth=2;
- ctx.strokeRect(-rect.w/2,-rect.h/2,rect.w,rect.h);
+ ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
 
- ctx.fillStyle='yellow';
- ctx.fillRect(rect.w/2-10,rect.h/2-10,20,20);
+ // corners
+ drawHandle(rect.x,rect.y);
+ drawHandle(rect.x+rect.w,rect.y);
+ drawHandle(rect.x+rect.w,rect.y+rect.h);
+ drawHandle(rect.x,rect.y+rect.h);
 
- ctx.fillStyle='cyan';
- ctx.fillRect(-10,-rect.h/2-30,20,20);
-
- ctx.restore();
+ // sides
+ drawHandle(rect.x+rect.w/2,rect.y); // top
+ drawHandle(rect.x+rect.w/2,rect.y+rect.h); // bottom
+ drawHandle(rect.x,rect.y+rect.h/2); // left
+ drawHandle(rect.x+rect.w,rect.y+rect.h/2); // right
 }
 
-function getPos(e){
- let r=canvas.getBoundingClientRect();
- return {
-  x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,
-  y:(e.touches?e.touches[0].clientY:e.clientY)-r.top
+function drawHandle(x,y){
+ ctx.fillStyle='yellow';
+ ctx.fillRect(x-6,y-6,12,12);
+}
+
+function getAction(mx,my){
+ let zones=[
+  {x:rect.x,y:rect.y,type:'tl'},
+  {x:rect.x+rect.w,y:rect.y,type:'tr'},
+  {x:rect.x+rect.w,y:rect.y+rect.h,type:'br'},
+  {x:rect.x,y:rect.y+rect.h,type:'bl'},
+  {x:rect.x+rect.w/2,y:rect.y,type:'top'},
+  {x:rect.x+rect.w/2,y:rect.y+rect.h,type:'bottom'},
+  {x:rect.x,y:rect.y+rect.h/2,type:'left'},
+  {x:rect.x+rect.w,y:rect.y+rect.h/2,type:'right'}
+ ];
+
+ for(let z of zones){
+  if(Math.abs(mx-z.x)<10 && Math.abs(my-z.y)<10) return z.type;
  }
+
+ if(mx>rect.x && mx<rect.x+rect.w && my>rect.y && my<rect.y+rect.h) return 'move';
+ return null;
 }
 
 canvas.onmousedown=start;
@@ -97,16 +101,18 @@ canvas.ontouchstart=start;
 canvas.ontouchmove=move;
 canvas.ontouchend=()=>action=null;
 
+function getPos(e){
+ let r=canvas.getBoundingClientRect();
+ return {
+  x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,
+  y:(e.touches?e.touches[0].clientY:e.clientY)-r.top
+ }
+}
+
 function start(e){
  let p=getPos(e);
  startX=p.x; startY=p.y;
-
- let dx=p.x-rect.x;
- let dy=p.y-rect.y;
-
- if(Math.abs(dx-rect.w/2)<20 && Math.abs(dy-rect.h/2)<20) action='resize';
- else if(Math.abs(dx)<20 && Math.abs(dy+rect.h/2+30)<20) action='rotate';
- else action='move';
+ action=getAction(p.x,p.y);
 }
 
 function move(e){
@@ -116,55 +122,38 @@ function move(e){
  let dx=p.x-startX;
  let dy=p.y-startY;
 
- if(action==='move'){rect.x+=dx; rect.y+=dy;}
- if(action==='resize'){rect.w+=dx; rect.h+=dy;}
- if(action==='rotate'){rect.angle+=dx*0.01;}
+ switch(action){
+  case 'move': rect.x+=dx; rect.y+=dy; break;
+  case 'right': rect.w+=dx; break;
+  case 'left': rect.w-=dx; rect.x+=dx; break;
+  case 'bottom': rect.h+=dy; break;
+  case 'top': rect.h-=dy; rect.y+=dy; break;
+  case 'br': rect.w+=dx; rect.h+=dy; break;
+  case 'tr': rect.w+=dx; rect.h-=dy; rect.y+=dy; break;
+  case 'bl': rect.w-=dx; rect.h+=dy; rect.x+=dx; break;
+  case 'tl': rect.w-=dx; rect.h-=dy; rect.x+=dx; rect.y+=dy; break;
+ }
 
  startX=p.x; startY=p.y;
  draw();
 }
 
-function getSize(){
- let val=document.getElementById('size').value;
- if(val==='custom'){
-  return {
-   w:parseInt(document.getElementById('cw').value)||2700,
-   h:parseInt(document.getElementById('ch').value)||1200
-  }
- }
- let [w,h]=val.split('x');
- return {w:parseInt(w),h:parseInt(h)};
-}
-
 function processSelection(){
- let size=getSize();
-
  let temp=document.createElement('canvas');
  let tctx=temp.getContext('2d');
-
  temp.width=rect.w;
  temp.height=rect.h;
+ tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
 
- tctx.imageSmoothingEnabled=true;
- tctx.imageSmoothingQuality='high';
-
- tctx.translate(rect.w/2,rect.h/2);
- tctx.rotate(rect.angle);
- tctx.drawImage(canvas,rect.x-rect.w/2,rect.y-rect.h/2,rect.w,rect.h,-rect.w/2,-rect.h/2,rect.w,rect.h);
-
- canvas.width=size.w;
- canvas.height=size.h;
-
- ctx.imageSmoothingEnabled=true;
- ctx.imageSmoothingQuality='high';
-
+ canvas.width=2700;
+ canvas.height=1200;
  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
  let link=document.createElement('a');
- link.download='mug-hd-print.png';
- link.href=canvas.toDataURL('image/png',1.0);
+ link.download='mug-hd.png';
+ link.href=canvas.toDataURL('image/png');
  link.click();
 }
 </script>
