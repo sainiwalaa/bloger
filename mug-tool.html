@@ -3,22 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - Ultimate UI PRO</title>
+<title>Mug Tool - Ultra PRO HD</title>
 <style>
 body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}
 .container{max-width:900px;margin:auto}
-input,button{padding:10px;margin:8px;border:none;border-radius:6px}
+input,select,button{padding:10px;margin:8px;border:none;border-radius:6px}
 button{background:#00e5ff;color:#000;font-weight:bold;cursor:pointer}
 canvas{margin-top:20px;max-width:100%;border:1px solid #444;touch-action:none}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Mug Tool - UI PRO</h1>
-<p>Drag ✔ Resize ✔ Rotate ✔ Mobile Friendly ✔</p>
+<h1>☕ Mug Tool - Ultra PRO HD</h1>
+<p>HD Quality • Resize • Rotate • Custom Print Size</p>
 
 <input type="file" id="upload" accept="image/*"><br>
-<button onclick="processSelection()">Generate Print</button>
+
+<label>Select Print Size:</label>
+<select id="size">
+<option value="2700x1200">9x4 inch (Standard Mug)</option>
+<option value="3000x1500">10x5 inch (Large Print)</option>
+<option value="2000x1000">Small Print</option>
+<option value="custom">Custom Size</option>
+</select><br>
+
+<input type="number" id="cw" placeholder="Width px">
+<input type="number" id="ch" placeholder="Height px"><br>
+
+<button onclick="processSelection()">Generate HD Print</button>
 <button onclick="downloadImage()">Download PNG</button>
 
 <canvas id="canvas"></canvas>
@@ -30,8 +42,7 @@ let ctx=canvas.getContext('2d');
 let img=new Image();
 
 let rect={x:200,y:200,w:300,h:200,angle:0};
-let action=null;
-let startX,startY;
+let action=null,startX,startY;
 
 function loadImage(file){
  let reader=new FileReader();
@@ -39,6 +50,8 @@ function loadImage(file){
   img.onload=()=>{
    canvas.width=img.width;
    canvas.height=img.height;
+   ctx.imageSmoothingEnabled=true;
+   ctx.imageSmoothingQuality='high';
    draw();
   }
   img.src=e.target.result;
@@ -46,9 +59,7 @@ function loadImage(file){
  reader.readAsDataURL(file);
 }
 
-document.getElementById('upload').addEventListener('change',e=>{
- loadImage(e.target.files[0]);
-});
+document.getElementById('upload').addEventListener('change',e=>loadImage(e.target.files[0]));
 
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -62,102 +73,98 @@ function draw(){
  ctx.lineWidth=2;
  ctx.strokeRect(-rect.w/2,-rect.h/2,rect.w,rect.h);
 
- // resize handle
  ctx.fillStyle='yellow';
  ctx.fillRect(rect.w/2-10,rect.h/2-10,20,20);
 
- // rotate handle
  ctx.fillStyle='cyan';
  ctx.fillRect(-10,-rect.h/2-30,20,20);
 
  ctx.restore();
 }
 
-function getTouchPos(e){
- let rectCanvas=canvas.getBoundingClientRect();
+function getPos(e){
+ let r=canvas.getBoundingClientRect();
  return {
-  x:(e.touches?e.touches[0].clientX:e.clientX)-rectCanvas.left,
-  y:(e.touches?e.touches[0].clientY:e.clientY)-rectCanvas.top
+  x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,
+  y:(e.touches?e.touches[0].clientY:e.clientY)-r.top
  }
 }
 
-canvas.addEventListener('mousedown',start);
-canvas.addEventListener('mousemove',move);
-canvas.addEventListener('mouseup',stop);
-
-canvas.addEventListener('touchstart',start);
-canvas.addEventListener('touchmove',move);
-canvas.addEventListener('touchend',stop);
+canvas.onmousedown=start;
+canvas.onmousemove=move;
+canvas.onmouseup=()=>action=null;
+canvas.ontouchstart=start;
+canvas.ontouchmove=move;
+canvas.ontouchend=()=>action=null;
 
 function start(e){
- let pos=getTouchPos(e);
- startX=pos.x;
- startY=pos.y;
+ let p=getPos(e);
+ startX=p.x; startY=p.y;
 
- // detect zones
- let dx=startX-rect.x;
- let dy=startY-rect.y;
+ let dx=p.x-rect.x;
+ let dy=p.y-rect.y;
 
- if(Math.abs(dx-rect.w/2)<20 && Math.abs(dy-rect.h/2)<20){
-  action='resize';
- }
- else if(Math.abs(dx)<20 && Math.abs(dy+rect.h/2+30)<20){
-  action='rotate';
- }
- else{
-  action='move';
- }
+ if(Math.abs(dx-rect.w/2)<20 && Math.abs(dy-rect.h/2)<20) action='resize';
+ else if(Math.abs(dx)<20 && Math.abs(dy+rect.h/2+30)<20) action='rotate';
+ else action='move';
 }
 
 function move(e){
  if(!action) return;
  e.preventDefault();
+ let p=getPos(e);
+ let dx=p.x-startX;
+ let dy=p.y-startY;
 
- let pos=getTouchPos(e);
- let dx=pos.x-startX;
- let dy=pos.y-startY;
+ if(action==='move'){rect.x+=dx; rect.y+=dy;}
+ if(action==='resize'){rect.w+=dx; rect.h+=dy;}
+ if(action==='rotate'){rect.angle+=dx*0.01;}
 
- if(action==='move'){
-  rect.x+=dx;
-  rect.y+=dy;
- }
-
- if(action==='resize'){
-  rect.w+=dx;
-  rect.h+=dy;
- }
-
- if(action==='rotate'){
-  rect.angle+=dx*0.01;
- }
-
- startX=pos.x;
- startY=pos.y;
+ startX=p.x; startY=p.y;
  draw();
 }
 
-function stop(){action=null;}
+function getSize(){
+ let val=document.getElementById('size').value;
+ if(val==='custom'){
+  return {
+   w:parseInt(document.getElementById('cw').value)||2700,
+   h:parseInt(document.getElementById('ch').value)||1200
+  }
+ }
+ let [w,h]=val.split('x');
+ return {w:parseInt(w),h:parseInt(h)};
+}
 
 function processSelection(){
+ let size=getSize();
+
  let temp=document.createElement('canvas');
  let tctx=temp.getContext('2d');
 
  temp.width=rect.w;
  temp.height=rect.h;
 
+ tctx.imageSmoothingEnabled=true;
+ tctx.imageSmoothingQuality='high';
+
  tctx.translate(rect.w/2,rect.h/2);
  tctx.rotate(rect.angle);
  tctx.drawImage(canvas,rect.x-rect.w/2,rect.y-rect.h/2,rect.w,rect.h,-rect.w/2,-rect.h/2,rect.w,rect.h);
 
- canvas.width=2700;
- canvas.height=1200;
+ canvas.width=size.w;
+ canvas.height=size.h;
+
+ ctx.imageSmoothingEnabled=true;
+ ctx.imageSmoothingQuality='high';
+
  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
  let link=document.createElement('a');
- link.download='mug-print.png';
- link.href=canvas.toDataURL('image/png');
+ link.download='mug-hd-print.png';
+ link.href=canvas.toDataURL('image/png',1.0);
  link.click();
 }
 </script>
