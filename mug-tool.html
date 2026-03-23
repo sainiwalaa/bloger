@@ -3,60 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sainiwalaa Mug Tool PRO</title>
+<title>Sainiwalaa Mug Tool PRO+</title>
 <style>
-body{
- font-family:Arial;
- background:linear-gradient(135deg,#ff512f,#dd2476);
- color:#fff;
- text-align:center;
- padding:20px;
-}
-.container{
- max-width:900px;
- margin:auto;
- background:#111;
- padding:20px;
- border-radius:12px;
- box-shadow:0 0 20px rgba(0,0,0,0.5);
-}
-input,select,button{
- padding:10px;
- margin:8px;
- border:none;
- border-radius:6px;
-}
-button{
- background:#00e5ff;
- color:#000;
- font-weight:bold;
- cursor:pointer;
-}
-canvas{
- margin-top:20px;
- max-width:100%;
- border:2px solid #fff;
- border-radius:10px;
- touch-action:none;
-}
+body{font-family:Arial;background:linear-gradient(135deg,#ff512f,#dd2476);color:#fff;text-align:center;padding:20px}
+.container{max-width:950px;margin:auto;background:#111;padding:20px;border-radius:12px}
+input,select,button{padding:10px;margin:6px;border:none;border-radius:6px}
+button{background:#00e5ff;color:#000;font-weight:bold;cursor:pointer}
+canvas{margin-top:20px;max-width:100%;border:2px solid #fff;border-radius:10px;touch-action:none}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Sainiwalaa Mug Print Tool</h1>
-<p>HD Quality • Resize • Custom Mug Print Sizes</p>
+<h1>☕ Sainiwalaa Mug Tool PRO+</h1>
+<p>HD • Resize • Text Add • Print Ready</p>
 
 <input type="file" id="upload" accept="image/*"><br>
 
 <select id="size">
-<option value="2700x1200">9x4 inch (Standard Mug)</option>
+<option value="2700x1200">9x4 inch</option>
 <option value="3000x1500">10x5 inch</option>
-<option value="2000x1000">Small Print</option>
-<option value="custom">Custom Size</option>
-</select><br>
-
+<option value="custom">Custom</option>
+</select>
 <input type="number" id="cw" placeholder="Width px">
 <input type="number" id="ch" placeholder="Height px"><br>
+
+<!-- TEXT TOOL -->
+<input type="text" id="textInput" placeholder="Enter text">
+<input type="color" id="textColor" value="#ffffff">
+<button onclick="addText()">Add Text</button><br>
 
 <button onclick="processSelection()">Generate Print</button>
 <button onclick="downloadImage()">Download PNG</button>
@@ -71,6 +45,8 @@ let img=new Image();
 
 let rect={x:200,y:200,w:300,h:200};
 let action=null,startX,startY;
+
+let texts=[];
 
 function loadImage(file){
  let reader=new FileReader();
@@ -91,86 +67,48 @@ function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
  ctx.drawImage(img,0,0);
 
+ // draw selection
  ctx.strokeStyle='yellow';
- ctx.lineWidth=2;
  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
 
- drawHandle(rect.x,rect.y);
- drawHandle(rect.x+rect.w,rect.y);
- drawHandle(rect.x+rect.w,rect.y+rect.h);
- drawHandle(rect.x,rect.y+rect.h);
-
- drawHandle(rect.x+rect.w/2,rect.y);
- drawHandle(rect.x+rect.w/2,rect.y+rect.h);
- drawHandle(rect.x,rect.y+rect.h/2);
- drawHandle(rect.x+rect.w,rect.y+rect.h/2);
+ // draw text
+ texts.forEach(t=>{
+  ctx.fillStyle=t.color;
+  ctx.font=t.size+'px Arial';
+  ctx.fillText(t.text,t.x,t.y);
+ });
 }
 
-function drawHandle(x,y){
- ctx.fillStyle='#00e5ff';
- ctx.fillRect(x-6,y-6,12,12);
-}
+function addText(){
+ let text=document.getElementById('textInput').value;
+ let color=document.getElementById('textColor').value;
 
-function getAction(mx,my){
- let zones=[
-  {x:rect.x,y:rect.y,type:'tl'},
-  {x:rect.x+rect.w,y:rect.y,type:'tr'},
-  {x:rect.x+rect.w,y:rect.y+rect.h,type:'br'},
-  {x:rect.x,y:rect.y+rect.h,type:'bl'},
-  {x:rect.x+rect.w/2,y:rect.y,type:'top'},
-  {x:rect.x+rect.w/2,y:rect.y+rect.h,type:'bottom'},
-  {x:rect.x,y:rect.y+rect.h/2,type:'left'},
-  {x:rect.x+rect.w,y:rect.y+rect.h/2,type:'right'}
- ];
-
- for(let z of zones){
-  if(Math.abs(mx-z.x)<10 && Math.abs(my-z.y)<10) return z.type;
- }
-
- if(mx>rect.x && mx<rect.x+rect.w && my>rect.y && my<rect.y+rect.h) return 'move';
- return null;
+ texts.push({text:text,x:100,y:100,size:50,color:color});
+ draw();
 }
 
 canvas.onmousedown=start;
 canvas.onmousemove=move;
 canvas.onmouseup=()=>action=null;
-canvas.ontouchstart=start;
-canvas.ontouchmove=move;
-canvas.ontouchend=()=>action=null;
 
 function getPos(e){
  let r=canvas.getBoundingClientRect();
- return {
-  x:(e.touches?e.touches[0].clientX:e.clientX)-r.left,
-  y:(e.touches?e.touches[0].clientY:e.clientY)-r.top
- }
+ return {x:e.clientX-r.left,y:e.clientY-r.top}
 }
 
 function start(e){
  let p=getPos(e);
  startX=p.x; startY=p.y;
- action=getAction(p.x,p.y);
+ action='move';
 }
 
 function move(e){
  if(!action) return;
- e.preventDefault();
  let p=getPos(e);
  let dx=p.x-startX;
  let dy=p.y-startY;
-
- switch(action){
-  case 'move': rect.x+=dx; rect.y+=dy; break;
-  case 'right': rect.w+=dx; break;
-  case 'left': rect.w-=dx; rect.x+=dx; break;
-  case 'bottom': rect.h+=dy; break;
-  case 'top': rect.h-=dy; rect.y+=dy; break;
-  case 'br': rect.w+=dx; rect.h+=dy; break;
-  case 'tr': rect.w+=dx; rect.h-=dy; rect.y+=dy; break;
-  case 'bl': rect.w-=dx; rect.h+=dy; rect.x+=dx; break;
-  case 'tl': rect.w-=dx; rect.h-=dy; rect.x+=dx; rect.y+=dy; break;
- }
-
+ rect.x+=dx;
+ rect.y+=dy;
  startX=p.x; startY=p.y;
  draw();
 }
@@ -178,10 +116,7 @@ function move(e){
 function getSize(){
  let val=document.getElementById('size').value;
  if(val==='custom'){
-  return {
-   w:parseInt(document.getElementById('cw').value)||2700,
-   h:parseInt(document.getElementById('ch').value)||1200
-  }
+  return {w:parseInt(cw.value)||2700,h:parseInt(ch.value)||1200};
  }
  let [w,h]=val.split('x');
  return {w:parseInt(w),h:parseInt(h)};
@@ -189,8 +124,6 @@ function getSize(){
 
 function processSelection(){
  let size=getSize();
- let scale=3;
-
  let temp=document.createElement('canvas');
  let tctx=temp.getContext('2d');
 
@@ -213,7 +146,7 @@ function processSelection(){
 
 function downloadImage(){
  let link=document.createElement('a');
- link.download='sainiwalaa-mug-print.png';
+ link.download='sainiwalaa-mug.png';
  link.href=canvas.toDataURL('image/png',1.0);
  link.click();
 }
