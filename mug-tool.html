@@ -3,23 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mug Tool - Ultra PRO HD</title>
+<title>Sainiwalaa Mug Tool PRO</title>
 <style>
-body{font-family:Arial;background:#111;color:#fff;text-align:center;padding:20px}
-.container{max-width:900px;margin:auto}
-input,select,button{padding:10px;margin:8px;border:none;border-radius:6px}
-button{background:#00e5ff;color:#000;font-weight:bold;cursor:pointer}
-canvas{margin-top:20px;max-width:100%;border:1px solid #444;touch-action:none}
+body{
+ font-family:Arial;
+ background:linear-gradient(135deg,#ff512f,#dd2476);
+ color:#fff;
+ text-align:center;
+ padding:20px;
+}
+.container{
+ max-width:900px;
+ margin:auto;
+ background:#111;
+ padding:20px;
+ border-radius:12px;
+ box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+input,select,button{
+ padding:10px;
+ margin:8px;
+ border:none;
+ border-radius:6px;
+}
+button{
+ background:#00e5ff;
+ color:#000;
+ font-weight:bold;
+ cursor:pointer;
+}
+canvas{
+ margin-top:20px;
+ max-width:100%;
+ border:2px solid #fff;
+ border-radius:10px;
+ touch-action:none;
+}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>☕ Mug Tool - Ultra PRO HD</h1>
-<p>4 Side Resize ✔ Corner Resize ✔ Rotate ✔ Smooth Control</p>
+<h1>☕ Sainiwalaa Mug Print Tool</h1>
+<p>HD Quality • Resize • Custom Mug Print Sizes</p>
 
 <input type="file" id="upload" accept="image/*"><br>
 
-<button onclick="processSelection()">Generate HD Print</button>
+<select id="size">
+<option value="2700x1200">9x4 inch (Standard Mug)</option>
+<option value="3000x1500">10x5 inch</option>
+<option value="2000x1000">Small Print</option>
+<option value="custom">Custom Size</option>
+</select><br>
+
+<input type="number" id="cw" placeholder="Width px">
+<input type="number" id="ch" placeholder="Height px"><br>
+
+<button onclick="processSelection()">Generate Print</button>
 <button onclick="downloadImage()">Download PNG</button>
 
 <canvas id="canvas"></canvas>
@@ -52,25 +91,23 @@ function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
  ctx.drawImage(img,0,0);
 
- ctx.strokeStyle='red';
+ ctx.strokeStyle='yellow';
  ctx.lineWidth=2;
  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
 
- // corners
  drawHandle(rect.x,rect.y);
  drawHandle(rect.x+rect.w,rect.y);
  drawHandle(rect.x+rect.w,rect.y+rect.h);
  drawHandle(rect.x,rect.y+rect.h);
 
- // sides
- drawHandle(rect.x+rect.w/2,rect.y); // top
- drawHandle(rect.x+rect.w/2,rect.y+rect.h); // bottom
- drawHandle(rect.x,rect.y+rect.h/2); // left
- drawHandle(rect.x+rect.w,rect.y+rect.h/2); // right
+ drawHandle(rect.x+rect.w/2,rect.y);
+ drawHandle(rect.x+rect.w/2,rect.y+rect.h);
+ drawHandle(rect.x,rect.y+rect.h/2);
+ drawHandle(rect.x+rect.w,rect.y+rect.h/2);
 }
 
 function drawHandle(x,y){
- ctx.fillStyle='yellow';
+ ctx.fillStyle='#00e5ff';
  ctx.fillRect(x-6,y-6,12,12);
 }
 
@@ -138,35 +175,46 @@ function move(e){
  draw();
 }
 
+function getSize(){
+ let val=document.getElementById('size').value;
+ if(val==='custom'){
+  return {
+   w:parseInt(document.getElementById('cw').value)||2700,
+   h:parseInt(document.getElementById('ch').value)||1200
+  }
+ }
+ let [w,h]=val.split('x');
+ return {w:parseInt(w),h:parseInt(h)};
+}
+
 function processSelection(){
-  let temp=document.createElement('canvas');
-  let tctx=temp.getContext('2d');
+ let size=getSize();
+ let scale=3;
 
-  temp.width=rect.w;
-  temp.height=rect.h;
+ let temp=document.createElement('canvas');
+ let tctx=temp.getContext('2d');
 
-  // HIGH QUALITY SETTINGS
-  tctx.imageSmoothingEnabled=true;
-  tctx.imageSmoothingQuality='high';
+ temp.width=rect.w;
+ temp.height=rect.h;
 
-  tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
+ tctx.imageSmoothingEnabled=true;
+ tctx.imageSmoothingQuality='high';
 
-  // ULTRA HD SIZE (4K–8K Support)
-  let scale=3; // increase for more HD (2 = normal, 3 = ultra, 4 = 8K)
+ tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
 
-  canvas.width=rect.w*scale;
-  canvas.height=rect.h*scale;
+ canvas.width=size.w;
+ canvas.height=size.h;
 
-  ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality='high';
+ ctx.imageSmoothingEnabled=true;
+ ctx.imageSmoothingQuality='high';
 
-  ctx.drawImage(temp,0,0,canvas.width,canvas.height);
+ ctx.drawImage(temp,0,0,canvas.width,canvas.height);
 }
 
 function downloadImage(){
  let link=document.createElement('a');
- link.download='mug-hd.png';
- link.href=canvas.toDataURL('image/png');
+ link.download='sainiwalaa-mug-print.png';
+ link.href=canvas.toDataURL('image/png',1.0);
  link.click();
 }
 </script>
