@@ -9,16 +9,16 @@ body{font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:2
 .container{max-width:900px;margin:auto}
 input,button{padding:10px;margin:10px;border:none;border-radius:6px}
 button{background:#00bcd4;color:#000;cursor:pointer;font-weight:bold}
-canvas{margin-top:20px;max-width:100%;border:1px solid #444}
+canvas{margin-top:20px;max-width:100%;border:1px solid #444;cursor:crosshair}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>☕ Mug Tool - Hybrid PRO</h1>
-<p>Upload → Select Design Area → Auto Clean → HD Print PNG</p>
+<p>Upload → Drag & Resize Selection → Process → HD PNG</p>
 
 <input type="file" id="upload" accept="image/*"><br>
-<button onclick="startSelection()">Select Design Area</button>
+<button onclick="enableSelection()">Enable Selection</button>
 <button onclick="processSelection()">Process Design</button>
 <button onclick="downloadImage()">Download HD PNG</button>
 
@@ -29,8 +29,11 @@ canvas{margin-top:20px;max-width:100%;border:1px solid #444}
 let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 let img = new Image();
-let selecting = false;
-let startX, startY, endX, endY;
+
+let rect = {x:50,y:50,w:200,h:150};
+let dragging = false;
+let resizing = false;
+let offsetX, offsetY;
 
 function loadImage(file){
   let reader = new FileReader();
@@ -38,7 +41,7 @@ function loadImage(file){
     img.onload = function(){
       canvas.width = img.width;
       canvas.height = img.height;
-      ctx.drawImage(img,0,0);
+      draw();
     }
     img.src = e.target.result;
   }
@@ -49,42 +52,71 @@ document.getElementById('upload').addEventListener('change', function(){
   loadImage(this.files[0]);
 });
 
-function startSelection(){
-  selecting = true;
-  canvas.onmousedown = function(e){
-    startX = e.offsetX;
-    startY = e.offsetY;
-  }
-  canvas.onmouseup = function(e){
-    endX = e.offsetX;
-    endY = e.offsetY;
-    drawSelection();
-  }
-}
-
-function drawSelection(){
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(img,0,0);
+
+  // draw rectangle
   ctx.strokeStyle = 'red';
   ctx.lineWidth = 3;
-  ctx.strokeRect(startX, startY, endX-startX, endY-startY);
+  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+
+  // resize handle (bottom-right)
+  ctx.fillStyle = 'red';
+  ctx.fillRect(rect.x+rect.w-10, rect.y+rect.h-10, 10, 10);
+}
+
+function enableSelection(){
+  canvas.onmousedown = function(e){
+    let mx = e.offsetX;
+    let my = e.offsetY;
+
+    // check resize handle
+    if(mx > rect.x+rect.w-10 && my > rect.y+rect.h-10){
+      resizing = true;
+    }
+    // check inside box
+    else if(mx > rect.x && mx < rect.x+rect.w && my > rect.y && my < rect.y+rect.h){
+      dragging = true;
+      offsetX = mx - rect.x;
+      offsetY = my - rect.y;
+    }
+  }
+
+  canvas.onmousemove = function(e){
+    let mx = e.offsetX;
+    let my = e.offsetY;
+
+    if(dragging){
+      rect.x = mx - offsetX;
+      rect.y = my - offsetY;
+      draw();
+    }
+
+    if(resizing){
+      rect.w = mx - rect.x;
+      rect.h = my - rect.y;
+      draw();
+    }
+  }
+
+  canvas.onmouseup = function(){
+    dragging = false;
+    resizing = false;
+  }
 }
 
 function processSelection(){
-  let w = Math.abs(endX - startX);
-  let h = Math.abs(endY - startY);
-
   let tempCanvas = document.createElement('canvas');
   let tctx = tempCanvas.getContext('2d');
-  tempCanvas.width = w;
-  tempCanvas.height = h;
+  tempCanvas.width = rect.w;
+  tempCanvas.height = rect.h;
 
-  tctx.drawImage(canvas, startX, startY, w, h, 0, 0, w, h);
+  tctx.drawImage(canvas, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
 
-  // Resize to print size (2700x1200)
   canvas.width = 2700;
   canvas.height = 1200;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
 
   removeBackground();
