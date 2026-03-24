@@ -70,14 +70,25 @@ function loadImage(file){
 
 document.getElementById('upload').addEventListener('change',e=>loadImage(e.target.files[0]));
 
-// IMAGE LAYER UPLOAD
+// IMAGE LAYER UPLOAD (Improved Canva Style)
 document.getElementById('imgLayerUpload').addEventListener('change',e=>{
  let file=e.target.files[0];
  let reader=new FileReader();
  reader.onload=ev=>{
   let newImg=new Image();
   newImg.onload=()=>{
-   images.push({img:newImg,x:150,y:150,w:200,h:150});
+   // auto size fit system (single or double print logic)
+   let baseW = rect.w * 0.5;
+   let baseH = rect.h * 0.5;
+
+   images.push({
+     img:newImg,
+     x:rect.x + 20,
+     y:rect.y + 20,
+     w:baseW,
+     h:baseH,
+     mode:'single' // single or double
+   });
    draw();
   }
   newImg.src=ev.target.result;
@@ -94,8 +105,16 @@ function draw(){
  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
  drawHandles(rect);
 
+ // IMAGE LAYERS
  images.forEach(im=>{
-  ctx.drawImage(im.img,im.x,im.y,im.w,im.h);
+  if(im.mode==='double'){
+    // duplicate print (left + right)
+    ctx.drawImage(im.img,rect.x,im.y,im.w,im.h);
+    ctx.drawImage(im.img,rect.x+rect.w-im.w,im.y,im.w,im.h);
+  }else{
+    ctx.drawImage(im.img,im.x,im.y,im.w,im.h);
+  }
+
   if(im===selectedImage) drawHandles(im);
  });
 
@@ -134,6 +153,15 @@ function deleteImageLayer(){
   selectedImage=null;
   draw();
  }
+}
+
+// SWITCH PRINT MODE (single/double)
+function toggleImageMode(){
+ if(selectedImage){
+  selectedImage.mode = selectedImage.mode==='single' ? 'double' : 'single';
+  draw();
+ }
+}
 }
 
 function zoomIn(){zoom+=0.2;draw();}
