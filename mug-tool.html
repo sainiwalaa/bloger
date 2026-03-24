@@ -2,131 +2,122 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwala Design Extractor 4K</title>
+    <title>Sainiwala Ultimate Crop & 4K Editor</title>
     <style>
-        :root { --accent: #00ff88; --panel: #121212; }
-        body { margin: 0; font-family: sans-serif; background: #222; color: white; display: flex; height: 100vh; overflow: hidden; }
+        :root { --neon: #00ff88; --dark: #0a0a0a; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar */
-        .sidebar { width: 320px; background: var(--panel); padding: 20px; border-right: 2px solid var(--accent); display: flex; flex-direction: column; gap: 15px; z-index: 5; }
-        .sidebar h2 { color: var(--accent); font-size: 18px; margin-top: 0; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        /* Sidebar Design */
+        .sidebar { width: 320px; background: var(--dark); padding: 20px; border-right: 2px solid var(--neon); display: flex; flex-direction: column; gap: 12px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        h2 { color: var(--neon); font-size: 1.2rem; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Buttons */
-        input[type="file"] { display: none; }
-        .btn { background: #333; color: white; border: 1px solid var(--accent); padding: 12px; cursor: pointer; border-radius: 5px; text-align: center; font-weight: bold; transition: 0.2s; }
-        .btn:hover { background: var(--accent); color: black; }
-        .btn-main { background: var(--accent); color: black; }
-        .btn-red { border-color: #ff4444; color: #ff4444; }
-        .btn-red:hover { background: #ff4444; color: white; }
+        .btn { background: #222; color: white; border: 1px solid #444; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; text-align: center; }
+        .btn:hover { border-color: var(--neon); background: #2a2a2a; }
+        .btn-active { background: var(--neon); color: #000; border: none; }
+        .btn-danger { color: #ff4444; border-color: #ff4444; }
+        .btn-danger:hover { background: #ff4444; color: white; }
 
-        /* Canvas Area */
-        #viewport { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #1a1a1a; cursor: crosshair; }
-        canvas { box-shadow: 0 0 30px rgba(0,0,0,0.8); background: white; max-width: 95%; max-height: 95%; }
+        input[type="file"] { display: none; }
+        label { display: block; }
+
+        /* Workspace */
+        #container { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 25px 25px; }
+        canvas { background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); cursor: crosshair; image-rendering: -webkit-optimize-contrast; }
         
-        .step-info { position: absolute; top: 10px; right: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; font-size: 14px; color: var(--accent); }
+        .status-bar { position: absolute; bottom: 15px; left: 335px; background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 20px; font-size: 12px; border: 1px solid var(--neon); }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>SAINIWALA SYSTEM</h2>
+    <h2>Sainiwala System</h2>
     
-    <label class="btn btn-main" for="cupUpload">1. Upload Cup Photo</label>
-    <input type="file" id="cupUpload" accept="image/*">
+    <label class="btn btn-active" for="upload">🖼️ Upload Cup Photo</label>
+    <input type="file" id="upload" accept="image/*">
     
-    <button class="btn" onclick="extractDesign()">2. Extract Design (Cut)</button>
+    <button class="btn" onclick="extractNow()" id="cutBtn" style="display:none; background:#00e5ff; color:#000;">✂️ Extract Selection</button>
     
-    <hr style="width:100%; border:0.5px solid #333">
+    <hr style="width:100%; border:0.1px solid #333; margin: 10px 0;">
     
-    <button class="btn" onclick="addText()">Add Name/Text</button>
-    <button class="btn" onclick="addLogo()">Add Extra Image</button>
-    <button class="btn" onclick="duplicateLayer()">Duplicate</button>
-    <button class="btn btn-red" onclick="deleteLayer()">Delete Selected</button>
+    <button class="btn" onclick="addText()">➕ Add Name/Text</button>
+    <button class="btn" onclick="addDecoration()">⭐ Add Logo/Icon</button>
+    <button class="btn btn-danger" onclick="deleteObj()">🗑️ Delete Item</button>
     
-    <div id="status" style="font-size:12px; color:#888; margin-top:10px;">Status: Ready</div>
+    <div style="margin-top:20px; padding:10px; background:#111; border-radius:5px; font-size:13px;">
+        <p style="margin:5px 0;">Quality: <b style="color:var(--neon)">4K Ultra HD</b></p>
+        <p style="margin:5px 0;">Resolution: <b>4000x1800 px</b></p>
+    </div>
 
-    <button class="btn btn-main" style="margin-top:auto; font-size:16px;" onclick="download4K()">⬇ Download 4K Design</button>
+    <button class="btn btn-active" style="margin-top:auto; font-size:18px;" onclick="downloadHD()">💾 Download 4K Design</button>
 </div>
 
-<div id="viewport">
-    <div class="step-info" id="guide">Step 1: Upload a Cup photo to start</div>
-    <canvas id="mainCanvas"></canvas>
+<div id="container">
+    <canvas id="canvas"></canvas>
+    <div class="status-bar" id="status">Upload an image to start cutting...</div>
 </div>
 
 <script>
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
-    const guide = document.getElementById('guide');
-    
-    let baseImg = new Image();
-    let layers = [];
-    let selectedLayer = null;
-    let isExtracting = false;
-    
-    // Selection Box for Extraction
-    let cropBox = { x: 50, y: 50, w: 200, h: 200, active: false };
-    let isDragging = false, isResizing = false, startX, startY;
+    const cvs = document.getElementById('canvas');
+    const ctx = cvs.getContext('2d');
+    const status = document.getElementById('status');
+    const cutBtn = document.getElementById('cutBtn');
 
-    // 1. Upload Image
-    document.getElementById('cupUpload').onchange = (e) => {
+    let mode = 'upload'; // 'upload' or 'edit'
+    let img = new Image();
+    let layers = [];
+    let selected = null;
+    
+    // Selection Frame Logic
+    let frame = { x: 100, y: 100, w: 300, h: 200 };
+    let handleSize = 10;
+    let dragging = false;
+    let resizing = null; // 'tl', 'tr', 'bl', 'br'
+
+    document.getElementById('upload').onchange = (e) => {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            baseImg.onload = () => {
-                canvas.width = 800;
-                canvas.height = (baseImg.height / baseImg.width) * 800;
-                cropBox.active = true;
-                guide.innerText = "Step 2: Move/Resize Green box on design and click 'Extract'";
+        reader.onload = (f) => {
+            img.onload = () => {
+                cvs.width = 800;
+                cvs.height = (img.height / img.width) * 800;
+                mode = 'upload';
+                cutBtn.style.display = 'block';
+                status.innerText = "Corner handles se frame set karein, fir Extract dabayein.";
                 draw();
             };
-            baseImg.src = ev.target.result;
+            img.src = f.target.result;
         };
         reader.readAsDataURL(e.target.files[0]);
     };
 
-    // 2. Extract Function (Ye wahi hai jo cup se design nikalega)
-    function extractDesign() {
-        if (!cropBox.active) return;
-        
-        // Create a temporary canvas to hold the cut piece
-        const tempCanvas = document.createElement('canvas');
-        const tctx = tempCanvas.getContext('2d');
-        const scaleX = baseImg.width / canvas.width;
-        const scaleY = baseImg.height / canvas.height;
-        
-        tempCanvas.width = cropBox.w * scaleX;
-        tempCanvas.height = cropBox.h * scaleY;
-        
-        tctx.drawImage(baseImg, cropBox.x * scaleX, cropBox.y * scaleY, cropBox.w * scaleX, cropBox.h * scaleY, 0, 0, tempCanvas.width, tempCanvas.height);
-        
-        const extractedImg = new Image();
-        extractedImg.onload = () => {
-            layers.push({ type: 'img', data: extractedImg, x: 50, y: 50, w: 300, h: (extractedImg.height/extractedImg.width)*300 });
-            cropBox.active = false;
-            baseImg = new Image(); // Clear background
-            canvas.width = 1000; canvas.height = 450; // Set to standard mug print size
-            guide.innerText = "Step 3: Design extracted! Now edit and add text.";
-            draw();
-        };
-        extractedImg.src = tempCanvas.toDataURL();
-    }
-
-    function addText() {
-        layers.push({ type: 'text', content: 'NAME HERE', x: 400, y: 200, size: 50, color: '#ff0000', w: 200, h: 50 });
-        draw();
-    }
-
-    // Drawing Logic
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0,0, cvs.width, cvs.height);
 
-        if (baseImg.src) {
-            ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+        if (mode === 'upload' && img.src) {
+            ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
+            
+            // Draw Green Selection Frame
+            ctx.strokeStyle = "#00ff88";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(frame.x, frame.y, frame.w, frame.h);
+            ctx.setLineDash([]);
+            
+            // Draw Resize Handles (4 corners)
+            ctx.fillStyle = "#00ff88";
+            const handles = [
+                {x: frame.x, y: frame.y}, // Top-Left
+                {x: frame.x + frame.w, y: frame.y}, // Top-Right
+                {x: frame.x, y: frame.y + frame.h}, // Bottom-Left
+                {x: frame.x + frame.w, y: frame.y + frame.h} // Bottom-Right
+            ];
+            handles.forEach(h => ctx.fillRect(h.x - 6, h.y - 6, 12, 12));
         }
 
-        // Draw Layers
+        // Draw Editable Layers
         layers.forEach(l => {
+            ctx.save();
             if (l.type === 'img') {
                 ctx.drawImage(l.data, l.x, l.y, l.w, l.h);
             } else {
@@ -134,96 +125,112 @@
                 ctx.font = `bold ${l.size}px Arial`;
                 ctx.fillText(l.content, l.x, l.y + l.h);
             }
-            if (l === selectedLayer) {
-                ctx.strokeStyle = '#00ff88';
-                ctx.lineWidth = 2;
+            if (l === selected) {
+                ctx.strokeStyle = "#00e5ff";
+                ctx.setLineDash([2, 2]);
                 ctx.strokeRect(l.x, l.y, l.w, l.h);
             }
+            ctx.restore();
         });
-
-        // Selection Box for Cutting
-        if (cropBox.active) {
-            ctx.strokeStyle = '#00ff88';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([10, 5]);
-            ctx.strokeRect(cropBox.x, cropBox.y, cropBox.w, cropBox.h);
-            ctx.setLineDash([]);
-            ctx.fillStyle = "rgba(0, 255, 136, 0.2)";
-            ctx.fillRect(cropBox.x, cropBox.y, cropBox.w, cropBox.h);
-        }
     }
 
-    // Interaction (Drag & Resize)
-    canvas.onmousedown = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-        
-        startX = x; startY = y;
-        isDragging = false; isResizing = false;
+    cvs.onmousedown = (e) => {
+        const r = cvs.getBoundingClientRect();
+        const mx = (e.clientX - r.left) * (cvs.width / r.width);
+        const my = (e.clientY - r.top) * (cvs.height / r.height);
 
-        if (cropBox.active) {
-            if (x > cropBox.x && x < cropBox.x + cropBox.w && y > cropBox.y && y < cropBox.y + cropBox.h) {
-                isDragging = true;
-            }
+        if (mode === 'upload') {
+            // Check corners first for resizing
+            if (Math.hypot(mx - frame.x, my - frame.y) < 15) resizing = 'tl';
+            else if (Math.hypot(mx - (frame.x+frame.w), my - frame.y) < 15) resizing = 'tr';
+            else if (Math.hypot(mx - frame.x, my - (frame.y+frame.h)) < 15) resizing = 'bl';
+            else if (Math.hypot(mx - (frame.x+frame.w), my - (frame.y+frame.h)) < 15) resizing = 'br';
+            else if (mx > frame.x && mx < frame.x + frame.w && my > frame.y && my < frame.y + frame.h) dragging = true;
         } else {
-            selectedLayer = null;
+            selected = null;
             layers.forEach(l => {
-                if (x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h) {
-                    selectedLayer = l;
-                    isDragging = true;
+                if (mx > l.x && mx < l.x+l.w && my > l.y && my < l.y+l.h) {
+                    selected = l; dragging = true;
                 }
             });
         }
-    };
-
-    canvas.onmousemove = (e) => {
-        if (!isDragging) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-        
-        let dx = x - startX;
-        let dy = y - startY;
-
-        if (cropBox.active) {
-            cropBox.x += dx; cropBox.y += dy;
-        } else if (selectedLayer) {
-            selectedLayer.x += dx; selectedLayer.y += dy;
-        }
-        
-        startX = x; startY = y;
+        startX = mx; startY = my;
         draw();
     };
 
-    window.onmouseup = () => isDragging = false;
+    cvs.onmousemove = (e) => {
+        const r = cvs.getBoundingClientRect();
+        const mx = (e.clientX - r.left) * (cvs.width / r.width);
+        const my = (e.clientY - r.top) * (cvs.height / r.height);
 
-    // 4K Download
-    function download4K() {
-        const off = document.createElement('canvas');
-        off.width = 4000; off.height = 1800; // Professional Print Size
-        const octx = off.getContext('2d');
-        const s = off.width / canvas.width;
+        if (resizing) {
+            if (resizing === 'tl') { frame.w += frame.x - mx; frame.h += frame.y - my; frame.x = mx; frame.y = my; }
+            if (resizing === 'tr') { frame.w = mx - frame.x; frame.h += frame.y - my; frame.y = my; }
+            if (resizing === 'bl') { frame.x = mx; frame.w = (frame.x + frame.w) - mx; frame.h = my - frame.y; }
+            if (resizing === 'br') { frame.w = mx - frame.x; frame.h = my - frame.y; }
+        } else if (dragging) {
+            if (mode === 'upload') { frame.x += mx - startX; frame.y += my - startY; }
+            else if (selected) { selected.x += mx - startX; selected.y += my - startY; }
+        }
+        startX = mx; startY = my;
+        draw();
+    };
 
-        octx.fillStyle = "white";
-        octx.fillRect(0,0,off.width, off.height);
+    window.onmouseup = () => { dragging = false; resizing = null; };
+
+    function extractNow() {
+        const temp = document.createElement('canvas');
+        const tctx = temp.getContext('2d');
+        const sX = img.width / cvs.width;
+        const sY = img.height / cvs.height;
+        
+        temp.width = frame.w * sX;
+        temp.height = frame.h * sY;
+        tctx.drawImage(img, frame.x*sX, frame.y*sY, frame.w*sX, frame.h*sY, 0, 0, temp.width, temp.height);
+        
+        const ext = new Image();
+        ext.onload = () => {
+            layers.push({ type:'img', data: ext, x: 50, y: 50, w: 400, h: (ext.height/ext.width)*400 });
+            mode = 'edit';
+            img = new Image();
+            cvs.width = 1000; cvs.height = 450; // Standard Print Area
+            cutBtn.style.display = 'none';
+            status.innerText = "Design Extracted! Add name or logos for high quality print.";
+            draw();
+        };
+        ext.src = temp.toDataURL();
+    }
+
+    function addText() {
+        layers.push({ type:'text', content: 'Sainiwala System', x: 200, y: 150, size: 60, color: '#ff0000', w: 400, h: 60 });
+        draw();
+    }
+
+    function downloadHD() {
+        const hd = document.createElement('canvas');
+        hd.width = 4000; hd.height = 1800;
+        const hctx = hd.getContext('2d');
+        const scale = 4000 / cvs.width;
+
+        hctx.fillStyle = "white";
+        hctx.fillRect(0,0, 4000, 1800);
 
         layers.forEach(l => {
-            if (l.type === 'img') octx.drawImage(l.data, l.x*s, l.y*s, l.w*s, l.h*s);
+            if (l.type === 'img') hctx.drawImage(l.data, l.x*scale, l.y*scale, l.w*scale, l.h*scale);
             else {
-                octx.fillStyle = l.color;
-                octx.font = `bold ${l.size*s}px Arial`;
-                octx.fillText(l.content, l.x*s, (l.y+l.h)*s);
+                hctx.fillStyle = l.color;
+                hctx.font = `bold ${l.size*scale}px Arial`;
+                hctx.fillText(l.content, l.x*scale, (l.y+l.h)*scale);
             }
         });
 
         const link = document.createElement('a');
-        link.download = "Sainiwala_4K_Print.png";
-        link.href = off.toDataURL("image/png", 1.0);
+        link.download = `Sainiwala_HD_Print_${Date.now()}.png`;
+        link.href = hd.toDataURL("image/png", 1.0);
         link.click();
     }
-    
-    function deleteLayer() { if(selectedLayer) { layers = layers.filter(l => l !== selectedLayer); selectedLayer = null; draw(); } }
+
+    function deleteObj() { if(selected) { layers = layers.filter(l => l !== selected); selected = null; draw(); } }
 </script>
 
 </body>
