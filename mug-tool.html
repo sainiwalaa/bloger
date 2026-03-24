@@ -2,86 +2,116 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Sainiwala Ultimate Crop & 4K Editor</title>
+    <title>Sainiwala Pro Mug Editor - 4K</title>
     <style>
-        :root { --neon: #00ff88; --dark: #0a0a0a; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; display: flex; height: 100vh; overflow: hidden; }
+        :root { --neon: #00ff88; --dark: #0f0f0f; --panel: #1a1a1a; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; display: flex; height: 100vh; }
         
-        /* Sidebar Design */
-        .sidebar { width: 320px; background: var(--dark); padding: 20px; border-right: 2px solid var(--neon); display: flex; flex-direction: column; gap: 12px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        h2 { color: var(--neon); font-size: 1.2rem; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        /* Left Sidebar */
+        .sidebar { width: 350px; background: var(--panel); padding: 20px; border-right: 2px solid var(--neon); display: flex; flex-direction: column; gap: 15px; overflow-y: auto; box-shadow: 10px 0 20px rgba(0,0,0,0.5); }
+        h2 { color: var(--neon); text-align: center; margin: 0 0 10px 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+        /* Controls Style */
+        .control-group { background: #222; padding: 12px; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 10px; }
+        label { font-size: 12px; color: #aaa; font-weight: bold; }
+        input[type="text"], input[type="range"], select { width: 100%; padding: 8px; background: #000; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
         
-        .btn { background: #222; color: white; border: 1px solid #444; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s; text-align: center; }
-        .btn:hover { border-color: var(--neon); background: #2a2a2a; }
-        .btn-active { background: var(--neon); color: #000; border: none; }
-        .btn-danger { color: #ff4444; border-color: #ff4444; }
+        .btn { background: #333; color: white; border: 1px solid var(--neon); padding: 10px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; text-align: center; }
+        .btn:hover { background: var(--neon); color: black; }
+        .btn-main { background: var(--neon); color: black; font-size: 16px; margin-top: 10px; }
+        .btn-danger { border-color: #ff4444; color: #ff4444; }
         .btn-danger:hover { background: #ff4444; color: white; }
 
-        input[type="file"] { display: none; }
-        label { display: block; }
-
-        /* Workspace */
-        #container { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 25px 25px; }
-        canvas { background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); cursor: crosshair; image-rendering: -webkit-optimize-contrast; }
-        
-        .status-bar { position: absolute; bottom: 15px; left: 335px; background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 20px; font-size: 12px; border: 1px solid var(--neon); }
+        /* Canvas Area */
+        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; position: relative; }
+        canvas { background: #fff; box-shadow: 0 0 50px rgba(0,0,0,0.7); cursor: move; }
+        .hint { position: absolute; bottom: 20px; color: #666; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>Sainiwala System</h2>
+    <h2>MUG DESIGN SYSTEM</h2>
     
-    <label class="btn btn-active" for="upload">🖼️ Upload Cup Photo</label>
-    <input type="file" id="upload" accept="image/*">
-    
-    <button class="btn" onclick="extractNow()" id="cutBtn" style="display:none; background:#00e5ff; color:#000;">✂️ Extract Selection</button>
-    
-    <hr style="width:100%; border:0.1px solid #333; margin: 10px 0;">
-    
-    <button class="btn" onclick="addText()">➕ Add Name/Text</button>
-    <button class="btn" onclick="addDecoration()">⭐ Add Logo/Icon</button>
-    <button class="btn btn-danger" onclick="deleteObj()">🗑️ Delete Item</button>
-    
-    <div style="margin-top:20px; padding:10px; background:#111; border-radius:5px; font-size:13px;">
-        <p style="margin:5px 0;">Quality: <b style="color:var(--neon)">4K Ultra HD</b></p>
-        <p style="margin:5px 0;">Resolution: <b>4000x1800 px</b></p>
+    <div class="control-group">
+        <label>1. BASE IMAGE (CUP)</label>
+        <input type="file" id="baseUpload" accept="image/*">
+        <button class="btn" onclick="extractDesign()" id="cutBtn" style="display:none; background:#00e5ff; color:black;">✂️ Extract This Design</button>
     </div>
 
-    <button class="btn btn-active" style="margin-top:auto; font-size:18px;" onclick="downloadHD()">💾 Download 4K Design</button>
+    <div class="control-group">
+        <label>2. ADD NEW ELEMENTS</label>
+        <button class="btn" onclick="addNewText()">➕ Add New Text</button>
+        <button class="btn" onclick="document.getElementById('logoUpload').click()">🖼️ Add Extra Image/Logo</button>
+        <input type="file" id="logoUpload" style="display:none" accept="image/*">
+    </div>
+
+    <div id="editPanel" class="control-group" style="display:none; border-color: var(--neon);">
+        <label>3. EDIT SELECTED ITEM</label>
+        <input type="text" id="textInput" placeholder="Edit Text Content..." oninput="updateItem()">
+        
+        <div>
+            <label>Size</label>
+            <input type="range" id="sizeRange" min="10" max="500" value="100" oninput="updateItem()">
+        </div>
+        
+        <div>
+            <label>Rotate</label>
+            <input type="range" id="rotateRange" min="0" max="6.28" step="0.01" value="0" oninput="updateItem()">
+        </div>
+        
+        <label>Color</label>
+        <input type="color" id="colorInput" value="#ff0000" oninput="updateItem()">
+        
+        <button class="btn btn-danger" onclick="deleteLayer()">🗑️ Remove Selected</button>
+    </div>
+
+    <button class="btn btn-main" onclick="downloadHD()">💾 DOWNLOAD 4K MUG PRINT</button>
+    <div style="text-align:center; font-size:10px; color:#555; margin-top:5px;">SANGANER GITHUB SYSTEM</div>
 </div>
 
-<div id="container">
-    <canvas id="canvas"></canvas>
-    <div class="status-bar" id="status">Upload an image to start cutting...</div>
+<div id="main-view">
+    <canvas id="editor"></canvas>
+    <p class="hint">Use Mouse/Touch to Move. Use Sidebar to Rotate & Resize.</p>
 </div>
 
 <script>
-    const cvs = document.getElementById('canvas');
-    const ctx = cvs.getContext('2d');
-    const status = document.getElementById('status');
-    const cutBtn = document.getElementById('cutBtn');
-
-    let mode = 'upload'; // 'upload' or 'edit'
-    let img = new Image();
+    const canvas = document.getElementById('editor');
+    const ctx = canvas.getContext('2d');
+    
     let layers = [];
     let selected = null;
-    
-    // Selection Frame Logic
+    let baseImg = new Image();
+    let mode = 'crop'; // crop or edit
     let frame = { x: 100, y: 100, w: 300, h: 200 };
-    let handleSize = 10;
-    let dragging = false;
-    let resizing = null; // 'tl', 'tr', 'bl', 'br'
+    let isDragging = false, startX, startY;
 
-    document.getElementById('upload').onchange = (e) => {
+    // 1. Base Image Upload & Crop System
+    document.getElementById('baseUpload').onchange = (e) => {
         const reader = new FileReader();
         reader.onload = (f) => {
+            baseImg.onload = () => {
+                canvas.width = 800;
+                canvas.height = (baseImg.height/baseImg.width)*800;
+                mode = 'crop';
+                document.getElementById('cutBtn').style.display = 'block';
+                draw();
+            };
+            baseImg.src = f.target.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    // 2. Extra Image/Logo Add System
+    document.getElementById('logoUpload').onchange = (e) => {
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            const img = new Image();
             img.onload = () => {
-                cvs.width = 800;
-                cvs.height = (img.height / img.width) * 800;
-                mode = 'upload';
-                cutBtn.style.display = 'block';
-                status.innerText = "Corner handles se frame set karein, fir Extract dabayein.";
+                const l = { type:'img', data: img, x: 100, y: 100, w: 200, h: (img.height/img.width)*200, rot: 0 };
+                layers.push(l);
+                selected = l;
+                showPanel();
                 draw();
             };
             img.src = f.target.result;
@@ -89,149 +119,176 @@
         reader.readAsDataURL(e.target.files[0]);
     };
 
-    function draw() {
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0,0, cvs.width, cvs.height);
+    function extractDesign() {
+        const temp = document.createElement('canvas');
+        const tctx = temp.getContext('2d');
+        const sx = baseImg.width / canvas.width;
+        const sy = baseImg.height / canvas.height;
+        temp.width = frame.w * sx; temp.height = frame.h * sy;
+        tctx.drawImage(baseImg, frame.x*sx, frame.y*sy, frame.w*sx, frame.h*sy, 0, 0, temp.width, temp.height);
+        
+        const extImg = new Image();
+        extImg.onload = () => {
+            layers.push({ type:'img', data: extImg, x: 100, y: 50, w: 500, h: (extImg.height/extImg.width)*500, rot: 0 });
+            mode = 'edit';
+            canvas.width = 1000; canvas.height = 450;
+            document.getElementById('cutBtn').style.display = 'none';
+            draw();
+        };
+        extImg.src = temp.toDataURL();
+    }
 
-        if (mode === 'upload' && img.src) {
-            ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
-            
-            // Draw Green Selection Frame
-            ctx.strokeStyle = "#00ff88";
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
+    function addNewText() {
+        const l = { type:'text', content: 'New Text', x: 400, y: 200, size: 50, color: '#ff0000', rot: 0, w: 200, h: 50 };
+        layers.push(l);
+        selected = l;
+        showPanel();
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+
+        if(mode === 'crop' && baseImg.src) {
+            ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#00ff88"; ctx.lineWidth = 3;
             ctx.strokeRect(frame.x, frame.y, frame.w, frame.h);
-            ctx.setLineDash([]);
-            
-            // Draw Resize Handles (4 corners)
+            // Handles
             ctx.fillStyle = "#00ff88";
-            const handles = [
-                {x: frame.x, y: frame.y}, // Top-Left
-                {x: frame.x + frame.w, y: frame.y}, // Top-Right
-                {x: frame.x, y: frame.y + frame.h}, // Bottom-Left
-                {x: frame.x + frame.w, y: frame.y + frame.h} // Bottom-Right
-            ];
-            handles.forEach(h => ctx.fillRect(h.x - 6, h.y - 6, 12, 12));
+            ctx.fillRect(frame.x-5, frame.y-5, 10, 10);
+            ctx.fillRect(frame.x+frame.w-5, frame.y+frame.h-5, 10, 10);
         }
 
-        // Draw Editable Layers
         layers.forEach(l => {
             ctx.save();
-            if (l.type === 'img') {
-                ctx.drawImage(l.data, l.x, l.y, l.w, l.h);
+            ctx.translate(l.x + l.w/2, l.y + l.h/2);
+            ctx.rotate(l.rot);
+            if(l.type === 'img') {
+                ctx.drawImage(l.data, -l.w/2, -l.h/2, l.w, l.h);
             } else {
                 ctx.fillStyle = l.color;
                 ctx.font = `bold ${l.size}px Arial`;
-                ctx.fillText(l.content, l.x, l.y + l.h);
+                ctx.textAlign = "center";
+                ctx.fillText(l.content, 0, l.size/3);
             }
-            if (l === selected) {
-                ctx.strokeStyle = "#00e5ff";
-                ctx.setLineDash([2, 2]);
-                ctx.strokeRect(l.x, l.y, l.w, l.h);
+            if(l === selected) {
+                ctx.strokeStyle = "#00e5ff"; ctx.lineWidth = 2;
+                ctx.strokeRect(-l.w/2 - 5, -l.h/2 - 5, l.w + 10, l.h + 10);
             }
             ctx.restore();
         });
     }
 
-    cvs.onmousedown = (e) => {
-        const r = cvs.getBoundingClientRect();
-        const mx = (e.clientX - r.left) * (cvs.width / r.width);
-        const my = (e.clientY - r.top) * (cvs.height / r.height);
+    // Interactive Logic
+    canvas.onmousedown = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const mx = (e.clientX - r.left) * (canvas.width/r.width);
+        const my = (e.clientY - r.top) * (canvas.height/r.height);
 
-        if (mode === 'upload') {
-            // Check corners first for resizing
-            if (Math.hypot(mx - frame.x, my - frame.y) < 15) resizing = 'tl';
-            else if (Math.hypot(mx - (frame.x+frame.w), my - frame.y) < 15) resizing = 'tr';
-            else if (Math.hypot(mx - frame.x, my - (frame.y+frame.h)) < 15) resizing = 'bl';
-            else if (Math.hypot(mx - (frame.x+frame.w), my - (frame.y+frame.h)) < 15) resizing = 'br';
-            else if (mx > frame.x && mx < frame.x + frame.w && my > frame.y && my < frame.y + frame.h) dragging = true;
+        if(mode === 'crop') {
+            isDragging = true;
         } else {
             selected = null;
-            layers.forEach(l => {
-                if (mx > l.x && mx < l.x+l.w && my > l.y && my < l.y+l.h) {
-                    selected = l; dragging = true;
+            document.getElementById('editPanel').style.display = 'none';
+            for(let i=layers.length-1; i>=0; i--) {
+                let l = layers[i];
+                if(mx > l.x && mx < l.x+l.w && my > l.y && my < l.y+l.h) {
+                    selected = l;
+                    isDragging = true;
+                    showPanel();
+                    break;
                 }
-            });
+            }
         }
         startX = mx; startY = my;
         draw();
     };
 
-    cvs.onmousemove = (e) => {
-        const r = cvs.getBoundingClientRect();
-        const mx = (e.clientX - r.left) * (cvs.width / r.width);
-        const my = (e.clientY - r.top) * (cvs.height / r.height);
+    canvas.onmousemove = (e) => {
+        if(!isDragging) return;
+        const r = canvas.getBoundingClientRect();
+        const mx = (e.clientX - r.left) * (canvas.width/r.width);
+        const my = (e.clientY - r.top) * (canvas.height/r.height);
 
-        if (resizing) {
-            if (resizing === 'tl') { frame.w += frame.x - mx; frame.h += frame.y - my; frame.x = mx; frame.y = my; }
-            if (resizing === 'tr') { frame.w = mx - frame.x; frame.h += frame.y - my; frame.y = my; }
-            if (resizing === 'bl') { frame.x = mx; frame.w = (frame.x + frame.w) - mx; frame.h = my - frame.y; }
-            if (resizing === 'br') { frame.w = mx - frame.x; frame.h = my - frame.y; }
-        } else if (dragging) {
-            if (mode === 'upload') { frame.x += mx - startX; frame.y += my - startY; }
-            else if (selected) { selected.x += mx - startX; selected.y += my - startY; }
+        if(mode === 'crop') {
+            frame.w = mx - frame.x; frame.h = my - frame.y;
+        } else if(selected) {
+            selected.x += (mx - startX);
+            selected.y += (my - startY);
         }
         startX = mx; startY = my;
         draw();
     };
 
-    window.onmouseup = () => { dragging = false; resizing = null; };
+    window.onmouseup = () => isDragging = false;
 
-    function extractNow() {
-        const temp = document.createElement('canvas');
-        const tctx = temp.getContext('2d');
-        const sX = img.width / cvs.width;
-        const sY = img.height / cvs.height;
-        
-        temp.width = frame.w * sX;
-        temp.height = frame.h * sY;
-        tctx.drawImage(img, frame.x*sX, frame.y*sY, frame.w*sX, frame.h*sY, 0, 0, temp.width, temp.height);
-        
-        const ext = new Image();
-        ext.onload = () => {
-            layers.push({ type:'img', data: ext, x: 50, y: 50, w: 400, h: (ext.height/ext.width)*400 });
-            mode = 'edit';
-            img = new Image();
-            cvs.width = 1000; cvs.height = 450; // Standard Print Area
-            cutBtn.style.display = 'none';
-            status.innerText = "Design Extracted! Add name or logos for high quality print.";
-            draw();
-        };
-        ext.src = temp.toDataURL();
+    // Sidebar Update System
+    function showPanel() {
+        const p = document.getElementById('editPanel');
+        p.style.display = 'block';
+        if(selected.type === 'text') {
+            document.getElementById('textInput').style.display = 'block';
+            document.getElementById('textInput').value = selected.content;
+            document.getElementById('colorInput').value = selected.color;
+        } else {
+            document.getElementById('textInput').style.display = 'none';
+        }
+        document.getElementById('sizeRange').value = selected.type === 'text' ? selected.size : selected.w;
+        document.getElementById('rotateRange').value = selected.rot;
     }
 
-    function addText() {
-        layers.push({ type:'text', content: 'Sainiwala System', x: 200, y: 150, size: 60, color: '#ff0000', w: 400, h: 60 });
+    function updateItem() {
+        if(!selected) return;
+        if(selected.type === 'text') {
+            selected.content = document.getElementById('textInput').value;
+            selected.size = parseInt(document.getElementById('sizeRange').value);
+            selected.color = document.getElementById('colorInput').value;
+            selected.w = ctx.measureText(selected.content).width * (selected.size/20); // rough estimation
+        } else {
+            const oldW = selected.w;
+            selected.w = parseInt(document.getElementById('sizeRange').value);
+            selected.h = selected.h * (selected.w / oldW);
+        }
+        selected.rot = parseFloat(document.getElementById('rotateRange').value);
+        draw();
+    }
+
+    function deleteLayer() {
+        layers = layers.filter(l => l !== selected);
+        selected = null;
+        document.getElementById('editPanel').style.display = 'none';
         draw();
     }
 
     function downloadHD() {
         const hd = document.createElement('canvas');
-        hd.width = 4000; hd.height = 1800;
+        hd.width = 4000; hd.height = 1800; // 4K Resolution
         const hctx = hd.getContext('2d');
-        const scale = 4000 / cvs.width;
+        const s = 4000 / canvas.width;
 
-        hctx.fillStyle = "white";
-        hctx.fillRect(0,0, 4000, 1800);
+        hctx.fillStyle = "white"; hctx.fillRect(0,0,4000,1800);
 
         layers.forEach(l => {
-            if (l.type === 'img') hctx.drawImage(l.data, l.x*scale, l.y*scale, l.w*scale, l.h*scale);
-            else {
+            hctx.save();
+            hctx.translate((l.x + l.w/2)*s, (l.y + l.h/2)*s);
+            hctx.rotate(l.rot);
+            if(l.type === 'img') {
+                hctx.drawImage(l.data, (-l.w/2)*s, (-l.h/2)*s, l.w*s, l.h*s);
+            } else {
                 hctx.fillStyle = l.color;
-                hctx.font = `bold ${l.size*scale}px Arial`;
-                hctx.fillText(l.content, l.x*scale, (l.y+l.h)*scale);
+                hctx.font = `bold ${l.size*s}px Arial`;
+                hctx.textAlign = "center";
+                hctx.fillText(l.content, 0, (l.size/3)*s);
             }
+            hctx.restore();
         });
-
         const link = document.createElement('a');
-        link.download = `Sainiwala_HD_Print_${Date.now()}.png`;
+        link.download = "Sainiwala_Mug_4K.png";
         link.href = hd.toDataURL("image/png", 1.0);
         link.click();
     }
-
-    function deleteObj() { if(selected) { layers = layers.filter(l => l !== selected); selected = null; draw(); } }
 </script>
-
 </body>
 </html>
