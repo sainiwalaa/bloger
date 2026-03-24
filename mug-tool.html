@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sainiwalaa Mug Tool FINAL</title>
+<title>Sainiwalaa Mug Tool FINAL PRO</title>
 
 <style>
 body{
@@ -20,7 +20,7 @@ body{
  padding:20px;
  border-radius:12px;
 }
-input,select,button{
+input,button{
  padding:10px;
  margin:6px;
  border:none;
@@ -43,108 +43,124 @@ canvas{
 </head>
 
 <body>
+
 <div class="container">
+<h2>☕ Sainiwalaa Mug Tool FINAL PRO</h2>
 
-<h1>☕ Sainiwalaa Mug Tool PRO</h1>
+<input type="file" id="upload"><br>
 
-<input type="file" id="upload" accept="image/*"><br>
+<input type="file" id="imgLayerUpload">
+<button onclick="deleteImage()">Delete Image</button><br>
 
-<button onclick="toggleImageMode()">Single / Double</button>
-
-<input type="file" id="imgLayerUpload" accept="image/*">
-<button onclick="deleteImageLayer()">Delete Image</button><br>
-
-<input type="text" id="textInput" placeholder="Enter text">
+<input type="text" id="textInput">
 <button onclick="addText()">Add Text</button>
-<button onclick="deleteText()">Delete Text</button><br>
 
-<button onclick="processSelection()">Generate Print</button>
-<button onclick="downloadImage()">Download PNG</button>
+<button onclick="toggleMode()">Single/Double</button><br>
+
+<button onclick="exportImage()">Download</button>
 
 <canvas id="canvas"></canvas>
-
 </div>
 
 <script>
+
 let canvas=document.getElementById('canvas');
 let ctx=canvas.getContext('2d');
-let img=new Image();
 
-let rect={x:100,y:100,w:400,h:250};
+let baseImg=new Image();
+
+let rect={x:150,y:150,w:400,h:250};
+
 let images=[];
 let texts=[];
+
+let action=null;
+let startX,startY;
 let selectedImage=null;
 let selectedText=null;
-let action=null,startX,startY;
 
-// MAIN IMAGE
-document.getElementById('upload').addEventListener('change',function(e){
- if(e.target.files && e.target.files[0]){
-   let reader=new FileReader();
-   reader.onload=function(ev){
-     img.onload=function(){
-       canvas.width=img.width;
-       canvas.height=img.height;
-       draw();
-     }
-     img.src=ev.target.result;
-   }
-   reader.readAsDataURL(e.target.files[0]);
+document.getElementById("upload").onchange=e=>{
+ let file=e.target.files[0];
+ let reader=new FileReader();
+ reader.onload=ev=>{
+  baseImg.onload=()=>{
+   canvas.width=baseImg.width;
+   canvas.height=baseImg.height;
+   draw();
+  }
+  baseImg.src=ev.target.result;
  }
-});
+ reader.readAsDataURL(file);
+};
 
-// IMAGE LAYER
-document.getElementById('imgLayerUpload').addEventListener('change',function(e){
+// IMAGE UPLOAD
+document.getElementById("imgLayerUpload").onchange=e=>{
  let file=e.target.files[0];
  let reader=new FileReader();
 
- reader.onload=function(ev){
-   let newImg=new Image();
-   newImg.onload=function(){
-     images.push({
-       img:newImg,
-       x:rect.x+20,
-       y:rect.y+20,
-       w:rect.w/2,
-       h:rect.h/2,
-       mode:'single'
-     });
-     draw();
-   }
-   newImg.src=ev.target.result;
+ reader.onload=ev=>{
+  let img=new Image();
+  img.onload=()=>{
+   images.push({
+     img:img,
+     x:rect.x+20,
+     y:rect.y+20,
+     w:200,
+     h:150,
+     mode:"single"
+   });
+   draw();
+  }
+  img.src=ev.target.result;
  }
 
  reader.readAsDataURL(file);
-});
+};
 
-// DRAW
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
- if(img.src){
-   ctx.drawImage(img,0,0);
- }
+ if(baseImg.src) ctx.drawImage(baseImg,0,0);
 
  // FRAME
- ctx.strokeStyle='yellow';
+ ctx.strokeStyle="yellow";
  ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
+
+ drawHandles(rect);
 
  // IMAGE
  images.forEach(im=>{
-   if(im.mode==='double'){
-     ctx.drawImage(im.img,rect.x,im.y,im.w,im.h);
-     ctx.drawImage(im.img,rect.x+rect.w-im.w,im.y,im.w,im.h);
-   }else{
-     ctx.drawImage(im.img,im.x,im.y,im.w,im.h);
-   }
+  if(im.mode==="double"){
+   ctx.drawImage(im.img,rect.x,im.y,im.w,im.h);
+   ctx.drawImage(im.img,rect.x+rect.w-im.w,im.y,im.w,im.h);
+  }else{
+   ctx.drawImage(im.img,im.x,im.y,im.w,im.h);
+  }
+  if(im===selectedImage) drawHandles(im);
  });
 
  // TEXT
  texts.forEach(t=>{
-   ctx.fillStyle="#fff";
-   ctx.font="40px Arial";
-   ctx.fillText(t.text,t.x,t.y);
+  ctx.fillStyle="#fff";
+  ctx.font="40px Arial";
+  ctx.fillText(t.text,t.x,t.y);
  });
+}
+
+// HANDLES
+function drawHandles(obj){
+ let p=[
+ [obj.x,obj.y],
+ [obj.x+obj.w,obj.y],
+ [obj.x+obj.w,obj.y+obj.h],
+ [obj.x,obj.y+obj.h],
+ [obj.x+obj.w/2,obj.y],
+ [obj.x+obj.w/2,obj.y+obj.h],
+ [obj.x,obj.y+obj.h/2],
+ [obj.x+obj.w,obj.y+obj.h/2]
+ ];
+ ctx.fillStyle="#00e5ff";
+ p.forEach(pt=>ctx.fillRect(pt[0]-5,pt[1]-5,10,10));
 }
 
 // TEXT
@@ -153,48 +169,108 @@ function addText(){
  draw();
 }
 
-function deleteText(){
- texts.pop();
- draw();
-}
-
-// IMAGE DELETE
-function deleteImageLayer(){
+// DELETE IMAGE
+function deleteImage(){
  images.pop();
  draw();
 }
 
-// DOUBLE MODE
-function toggleImageMode(){
- if(images.length>0){
-   images[images.length-1].mode =
-   images[images.length-1].mode==='single'?'double':'single';
-   draw();
+// MODE SWITCH
+function toggleMode(){
+ if(images.length){
+  let im=images[images.length-1];
+  im.mode=im.mode==="single"?"double":"single";
+  draw();
+ }
+}
+
+// MOUSE
+canvas.onmousedown=e=>{
+ let r=canvas.getBoundingClientRect();
+ startX=e.clientX-r.left;
+ startY=e.clientY-r.top;
+
+ action=getAction(startX,startY);
+};
+
+canvas.onmousemove=e=>{
+ if(!action) return;
+
+ let r=canvas.getBoundingClientRect();
+ let x=e.clientX-r.left;
+ let y=e.clientY-r.top;
+
+ let dx=x-startX;
+ let dy=y-startY;
+
+ if(action==="move"){
+  rect.x+=dx;
+  rect.y+=dy;
+ }else{
+  resize(rect,action,dx,dy);
+ }
+
+ startX=x;
+ startY=y;
+ draw();
+};
+
+canvas.onmouseup=()=>action=null;
+
+// ACTION
+function getAction(x,y){
+
+ let h=getHandle(rect,x,y);
+ if(h) return h;
+
+ if(x>rect.x && x<rect.x+rect.w && y>rect.y && y<rect.y+rect.h)
+  return "move";
+
+ return null;
+}
+
+// HANDLE CHECK
+function getHandle(o,x,y){
+ let map={
+  tl:[o.x,o.y],
+  tr:[o.x+o.w,o.y],
+  br:[o.x+o.w,o.y+o.h],
+  bl:[o.x,o.y+o.h],
+  top:[o.x+o.w/2,o.y],
+  bottom:[o.x+o.w/2,o.y+o.h],
+  left:[o.x,o.y+o.h/2],
+  right:[o.x+o.w,o.y+o.h/2]
+ };
+
+ for(let k in map){
+  if(Math.abs(x-map[k][0])<10 && Math.abs(y-map[k][1])<10)
+   return k;
+ }
+ return null;
+}
+
+// RESIZE
+function resize(o,t,dx,dy){
+ switch(t){
+  case "right":o.w+=dx;break;
+  case "left":o.w-=dx;o.x+=dx;break;
+  case "bottom":o.h+=dy;break;
+  case "top":o.h-=dy;o.y+=dy;break;
+  case "br":o.w+=dx;o.h+=dy;break;
+  case "tr":o.w+=dx;o.h-=dy;o.y+=dy;break;
+  case "bl":o.w-=dx;o.h+=dy;o.x+=dx;break;
+  case "tl":o.w-=dx;o.h-=dy;o.x+=dx;o.y+=dy;break;
  }
 }
 
 // EXPORT
-function processSelection(){
- let temp=document.createElement('canvas');
- let tctx=temp.getContext('2d');
-
- temp.width=rect.w;
- temp.height=rect.h;
-
- tctx.drawImage(canvas,rect.x,rect.y,rect.w,rect.h,0,0,rect.w,rect.h);
-
- canvas.width=2700;
- canvas.height=1200;
-
- ctx.drawImage(temp,0,0,canvas.width,canvas.height);
-}
-
-function downloadImage(){
- let link=document.createElement('a');
- link.download='mug.png';
- link.href=canvas.toDataURL('image/png');
+function exportImage(){
+ let link=document.createElement("a");
+ link.download="mug.png";
+ link.href=canvas.toDataURL("image/png");
  link.click();
 }
+
 </script>
 
 </body>
