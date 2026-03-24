@@ -1,234 +1,250 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sainiwalaa Ultimate Mug Editor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sainiwala Pro 4K Mug Editor</title>
+    <style>
+        :root { --neon: #00e5ff; --bg: #1a1a1a; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow: hidden; }
+        
+        /* Sidebar & UI */
+        .controls { position: absolute; left: 0; top: 0; width: 300px; height: 100vh; background: #000; padding: 20px; box-sizing: border-box; border-right: 2px solid var(--neon); display: flex; flex-direction: column; gap: 15px; z-index: 10; }
+        
+        h2 { color: var(--neon); margin-top: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: #333; color: white; border: 1px solid #555; padding: 10px; cursor: pointer; border-radius: 4px; transition: 0.3s; font-weight: bold; }
+        button:hover { background: var(--neon); color: #000; border-color: #fff; }
+        .btn-main { background: var(--neon); color: #000; grid-column: span 2; }
+        
+        input[type="file"] { display: none; }
+        label { background: #444; padding: 10px; display: block; text-align: center; border-radius: 4px; cursor: pointer; border: 1px dashed var(--neon); }
 
-<style>
-body{margin:0;font-family:Arial;background:#111;color:#fff;text-align:center}
-.toolbar{background:#000;padding:10px}
-button,input{margin:5px;padding:8px;border:none;border-radius:5px}
-button{background:#00e5ff;color:#000;font-weight:bold}
-canvas{border:2px solid #fff;margin-top:10px;touch-action:none;max-width:100%}
-</style>
+        /* Workspace */
+        #workspace { margin-left: 300px; height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 30px 30px; position: relative; }
+        canvas { box-shadow: 0 0 50px rgba(0,0,0,0.5); background: white; max-width: 90%; max-height: 90%; }
+        
+        .info { position: absolute; bottom: 20px; right: 20px; color: #888; font-size: 12px; }
+    </style>
 </head>
-
 <body>
 
-<div class="toolbar">
+<div class="controls">
+    <h2>Mug Designer 4K</h2>
+    
+    <label for="imgUpload">🖼️ Add Image / Logo</label>
+    <input type="file" id="imgUpload" accept="image/*">
+    
+    <button class="btn-main" onclick="addText()">+ Add Text</button>
 
-<input type="file" id="bgUpload">
-<input type="file" id="imgUpload">
+    <div class="btn-group">
+        <button onclick="changeColor('#ffffff')">White</button>
+        <button onclick="changeColor('#000000')">Black</button>
+        <button onclick="deleteLayer()" style="background:#ff4444">Delete</button>
+        <button onclick="duplicateLayer()">Copy</button>
+    </div>
 
-<button onclick="addText()">Add Text</button>
-<button onclick="deleteLayer()">Delete</button>
-<button onclick="duplicate()">Duplicate</button>
-<button onclick="toggleMode()">Single/Double</button>
-<button onclick="download()">Download HD</button>
+    <hr style="width:100%; border:0.5px solid #333">
+    
+    <div style="font-size: 13px;">
+        <p>Size: <span id="sizeDisplay">200x150</span></p>
+        <p>Resolution: 4000px (4K HD)</p>
+    </div>
 
+    <button class="btn-main" style="margin-top:auto; background:#00ff88" onclick="exportHighRes()">⬇ Download 4K HD</button>
 </div>
 
-<canvas id="c"></canvas>
+<div id="workspace">
+    <canvas id="editor"></canvas>
+    <div class="info">Sainiwala System UI | Use Mouse to Drag & Corner to Resize</div>
+</div>
 
 <script>
-let canvas=document.getElementById("c");
-let ctx=canvas.getContext("2d");
+/**
+ * PRO MUG EDITOR LOGIC
+ * High-precision coordinate system for 4K Export
+ */
+const canvas = document.getElementById('editor');
+const ctx = canvas.getContext('2d');
+const sizeDisplay = document.getElementById('sizeDisplay');
 
-let bg=new Image();
-let layers=[];
-let selected=null;
+// Mug Standard Proportions (8.5 x 3.5 inches approx)
+// 4K Output Target: 4000px x 1800px
+let layers = [];
+let selectedLayer = null;
+let isDragging = false;
+let isResizing = false;
+let startX, startY;
 
-let frame={x:150,y:150,w:500,h:250};
+// Setup Workspace Canvas (Display version)
+function init() {
+    canvas.width = 800;
+    canvas.height = 360;
+    draw();
+}
 
-let action=null,startX,startY,handle=null;
-
-// BG
-bgUpload.onchange=e=>{
- let r=new FileReader();
- r.onload=ev=>{
-  bg.onload=()=>{
-   canvas.width=bg.width;
-   canvas.height=bg.height;
-   draw();
-  }
-  bg.src=ev.target.result;
- }
- r.readAsDataURL(e.target.files[0]);
+// Add Image
+document.getElementById('imgUpload').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            const layer = {
+                type: 'img',
+                data: img,
+                x: 100, y: 50,
+                w: 200, h: (img.height / img.width) * 200,
+                rot: 0
+            };
+            layers.push(layer);
+            selectedLayer = layer;
+            draw();
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(e.target.files[0]);
 };
 
-// IMAGE
-imgUpload.onchange=e=>{
- let r=new FileReader();
- r.onload=ev=>{
-  let img=new Image();
-  img.onload=()=>{
-   layers.push({
-     type:"img",
-     img:img,
-     x:frame.x+20,
-     y:frame.y+20,
-     w:200,
-     h:150,
-     rot:0,
-     mode:"single"
-   });
-   draw();
-  }
-  img.src=ev.target.result;
- }
- r.readAsDataURL(e.target.files[0]);
+function addText() {
+    const layer = {
+        type: 'text',
+        content: 'Type Here',
+        x: 300, y: 150,
+        w: 150, h: 40,
+        size: 40,
+        color: '#000000'
+    };
+    layers.push(layer);
+    selectedLayer = layer;
+    draw();
+}
+
+function draw() {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Safety Margin Guidelines
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#ccc";
+    ctx.strokeRect(10, 10, canvas.width-20, canvas.height-20);
+    ctx.setLineDash([]);
+
+    layers.forEach(l => {
+        if (l.type === 'img') {
+            ctx.drawImage(l.data, l.x, l.y, l.w, l.h);
+        } else {
+            ctx.fillStyle = l.color;
+            ctx.font = `bold ${l.size}px Arial`;
+            ctx.fillText(l.content, l.x, l.y + l.h);
+        }
+
+        if (l === selectedLayer) {
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(l.x, l.y, l.w, l.h);
+            // Resize handle
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillRect(l.x + l.w - 8, l.y + l.h - 8, 10, 10);
+        }
+    });
+}
+
+// Interaction
+canvas.onmousedown = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    selectedLayer = null;
+    isResizing = false;
+
+    for (let i = layers.length - 1; i >= 0; i--) {
+        let l = layers[i];
+        // Check resize handle first
+        if (x > l.x + l.w - 15 && x < l.x + l.w + 5 && y > l.y + l.h - 15 && y < l.y + l.h + 5) {
+            selectedLayer = l;
+            isResizing = true;
+            break;
+        }
+        // Check body
+        if (x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h) {
+            selectedLayer = l;
+            isDragging = true;
+            break;
+        }
+    }
+    startX = x; startY = y;
+    draw();
 };
 
-// TEXT
-function addText(){
- layers.push({
-  type:"text",
-  text:"Edit Text",
-  x:200,
-  y:200,
-  size:40,
-  rot:0
- });
- draw();
-}
-
-// DELETE
-function deleteLayer(){
- if(selected){
-  layers=layers.filter(l=>l!==selected);
-  selected=null;
-  draw();
- }
-}
-
-// DUPLICATE
-function duplicate(){
- if(selected){
-  let copy=JSON.parse(JSON.stringify(selected));
-  copy.x+=20;
-  copy.y+=20;
-  layers.push(copy);
-  draw();
- }
-}
-
-// MODE
-function toggleMode(){
- if(selected && selected.type==="img"){
-  selected.mode=selected.mode==="single"?"double":"single";
-  draw();
- }
-}
-
-// DRAW
-function draw(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
-
- if(bg.src) ctx.drawImage(bg,0,0);
-
- ctx.strokeStyle="yellow";
- ctx.strokeRect(frame.x,frame.y,frame.w,frame.h);
-
- layers.forEach(l=>{
-  ctx.save();
-  ctx.translate(l.x,l.y);
-  ctx.rotate(l.rot);
-
-  if(l.type==="img"){
-   if(l.mode==="double"){
-    ctx.drawImage(l.img,-l.w/2,-l.h/2,l.w,l.h);
-    ctx.drawImage(l.img,frame.w-l.w*2,-l.h/2,l.w,l.h);
-   }else{
-    ctx.drawImage(l.img,-l.w/2,-l.h/2,l.w,l.h);
-   }
-  }
-
-  if(l.type==="text"){
-   ctx.fillStyle="#fff";
-   ctx.font=l.size+"px Arial";
-   ctx.fillText(l.text,0,0);
-  }
-
-  ctx.restore();
-
-  if(l===selected) drawBox(l);
- });
-}
-
-// BOX + HANDLES
-function drawBox(o){
- ctx.strokeStyle="cyan";
- ctx.strokeRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);
-
- let pts=[
-  [o.x-o.w/2,o.y-o.h/2],
-  [o.x+o.w/2,o.y-o.h/2],
-  [o.x+o.w/2,o.y+o.h/2],
-  [o.x-o.w/2,o.y+o.h/2]
- ];
-
- pts.forEach(p=>ctx.fillRect(p[0]-5,p[1]-5,10,10));
-}
-
-// CLICK
-canvas.onmousedown=e=>{
- let r=canvas.getBoundingClientRect();
- let x=e.clientX-r.left;
- let y=e.clientY-r.top;
-
- selected=null;
-
- layers.forEach(l=>{
-  if(x>l.x-l.w/2 && x<l.x+l.w/2 && y>l.y-l.h/2 && y<l.y+l.h/2){
-   selected=l;
-   action="move";
-  }
- });
-
- startX=x;
- startY=y;
- draw();
+canvas.onmousemove = (e) => {
+    if (!selectedLayer) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    if (isDragging) {
+        selectedLayer.x += (x - startX);
+        selectedLayer.y += (y - startY);
+    } else if (isResizing) {
+        selectedLayer.w += (x - startX);
+        selectedLayer.h += (y - startY);
+    }
+    
+    startX = x; startY = y;
+    sizeDisplay.innerText = `${Math.round(selectedLayer.w)}x${Math.round(selectedLayer.h)}`;
+    draw();
 };
 
-// MOVE
-canvas.onmousemove=e=>{
- if(!action||!selected) return;
+window.onmouseup = () => { isDragging = false; isResizing = false; };
 
- let r=canvas.getBoundingClientRect();
- let x=e.clientX-r.left;
- let y=e.clientY-r.top;
-
- let dx=x-startX;
- let dy=y-startY;
-
- selected.x+=dx;
- selected.y+=dy;
-
- startX=x;
- startY=y;
-
- draw();
-};
-
-canvas.onmouseup=()=>action=null;
-
-// DOWNLOAD HD
-function download(){
- let out=document.createElement("canvas");
- let octx=out.getContext("2d");
-
- out.width=3000;
- out.height=1500;
-
- octx.drawImage(canvas,frame.x,frame.y,frame.w,frame.h,0,0,out.width,out.height);
-
- let link=document.createElement("a");
- link.download="mug-HD.png";
- link.href=out.toDataURL("image/png");
- link.click();
+function deleteLayer() {
+    if (selectedLayer) {
+        layers = layers.filter(l => l !== selectedLayer);
+        selectedLayer = null;
+        draw();
+    }
 }
+
+function duplicateLayer() {
+    if (selectedLayer) {
+        const copy = {...selectedLayer, x: selectedLayer.x + 20, y: selectedLayer.y + 20};
+        layers.push(copy);
+        draw();
+    }
+}
+
+// 4K EXPORT SYSTEM
+function exportHighRes() {
+    const offCanvas = document.createElement('canvas');
+    const octx = offCanvas.getContext('2d');
+    
+    // Setting 4000px width for HD quality
+    offCanvas.width = 4000;
+    offCanvas.height = 1800;
+    const scale = offCanvas.width / canvas.width;
+
+    octx.fillStyle = "white";
+    octx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+
+    layers.forEach(l => {
+        if (l.type === 'img') {
+            octx.drawImage(l.data, l.x * scale, l.y * scale, l.w * scale, l.h * scale);
+        } else {
+            octx.fillStyle = l.color;
+            octx.font = `bold ${l.size * scale}px Arial`;
+            octx.fillText(l.content, l.x * scale, (l.y + l.h) * scale);
+        }
+    });
+
+    const link = document.createElement('a');
+    link.download = `Sainiwala_Mug_4K_${Date.now()}.png`;
+    link.href = offCanvas.toDataURL("image/png", 1.0);
+    link.click();
+}
+
+init();
 </script>
-
 </body>
 </html>
