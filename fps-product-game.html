@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Success System | Work From Home</title>
+    <title>Digital Success Academy | Official Enrollment</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -14,364 +14,174 @@
             --accent: #f093fb;
             --dark: #0a0a0b;
             --glass: rgba(255, 255, 255, 0.05);
+            --trust-blue: #0984e3;
         }
 
-        * { box-sizing: border-box; }
-
+        * { box-sizing: border-box; transition: all 0.3s ease; }
         body {
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--dark);
-            color: #ffffff;
-            overflow-x: hidden;
-            line-height: 1.6;
+            margin: 0; font-family: 'Poppins', sans-serif;
+            background-color: var(--dark); color: #ffffff;
+            overflow-x: hidden; line-height: 1.6;
         }
 
-        /* Animated Tech Background */
         .bg-glow {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #0a0a0b 100%);
             z-index: -1;
         }
 
-        .orb {
-            position: absolute;
-            width: 400px; height: 400px;
-            background: linear-gradient(var(--primary), var(--secondary));
-            filter: blur(120px);
-            opacity: 0.2;
-            border-radius: 50%;
-            animation: move 20s infinite alternate;
-        }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
 
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 30%); }
+        /* Language Switcher */
+        .lang-toggle {
+            display: flex; justify-content: center; margin-bottom: 20px;
         }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
+        .lang-btn {
+            background: var(--glass); border: 1px solid var(--primary);
+            color: white; padding: 8px 20px; cursor: pointer;
+            font-weight: 600; border-radius: 50px; margin: 0 5px;
         }
+        .lang-btn.active { background: var(--primary); color: #000; }
 
-        /* Header Section */
-        .hero {
-            text-align: center;
-            padding: 40px 0 20px;
-        }
-
+        /* Header */
+        .hero { text-align: center; padding: 20px 0; }
         .hero h1 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: clamp(28px, 8vw, 42px);
-            font-weight: 900;
-            margin: 0;
-            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif; font-size: clamp(24px, 7vw, 38px);
+            font-weight: 900; margin: 0; text-transform: uppercase;
             background: linear-gradient(135deg, #fff 30%, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
-
-        .hero p {
-            color: var(--primary);
-            font-weight: 500;
-            letter-spacing: 2px;
-            margin-top: 5px;
-            font-size: 14px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         /* Video Card */
         .video-card {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            padding: 10px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px; padding: 10px; margin-bottom: 25px;
+            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            border-radius: 20px;
-            overflow: hidden;
+        /* Trust Info Box */
+        .trust-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--primary);
+            border-radius: 15px; padding: 20px; margin-bottom: 25px;
         }
+        .trust-box h4 { color: var(--primary); margin: 0 0 10px 0; font-size: 18px; }
+        .trust-box p { font-size: 14px; margin: 0; color: #dfe6e9; text-align: left; }
 
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border: none;
-        }
-
-        .play-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6) url('https://img.icons8.com/ios-filled/100/ffffff/play-button-circled.png') no-repeat center;
-            background-size: 80px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .play-overlay:hover { background-color: rgba(0,0,0,0.4); transform: scale(1.02); }
-
-        /* Features */
-        .features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .feat-box {
-            background: rgba(255,255,255,0.03);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .feat-box h4 { margin: 0; font-size: 14px; color: var(--primary); }
-        .feat-box p { margin: 5px 0 0; font-size: 11px; opacity: 0.7; }
-
-        /* Ticker */
-        .ticker {
-            background: linear-gradient(to right, transparent, var(--glass), transparent);
-            padding: 10px 0;
-            margin: 20px 0;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .ticker-inner {
-            display: inline-block;
-            animation: scroll 15s linear infinite;
-            font-weight: bold;
-            color: var(--accent);
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        @keyframes scroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* Registration Form Card */
+        /* Form Card */
         .reg-card {
-            background: white;
-            color: black;
-            border-radius: 30px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            background: #ffffff; color: #2d3436;
+            border-radius: 30px; padding: 30px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
-
-        /* Info Section Styling */
-        .info-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px dashed #ccc;
-        }
-
-        .info-header h3 {
-            margin: 0;
-            font-family: 'Montserrat';
-            color: #2d3436;
-            font-weight: 700;
-            font-size: 22px;
-        }
-
-        .info-text {
-            font-size: 14px;
-            color: #636e72;
-            margin-top: 10px;
-            line-height: 1.6;
-        }
-
-        .highlight-box {
-            background: #f1f2f6;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            border-left: 5px solid #764ba2;
-            text-align: left;
-            font-size: 13.5px;
-            color: #2d3436;
-        }
-
-        .price-tag {
-            color: #d63031;
-            font-weight: 900;
-            font-size: 20px;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #636e72;
-            margin-bottom: 5px;
-            text-transform: uppercase;
+        .form-header h3 { margin: 0; font-family: 'Montserrat'; font-size: 24px; color: #000; text-align: center; }
+        
+        .price-chip {
+            display: block; text-align: center; background: #e3f2fd; color: #0d47a1;
+            padding: 8px; border-radius: 10px; font-weight: 800; margin: 15px 0;
+            border: 1px dashed #0d47a1;
         }
 
         input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Roboto', sans-serif;
-            transition: 0.3s;
+            width: 100%; padding: 15px; border: 2px solid #f1f2f6;
+            border-radius: 12px; font-size: 16px; margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
+        }
+        input:focus { border-color: var(--secondary); outline: none; background: #f8f9fa; }
+
+        button#submitBtn {
+            width: 100%; padding: 18px;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            border: none; border-radius: 12px; color: white;
+            font-weight: 700; font-size: 18px; text-transform: uppercase;
+            cursor: pointer; box-shadow: 0 8px 15px rgba(0, 131, 176, 0.3);
         }
 
-        input:focus {
-            border-color: #764ba2;
-            outline: none;
-            background-color: #f9f9f9;
+        #qrBox { text-align: center; margin-top: 20px; display: none; }
+        #qrBox img { width: 230px; border: 8px solid #f1f2f6; border-radius: 20px; margin: 15px 0; }
+        
+        .wait-msg {
+            background: #fff4e6; color: #d9480f; padding: 12px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; margin-top: 15px; border: 1px solid #ffd8a8;
         }
 
-        button {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: 700;
-            font-size: 17px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.2);
-        }
+        footer { text-align: center; padding: 40px; font-size: 12px; opacity: 0.6; }
 
-        button:hover { transform: translateY(-3px); }
-        button:disabled { background: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        #qrBox { text-align: center; color: black; margin-top: 20px; }
-        #qrBox img { width: 220px; margin: 15px 0; border: 2px solid #eee; padding: 5px; border-radius: 10px; }
-
-        .secure-text {
-            font-size: 12px;
-            color: #2ecc71;
-            font-weight: 600;
-            margin-top: 5px;
-            display: block;
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            font-size: 12px;
-            opacity: 0.5;
-        }
-
-        @media (max-width: 480px) {
-            .features { grid-template-columns: 1fr; }
-            .reg-card { padding: 20px; }
-        }
+        /* Hidden Class */
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="bg-glow"><div class="orb"></div></div>
+    <div class="bg-glow"></div>
 
     <div class="container">
         
         <header class="hero">
-            <p>ADVANCED LEARNING PLATFORM</p>
-            <h1>DIGITAL <br> SKILLS ACADEMY</h1>
+            <p style="letter-spacing: 2px; font-size: 12px; color: var(--primary);">VERIFIED TRAINING SYSTEM</p>
+            <h1>DIGITAL ACADEMY</h1>
         </header>
+
+        <div class="lang-toggle">
+            <button class="lang-btn active" onclick="setLang('hi', this)">HINDI</button>
+            <button class="lang-btn" onclick="setLang('en', this)">ENGLISH</button>
+        </div>
 
         <div class="video-card">
             <div class="video-wrapper">
                 <iframe id="mainVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
-                <div class="play-overlay" id="overlay" onclick="launchVideo()"></div>
             </div>
         </div>
 
-        <div class="features">
-            <div class="feat-box">
-                <h4>Social Media Mastery</h4>
-                <p>FB & Instagram se grow karna sikhein</p>
-            </div>
-            <div class="feat-box">
-                <h4>Leader Support</h4>
-                <p>Expert leaders ke sath live coaching</p>
-            </div>
-            <div class="feat-box">
-                <h4>Multi-Level Growth</h4>
-                <p>Seekhte-seekhte kai levels par earning</p>
-            </div>
-            <div class="feat-box">
-                <h4>Home Based Work</h4>
-                <p>Sirf mobile se 2-3 ghante kaam</p>
+        <div id="content-hi" class="lang-content active">
+            <div class="trust-box">
+                <h4>💡 फीस क्यों ली जाती है?</h4>
+                <p>
+                    यह ₹199 की छोटी राशि आपकी <b>गंभीरता (Commitment)</b> को परखने के लिए है। मुफ्त की चीज़ों को लोग अक्सर गंभीरता से नहीं लेते और बीच में ही ट्रेनिंग छोड़ देते हैं। जब आप अपनी मेहनत की राशि निवेश करते हैं, तो आप उसे सीखने में पूरा समय देते हैं। हमारा उद्देश्य आपको एक सफल डिजिटल क्रिएटर बनाना है।
+                </p>
             </div>
         </div>
 
-        <div class="ticker">
-            <div class="ticker-inner">
-                ⚡ No Experience Required • 🎓 Full Training Provided • 🚀 Professional Digital Career • 📱 100% Mobile Work • 
+        <div id="content-en" class="lang-content">
+            <div class="trust-box">
+                <h4>💡 Why do we charge a fee?</h4>
+                <p>
+                    This nominal fee of ₹199 is to ensure your <b>Commitment & Discipline</b>. People often ignore free resources and fail to complete their training. By investing a small amount, you value the system and dedicate your time to learning. Our goal is to build your professional digital career.
+                </p>
             </div>
         </div>
 
         <div class="reg-card">
-            <div class="info-header">
-                <h3>Sytem Enrollment & Policy</h3>
-                <div class="info-text">
-                    Agar aapne upar diye gaye video se puri jankari prapt kar li hai, toh is system ke sath judne aur training ka hissha banne ke liye niche diye gaye steps follow karein.
-                </div>
-                
-                <div class="highlight-box">
-                    <b>💡 Hum Fees Kyu Le Rahe Hain?</b><br>
-                    Ye payment hum aapko training me rokne ke liye lete hain taki aapko ahsas rahe ki aap ek rashi kharch kar system se jud rahe hain. Isse aap training ko poora samay denge. Yadi ise free kiya jaye to jyadatar log apna dream pura nahi kar pate aur beech me hi remove ho jate hain. Isiliye ye shulk bahut kam (nominal) rakha gaya hai.
-                </div>
-
-                <div style="font-size: 15px; color: #2d3436; font-weight: 700; margin: 15px 0;">
-                    📝 Commitment & Registration Fee: <span class="price-tag">₹199 Only</span>
-                </div>
-                
-                <div style="font-size: 13px; color: #d63031; font-weight: bold;">
-                    ⚠️ Note: Payment ke baad 4-6 hours ka wait karein. Team aapse training batch ke liye sampark kar legi.
-                </div>
+            <div class="form-header">
+                <h3 id="formTitle">नामांकन फॉर्म</h3>
+                <div class="price-chip">Registration Fee: ₹199</div>
             </div>
 
             <form id="regForm">
-                <div class="form-group">
-                    <label>Aapka Poora Naam (Full Name)</label>
-                    <input type="text" id="name" placeholder="E.g. Rahul Sharma" required minlength="3">
-                </div>
+                <input type="text" id="name" placeholder="Full Name (सत्य नाम)" required minlength="3">
+                <input type="tel" id="whatsapp" placeholder="WhatsApp No. (10 Digits)" required pattern="[0-9]{10}">
+                <input type="text" id="city" placeholder="Your City (शहर)" required minlength="2">
                 
-                <div class="form-group">
-                    <label>WhatsApp Number (10 Digits)</label>
-                    <input type="tel" id="whatsapp" placeholder="E.g. 9876543210" required pattern="[0-9]{10}">
-                </div>
-                
-                <div class="form-group">
-                    <label>Aapka Shahar aur State (City / State)</label>
-                    <input type="text" id="city" placeholder="E.g. Jaipur, Rajasthan" required minlength="3">
-                </div>
-                
-                <button type="submit" id="btnText">Verify & Enroll Now</button>
-                <span class="secure-text">🔒 100% Secure & One-Time Submission Only</span>
+                <button type="submit" id="submitBtn">Submit & Show QR</button>
             </form>
             
-            <div id="qrBox"></div>
+            <div id="qrBox">
+                <div style="border-top: 2px solid #f1f2f6; margin-top: 20px; padding-top: 20px;">
+                    <h4 style="color: #2ecc71; margin: 0;">✅ Registration Successful</h4>
+                    <p style="font-size: 14px; color: #636e72; margin: 10px 0;" id="qrText">कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लें।</p>
+                    <img id="qrImg" src="" alt="Payment QR">
+                    <div class="wait-msg" id="waitText">
+                        ⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer>
-            © 2026 Digital Skills Academy | Empowering People Globally
+            © 2026 Digital Success Academy | All Rights Reserved
         </footer>
 
     </div>
@@ -379,43 +189,51 @@
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
-        // 1. Check if user already submitted before
-        window.onload = function() {
-            if(localStorage.getItem("formSubmitted") === "true") {
-                document.getElementById("regForm").innerHTML = `
-                    <div style="text-align:center; padding:20px; background:#f1f2f6; border-radius:10px;">
-                        <h4 style="color:#e74c3c; margin:0;">⚠️ Access Denied!</h4>
-                        <p style="font-size:14px; margin-top:5px; color:#2d3436;">Aapne pehle hi data fill kar diya hai. Aap ek se jyada baar form nahi bhar sakte.</p>
-                        <p style="font-size:12px; color:#636e72;">Yadi QR code nahi dikha tha, to hamari team aapko WhatsApp par sampark karegi.</p>
-                    </div>
-                `;
-            }
-        };
+        // Language Switcher Logic
+        function setLang(lang, btn) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-        // 2. Strict Submission Logic
+            document.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('content-' + lang).classList.add('active');
+
+            // Form Text Update
+            if(lang === 'hi') {
+                document.getElementById('formTitle').innerText = "नामांकन फॉर्म";
+                document.getElementById('submitBtn').innerText = "सबमिट और QR देखें";
+                document.getElementById('qrText').innerText = "कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लें।";
+                document.getElementById('waitText').innerText = "⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।";
+            } else {
+                document.getElementById('formTitle').innerText = "Enrollment Form";
+                document.getElementById('submitBtn').innerText = "Submit & Show QR";
+                document.getElementById('qrText').innerText = "Kindly pay ₹199 and take a screenshot.";
+                document.getElementById('waitText').innerText = "⚠️ Team will contact you within 4-6 hours.";
+            }
+        }
+
+        // Form Submission Logic
         document.getElementById("regForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             
-            const btn = document.getElementById("btnText");
-            const nameVal = document.getElementById("name").value.trim();
-            const mobileVal = document.getElementById("whatsapp").value.trim();
-            const cityVal = document.getElementById("city").value.trim();
+            const btn = document.getElementById("submitBtn");
+            const name = document.getElementById("name").value.trim();
+            const mobile = document.getElementById("whatsapp").value.trim();
+            const city = document.getElementById("city").value.trim();
 
-            // Sytem check to ensure no half/wrong data passes
-            if(nameVal.length < 3 || mobileVal.length !== 10 || cityVal.length < 3) {
-                alert("Kripya sahi naam, 10-anko ka sahi mobile number aur city bharein!");
+            if(mobile.length !== 10) {
+                alert("Please enter a valid 10-digit mobile number!");
                 return;
             }
 
-            btn.innerHTML = "Processing Data...";
+            btn.innerHTML = "Processing...";
             btn.disabled = true;
-
+            
             const params = new URLSearchParams(window.location.search);
             const data = {
-                name: nameVal,
-                mobile: mobileVal,
-                address: cityVal,
-                referral: params.get("ref") || "Direct_Academy_Lead"
+                name: name,
+                mobile: mobile,
+                address: city,
+                referral: params.get("ref") || "System_Direct"
             };
 
             try {
@@ -425,34 +243,25 @@
                 });
                 let result = await response.json();
 
-                // Lock out user from submitting again
-                localStorage.setItem("formSubmitted", "true");
+                document.getElementById("regForm").style.display = "none";
+                document.getElementById("qrImg").src = result.qr;
+                document.getElementById("qrBox").style.display = "block";
+                
+                localStorage.setItem("academy_user", "registered");
 
-                document.getElementById("qrBox").innerHTML = `
-                    <div style="padding:20px; border-top:2px solid #eee; margin-top: 25px; animation: fadeIn 0.5s;">
-                        <h4 style="margin:0; color: #2ecc71;">✅ Profile Verified Successfully!</h4>
-                        <p style="font-size:13px; margin:10px 0; color:#2d3436;">Niche diye QR par <b>₹199</b> pay karein aur screenshot lekar <b>4-6 ghante</b> wait karein.</p>
-                        <img src="${result.qr}" alt="Payment QR">
-                        <p style="font-size: 11px; color: #e74c3c; font-weight:bold;">Sytem Lock: Aapka data ek baar save ho chuka hai. Dubara fill nahi kar sakte.</p>
-                    </div>
-                `;
-                
-                // Remove form to stop double submit
-                document.getElementById("regForm").style.opacity = "0.5";
-                btn.innerHTML = "Submited Successfully! ✅";
-                
             } catch (err) {
-                alert("Kuch technical dikqat aayi! Kripya internet check karein.");
-                btn.innerHTML = "Verify & Enroll Now";
+                alert("Network Error! Try again.");
+                btn.innerHTML = "Submit & Show QR";
                 btn.disabled = false;
             }
         });
 
-        function launchVideo() {
-            let frame = document.getElementById("mainVideo");
-            frame.src += "&autoplay=1";
-            document.getElementById("overlay").style.display = "none";
-        }
+        // Anti-Duplicate Check
+        window.onload = function() {
+            if(localStorage.getItem("academy_user") === "registered") {
+                document.getElementById("regForm").innerHTML = "<p style='color:red; text-align:center; font-weight:bold;'>You have already registered. Please wait for our team to contact you.</p>";
+            }
+        };
     </script>
 </body>
 </html>
