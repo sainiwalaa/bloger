@@ -1,314 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn From Home | Premium Opportunity</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #ff007a;
-            --secondary: #7000ff;
-            --accent: #00d4ff;
-            --success: #00ff88;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forever Income System</title>
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #050505;
-            color: white;
-            overflow-x: hidden;
-        }
+<style>
+body{
+margin:0;
+font-family:Arial;
+color:white;
+background:url('https://media.licdn.com/dms/image/v2/D5612AQEG2hRe0X7BCA/article-cover_image-shrink_720_1280/B56ZmthjkEJ8AI-/0/1759552879351?e=2147483647&v=beta&t=QcT_x1LpWdEgay9_-z1KaQtX_y1XemEO1jGadpL6agQ') no-repeat center/cover;
+}
 
-        /* Dynamic Animated Background */
-        .bg-animate {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
-            z-index: -1;
-        }
+.overlay{
+background:rgba(0,0,0,0.75);
+min-height:100vh;
+}
 
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
-            animation: float 10s infinite alternate;
-        }
+.container{
+max-width:500px;
+margin:auto;
+padding:15px;
+}
 
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(100px, 50px); }
-        }
+.header{
+text-align:center;
+padding:25px;
+}
 
-        /* Main Container */
-        .container {
-            max-width: 450px;
-            margin: auto;
-            padding: 20px;
-        }
+.card{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+}
 
-        /* Hero Header */
-        .header {
-            text-align: center;
-            padding: 40px 10px;
-        }
+.video-frame{
+position:relative;
+border-radius:15px;
+overflow:hidden;
+}
 
-        .header h1 {
-            font-size: 38px;
-            font-weight: 800;
-            margin: 0;
-            background: linear-gradient(to right, var(--accent), var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            letter-spacing: -1px;
-            line-height: 1;
-        }
+.video-frame iframe{
+width:100%;
+height:220px;
+pointer-events:none;
+}
 
-        .header p {
-            font-size: 16px;
-            color: #ccc;
-            margin-top: 10px;
-        }
+.play-btn{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:black;
+width:70px;
+height:70px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
 
-        /* High-End Glass Card */
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+.play-btn:after{
+content:"▶";
+color:white;
+font-size:25px;
+}
 
-        /* Modern Video Player */
-        .video-container {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            aspect-ratio: 16/9;
-            box-shadow: 0 0 30px rgba(112, 0, 255, 0.3);
-        }
+.text-anim{
+text-align:center;
+height:25px;
+overflow:hidden;
+}
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+.text-anim span{
+display:block;
+animation:slide 6s infinite;
+}
 
-        .overlay-play {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+@keyframes slide{
+0%{transform:translateY(0)}
+25%{transform:translateY(-25px)}
+50%{transform:translateY(-50px)}
+75%{transform:translateY(-75px)}
+100%{transform:translateY(0)}
+}
 
-        .overlay-play:hover { background: rgba(0,0,0,0.2); }
+input,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+}
 
-        .play-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: 0 0 20px var(--primary);
-        }
+button{
+background:#22c55e;
+color:white;
+font-weight:bold;
+}
 
-        /* 3D Scrolling Text */
-        .scroller {
-            height: 40px;
-            overflow: hidden;
-            text-align: center;
-            font-weight: 600;
-            color: var(--accent);
-            font-size: 20px;
-        }
+img{
+width:180px;
+margin-top:15px;
+}
 
-        .scroller div {
-            animation: scroll-up 8s infinite ease-in-out;
-        }
+@media(min-width:768px){
+.video-frame iframe{
+height:300px;
+}
+}
+</style>
 
-        @keyframes scroll-up {
-            0%, 20% { transform: translateY(0); }
-            25%, 45% { transform: translateY(-40px); }
-            50%, 70% { transform: translateY(-80px); }
-            75%, 95% { transform: translateY(-120px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* Glowing Inputs & Buttons */
-        .input-group { margin-bottom: 15px; }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            box-sizing: border-box;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: white;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--accent);
-            background: rgba(255,255,255,0.12);
-        }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(to right, #7000ff, #ff007a);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(255, 0, 122, 0.3);
-            transition: 0.3s;
-        }
-
-        button:hover {
-            transform: scale(1.02);
-            filter: brightness(1.2);
-        }
-
-        /* QR Section */
-        #qrBox { text-align: center; margin-top: 20px; }
-        #qrBox img { 
-            width: 200px; 
-            border: 5px solid white; 
-            border-radius: 15px;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-    </style>
 </head>
+
 <body>
 
-    <div class="bg-animate">
-        <div class="circle" style="width: 300px; height: 300px; background: var(--secondary); top: -50px; right: -50px;"></div>
-        <div class="circle" style="width: 250px; height: 250px; background: var(--primary); bottom: 10%; left: -50px;"></div>
-    </div>
+<div class="overlay">
 
-    <div class="container">
-        
-        <div class="header">
-            <h1>CASH <br> MACHINE</h1>
-            <p>Passive income directly to your UPI</p>
-        </div>
+<div class="container">
 
-        <div class="card">
-            <div class="video-container">
-                <iframe id="ytVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
-                <div class="overlay-play" id="playOverlay" onclick="startVideo()">
-                    <div class="play-icon">▶</div>
-                </div>
-            </div>
-        </div>
+<div class="header">
+<h1>💸 Forever Income System</h1>
+<p>Ek baar join karo, lifetime earning pao</p>
+</div>
 
-        <div class="card scroller">
-            <div>
-                <div>💰 Instant Payouts</div>
-                <div>📱 100% Mobile Work</div>
-                <div>🔥 No Skills Needed</div>
-                <div>🚀 Limited Slots Only</div>
-            </div>
-        </div>
+<div class="card">
+<div class="video-frame">
+<iframe id="video" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
+<div class="play-btn" onclick="playVideo()"></div>
+</div>
+</div>
 
-        <div class="card">
-            <h3 style="margin-top:0; text-align:center;">Register Now</h3>
-            <form id="earnForm">
-                <div class="input-group">
-                    <input type="text" id="userName" placeholder="Enter Full Name" required>
-                </div>
-                <div class="input-group">
-                    <input type="tel" id="userMobile" placeholder="WhatsApp Number" required>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="userAddress" placeholder="City / State" required>
-                </div>
-                <button type="submit">Start Earning Now</button>
-            </form>
+<div class="card text-anim">
+<span>
+💰 Lifetime Income<br>
+👥 Unlimited Referral<br>
+📈 Level Income System<br>
+🚀 Passive Earnings
+</span>
+</div>
 
-            <div id="qrBox"></div>
-        </div>
+<div class="card">
+<b>🔥 Forever Referral Concept</b>
+<p>Jo bhi aapke link se join karega wo lifetime aapke under rahega aur aapko har level se income milegi.</p>
+</div>
 
-        <p style="text-align:center; font-size:12px; opacity:0.5;">
-            Join 5,000+ members working from home
-        </p>
+<div class="card">
+<h3>Join Now</h3>
 
-    </div>
+<form id="form">
+<input type="text" placeholder="Your Name" required>
+<input type="tel" placeholder="Mobile Number" required>
+<input type="text" placeholder="Address" required>
+<button type="submit">Start Earning</button>
+</form>
 
-    <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
+<div id="qrBox"></div>
+</div>
 
-        // Handle Form
-        document.getElementById("earnForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = "Processing...";
-            btn.disabled = true;
+</div>
 
-            const params = new URLSearchParams(window.location.search);
-            const ref = params.get("ref") || "Direct_Traffic";
+</div>
 
-            const payload = {
-                name: document.getElementById("userName").value,
-                mobile: document.getElementById("userMobile").value,
-                address: document.getElementById("userAddress").value,
-                referral: ref
-            };
+<script>
 
-            try {
-                let response = await fetch(scriptURL, {
-                    method: "POST",
-                    body: JSON.stringify(payload)
-                });
-                let data = await response.json();
+const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
-                document.getElementById("qrBox").innerHTML = `
-                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top:20px; padding-top:20px;">
-                        <h4 style="color:var(--success)">🎉 Steps to Activate:</h4>
-                        <img src="${data.qr}" alt="Payment QR">
-                        <p style="font-size:14px;">Scan karke payment karein aur screenshot WhatsApp par bhejein.</p>
-                    </div>
-                `;
-                btn.innerHTML = "Success ✅";
-            } catch (err) {
-                alert("Something went wrong. Try again.");
-                btn.innerHTML = "Start Earning Now";
-                btn.disabled = false;
-            }
-        });
+const params = new URLSearchParams(window.location.search);
+const ref = params.get("ref") || "Direct";
 
-        // Custom Video Control
-        function startVideo() {
-            let iframe = document.getElementById("ytVideo");
-            let overlay = document.getElementById("playOverlay");
-            iframe.src += "&autoplay=1";
-            overlay.style.display = "none";
-        }
-    </script>
+document.getElementById("form").addEventListener("submit", async function(e){
+e.preventDefault();
+
+let name = this[0].value;
+let mobile = this[1].value;
+let address = this[2].value;
+
+let res = await fetch(scriptURL,{
+method:"POST",
+body: JSON.stringify({
+name:name,
+mobile:mobile,
+address:address,
+referral:ref
+})
+});
+
+let data = await res.json();
+
+document.getElementById("qrBox").innerHTML = `
+<h3>💳 Scan & Pay</h3>
+<img src="${data.qr}">
+`;
+
+this.reset();
+
+});
+
+function playVideo(){
+let iframe = document.getElementById("video");
+iframe.style.pointerEvents="auto";
+iframe.src += "&autoplay=1";
+document.querySelector(".play-btn").style.display="none";
+}
+
+</script>
+
 </body>
 </html>
