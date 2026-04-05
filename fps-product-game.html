@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Success System | Work From Home</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -170,7 +170,7 @@
             box-shadow: 0 15px 50px rgba(0,0,0,0.3);
         }
 
-        /* New Info Section Styling */
+        /* Info Section Styling */
         .info-header {
             text-align: center;
             margin-bottom: 25px;
@@ -182,6 +182,7 @@
             margin: 0;
             font-family: 'Montserrat';
             color: #2d3436;
+            font-weight: 700;
             font-size: 22px;
         }
 
@@ -189,16 +190,18 @@
             font-size: 14px;
             color: #636e72;
             margin-top: 10px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .highlight-box {
             background: #f1f2f6;
-            padding: 12px;
+            padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
             border-left: 5px solid #764ba2;
-            font-weight: 500;
+            text-align: left;
+            font-size: 13.5px;
+            color: #2d3436;
         }
 
         .price-tag {
@@ -207,13 +210,35 @@
             font-size: 20px;
         }
 
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #636e72;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
         input {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 14px;
             border: 1px solid #ddd;
             border-radius: 10px;
             font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #764ba2;
+            outline: none;
+            background-color: #f9f9f9;
         }
 
         button {
@@ -224,16 +249,26 @@
             border-radius: 10px;
             color: white;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 17px;
             text-transform: uppercase;
             cursor: pointer;
             transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.2);
         }
 
         button:hover { transform: translateY(-3px); }
+        button:disabled { background: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
 
         #qrBox { text-align: center; color: black; margin-top: 20px; }
         #qrBox img { width: 220px; margin: 15px 0; border: 2px solid #eee; padding: 5px; border-radius: 10px; }
+
+        .secure-text {
+            font-size: 12px;
+            color: #2ecc71;
+            font-weight: 600;
+            margin-top: 5px;
+            display: block;
+        }
 
         footer {
             text-align: center;
@@ -293,24 +328,43 @@
 
         <div class="reg-card">
             <div class="info-header">
-                <h3>System Enrollment</h3>
+                <h3>Sytem Enrollment & Policy</h3>
                 <div class="info-text">
                     Agar aapne upar diye gaye video se puri jankari prapt kar li hai, toh is system ke sath judne aur training ka hissha banne ke liye niche diye gaye steps follow karein.
                 </div>
+                
                 <div class="highlight-box">
-                    📝 Registration Fee: <span class="price-tag">₹199 Only</span><br>
-                    <small style="font-weight: 400; color: #636e72;">Form fill karein aur milne wale QR par payment jama karein.</small>
+                    <b>💡 Hum Fees Kyu Le Rahe Hain?</b><br>
+                    Ye payment hum aapko training me rokne ke liye lete hain taki aapko ahsas rahe ki aap ek rashi kharch kar system se jud rahe hain. Isse aap training ko poora samay denge. Yadi ise free kiya jaye to jyadatar log apna dream pura nahi kar pate aur beech me hi remove ho jate hain. Isiliye ye shulk bahut kam (nominal) rakha gaya hai.
                 </div>
-                <div style="font-size: 13px; color: #764ba2; font-weight: bold; margin-top: 10px;">
-                    ⚠️ Payment ke baad 4-6 hours ka intjar karein. Team aapse training ke liye sampark kar legi.
+
+                <div style="font-size: 15px; color: #2d3436; font-weight: 700; margin: 15px 0;">
+                    📝 Commitment & Registration Fee: <span class="price-tag">₹199 Only</span>
+                </div>
+                
+                <div style="font-size: 13px; color: #d63031; font-weight: bold;">
+                    ⚠️ Note: Payment ke baad 4-6 hours ka wait karein. Team aapse training batch ke liye sampark kar legi.
                 </div>
             </div>
 
             <form id="regForm">
-                <input type="text" id="name" placeholder="Apna Poora Naam" required>
-                <input type="tel" id="whatsapp" placeholder="WhatsApp Number" required>
-                <input type="text" id="city" placeholder="Aapka Shahar (City)" required>
-                <button type="submit" id="btnText">Enroll & Get QR Code</button>
+                <div class="form-group">
+                    <label>Aapka Poora Naam (Full Name)</label>
+                    <input type="text" id="name" placeholder="E.g. Rahul Sharma" required minlength="3">
+                </div>
+                
+                <div class="form-group">
+                    <label>WhatsApp Number (10 Digits)</label>
+                    <input type="tel" id="whatsapp" placeholder="E.g. 9876543210" required pattern="[0-9]{10}">
+                </div>
+                
+                <div class="form-group">
+                    <label>Aapka Shahar aur State (City / State)</label>
+                    <input type="text" id="city" placeholder="E.g. Jaipur, Rajasthan" required minlength="3">
+                </div>
+                
+                <button type="submit" id="btnText">Verify & Enroll Now</button>
+                <span class="secure-text">🔒 100% Secure & One-Time Submission Only</span>
             </form>
             
             <div id="qrBox"></div>
@@ -325,18 +379,43 @@
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
+        // 1. Check if user already submitted before
+        window.onload = function() {
+            if(localStorage.getItem("formSubmitted") === "true") {
+                document.getElementById("regForm").innerHTML = `
+                    <div style="text-align:center; padding:20px; background:#f1f2f6; border-radius:10px;">
+                        <h4 style="color:#e74c3c; margin:0;">⚠️ Access Denied!</h4>
+                        <p style="font-size:14px; margin-top:5px; color:#2d3436;">Aapne pehle hi data fill kar diya hai. Aap ek se jyada baar form nahi bhar sakte.</p>
+                        <p style="font-size:12px; color:#636e72;">Yadi QR code nahi dikha tha, to hamari team aapko WhatsApp par sampark karegi.</p>
+                    </div>
+                `;
+            }
+        };
+
+        // 2. Strict Submission Logic
         document.getElementById("regForm").addEventListener("submit", async function(e) {
             e.preventDefault();
+            
             const btn = document.getElementById("btnText");
-            btn.innerHTML = "Processing...";
+            const nameVal = document.getElementById("name").value.trim();
+            const mobileVal = document.getElementById("whatsapp").value.trim();
+            const cityVal = document.getElementById("city").value.trim();
+
+            // Sytem check to ensure no half/wrong data passes
+            if(nameVal.length < 3 || mobileVal.length !== 10 || cityVal.length < 3) {
+                alert("Kripya sahi naam, 10-anko ka sahi mobile number aur city bharein!");
+                return;
+            }
+
+            btn.innerHTML = "Processing Data...";
             btn.disabled = true;
 
             const params = new URLSearchParams(window.location.search);
             const data = {
-                name: document.getElementById("name").value,
-                mobile: document.getElementById("whatsapp").value,
-                address: document.getElementById("city").value,
-                referral: params.get("ref") || "System_Member"
+                name: nameVal,
+                mobile: mobileVal,
+                address: cityVal,
+                referral: params.get("ref") || "Direct_Academy_Lead"
             };
 
             try {
@@ -346,18 +425,25 @@
                 });
                 let result = await response.json();
 
+                // Lock out user from submitting again
+                localStorage.setItem("formSubmitted", "true");
+
                 document.getElementById("qrBox").innerHTML = `
-                    <div style="padding:20px; border-top:1px solid #eee; margin-top: 20px;">
-                        <h4 style="margin:0; color: #2ecc71;">✅ Registration Details Saved!</h4>
-                        <p style="font-size:14px; margin:10px 0;">Niche diye QR par <b>₹199</b> pay karein aur screenshot lekar 4-6 ghante wait karein.</p>
+                    <div style="padding:20px; border-top:2px solid #eee; margin-top: 25px; animation: fadeIn 0.5s;">
+                        <h4 style="margin:0; color: #2ecc71;">✅ Profile Verified Successfully!</h4>
+                        <p style="font-size:13px; margin:10px 0; color:#2d3436;">Niche diye QR par <b>₹199</b> pay karein aur screenshot lekar <b>4-6 ghante</b> wait karein.</p>
                         <img src="${result.qr}" alt="Payment QR">
-                        <p style="font-size: 12px; color: #e74c3c;"><b>Note:</b> Team 4-6 ghante mein aapse sampark karegi.</p>
+                        <p style="font-size: 11px; color: #e74c3c; font-weight:bold;">Sytem Lock: Aapka data ek baar save ho chuka hai. Dubara fill nahi kar sakte.</p>
                     </div>
                 `;
-                btn.innerHTML = "Registration Success! ✅";
+                
+                // Remove form to stop double submit
+                document.getElementById("regForm").style.opacity = "0.5";
+                btn.innerHTML = "Submited Successfully! ✅";
+                
             } catch (err) {
-                alert("Connection error! Please try again.");
-                btn.innerHTML = "Enroll & Get QR Code";
+                alert("Kuch technical dikqat aayi! Kripya internet check karein.");
+                btn.innerHTML = "Verify & Enroll Now";
                 btn.disabled = false;
             }
         });
