@@ -1,229 +1,88 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Sainiwalaa Smooth Racer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-        
-        body { margin: 0; padding: 0; background: #000; font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        #map { position: absolute; top: 0; bottom: 0; width: 100%; z-index: 1; filter: saturate(1.2) brightness(0.8); }
-        
-        /* --- GAMING HUD --- */
-        #hud {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(0,0,0,0.8); border: 2px solid #00ffcc;
-            color: #fff; padding: 10px; border-radius: 12px; z-index: 100;
-            text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 15px #00ffcc;
-        }
-        #dist-val { font-size: 26px; color: #ff00cc; text-shadow: 0 0 10px #ff00cc; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refer & Join</title>
 
-        /* --- ARCADE CONTROLS (HOLD TO MOVE) --- */
-        #controls {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: 80px 80px 80px; grid-template-rows: 80px 80px;
-            gap: 15px; z-index: 1000;
-        }
-        .btn {
-            width: 80px; height: 80px; background: rgba(0,0,0,0.8); 
-            border: 4px solid #00ffcc; border-radius: 20px; color: #00ffcc;
-            font-size: 35px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 0 #008866; touch-action: none;
-        }
-        .btn:active { transform: translateY(4px); box-shadow: none; background: #00ffcc; color: #000; }
-        .up { grid-column: 2; }
-        .left { grid-column: 1; grid-row: 2; }
-        .down { grid-column: 2; grid-row: 2; }
-        .right { grid-column: 3; grid-row: 2; }
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
 
-        /* --- REWARD PANEL --- */
-        #reward-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 2000; color: white;
-            animation: fadeIn 0.5s;
-        }
-        .card { border: 4px solid #ff00cc; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 0 30px #ff00cc; }
-        .p-img { width: 100%; max-width: 200px; border-radius: 10px; margin: 15px 0; border: 2px solid #00ffcc; }
-        
-        /* Animation Keyframes */
-        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-        @keyframes targetPulse { from {transform: scale(1); filter: drop-shadow(0 0 5px gold);} to {transform: scale(1.1); filter: drop-shadow(0 0 15px gold);} }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+.container{
+padding:20px;
+max-width:400px;
+margin:auto;
+}
 
-        /* Custom Marker Styles */
-        #car-body { font-size: 45px; transition: transform 0.1s linear; }
-        .target-marker { font-size: 40px; animation: targetPulse 1s infinite alternate; }
-        .obstacle-marker { font-size: 30px; filter: drop-shadow(0 0 5px red); }
-        .shake-screen { animation: shake 0.3s; animation-iteration-count: 2; }
-    </style>
+h1{
+text-align:center;
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:none;
+}
+
+button{
+background:#22c55e;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+</style>
 </head>
+
 <body>
 
-<div id="hud">
-    <div style="font-size: 10px; letter-spacing: 2px;">DISTANCE TO TARGET</div>
-    <div id="dist-val">FINDING GPS...</div>
+<div class="container">
+<h1>Join & Earn 💸</h1>
+
+<form id="joinForm">
+<input type="text" placeholder="Your Name" required>
+<input type="tel" placeholder="Mobile Number" required>
+<input type="hidden" id="ref">
+
+<button type="submit">Join Now</button>
+</form>
+
+<p id="msg"></p>
 </div>
-
-<div id="controls">
-    <button class="btn up" ontouchstart="startMove('up')" ontouchend="stopMove()">▲</button>
-    <button class="btn left" ontouchstart="startMove('left')" ontouchend="stopMove()">◀</button>
-    <button class="btn down" ontouchstart="startMove('down')" ontouchend="stopMove()">▼</button>
-    <button class="btn right" ontouchstart="startMove('right')" ontouchend="stopMove()">▶</button>
-</div>
-
-<div id="reward-screen">
-    <div class="card">
-        <h1 style="color: gold; margin: 0; font-family: 'Orbitron'; font-weight: 900;">MISSION SUCCESS!</h1>
-        <p style="color: #ccc;">Sainiwalaa Premium Product Unlocked</p>
-        <img src="https://via.placeholder.com/200/00ffcc/000000?text=SAINIWALAA" class="p-img">
-        <div style="font-size: 28px; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; margin: 10px 0;">54% MEGA OFF</div>
-        <button onclick="location.reload()" style="background:linear-gradient(45deg, #00ffcc, #ff00cc); padding: 18px; width: 100%; border:none; border-radius: 50px; font-weight:bold; color: white; font-family:'Orbitron';">NEXT MISSION</button>
-    </div>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    let map, carMarker, targetMarker;
-    let obstacles = [];
-    let carPos = { lat: 0, lng: 0 };
-    let targetPos = { lat: 0, lng: 0 };
-    let moveInterval = null;
-    let isFrozen = false;
-    const step = 0.00007; // Smooth movement speed
 
-    function init() {
-        navigator.geolocation.getCurrentPosition(pos => {
-            carPos.lat = pos.coords.latitude;
-            carPos.lng = pos.coords.longitude;
+// 🔥 GET REFERRAL FROM URL
+const params = new URLSearchParams(window.location.search);
+const ref = params.get("ref");
+document.getElementById("ref").value = ref || "Direct";
 
-            // 1. Map Setup (Satellite View)
-            map = L.map('map', { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false }).setView([carPos.lat, carPos.lng], 19);
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
+// 🔥 FORM SUBMIT
+document.getElementById("joinForm").addEventListener("submit", function(e){
+e.preventDefault();
 
-            // 2. Car Marker
-            const carIcon = L.divIcon({ html: '<div id="car-body">🏎️</div>', className: 'dummy' });
-            carMarker = L.marker([carPos.lat, carPos.lng], { icon: carIcon }).addTo(map);
+let name = this[0].value;
+let mobile = this[1].value;
+let referral = document.getElementById("ref").value;
 
-            // 3. Setup Target & Obstacles (Save to LocalStorage)
-            setupGameData(latitude, longitude);
+// 👉 Yaha tum Google Sheet / API bhej sakte ho
+console.log({
+name:name,
+mobile:mobile,
+referral:referral
+});
 
-            // 4. Update HUD
-            updateHUD();
-        }, err => alert("GPS Permission On Karein bhai!"));
-    }
+document.getElementById("msg").innerHTML = "✅ Successfully Joined!";
+this.reset();
+});
 
-    function setupGameData(lat, lon) {
-        if(localStorage.getItem('target_lat')) {
-            targetPos.lat = parseFloat(localStorage.getItem('target_lat'));
-            targetPos.lng = parseFloat(localStorage.getItem('target_lng'));
-            obstacles = JSON.parse(localStorage.getItem('obstacles'));
-        } else {
-            // Closer Target (approx 70m away)
-            targetPos.lat = lat + 0.0006; 
-            targetPos.lng = lon + 0.0006;
-            localStorage.setItem('target_lat', targetPos.lat);
-            localStorage.setItem('target_lng', targetPos.lng);
-
-            // Create 3 Random Obstacles
-            obstacles = [];
-            for(let i=0; i<3; i++) {
-                obstacles.push({
-                    lat: lat + (targetPos.lat - lat) * (0.2 + i*0.3) + (Math.random()-0.5)*0.0002,
-                    lng: lon + (targetPos.lng - lon) * (0.2 + i*0.3) + (Math.random()-0.5)*0.0002
-                });
-            }
-            localStorage.setItem('obstacles', JSON.stringify(obstacles));
-        }
-
-        // Draw Target (Animated)
-        const giftIcon = L.divIcon({ html: '<div class="target-marker">🎁</div>', className: 'dummy' });
-        targetMarker = L.marker([targetPos.lat, targetPos.lng], { icon: giftIcon }).addTo(map);
-
-        // Draw Obstacles (Cones)
-        const coneIcon = L.divIcon({ html: '<div class="obstacle-marker">🚧</div>', className: 'dummy' });
-        obstacles.forEach(obs => {
-            L.marker([obs.lat, obs.lng], { icon: coneIcon }).addTo(map);
-        });
-    }
-
-    // --- SMOOTH MOVEMENT LOGIC (HOLD TO MOVE) ---
-    function startMove(dir) {
-        if(moveInterval || isFrozen) return;
-        
-        // Rotation logic
-        let rotation = 0;
-        if(dir === 'up') rotation = -90;
-        if(dir === 'down') rotation = 90;
-        if(dir === 'left') rotation = 180;
-        if(dir === 'right') rotation = 0;
-        document.getElementById('car-body').style.transform = `rotate(${rotation}deg)`;
-
-        // Move loop
-        moveInterval = setInterval(() => {
-            if(dir === 'up') carPos.lat += step;
-            if(dir === 'down') carPos.lat -= step;
-            if(dir === 'left') carPos.lng -= step;
-            if(dir === 'right') carPos.lng += step;
-
-            carMarker.setLatLng([carPos.lat, carPos.lng]);
-            map.panTo([carPos.lat, carPos.lng]);
-            
-            checkCollision();
-            updateHUD();
-        }, 50); // Loop every 50ms for smoothness
-    }
-
-    function stopMove() {
-        if(moveInterval) {
-            clearInterval(moveInterval);
-            moveInterval = null;
-        }
-    }
-
-    function checkCollision() {
-        for(let obs of obstacles) {
-            const d = getDist(carPos.lat, carPos.lng, obs.lat, obs.lng);
-            if(d < 12) { // Hit within 12 meters radius
-                stopMove();
-                isFrozen = true;
-                // Shake Screen Effect
-                document.getElementById('map').classList.add('shake-screen');
-                setTimeout(() => {
-                    isFrozen = false;
-                    document.getElementById('map').classList.remove('shake-screen');
-                }, 800); // 0.8-second freeze penalty
-                return;
-            }
-        }
-    }
-
-    function updateHUD() {
-        const d = getDist(carPos.lat, carPos.lng, targetPos.lat, targetPos.lng);
-        document.getElementById('dist-val').innerText = Math.round(d) + " M";
-        
-        if(d < 15) {
-            stopMove();
-            localStorage.clear(); // Clear win data
-            document.getElementById('reward-screen').style.display = 'flex';
-        }
-    }
-
-    function getDist(lat1, lon1, lat2, lon2) {
-        const R = 6371000;
-        const dLat = (lat2-lat1) * Math.PI/180;
-        const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    init();
 </script>
+
 </body>
 </html>
