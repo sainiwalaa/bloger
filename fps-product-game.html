@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Work From Home - Earn Money</title>
+<title>Earn From Home</title>
 
 <style>
 body{
@@ -13,62 +13,59 @@ background:#0f172a;
 color:white;
 }
 
-/* HERO */
-.hero{
-padding:30px;
+/* HEADER */
+.header{
 text-align:center;
+padding:30px;
 background:linear-gradient(135deg,#7c3aed,#06b6d4);
 }
 
-.hero h1{
+.header h1{
 font-size:28px;
+margin:0;
 }
 
-.hero p{
+.header p{
 opacity:0.9;
 }
 
-/* VIDEO */
-.video-box{
-position:relative;
-margin:20px;
-}
-
-.video-box iframe{
-width:100%;
-height:200px;
-border-radius:12px;
-pointer-events:none;
-}
-
-.play-btn{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:red;
-width:60px;
-height:60px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
-
-.play-btn:after{
-content:'▶';
-color:white;
-font-size:20px;
-}
-
-/* FORM */
+/* CONTAINER */
 .container{
 max-width:400px;
 margin:auto;
 padding:20px;
 }
 
+/* VIDEO LOCK */
+.video-box{
+position:relative;
+margin-bottom:15px;
+}
+
+.video-box iframe{
+width:100%;
+height:200px;
+border-radius:12px;
+pointer-events:none; /* ❌ CLICK DISABLE */
+}
+
+/* CONTENT TEXT */
+.info{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+}
+
+.info h3{
+margin-top:0;
+}
+
+ul{
+padding-left:18px;
+}
+
+/* FORM */
 input,button{
 width:100%;
 padding:12px;
@@ -81,6 +78,7 @@ button{
 background:#22c55e;
 color:white;
 font-size:16px;
+cursor:pointer;
 }
 
 /* QR */
@@ -90,37 +88,45 @@ margin-top:20px;
 border-radius:10px;
 }
 
-/* WORK IMAGE */
-.work-img{
-width:100%;
-border-radius:12px;
-margin-top:15px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- HERO -->
-<div class="hero">
-<h1>💸 Work From Home & Earn Daily</h1>
-<p>Refer friends & earn unlimited income</p>
+<!-- HEADER -->
+<div class="header">
+<h1>💸 Work From Home Earning</h1>
+<p>Ghar baithe roj kamao – No Experience Needed</p>
 </div>
 
-<!-- VIDEO -->
-<div class="video-box">
-<iframe id="video" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
-<div class="play-btn" onclick="playVideo()"></div>
-</div>
-
-<!-- IMAGE -->
 <div class="container">
-<img class="work-img" src="https://images.unsplash.com/photo-1581090700227-1e8c3c9c5a6f">
+
+<!-- VIDEO (NON-CLICKABLE) -->
+<div class="video-box">
+<iframe src="https://www.youtube.com/embed/oPN3WurQ3iw"></iframe>
+</div>
+
+<!-- INFO TEXT -->
+<div class="info">
+<h3>🔥 Why Join This System?</h3>
+<ul>
+<li>📱 Mobile se kaam – koi office nahi</li>
+<li>💰 Daily income opportunity</li>
+<li>👥 Referral se extra earning</li>
+<li>⏰ Flexible timing (jab chaho tab kaam)</li>
+<li>🚀 Fast growing earning model</li>
+</ul>
+</div>
+
+<div class="info">
+<h3>📌 Kaise kaam karega?</h3>
+<p>1️⃣ Form fill karo<br>
+2️⃣ Payment complete karo<br>
+3️⃣ Apna referral link share karo<br>
+4️⃣ Har join par earning pao 💸</p>
 </div>
 
 <!-- FORM -->
-<div class="container">
-
 <h2>Join Now</h2>
 
 <form id="form">
@@ -165,7 +171,7 @@ let data = await res.json();
 
 // QR SHOW
 document.getElementById("qrBox").innerHTML = `
-<h3>Scan & Pay</h3>
+<h3>💳 Scan & Pay</h3>
 <img src="${data.qr}">
 <p>Payment karke screenshot save kare</p>
 `;
@@ -173,14 +179,6 @@ document.getElementById("qrBox").innerHTML = `
 this.reset();
 
 });
-
-// VIDEO PLAY
-function playVideo(){
-let iframe = document.getElementById("video");
-iframe.style.pointerEvents = "auto";
-iframe.src += "&autoplay=1";
-document.querySelector(".play-btn").style.display="none";
-}
 
 </script>
 
