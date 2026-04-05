@@ -16,13 +16,13 @@ color:white;
 /* HEADER */
 .header{
 text-align:center;
-padding:30px;
+padding:25px;
 background:linear-gradient(135deg,#7c3aed,#06b6d4);
 }
 
 .header h1{
-font-size:28px;
 margin:0;
+font-size:clamp(20px,5vw,32px);
 }
 
 .header p{
@@ -31,38 +31,47 @@ opacity:0.9;
 
 /* CONTAINER */
 .container{
-max-width:400px;
+max-width:500px;
 margin:auto;
-padding:20px;
+padding:15px;
 }
 
-/* VIDEO LOCK */
-.video-box{
-position:relative;
-margin-bottom:15px;
-}
-
+/* VIDEO */
 .video-box iframe{
 width:100%;
-height:200px;
+height:220px;
 border-radius:12px;
-pointer-events:none; /* ❌ CLICK DISABLE */
+pointer-events:none;
 }
 
-/* CONTENT TEXT */
-.info{
+/* ANIMATION TEXT */
+.animated-text{
+text-align:center;
+font-size:18px;
+margin:15px 0;
+height:25px;
+overflow:hidden;
+}
+
+.animated-text span{
+display:block;
+animation:slide 6s infinite;
+}
+
+@keyframes slide{
+0%{transform:translateY(0)}
+25%{transform:translateY(-25px)}
+50%{transform:translateY(-50px)}
+75%{transform:translateY(-75px)}
+100%{transform:translateY(0)}
+}
+
+/* CARD */
+.card{
 background:#1e293b;
 padding:15px;
 border-radius:12px;
 margin-bottom:15px;
-}
-
-.info h3{
-margin-top:0;
-}
-
-ul{
-padding-left:18px;
 }
 
 /* FORM */
@@ -72,20 +81,30 @@ padding:12px;
 margin-top:10px;
 border-radius:8px;
 border:none;
+font-size:15px;
 }
 
 button{
 background:#22c55e;
 color:white;
-font-size:16px;
 cursor:pointer;
 }
 
 /* QR */
 img{
-width:200px;
-margin-top:20px;
+width:180px;
+margin-top:15px;
 border-radius:10px;
+}
+
+/* RESPONSIVE */
+@media(min-width:768px){
+.container{
+max-width:600px;
+}
+.video-box iframe{
+height:300px;
+}
 }
 
 </style>
@@ -93,41 +112,36 @@ border-radius:10px;
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-<h1>💸 Work From Home Earning</h1>
-<p>Ghar baithe roj kamao – No Experience Needed</p>
+<h1>💸 Work From Home</h1>
+<p>Ghar baithe earning start karo</p>
 </div>
 
 <div class="container">
 
-<!-- VIDEO (NON-CLICKABLE) -->
+<!-- VIDEO -->
 <div class="video-box">
 <iframe src="https://www.youtube.com/embed/oPN3WurQ3iw"></iframe>
 </div>
 
-<!-- INFO TEXT -->
-<div class="info">
-<h3>🔥 Why Join This System?</h3>
-<ul>
-<li>📱 Mobile se kaam – koi office nahi</li>
-<li>💰 Daily income opportunity</li>
-<li>👥 Referral se extra earning</li>
-<li>⏰ Flexible timing (jab chaho tab kaam)</li>
-<li>🚀 Fast growing earning model</li>
-</ul>
+<!-- ANIMATED TEXT -->
+<div class="animated-text">
+<span>
+💰 Daily Income Opportunity<br>
+📱 Mobile Se Kaam<br>
+🚀 Fast Growing System<br>
+👥 Referral Se Extra Income
+</span>
 </div>
 
-<div class="info">
-<h3>📌 Kaise kaam karega?</h3>
-<p>1️⃣ Form fill karo<br>
-2️⃣ Payment complete karo<br>
-3️⃣ Apna referral link share karo<br>
-4️⃣ Har join par earning pao 💸</p>
+<!-- INFO -->
+<div class="card">
+<b>🔥 Simple & Easy Process</b>
+<p>Sirf form fill karo aur turant start karo. Ye ek fast earning system hai jisme aap ghar baithe kaam kar sakte ho.</p>
 </div>
 
 <!-- FORM -->
-<h2>Join Now</h2>
+<h3>Join Now</h3>
 
 <form id="form">
 <input type="text" placeholder="Your Name" required>
