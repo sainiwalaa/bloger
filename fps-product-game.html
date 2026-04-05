@@ -1,214 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forever Income System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forever Income System | Lifetime Earning</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ff007a;
+            --secondary: #7000ff;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --gold: #ffcc00;
+        }
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-color:white;
-background:url('https://media.licdn.com/dms/image/v2/D5612AQEG2hRe0X7BCA/article-cover_image-shrink_720_1280/B56ZmthjkEJ8AI-/0/1759552879351?e=2147483647&v=beta&t=QcT_x1LpWdEgay9_-z1KaQtX_y1XemEO1jGadpL6agQ') no-repeat center/cover;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #050505;
+            color: white;
+            overflow-x: hidden;
+        }
 
-.overlay{
-background:rgba(0,0,0,0.75);
-min-height:100vh;
-}
+        /* Dynamic Animated Background */
+        .bg-animate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            z-index: -1;
+        }
 
-.container{
-max-width:500px;
-margin:auto;
-padding:15px;
-}
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 10s infinite alternate;
+        }
 
-.header{
-text-align:center;
-padding:25px;
-}
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 50px); }
+        }
 
-.card{
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(10px);
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
-}
+        .container {
+            max-width: 450px;
+            margin: auto;
+            padding: 20px;
+        }
 
-.video-frame{
-position:relative;
-border-radius:15px;
-overflow:hidden;
-}
+        /* Hero Header */
+        .header {
+            text-align: center;
+            padding: 30px 10px;
+        }
 
-.video-frame iframe{
-width:100%;
-height:220px;
-pointer-events:none;
-}
+        .header h1 {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, var(--gold), var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
 
-.play-btn{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:black;
-width:70px;
-height:70px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
+        .header p {
+            font-size: 15px;
+            color: #ddd;
+            margin-top: 10px;
+            font-weight: 500;
+        }
 
-.play-btn:after{
-content:"▶";
-color:white;
-font-size:25px;
-}
+        /* Glass Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
 
-.text-anim{
-text-align:center;
-height:25px;
-overflow:hidden;
-}
+        /* Video Player */
+        .video-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            box-shadow: 0 0 30px rgba(255, 0, 122, 0.2);
+        }
 
-.text-anim span{
-display:block;
-animation:slide 6s infinite;
-}
+        iframe { width: 100%; height: 100%; border: none; }
 
-@keyframes slide{
-0%{transform:translateY(0)}
-25%{transform:translateY(-25px)}
-50%{transform:translateY(-50px)}
-75%{transform:translateY(-75px)}
-100%{transform:translateY(0)}
-}
+        .overlay-play {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
 
-input,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:none;
-}
+        .play-icon {
+            width: 65px;
+            height: 65px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 0 25px var(--primary);
+        }
 
-button{
-background:#22c55e;
-color:white;
-font-weight:bold;
-}
+        /* 3D Scrolling Text */
+        .scroller {
+            height: 40px;
+            overflow: hidden;
+            text-align: center;
+            font-weight: 600;
+            color: var(--success);
+            font-size: 18px;
+        }
 
-img{
-width:180px;
-margin-top:15px;
-}
+        .scroller div {
+            animation: scroll-up 10s infinite ease-in-out;
+        }
 
-@media(min-width:768px){
-.video-frame iframe{
-height:300px;
-}
-}
-</style>
+        @keyframes scroll-up {
+            0%, 20% { transform: translateY(0); }
+            25%, 45% { transform: translateY(-40px); }
+            50%, 70% { transform: translateY(-80px); }
+            75%, 95% { transform: translateY(-120px); }
+            100% { transform: translateY(0); }
+        }
 
+        /* Concept Info Box */
+        .info-box {
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+        .info-box b { color: var(--accent); font-size: 18px; display: block; margin-bottom: 5px; }
+
+        /* Form Styling */
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #22c55e, #10b981);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+            transition: 0.3s;
+        }
+
+        button:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        /* QR Section */
+        #qrBox { text-align: center; margin-top: 20px; }
+        #qrBox img { 
+            width: 200px; 
+            border: 4px solid white; 
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+
+    </style>
 </head>
-
 <body>
 
-<div class="overlay">
+    <div class="bg-animate">
+        <div class="circle" style="width: 300px; height: 300px; background: var(--secondary); top: -50px; right: -50px;"></div>
+        <div class="circle" style="width: 250px; height: 250px; background: var(--primary); bottom: 10%; left: -50px;"></div>
+    </div>
 
-<div class="container">
+    <div class="container">
+        
+        <div class="header">
+            <h1>FOREVER <br> INCOME SYSTEM</h1>
+            <p>Ek baar join karo, lifetime earning pao!</p>
+        </div>
 
-<div class="header">
-<h1>💸 Forever Income System</h1>
-<p>Ek baar join karo, lifetime earning pao</p>
-</div>
+        <div class="card">
+            <div class="video-container">
+                <iframe id="ytVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
+                <div class="overlay-play" id="playOverlay" onclick="startVideo()">
+                    <div class="play-icon">▶</div>
+                </div>
+            </div>
+        </div>
 
-<div class="card">
-<div class="video-frame">
-<iframe id="video" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
-<div class="play-btn" onclick="playVideo()"></div>
-</div>
-</div>
+        <div class="card scroller">
+            <div>
+                <div>💰 Lifetime Passive Income</div>
+                <div>👥 Unlimited Referral Levels</div>
+                <div>📈 Rapid Network Growth</div>
+                <div>🚀 Automated Earning System</div>
+            </div>
+        </div>
 
-<div class="card text-anim">
-<span>
-💰 Lifetime Income<br>
-👥 Unlimited Referral<br>
-📈 Level Income System<br>
-🚀 Passive Earnings
-</span>
-</div>
+        <div class="card info-box">
+            <b>🔥 Forever Referral Concept</b>
+            <p style="font-size: 14px; margin: 0; line-height: 1.5;">
+                Jo bhi aapke link se join karega wo lifetime aapke under rahega aur aapko har level se income milti rahegi. No limits!
+            </p>
+        </div>
 
-<div class="card">
-<b>🔥 Forever Referral Concept</b>
-<p>Jo bhi aapke link se join karega wo lifetime aapke under rahega aur aapko har level se income milegi.</p>
-</div>
+        <div class="card">
+            <h3 style="margin-top:0; text-align:center; color:var(--accent);">Join the Revolution</h3>
+            <form id="mainForm">
+                <input type="text" id="name" placeholder="Apna Poora Naam Likhen" required>
+                <input type="tel" id="mobile" placeholder="WhatsApp Number" required>
+                <input type="text" id="address" placeholder="City aur State ka Naam" required>
+                <button type="submit" id="submitBtn">Start My Earning</button>
+            </form>
 
-<div class="card">
-<h3>Join Now</h3>
+            <div id="qrBox"></div>
+        </div>
 
-<form id="form">
-<input type="text" placeholder="Your Name" required>
-<input type="tel" placeholder="Mobile Number" required>
-<input type="text" placeholder="Address" required>
-<button type="submit">Start Earning</button>
-</form>
+        <p style="text-align:center; font-size:12px; opacity:0.6; padding-bottom: 30px;">
+            Secure System & Transparent Payouts
+        </p>
 
-<div id="qrBox"></div>
-</div>
+    </div>
 
-</div>
+    <script>
+        // Google Apps Script Link
+        const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
-</div>
+        // URL Parameters for Referral
+        const params = new URLSearchParams(window.location.search);
+        const refCode = params.get("ref") || "Direct_System";
 
-<script>
+        document.getElementById("mainForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.innerHTML = "Joining... Please Wait";
+            btn.disabled = true;
 
-const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
+            const data = {
+                name: document.getElementById("name").value,
+                mobile: document.getElementById("mobile").value,
+                address: document.getElementById("address").value,
+                referral: refCode
+            };
 
-const params = new URLSearchParams(window.location.search);
-const ref = params.get("ref") || "Direct";
+            try {
+                let response = await fetch(scriptURL, {
+                    method: "POST",
+                    body: JSON.stringify(data)
+                });
+                let result = await response.json();
 
-document.getElementById("form").addEventListener("submit", async function(e){
-e.preventDefault();
+                document.getElementById("qrBox").innerHTML = `
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top:20px; padding-top:20px;">
+                        <h3 style="color:var(--success)">💳 Activation Payment</h3>
+                        <p style="font-size:13px;">QR Code scan karke payment karein aur screenshot WhatsApp par bhejein.</p>
+                        <img src="${result.qr}" alt="Payment QR">
+                    </div>
+                `;
+                btn.innerHTML = "Registered Successfully ✅";
+            } catch (error) {
+                alert("Technical Error! Check internet connection.");
+                btn.innerHTML = "Start My Earning";
+                btn.disabled = false;
+            }
+        });
 
-let name = this[0].value;
-let mobile = this[1].value;
-let address = this[2].value;
-
-let res = await fetch(scriptURL,{
-method:"POST",
-body: JSON.stringify({
-name:name,
-mobile:mobile,
-address:address,
-referral:ref
-})
-});
-
-let data = await res.json();
-
-document.getElementById("qrBox").innerHTML = `
-<h3>💳 Scan & Pay</h3>
-<img src="${data.qr}">
-`;
-
-this.reset();
-
-});
-
-function playVideo(){
-let iframe = document.getElementById("video");
-iframe.style.pointerEvents="auto";
-iframe.src += "&autoplay=1";
-document.querySelector(".play-btn").style.display="none";
-}
-
-</script>
-
+        function startVideo() {
+            let iframe = document.getElementById("ytVideo");
+            let overlay = document.getElementById("playOverlay");
+            iframe.src += "&autoplay=1";
+            overlay.style.display = "none";
+        }
+    </script>
 </body>
 </html>
