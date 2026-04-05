@@ -14,7 +14,6 @@
             --accent: #f093fb;
             --dark: #0a0a0b;
             --glass: rgba(255, 255, 255, 0.05);
-            --trust-blue: #0984e3;
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; }
@@ -38,15 +37,17 @@
         }
         .lang-btn {
             background: var(--glass); border: 1px solid var(--primary);
-            color: white; padding: 8px 20px; cursor: pointer;
+            color: white; padding: 8px 25px; cursor: pointer;
             font-weight: 600; border-radius: 50px; margin: 0 5px;
+            font-size: 14px;
         }
-        .lang-btn.active { background: var(--primary); color: #000; }
+        .lang-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
 
         /* Header */
         .hero { text-align: center; padding: 20px 0; }
+        .hero p { letter-spacing: 3px; font-size: 10px; color: var(--primary); margin-bottom: 5px; }
         .hero h1 {
-            font-family: 'Montserrat', sans-serif; font-size: clamp(24px, 7vw, 38px);
+            font-family: 'Montserrat', sans-serif; font-size: clamp(24px, 7vw, 36px);
             font-weight: 900; margin: 0; text-transform: uppercase;
             background: linear-gradient(135deg, #fff 30%, var(--primary));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -55,8 +56,8 @@
         /* Video Card */
         .video-card {
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px; padding: 10px; margin-bottom: 25px;
-            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 25px; padding: 10px; margin-bottom: 20px;
+            backdrop-filter: blur(10px);
         }
         .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
@@ -74,18 +75,18 @@
         .reg-card {
             background: #ffffff; color: #2d3436;
             border-radius: 30px; padding: 30px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
         .form-header h3 { margin: 0; font-family: 'Montserrat'; font-size: 24px; color: #000; text-align: center; }
         
         .price-chip {
             display: block; text-align: center; background: #e3f2fd; color: #0d47a1;
-            padding: 8px; border-radius: 10px; font-weight: 800; margin: 15px 0;
-            border: 1px dashed #0d47a1;
+            padding: 10px; border-radius: 12px; font-weight: 800; margin: 15px 0;
+            border: 2px dashed #0d47a1; font-size: 18px;
         }
 
         input {
-            width: 100%; padding: 15px; border: 2px solid #f1f2f6;
+            width: 100%; padding: 16px; border: 2px solid #f1f2f6;
             border-radius: 12px; font-size: 16px; margin-bottom: 15px;
             font-family: 'Poppins', sans-serif;
         }
@@ -98,18 +99,18 @@
             font-weight: 700; font-size: 18px; text-transform: uppercase;
             cursor: pointer; box-shadow: 0 8px 15px rgba(0, 131, 176, 0.3);
         }
+        button#submitBtn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
         #qrBox { text-align: center; margin-top: 20px; display: none; }
-        #qrBox img { width: 230px; border: 8px solid #f1f2f6; border-radius: 20px; margin: 15px 0; }
+        #qrBox img { width: 240px; border: 8px solid #f1f2f6; border-radius: 20px; margin: 15px 0; }
         
         .wait-msg {
-            background: #fff4e6; color: #d9480f; padding: 12px; border-radius: 12px;
+            background: #fff4e6; color: #d9480f; padding: 15px; border-radius: 12px;
             font-size: 13px; font-weight: 600; margin-top: 15px; border: 1px solid #ffd8a8;
         }
 
-        footer { text-align: center; padding: 40px; font-size: 12px; opacity: 0.6; }
+        footer { text-align: center; padding: 40px; font-size: 12px; opacity: 0.5; color: #fff; }
 
-        /* Hidden Class */
         .lang-content { display: none; }
         .lang-content.active { display: block; }
     </style>
@@ -121,13 +122,13 @@
     <div class="container">
         
         <header class="hero">
-            <p style="letter-spacing: 2px; font-size: 12px; color: var(--primary);">VERIFIED TRAINING SYSTEM</p>
+            <p>VERIFIED SYSTEM • WORK FROM HOME</p>
             <h1>DIGITAL ACADEMY</h1>
         </header>
 
         <div class="lang-toggle">
-            <button class="lang-btn active" onclick="setLang('hi', this)">HINDI</button>
-            <button class="lang-btn" onclick="setLang('en', this)">ENGLISH</button>
+            <button id="btn-hi" class="lang-btn active" onclick="setLang('hi', this)">HINDI</button>
+            <button id="btn-en" class="lang-btn" onclick="setLang('en', this)">ENGLISH</button>
         </div>
 
         <div class="video-card">
@@ -140,7 +141,7 @@
             <div class="trust-box">
                 <h4>💡 फीस क्यों ली जाती है?</h4>
                 <p>
-                    यह ₹199 की छोटी राशि आपकी <b>गंभीरता (Commitment)</b> को परखने के लिए है। मुफ्त की चीज़ों को लोग अक्सर गंभीरता से नहीं लेते और बीच में ही ट्रेनिंग छोड़ देते हैं। जब आप अपनी मेहनत की राशि निवेश करते हैं, तो आप उसे सीखने में पूरा समय देते हैं। हमारा उद्देश्य आपको एक सफल डिजिटल क्रिएटर बनाना है।
+                    अगर आपने वीडियो देख लिया है, तो आप जानते होंगे कि यह ₹199 की राशि आपकी <b>गंभीरता (Commitment)</b> के लिए है। मुफ्त की चीज़ों को लोग अक्सर बीच में ही छोड़ देते हैं। जब आप निवेश करते हैं, तो आप सीखने में पूरा समय देते हैं। यह शुल्क सिर्फ इसलिए है ताकि हम सिर्फ उन्हीं लोगों को सिखाएं जो वाकई अपने सपने पूरे करना चाहते हैं।
                 </p>
             </div>
         </div>
@@ -149,7 +150,7 @@
             <div class="trust-box">
                 <h4>💡 Why do we charge a fee?</h4>
                 <p>
-                    This nominal fee of ₹199 is to ensure your <b>Commitment & Discipline</b>. People often ignore free resources and fail to complete their training. By investing a small amount, you value the system and dedicate your time to learning. Our goal is to build your professional digital career.
+                    If you have watched the video, you know this ₹199 is for your <b>Discipline & Focus</b>. People often ignore free training and fail to achieve their dreams. By investing a small amount, you stay committed to the training levels. Our goal is to filter out non-serious people and build a strong team of creators.
                 </p>
             </div>
         </div>
@@ -157,21 +158,21 @@
         <div class="reg-card">
             <div class="form-header">
                 <h3 id="formTitle">नामांकन फॉर्म</h3>
-                <div class="price-chip">Registration Fee: ₹199</div>
+                <div class="price-chip">Training Fee: ₹199</div>
             </div>
 
             <form id="regForm">
                 <input type="text" id="name" placeholder="Full Name (सत्य नाम)" required minlength="3">
-                <input type="tel" id="whatsapp" placeholder="WhatsApp No. (10 Digits)" required pattern="[0-9]{10}">
+                <input type="tel" id="whatsapp" placeholder="WhatsApp Number (10 Digits)" required pattern="[0-9]{10}">
                 <input type="text" id="city" placeholder="Your City (शहर)" required minlength="2">
                 
-                <button type="submit" id="submitBtn">Submit & Show QR</button>
+                <button type="submit" id="submitBtn">Submit & Get QR</button>
             </form>
             
             <div id="qrBox">
                 <div style="border-top: 2px solid #f1f2f6; margin-top: 20px; padding-top: 20px;">
-                    <h4 style="color: #2ecc71; margin: 0;">✅ Registration Successful</h4>
-                    <p style="font-size: 14px; color: #636e72; margin: 10px 0;" id="qrText">कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लें।</p>
+                    <h4 style="color: #2ecc71; margin: 0;">✅ Success! Data Saved</h4>
+                    <p style="font-size: 14px; color: #636e72; margin: 10px 0;" id="qrText">कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लेकर रखें।</p>
                     <img id="qrImg" src="" alt="Payment QR">
                     <div class="wait-msg" id="waitText">
                         ⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।
@@ -181,7 +182,7 @@
         </div>
 
         <footer>
-            © 2026 Digital Success Academy | All Rights Reserved
+            © 2026 Digital Success Academy | Empowering New Creators
         </footer>
 
     </div>
@@ -197,21 +198,21 @@
             document.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
             document.getElementById('content-' + lang).classList.add('active');
 
-            // Form Text Update
-            if(lang === 'hi') {
-                document.getElementById('formTitle').innerText = "नामांकन फॉर्म";
-                document.getElementById('submitBtn').innerText = "सबमिट और QR देखें";
-                document.getElementById('qrText').innerText = "कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लें।";
-                document.getElementById('waitText').innerText = "⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।";
-            } else {
-                document.getElementById('formTitle').innerText = "Enrollment Form";
-                document.getElementById('submitBtn').innerText = "Submit & Show QR";
-                document.getElementById('qrText').innerText = "Kindly pay ₹199 and take a screenshot.";
-                document.getElementById('waitText').innerText = "⚠️ Team will contact you within 4-6 hours.";
-            }
+            // Text Update based on language
+            const elements = {
+                formTitle: lang === 'hi' ? "नामांकन फॉर्म" : "Enrollment Form",
+                submitBtn: lang === 'hi' ? "सबमिट और QR देखें" : "Submit & Get QR",
+                qrText: lang === 'hi' ? "कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लेकर रखें।" : "Please pay ₹199 and keep a screenshot.",
+                waitText: lang === 'hi' ? "⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।" : "⚠️ Team will contact you within 4-6 hours."
+            };
+
+            document.getElementById('formTitle').innerText = elements.formTitle;
+            document.getElementById('submitBtn').innerText = elements.submitBtn;
+            document.getElementById('qrText').innerText = elements.qrText;
+            document.getElementById('waitText').innerText = elements.waitText;
         }
 
-        // Form Submission Logic
+        // Form Logic
         document.getElementById("regForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             
@@ -220,12 +221,13 @@
             const mobile = document.getElementById("whatsapp").value.trim();
             const city = document.getElementById("city").value.trim();
 
-            if(mobile.length !== 10) {
+            // Strict Validation
+            if(mobile.length !== 10 || isNaN(mobile)) {
                 alert("Please enter a valid 10-digit mobile number!");
                 return;
             }
 
-            btn.innerHTML = "Processing...";
+            btn.innerHTML = "Saving Data...";
             btn.disabled = true;
             
             const params = new URLSearchParams(window.location.search);
@@ -233,7 +235,7 @@
                 name: name,
                 mobile: mobile,
                 address: city,
-                referral: params.get("ref") || "System_Direct"
+                referral: params.get("ref") || "Organic_Join"
             };
 
             try {
@@ -243,23 +245,26 @@
                 });
                 let result = await response.json();
 
+                // Hide form and show QR after data is saved in Sheet
                 document.getElementById("regForm").style.display = "none";
                 document.getElementById("qrImg").src = result.qr;
                 document.getElementById("qrBox").style.display = "block";
                 
-                localStorage.setItem("academy_user", "registered");
+                // Block future attempts from this browser
+                localStorage.setItem("academy_joined", "true");
 
             } catch (err) {
-                alert("Network Error! Try again.");
-                btn.innerHTML = "Submit & Show QR";
+                alert("Connection Error! Try again.");
+                btn.innerHTML = "Submit & Get QR";
                 btn.disabled = false;
             }
         });
 
-        // Anti-Duplicate Check
+        // Anti-Duplicate Check on Load
         window.onload = function() {
-            if(localStorage.getItem("academy_user") === "registered") {
-                document.getElementById("regForm").innerHTML = "<p style='color:red; text-align:center; font-weight:bold;'>You have already registered. Please wait for our team to contact you.</p>";
+            if(localStorage.getItem("academy_joined") === "true") {
+                document.getElementById("regForm").innerHTML = "<div style='text-align:center; padding:20px;'><b style='color:red;'>Aap pehle hi register kar chuke hain.</b><br><small>Team ka intezar karein.</small></div>";
+                document.getElementById("submitBtn").style.display = "none";
             }
         };
     </script>
