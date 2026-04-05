@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Refer & Join</title>
+<title>Work From Home - Earn Money</title>
 
 <style>
 body{
@@ -13,14 +13,60 @@ background:#0f172a;
 color:white;
 }
 
-.container{
-padding:20px;
-max-width:400px;
-margin:auto;
+/* HERO */
+.hero{
+padding:30px;
+text-align:center;
+background:linear-gradient(135deg,#7c3aed,#06b6d4);
 }
 
-h1{
-text-align:center;
+.hero h1{
+font-size:28px;
+}
+
+.hero p{
+opacity:0.9;
+}
+
+/* VIDEO */
+.video-box{
+position:relative;
+margin:20px;
+}
+
+.video-box iframe{
+width:100%;
+height:200px;
+border-radius:12px;
+pointer-events:none;
+}
+
+.play-btn{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:red;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
+.play-btn:after{
+content:'▶';
+color:white;
+font-size:20px;
+}
+
+/* FORM */
+.container{
+max-width:400px;
+margin:auto;
+padding:20px;
 }
 
 input,button{
@@ -35,52 +81,106 @@ button{
 background:#22c55e;
 color:white;
 font-size:16px;
-cursor:pointer;
+}
+
+/* QR */
+img{
+width:200px;
+margin-top:20px;
+border-radius:10px;
+}
+
+/* WORK IMAGE */
+.work-img{
+width:100%;
+border-radius:12px;
+margin-top:15px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-<h1>Join & Earn 💸</h1>
+<!-- HERO -->
+<div class="hero">
+<h1>💸 Work From Home & Earn Daily</h1>
+<p>Refer friends & earn unlimited income</p>
+</div>
 
-<form id="joinForm">
+<!-- VIDEO -->
+<div class="video-box">
+<iframe id="video" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
+<div class="play-btn" onclick="playVideo()"></div>
+</div>
+
+<!-- IMAGE -->
+<div class="container">
+<img class="work-img" src="https://images.unsplash.com/photo-1581090700227-1e8c3c9c5a6f">
+</div>
+
+<!-- FORM -->
+<div class="container">
+
+<h2>Join Now</h2>
+
+<form id="form">
 <input type="text" placeholder="Your Name" required>
 <input type="tel" placeholder="Mobile Number" required>
-<input type="hidden" id="ref">
+<input type="text" placeholder="Address" required>
 
-<button type="submit">Join Now</button>
+<button type="submit">Start Earning</button>
 </form>
 
-<p id="msg"></p>
+<div id="qrBox"></div>
+
 </div>
 
 <script>
 
-// 🔥 GET REFERRAL FROM URL
-const params = new URLSearchParams(window.location.search);
-const ref = params.get("ref");
-document.getElementById("ref").value = ref || "Direct";
+const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
-// 🔥 FORM SUBMIT
-document.getElementById("joinForm").addEventListener("submit", function(e){
+// REFERRAL
+const params = new URLSearchParams(window.location.search);
+const ref = params.get("ref") || "Direct";
+
+// FORM SUBMIT
+document.getElementById("form").addEventListener("submit", async function(e){
 e.preventDefault();
 
 let name = this[0].value;
 let mobile = this[1].value;
-let referral = document.getElementById("ref").value;
+let address = this[2].value;
 
-// 👉 Yaha tum Google Sheet / API bhej sakte ho
-console.log({
+let res = await fetch(scriptURL,{
+method:"POST",
+body: JSON.stringify({
 name:name,
 mobile:mobile,
-referral:referral
+address:address,
+referral:ref
+})
 });
 
-document.getElementById("msg").innerHTML = "✅ Successfully Joined!";
+let data = await res.json();
+
+// QR SHOW
+document.getElementById("qrBox").innerHTML = `
+<h3>Scan & Pay</h3>
+<img src="${data.qr}">
+<p>Payment karke screenshot save kare</p>
+`;
+
 this.reset();
+
 });
+
+// VIDEO PLAY
+function playVideo(){
+let iframe = document.getElementById("video");
+iframe.style.pointerEvents = "auto";
+iframe.src += "&autoplay=1";
+document.querySelector(".play-btn").style.display="none";
+}
 
 </script>
 
