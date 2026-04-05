@@ -9,24 +9,8 @@
 body{
 margin:0;
 font-family:Arial;
-background:#0f172a;
+background:linear-gradient(135deg,#0f172a,#1e3a8a,#9333ea);
 color:white;
-}
-
-/* HEADER */
-.header{
-text-align:center;
-padding:25px;
-background:linear-gradient(135deg,#7c3aed,#06b6d4);
-}
-
-.header h1{
-margin:0;
-font-size:clamp(20px,5vw,32px);
-}
-
-.header p{
-opacity:0.9;
 }
 
 /* CONTAINER */
@@ -36,24 +20,76 @@ margin:auto;
 padding:15px;
 }
 
-/* VIDEO */
-.video-box iframe{
+/* HEADER */
+.header{
+text-align:center;
+padding:25px;
+}
+
+.header h1{
+font-size:clamp(22px,5vw,32px);
+margin:0;
+}
+
+.header p{
+opacity:0.9;
+}
+
+/* GLASS CARD */
+.card{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+/* VIDEO FRAME */
+.video-frame{
+position:relative;
+border-radius:15px;
+overflow:hidden;
+border:2px solid rgba(255,255,255,0.2);
+}
+
+.video-frame iframe{
 width:100%;
 height:220px;
-border-radius:12px;
 pointer-events:none;
 }
 
-/* ANIMATION TEXT */
-.animated-text{
-text-align:center;
-font-size:18px;
-margin:15px 0;
-height:25px;
-overflow:hidden;
+/* PLAY BUTTON */
+.play-btn{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70px;
+height:70px;
+background:rgba(0,0,0,0.6);
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
 }
 
-.animated-text span{
+.play-btn:after{
+content:"▶";
+font-size:28px;
+color:white;
+}
+
+/* TEXT ANIMATION */
+.text-anim{
+text-align:center;
+height:25px;
+overflow:hidden;
+margin:10px 0;
+}
+
+.text-anim span{
 display:block;
 animation:slide 6s infinite;
 }
@@ -66,14 +102,6 @@ animation:slide 6s infinite;
 100%{transform:translateY(0)}
 }
 
-/* CARD */
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-}
-
 /* FORM */
 input,button{
 width:100%;
@@ -84,10 +112,16 @@ border:none;
 font-size:15px;
 }
 
+input{
+background:#0f172a;
+color:white;
+}
+
 button{
 background:#22c55e;
 color:white;
 cursor:pointer;
+font-weight:bold;
 }
 
 /* QR */
@@ -99,10 +133,7 @@ border-radius:10px;
 
 /* RESPONSIVE */
 @media(min-width:768px){
-.container{
-max-width:600px;
-}
-.video-box iframe{
+.video-frame iframe{
 height:300px;
 }
 }
@@ -112,35 +143,40 @@ height:300px;
 
 <body>
 
-<div class="header">
-<h1>💸 Work From Home</h1>
-<p>Ghar baithe earning start karo</p>
-</div>
-
 <div class="container">
 
+<!-- HEADER -->
+<div class="header">
+<h1>💸 Work From Home</h1>
+<p>Start earning from your mobile today</p>
+</div>
+
 <!-- VIDEO -->
-<div class="video-box">
-<iframe src="https://www.youtube.com/embed/oPN3WurQ3iw"></iframe>
+<div class="card">
+<div class="video-frame">
+<iframe id="video" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
+<div class="play-btn" onclick="playVideo()"></div>
+</div>
 </div>
 
 <!-- ANIMATED TEXT -->
-<div class="animated-text">
+<div class="card text-anim">
 <span>
-💰 Daily Income Opportunity<br>
-📱 Mobile Se Kaam<br>
-🚀 Fast Growing System<br>
-👥 Referral Se Extra Income
+💰 Daily Income<br>
+📱 Mobile Work<br>
+🚀 Fast Growth<br>
+👥 Referral Income
 </span>
 </div>
 
 <!-- INFO -->
 <div class="card">
-<b>🔥 Simple & Easy Process</b>
-<p>Sirf form fill karo aur turant start karo. Ye ek fast earning system hai jisme aap ghar baithe kaam kar sakte ho.</p>
+<b>🔥 Easy Earning System</b>
+<p>Ghar baithe simple process se earning start karo. Koi experience ki jarurat nahi hai. Mobile se kaam karo aur apni income badhao.</p>
 </div>
 
 <!-- FORM -->
+<div class="card">
 <h3>Join Now</h3>
 
 <form id="form">
@@ -152,6 +188,7 @@ height:300px;
 </form>
 
 <div id="qrBox"></div>
+</div>
 
 </div>
 
@@ -193,6 +230,14 @@ document.getElementById("qrBox").innerHTML = `
 this.reset();
 
 });
+
+// VIDEO PLAY
+function playVideo(){
+let iframe = document.getElementById("video");
+iframe.style.pointerEvents="auto";
+iframe.src += "&autoplay=1";
+document.querySelector(".play-btn").style.display="none";
+}
 
 </script>
 
