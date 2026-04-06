@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Success Academy | Official Enrollment</title>
+    <title>Digital Success Academy | Professional System</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
             --primary: #00f2fe;
             --secondary: #4facfe;
             --accent: #f093fb;
+            --success: #2ecc71;
             --dark: #0a0a0b;
             --glass: rgba(255, 255, 255, 0.05);
         }
@@ -29,87 +31,113 @@
             z-index: -1;
         }
 
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 650px; margin: 0 auto; padding: 20px; }
 
-        /* Language Switcher */
-        .lang-toggle {
-            display: flex; justify-content: center; margin-bottom: 20px;
-        }
-        .lang-btn {
-            background: var(--glass); border: 1.5px solid var(--primary);
-            color: white; padding: 10px 25px; cursor: pointer;
-            font-weight: 600; border-radius: 50px; margin: 0 5px;
-            font-size: 14px;
-        }
-        .lang-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
-
-        /* Header */
+        /* Header Area */
         .hero { text-align: center; padding: 20px 0; }
-        .hero p { letter-spacing: 3px; font-size: 10px; color: var(--primary); margin-bottom: 5px; }
+        .hero .badge { 
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: #000; padding: 4px 12px; border-radius: 50px;
+            font-size: 10px; font-weight: 800; letter-spacing: 1px;
+            display: inline-block; margin-bottom: 10px;
+        }
         .hero h1 {
-            font-family: 'Montserrat', sans-serif; font-size: clamp(24px, 7vw, 36px);
+            font-family: 'Montserrat', sans-serif; font-size: clamp(28px, 8vw, 42px);
             font-weight: 900; margin: 0; text-transform: uppercase;
-            background: linear-gradient(135deg, #fff 30%, var(--primary));
+            background: linear-gradient(135deg, #fff 40%, var(--primary));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        /* Video Card */
+        /* Features Grid */
+        .features-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px;
+        }
+        .feature-card {
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px; border-radius: 18px; text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        .feature-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+        .feature-card p { font-size: 11px; margin: 0; font-weight: 600; color: #fff; }
+
+        /* Video Section */
         .video-card {
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px; padding: 10px; margin-bottom: 20px;
-            backdrop-filter: blur(10px);
+            border-radius: 25px; padding: 10px; margin-bottom: 25px;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.1);
         }
         .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* Trust Info Box */
-        .trust-box {
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 4px solid var(--primary);
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
+        /* Language Switcher */
+        .lang-toggle { display: flex; justify-content: center; margin-bottom: 25px; gap: 10px; }
+        .lang-btn {
+            background: transparent; border: 1px solid var(--primary);
+            color: #fff; padding: 8px 30px; cursor: pointer;
+            font-weight: 600; border-radius: 50px; font-size: 13px;
         }
-        .trust-box h4 { color: var(--primary); margin: 0 0 10px 0; font-size: 18px; }
-        .trust-box p { font-size: 14px; margin: 0; color: #dfe6e9; text-align: left; }
+        .lang-btn.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
 
         /* Form Card */
         .reg-card {
             background: #ffffff; color: #2d3436;
-            border-radius: 30px; padding: 30px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border-radius: 35px; padding: 35px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            position: relative; overflow: hidden;
         }
-        .form-header h3 { margin: 0; font-family: 'Montserrat'; font-size: 24px; color: #000; text-align: center; }
+        .reg-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .form-header h3 { margin: 0; font-family: 'Montserrat'; font-size: 26px; color: #1a1a1a; text-align: center; }
         
         .price-chip {
-            display: block; text-align: center; background: #e3f2fd; color: #0d47a1;
-            padding: 10px; border-radius: 12px; font-weight: 800; margin: 15px 0;
-            border: 2px dashed #0d47a1; font-size: 18px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #f0f9ff; color: #0077cc;
+            padding: 12px; border-radius: 15px; font-weight: 800; margin: 20px 0;
+            border: 2px dashed #0077cc; font-size: 20px;
         }
 
         input {
-            width: 100%; padding: 16px; border: 2px solid #f1f2f6;
-            border-radius: 12px; font-size: 16px; margin-bottom: 15px;
-            font-family: 'Poppins', sans-serif;
+            width: 100%; padding: 18px; border: 2px solid #edf2f7;
+            border-radius: 15px; font-size: 16px; margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif; background: #f8fafc;
         }
-        input:focus { border-color: var(--secondary); outline: none; background: #f8f9fa; }
+        input:focus { border-color: var(--secondary); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.1); }
 
         button#submitBtn {
-            width: 100%; padding: 18px;
+            width: 100%; padding: 20px;
             background: linear-gradient(135deg, #00b4db, #0083b0);
-            border: none; border-radius: 12px; color: white;
+            border: none; border-radius: 15px; color: white;
             font-weight: 700; font-size: 18px; text-transform: uppercase;
-            cursor: pointer; box-shadow: 0 8px 15px rgba(0, 131, 176, 0.3);
+            cursor: pointer; box-shadow: 0 10px 25px rgba(0, 131, 176, 0.4);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        button#submitBtn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        button#submitBtn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0, 131, 176, 0.5); }
 
-        #qrBox { text-align: center; margin-top: 20px; display: none; }
-        #qrBox img { width: 240px; border: 8px solid #f1f2f6; border-radius: 20px; margin: 15px 0; }
+        /* Success & QR */
+        #qrBox { text-align: center; margin-top: 20px; display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #qrBox img { width: 250px; border: 12px solid #f1f2f6; border-radius: 25px; margin: 20px 0; }
         
         .wait-msg {
-            background: #fff4e6; color: #d9480f; padding: 15px; border-radius: 12px;
-            font-size: 13px; font-weight: 600; margin-top: 15px; border: 1px solid #ffd8a8;
+            background: #fff4e6; color: #d9480f; padding: 18px; border-radius: 15px;
+            font-size: 13px; font-weight: 600; margin-top: 20px; border: 1px solid #ffd8a8;
+            display: flex; align-items: center; gap: 10px;
         }
 
-        footer { text-align: center; padding: 40px; font-size: 12px; opacity: 0.5; color: #fff; }
+        /* Trust Points Area */
+        .trust-section { margin: 25px 0; }
+        .trust-item { 
+            display: flex; gap: 15px; background: rgba(255,255,255,0.03); 
+            padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .trust-item i { color: var(--primary); font-size: 20px; margin-top: 4px; }
+        .trust-item h5 { margin: 0; font-size: 15px; color: var(--primary); }
+        .trust-item p { margin: 3px 0 0; font-size: 12px; color: #cbd5e0; }
+
+        footer { text-align: center; padding: 50px 20px; font-size: 12px; opacity: 0.6; color: #fff; }
 
         .lang-content { display: none; }
         .lang-content.active { display: block; }
@@ -122,75 +150,97 @@
     <div class="container">
         
         <header class="hero">
-            <p>VERIFIED SYSTEM • WORK FROM HOME</p>
+            <span class="badge"><i class="fas fa-shield-halved"></i> GOVERNMENT REGISTERED SYSTEM</span>
             <h1>DIGITAL ACADEMY</h1>
         </header>
 
-        <div class="lang-toggle">
-            <button id="btn-hi" class="lang-btn active" onclick="setLang('hi', this)">हिन्दी</button>
-            <button id="btn-en" class="lang-btn" onclick="setLang('en', this)">English</button>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-video"></i>
+                <p>Live Zoom Meetings</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <p>Level Income Plan</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-headset"></i>
+                <p>24/7 Support Team</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-star"></i>
+                <p>Trusted Platform</p>
+            </div>
         </div>
 
         <div class="video-card">
             <div class="video-wrapper">
-                <iframe id="mainVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1"></iframe>
+                <iframe id="mainVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?autoplay=0"></iframe>
             </div>
         </div>
 
+        <div class="lang-toggle">
+            <button id="btn-hi" class="lang-btn active" onclick="setLang('hi', this)">HINDI</button>
+            <button id="btn-en" class="lang-btn" onclick="setLang('en', this)">ENGLISH</button>
+        </div>
+
         <div id="content-hi" class="lang-content active">
-            <div class="trust-box">
-                <h4>⚠️ महत्वपूर्ण निर्देश</h4>
-                <p>अगर आपने ऊपर दिए गए वीडियो से पूरी जानकारी प्राप्त कर ली है, तो इस सिस्टम के साथ जुड़ने और ट्रेनिंग का हिस्सा बनने के लिए नीचे दिए गए स्टेप्स फॉलो करें। फॉर्म भरें और मिलने वाले QR पर पेमेंट जमा करें।</p>
-            </div>
-            <div class="trust-box" style="border-color: var(--accent);">
-                <h4>💡 फीस क्यों ली जाती है?</h4>
-                <p>
-                    अगर आपने वीडियो देख लिया है, तो आप जानते होंगे कि यह ₹199 की राशि आपकी <b>गंभीरता (Commitment)</b> के लिए है। मुफ्त की चीज़ों को लोग अक्सर बीच में ही छोड़ देते हैं। जब आप निवेश करते हैं, तो आप सीखने में पूरा समय देते हैं। यह शुल्क सिर्फ इसलिए है ताकि हम सिर्फ उन्हीं लोगों को सिखाएं जो वाकई अपने सपने पूरे करना चाहते हैं।
-                </p>
+            <div class="trust-section">
+                <div class="trust-item">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h5>फीस क्यों ली जाती है?</h5>
+                        <p>यह ₹199 आपकी गंभीरता (Commitment) के लिए है। निवेश करने से आप ट्रेनिंग को पूरा समय देते हैं।</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="content-en" class="lang-content">
-            <div class="trust-box">
-                <h4>⚠️ Important Instructions</h4>
-                <p>If you have received complete information from the video above, follow the steps below to join the system and become a part of the training. Fill the form and make the payment on the provided QR code.</p>
-            </div>
-            <div class="trust-box" style="border-color: var(--accent);">
-                <h4>💡 Why is the fee charged?</h4>
-                <p>
-                    As explained in the video, this ₹199 fee is for your <b>Commitment & Discipline</b>. People often ignore free training and fail to achieve their dreams. By investing a small amount, you stay dedicated to the process. This fee ensures we only teach those who are truly serious.
-                </p>
+            <div class="trust-section">
+                <div class="trust-item">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h5>Why the small fee?</h5>
+                        <p>This ₹199 ensures your commitment. People value what they invest in. It filters for serious creators.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="reg-card">
             <div class="form-header">
                 <h3 id="formTitle">नामांकन फॉर्म</h3>
-                <div class="price-chip">Training Fee: ₹199</div>
+                <div class="price-chip">
+                    <i class="fas fa-check-circle"></i> Registration: ₹199
+                </div>
             </div>
 
             <form id="regForm">
-                <input type="text" id="name" placeholder="Full Name (सत्य नाम)" required minlength="3">
+                <input type="text" id="name" placeholder="Full Name (सत्य नाम)" required>
                 <input type="tel" id="whatsapp" placeholder="WhatsApp Number (10 Digits)" required pattern="[0-9]{10}">
-                <input type="text" id="city" placeholder="Your City (शहर)" required minlength="2">
+                <input type="text" id="city" placeholder="Your City (शहर)" required>
                 
-                <button type="submit" id="submitBtn">Submit & Get QR</button>
+                <button type="submit" id="submitBtn">
+                    Submit & Get QR <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
             
             <div id="qrBox">
                 <div style="border-top: 2px solid #f1f2f6; margin-top: 20px; padding-top: 20px;">
-                    <h4 style="color: #2ecc71; margin: 0;">✅ Success! Data Saved</h4>
+                    <h3 style="color: var(--success); margin: 0;"><i class="fas fa-file-export"></i> Data Saved!</h3>
                     <p style="font-size: 14px; color: #636e72; margin: 10px 0;" id="qrText">कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लेकर रखें।</p>
                     <img id="qrImg" src="" alt="Payment QR">
                     <div class="wait-msg" id="waitText">
-                        ⏳ भुगतान के बाद 4-6 घंटे का इंतजार करें। टीम आपसे ट्रेनिंग के लिए संपर्क कर लेगी।
+                        <i class="fas fa-clock"></i> ⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।
                     </div>
                 </div>
             </div>
         </div>
 
         <footer>
-            © 2026 Digital Success Academy | Empowering New Creators
+            <p>© 2026 Digital Success Academy | Professional Creator Marketplace</p>
+            <p style="margin-top:10px; font-size:10px;">Safe & Secure SSL Encrypted System</p>
         </footer>
 
     </div>
@@ -198,41 +248,34 @@
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
 
-        // Language Switcher Logic
         function setLang(lang, btn) {
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
             document.querySelectorAll('.lang-content').forEach(c => c.classList.remove('active'));
             document.getElementById('content-' + lang).classList.add('active');
 
-            // Form Text Update
             if(lang === 'hi') {
                 document.getElementById('formTitle').innerText = "नामांकन फॉर्म";
-                document.getElementById('submitBtn').innerText = "सबमिट और QR देखें";
                 document.getElementById('qrText').innerText = "कृपया ₹199 का भुगतान करें और स्क्रीनशॉट लेकर रखें।";
-                document.getElementById('waitText').innerText = "⏳ भुगतान के बाद 4-6 घंटे का इंतजार करें। टीम आपसे ट्रेनिंग के लिए संपर्क कर लेगी।";
+                document.getElementById('waitText').innerHTML = "<i class='fas fa-clock'></i> ⚠️ टीम 4-6 घंटे के भीतर आपसे संपर्क करेगी।";
             } else {
                 document.getElementById('formTitle').innerText = "Enrollment Form";
-                document.getElementById('submitBtn').innerText = "Submit & Get QR";
-                document.getElementById('qrText').innerText = "Please pay ₹199 and keep the screenshot safe.";
-                document.getElementById('waitText').innerText = "⏳ Wait for 4-6 hours after payment. The team will contact you for training.";
+                document.getElementById('qrText').innerText = "Please pay ₹199 and keep a screenshot safely.";
+                document.getElementById('waitText').innerHTML = "<i class='fas fa-clock'></i> ⚠️ Team will contact you within 4-6 hours.";
             }
         }
 
-        // Form Submission
         document.getElementById("regForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            
             const btn = document.getElementById("submitBtn");
             const mobile = document.getElementById("whatsapp").value.trim();
 
-            if(mobile.length !== 10 || isNaN(mobile)) {
-                alert("Please enter a valid 10-digit mobile number!");
+            if(mobile.length !== 10) {
+                alert("Please enter 10 digit number!");
                 return;
             }
 
-            btn.innerHTML = "Saving Details...";
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Saving Data...";
             btn.disabled = true;
             
             const params = new URLSearchParams(window.location.search);
@@ -240,7 +283,7 @@
                 name: document.getElementById("name").value.trim(),
                 mobile: mobile,
                 address: document.getElementById("city").value.trim(),
-                referral: params.get("ref") || "Organic_Join"
+                referral: params.get("ref") || "Web_Official"
             };
 
             try {
@@ -251,25 +294,18 @@
                 let result = await response.json();
 
                 document.getElementById("regForm").style.display = "none";
+                document.querySelector(".form-header").style.display = "none";
                 document.getElementById("qrImg").src = result.qr;
                 document.getElementById("qrBox").style.display = "block";
-                
-                localStorage.setItem("academy_joined", "true");
 
             } catch (err) {
-                alert("Connection Error! Try again.");
+                alert("Error! Please try again.");
                 btn.innerHTML = "Submit & Get QR";
                 btn.disabled = false;
             }
         });
 
-        // Prevention for multiple entries
-        window.onload = function() {
-            if(localStorage.getItem("academy_joined") === "true") {
-                document.getElementById("regForm").innerHTML = "<div style='text-align:center; padding:20px; color:#d9480f;'><b>Aap pehle hi register kar chuke hain.</b><br>Kripya team ke message ka intezar karein.</div>";
-                document.getElementById("submitBtn").style.display = "none";
-            }
-        };
+        // LocalStorage logic removed as per request to keep form visible on refresh
     </script>
 </body>
 </html>
