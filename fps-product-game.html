@@ -25,19 +25,20 @@
             overflow-x: hidden; line-height: 1.6;
         }
 
-        /* NEW: Scrolling Attractive Line */
+        /* UPDATED: Better Scrolling Line */
         .scrolling-bar {
             background: linear-gradient(90deg, #ff0055, #7000ff);
-            color: white; padding: 8px 0; font-size: 13px; font-weight: 700;
+            color: white; padding: 10px 0; font-size: 14px; font-weight: 700;
             overflow: hidden; white-space: nowrap; position: sticky; top: 0; z-index: 100;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
         }
         .scrolling-text {
-            display: inline-block; padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            display: inline-block;
+            animation: marquee 25s linear infinite;
         }
         @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
         .bg-glow {
@@ -72,27 +73,32 @@
         .feature-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
         .feature-card p { font-size: 11px; margin: 0; font-weight: 600; }
 
-        /* Video Protection Layer */
+        /* Video Section */
         .video-card {
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 25px; padding: 10px; margin-bottom: 15px; position: relative;
+            overflow: hidden;
         }
         .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
+        .video-wrapper iframe { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; 
+            pointer-events: none; /* Disables clicking on video */
+        }
         
+        /* Fully Transparent Overlay to block all interactions */
         .video-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; cursor: default;
+            z-index: 20; background: transparent;
         }
 
-        /* NEW: Video Control Button */
         .video-controls { text-align: center; margin-bottom: 25px; }
         .play-btn {
             background: linear-gradient(45deg, #00f2fe, #4facfe);
-            border: none; padding: 12px 30px; border-radius: 50px;
+            border: none; padding: 15px 40px; border-radius: 50px;
             color: #000; font-weight: 800; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 242, 254, 0.3);
             display: inline-flex; align-items: center; gap: 10px;
+            font-size: 16px;
         }
 
         .lang-toggle { display: flex; justify-content: center; margin-bottom: 25px; gap: 10px; }
@@ -161,7 +167,7 @@
 
     <div class="scrolling-bar">
         <div class="scrolling-text">
-            🚀 सुनहरा मौका: घर बैठे काम करें (Work From Home) और महीने के ₹25,000 - ₹50,000 कमाएं! | 100% Trusted & Government Registered Platform | सीमित सीटें उपलब्ध (Limited Seats) | अभी अपना नामांकन पूरा करें...
+            🚀 सुनहरा मौका: घर बैठे काम करें (Work From Home) और महीने के ₹25,000 - ₹50,000 कमाएं! | 🔥 No Experience Required | 🎓 Students, Housewife और Job करने वाले सभी के लिए बेस्ट अवसर | ✅ 100% सुरक्षित और सरकार द्वारा मान्यता प्राप्त सिस्टम | ⏳ समय कम है, सीटें भर रही हैं, अभी रजिस्टर करें...
         </div>
     </div>
 
@@ -182,9 +188,8 @@
         </div>
 
         <div class="video-card">
-            <div class="video-overlay"></div>
-            <div class="video-wrapper">
-                <iframe id="mainVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1&controls=0&modestbranding=1&rel=0"></iframe>
+            <div class="video-overlay"></div> <div class="video-wrapper">
+                <iframe id="mainVideo" src="https://www.youtube.com/embed/oPN3WurQ3iw?enablejsapi=1&controls=0&modestbranding=1&rel=0&showinfo=0" allow="autoplay"></iframe>
             </div>
         </div>
 
@@ -252,7 +257,7 @@
     <script>
         const scriptURL = "https://script.google.com/macros/s/AKfycby0KZNDqPrrkLrAe867r1euXdihIZMmiZX1rquBpwtaBYwZoxHYPvUXpBmhez9msPPieQ/exec";
         
-        // Video Controls Logic
+        // --- Improved Video Control Logic ---
         let isPlaying = false;
         const iframe = document.getElementById('mainVideo');
         
@@ -261,12 +266,21 @@
             const txt = document.getElementById('btnText');
             
             if (!isPlaying) {
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                // Post message to YouTube API
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    "event": "command",
+                    "func": "playVideo"
+                }), "*");
+                
                 btn.innerHTML = '<i class="fas fa-pause"></i> <span id="btnText">PAUSE VIDEO</span>';
                 btn.style.background = "linear-gradient(45deg, #ff416c, #ff4b2b)";
                 isPlaying = true;
             } else {
-                iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    "event": "command",
+                    "func": "pauseVideo"
+                }), "*");
+                
                 btn.innerHTML = '<i class="fas fa-play"></i> <span id="btnText">PLAY VIDEO</span>';
                 btn.style.background = "linear-gradient(45deg, #00f2fe, #4facfe)";
                 isPlaying = false;
